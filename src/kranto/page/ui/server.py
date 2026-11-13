@@ -25,6 +25,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+from kranto import legacy
+
 from .. import tokens as tokens_mod
 from . import api
 
@@ -81,7 +83,10 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
                 jar.load(self.headers.get("Cookie") or "")
             except Exception:                       # noqa: BLE001 - a broken header: no cookie
                 pass
-            morsel = jar.get(self.cookie_name)
+            port = self.server.server_address[1]
+            # a browser signed in before the rename carries the old name until it expires
+            morsel = jar.get(self.cookie_name) or jar.get(
+                f"{legacy.COOKIE}_{int(port)}" if port else legacy.COOKIE)
             if morsel is not None:
                 ident = store.identify(morsel.value)
                 if ident and ident["origin"] == "ui":

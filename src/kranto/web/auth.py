@@ -36,6 +36,7 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.routing import Route
 
+from .. import legacy
 from .. import tokens as tokens_mod
 
 log = logging.getLogger(__name__)
@@ -66,6 +67,12 @@ def _json(status: int, error: str) -> JSONResponse:
     return JSONResponse({"error": error}, status_code=status)
 
 
+def old_cookie_name(port: int | None = None) -> str:
+    """The session cookie's name before the rename (``legacy.COOKIE``), with the same port
+    suffix as ``tokens.cookie_name``: still accepted when the new one is absent."""
+    return f"{legacy.COOKIE}_{int(port)}" if port else legacy.COOKIE
+
+
 def is_owner(identity: dict | None) -> bool:
     return bool(identity) and identity.get("origin") in OWNER
 
@@ -74,6 +81,9 @@ class Auth:
     def __init__(self, store: tokens_mod.Store, require: bool = True, port: int | None = None):
         self.store, self.require, self.port = store, require, port
         self.cookie = tokens_mod.cookie_name(port)
+        # a browser signed in before the rename carries the old name until it expires; new
+        # sign-ins set only the new one
+        self.old_cookie = old_cookie_name(port)
         self.last_used: dict[str, float] = {}
 
     # -- who is calling --------------------------------------------------------------------
@@ -84,7 +94,7 @@ class Auth:
             ident = self.store.identify(authz[7:].strip())
             return ({**ident, "via": "bearer"}, None) if ident else \
                 (None, "its bearer token is not a current kranto token")
-        value = request.cookies.get(self.cookie)
+        value = request.cookies.get(self.cookie) or request.cookies.get(self.old_cookie)
         if value:
             ident = self.store.identify(value)
             if ident and ident["origin"] == "ui":
@@ -200,6 +210,8 @@ class Auth:
     async def signout(self, request: Request):
         response = JSONResponse({"ok": True})
         response.delete_cookie(self.cookie, path="/")
+        if request.cookies.get(self.old_cookie):
+            response.delete_cookie(self.old_cookie, path="/")
         return response
 
     def whoami(self, request: Request):
