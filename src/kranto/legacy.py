@@ -191,6 +191,20 @@ def unit_store(kind: str, environ: os._Environ[str] | dict[str, str] | None = No
     return config_dir(home) / name
 
 
+def is_old_unit(text: str) -> bool:
+    """Whether a unit file was written before the rename, whatever its name (``bears.service``,
+    or a unit named by the old variable): its ``ExecStart`` runs the old command, or it sets an
+    old variable. Such a unit is kept as it is (only its ``Description=`` changes), so the
+    version before the rename can still start from it after a rollback."""
+    for line in text.splitlines():
+        key, _, value = line.strip().partition("=")
+        if key == "ExecStart" and value.split() and Path(value.split()[0]).name == COMMAND:
+            return True
+        if key == "Environment" and new_env_name(value.strip().strip('"').split("=", 1)[0]):
+            return True
+    return False
+
+
 def mcp_server_for(invoked: str | None) -> str:
     """The MCP server's name for the command it was started as: the old command serves the old
     names (``<old>_status``), so a client added long ago and its allow-lists keep matching."""

@@ -91,6 +91,27 @@ def test_up_on_an_old_install_keeps_its_unit_and_rewrites_only_the_description(u
     assert ["restart", legacy.UNIT] not in [c[2:] for c in host.machine.calls]
 
 
+def test_a_unit_named_by_the_old_variable_is_kept_too(user_home, monkeypatch):
+    """An old install that runs under another unit (named by the old variable, as the release's
+    rehearsal and the end-to-end test do) is kept by its text, not its name: a rollback to the
+    version before the rename must still start from it."""
+    old = old_install(user_home)
+    other = old["units"] / "scratch-test.service"
+    other.write_bytes(old["unit"].read_bytes())
+    old["unit"].unlink()
+    monkeypatch.setattr(launcher, "UNIT", "scratch-test.service")
+    host = make_host(user_home)
+    before = other.read_bytes()
+    path, changed = launcher.install_unit(host, "[Unit]\nDescription=new\n")
+    assert path == other and changed
+    assert other.read_bytes() == before.replace(
+        b"Description=the old words", b"Description=" + launcher.UNIT_DESCRIPTION.encode())
+    # a unit the new version wrote is written as usual
+    other.write_text("[Service]\nExecStart=%h/.local/bin/kranto serve\n")
+    path, changed = launcher.install_unit(host, "[Unit]\nDescription=new\n")
+    assert changed and other.read_text() == "[Unit]\nDescription=new\n"
+
+
 def test_up_on_a_new_install_writes_the_new_names(user_home):
     host = make_host(user_home)
     assert launcher.host_unit(host) == product.UNIT

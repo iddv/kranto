@@ -589,10 +589,12 @@ def keep_old_unit(path: Path) -> bool:
 
 def install_unit(host: Host, text: str) -> tuple[Path, bool]:
     """Write ``kranto.service``; True when it changed. On an install made before the rename,
-    its old unit is kept (``keep_old_unit``) and no new one is written beside it."""
+    its old unit (the old name, or any unit whose text the old version wrote:
+    ``legacy.is_old_unit``) is kept (``keep_old_unit``) and no new one is written beside it."""
     host.unit_dir.mkdir(parents=True, exist_ok=True)
     path = host.unit_dir / host_unit(host)
-    if path.name == legacy.UNIT and path.exists():
+    if path.exists() and (path.name == legacy.UNIT
+                          or legacy.is_old_unit(path.read_text(errors="replace"))):
         return path, keep_old_unit(path)
     old = path.read_text() if path.exists() else None
     if old != text:

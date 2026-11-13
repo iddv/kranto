@@ -138,3 +138,15 @@ def test_mcp_answers_to_the_name_it_was_started_as():
 def test_the_compat_set_names_the_old_distributions():
     assert set(legacy.COMPAT_DISTS) == set(legacy.DISTS)
     assert legacy.TOOL == legacy.COMPAT_META == legacy.COMMAND
+
+
+def test_a_unit_written_before_the_rename_is_known_by_its_text():
+    old_var = legacy.ENV_PREFIXES[0] + "HOME"
+    old = ("[Unit]\nDescription=x\n[Service]\nEnvironment=" + old_var + "=%h/kb\n"
+           "ExecStart=%h/.local/bin/" + legacy.COMMAND + " serve --port 10025\n")
+    assert legacy.is_old_unit(old)
+    assert legacy.is_old_unit("[Service]\nExecStart=/x/" + legacy.COMMAND + " serve\n")
+    assert legacy.is_old_unit("[Service]\nEnvironment=\"" + old_var + "=/kb\"\n")
+    new = ("[Unit]\nDescription=x\n[Service]\nEnvironment=KRANTO_HOME=%h/kb\n"
+           "ExecStart=%h/.local/bin/kranto serve --port 10025\n")
+    assert not legacy.is_old_unit(new)
