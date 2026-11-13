@@ -29,6 +29,7 @@ COMPAT_META = _OLD
 COMPAT_SERVER = f"{_OLD}afk"
 COMPAT_PAGE = f"{_OLD}brb"
 COMPAT_DISTS = (COMPAT_META, COMPAT_SERVER, COMPAT_PAGE)
+OLD_PACKAGE = f"{_OLD}afk"   # the server's import package before the rename (its loggers' names)
 
 ENV_PREFIXES = (_OLD.upper() + "_", _OLD.upper() + "BRB_", _OLD.upper() + "AFK_")
 # variables that were named after one half of the old pair, and the name each has now
