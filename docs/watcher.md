@@ -106,7 +106,7 @@ Then start it:
 afk -w ~/kranto serve
 ```
 
-and open http://127.0.0.1:8765. The UI is Kranto's (the page's pages at `/brb/`; the
+and open http://127.0.0.1:8765. The UI is Kranto's (the page, at `/`; the
 old addresses such as `/library` redirect there); the server alone, without the page, is
 not a supported way to run and its pages only show how to install Kranto
 ([setup.md](setup.md), step 2). The server fetches every 3 hours (a new
@@ -226,7 +226,7 @@ afk grade TARGET ID GRADE    a card or evidence: grade idea 12 useful, grade obs
                              not_useful (skip clears); other targets are not graded
 afk list | search QUERY | show ID | explain ID
 afk pause [REASON] | resume
-afk serve                    JSON API, scheduler, and the kranto UI at /brb/
+afk serve                    JSON API, scheduler, and the page at /
 afk export TABLE -o FILE     JSONL export of any table
 afk export bundle -o DIR     static copy of the latest map
 afk import parallax PATH     import a Parallax library

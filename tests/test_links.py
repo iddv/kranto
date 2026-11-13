@@ -1,5 +1,5 @@
 """Links back to the instance (phase 1f): delivered messages, the Atom feed and form
-redirects point into Kranto UI (``/brb/#/...``) when the page is mounted, and to
+redirects point into the page (``/#/...``) when the page is mounted, and to
 the server's own pages otherwise."""
 
 from dataclasses import replace
@@ -34,29 +34,29 @@ def message(kind="strike", mid=7):
 
 def test_link_table():
     kranto, own = Links(True, BASE + "/"), Links(False, BASE)
-    assert kranto.observation(3) == f"{BASE}/brb/#/library/o/3"
+    assert kranto.observation(3) == f"{BASE}/#/library/o/3"
     assert own.observation(3) == f"{BASE}/obs/3"
-    assert kranto.idea(2) == f"{BASE}/brb/#/ideas/card:2"
+    assert kranto.idea(2) == f"{BASE}/#/ideas/card:2"
     assert own.idea(2) == f"{BASE}/ideas#idea-2"
-    assert kranto.message(7) == f"{BASE}/brb/#/settings/health?message=7"
+    assert kranto.message(7) == f"{BASE}/#/settings/health?message=7"
     assert own.message(7) == f"{BASE}/health#message-7"
     assert kranto.grade_message(7) == kranto.message(7)
     assert own.grade_message(7) == f"{BASE}/grade/message/7"
-    assert Links(True).health("a b&c") == "/brb/#/settings/health?msg=a+b%26c"
+    assert Links(True).health("a b&c") == "/#/settings/health?msg=a+b%26c"
     assert Links(False).cluster(4, "no map") == "/clusters?msg=no+map#c4"
-    assert Links(True).cluster(4) == "/brb/#/library/clusters/4"
-    assert Links(False).map() == "/map?started=1" and Links(True).map() == "/brb/#/library/map"
+    assert Links(True).cluster(4) == "/#/library/clusters/4"
+    assert Links(False).map() == "/map?started=1" and Links(True).map() == "/#/library/map"
 
 
 @pytest.mark.parametrize("kranto, obs, grade, health", [
-    (True, f"{BASE}/brb/#/library/o/3", f"{BASE}/brb/#/settings/health?message=7",
-     f"{BASE}/brb/#/settings/health?message=8"),
+    (True, f"{BASE}/#/library/o/3", f"{BASE}/#/settings/health?message=7",
+     f"{BASE}/#/settings/health?message=8"),
     (False, f"{BASE}/obs/3", f"{BASE}/grade/message/7", f"{BASE}/health#message-8"),
 ])
 def test_delivered_messages_link_into_the_ui_that_is_served(kranto, obs, grade, health):
     _, body = delivery.compose(message(), BASE, kranto=kranto)
     assert obs in body and f"Grade it: {grade}" in body
-    assert "/obs/" not in body if kranto else "/brb/" not in body
+    assert "/obs/" not in body if kranto else "/#/" not in body
     _, body = delivery.compose(message("alarm", 8), BASE, kranto=kranto)
     assert body.rstrip().endswith(health)
 
@@ -97,7 +97,7 @@ def test_deliveries_use_the_kranto_links_when_enabled(store, monkeypatch, tmp_pa
     monkeypatch.setattr(links.importlib.util, "find_spec", lambda name: object())
     report = delivery.deliver_pending(store, cfg, apprise_module=module)
     assert report.sent == 1
-    assert f"{BASE}/brb/#/library/o/5" in sent[0] and "/obs/5" not in sent[0]
+    assert f"{BASE}/#/library/o/5" in sent[0] and "/obs/5" not in sent[0]
 
 
 def _feed_hrefs(rt):
@@ -112,8 +112,8 @@ def test_atom_feed_links_into_the_kranto_ui_when_mounted(tmp_path, store, embedd
     notify.emit(store, "alarm", "an alarm", "body", dedup_key="a", origin="test",
                 evidence_ids=[5])
     llm = make_client(lambda b: chat_response("{}"))
-    for enabled, want in ((True, {f"alternate:{BASE}/brb/#/settings/health?message=1",
-                                  f"related:{BASE}/brb/#/library/o/5"}),
+    for enabled, want in ((True, {f"alternate:{BASE}/#/settings/health?message=1",
+                                  f"related:{BASE}/#/library/o/5"}),
                           (False, {f"alternate:{BASE}/health#message-1",
                                    f"related:{BASE}/obs/5"})):
         cfg = Config(root=tmp_path, llm=llm_config(), budget=BudgetConfig(monthly_usd=1),

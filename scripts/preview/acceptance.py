@@ -128,7 +128,7 @@ class Preview:
         return ctx, pg
 
     def go(self, pg: Any, route: str, wait: int = 2500) -> None:
-        pg.goto(self.base + "/brb/" + route)
+        pg.goto(self.base + "/" + route)     # the page at / (an older tree redirects / to /brb/)
         end = time.monotonic() + 20
         while time.monotonic() < end:
             try:

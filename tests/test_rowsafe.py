@@ -366,7 +366,7 @@ def test_a_page_that_fails_answers_the_error_page(rt, monkeypatch):  # noqa: F81
     eid = r.text.split("error ")[1][:8]
     assert f"Kranto {__version__} · error {eid}" in r.text
     assert "Try again" in r.text and "Send this error" in r.text
-    assert f"/brb/#/today?send_error={eid}" in r.text
+    assert f"/#/today?send_error={eid}" in r.text
     assert "ValueError" in r.text and TOKEN not in r.text and str(Path.home()) not in r.text
 
 

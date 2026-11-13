@@ -113,7 +113,7 @@ configured.
 | `kranto.py`, `packages/kranto/` | The `kranto` command (`up`, `serve`, `down`, `status`, `logs`, `doctor`, `adopt`) and the metadata-only `kranto` distribution that installs the server and the page together. |
 | `progress.py` | "What is missing" messages for empty pages. |
 | `packs.py`, `importers.py`, `bundle.py`, `doctor.py` | Topic packs, Parallax import, static bundle export, preflight checks. |
-| `web/` | Starlette app: the JSON API and the host of Kranto UI (the page, at `/brb/`). the server's old page addresses redirect there; without the page they and `/` show an install notice (Kranto is one app, D5). The only Jinja pages left are the connection sign-in pages. |
+| `web/` | Starlette app: the JSON API and the host of the page (drawn at `/`; its files and calls under `/brb/`). the server's old page addresses redirect there; without the page they and `/` show an install notice (Kranto is one app, D5). The only Jinja pages left are the connection sign-in pages. |
 | `core/cubs/` | The cub runtime: `sandbox.py` (bubblewrap under a systemd user scope, else rlimits), `process.py` and `host.py` (one process a cub, `cub/1` over its pipes, every call checked and written to `cub_calls`), `runtime.py` (start on demand, idle stop, the pause rules, the reaper, the STOP file, recovery, the daily gc), `install.py` and `inspect.py` (add, update, stop, remove; the tree's checks, the findings, the words), `brokers/` (the newsletter, through whichever platform `kranto/newsletter/` has connected, and Mastodon, with the owner's connection), `settings.py` (the `cubs:` section, read again when kranto.yaml changes), `cli.py` (`kranto cub`), `views.py`. |
 | `bears_cub/` (a package of its own in `src/`) | The SDK a cub imports (and the `bears-cub-sdk` wheel): the decorators, `ctx`, the wire, `FakeHost` for tests, the template, `python -m bears_cub.check` and `.standard`. |
 | `cubs/examples/` | The reference cubs, `newsletter`, `toot` and `blog`, installed like any cub (`kranto paths examples`); Kranto adds `blog` itself the first time a post is asked for. |
@@ -337,7 +337,7 @@ off), and `kranto update` reports a stop over 12 s as a warning with that line.
 the page's build loop as a second lane, when `brb.enabled` and `builds.enabled`
 are set, the page is installed and the server is on loopback.
 
-**Builds are off unless set.** `brb.enabled` is the page at `/brb/`; `builds.enabled`
+**Builds are off unless set.** `brb.enabled` is the page at `/`; `builds.enabled`
 (absent means off) is the half of it that builds: the loop lane and its maintenance
 poll, Build, Projects and Repos, Settings › Building, Publishing and Tools, "Send to
 build" on a card, Welcome's Building and Publishing steps, and the build loop's

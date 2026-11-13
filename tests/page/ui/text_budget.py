@@ -69,7 +69,7 @@ def run(base: str):
         ctx.route("**/*", lambda r: r.abort() if r.request.method not in ("GET", "HEAD") else r.continue_())
         pg = ctx.new_page()
         for name, route in ROUTES.items():
-            pg.goto(f"{base}/brb/#/{route}")
+            pg.goto(f"{base}/#/{route}")
             try:
                 pg.wait_for_load_state("networkidle", timeout=15000)
             except Exception:

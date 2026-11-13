@@ -1001,7 +1001,7 @@ class App:
                 request=request, kranto=None, nav="error", paused=None, error_id=eid,
                 again=str(request.url.path) + (f"?{request.url.query}" if request.url.query
                                                else ""),
-                send=f"/brb/#/today?send_error={eid}", github=rowsafe.issue_url(
+                send=f"/#/today?send_error={eid}", github=rowsafe.issue_url(
                     rep["title"], rep["body"]), title=rep["title"], body=rep["body"]),
                 status_code=500)
         return GuardMiddleware._secure(out)
@@ -1190,10 +1190,10 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
               else f"{KRANTO}library/clusters" if target == "cluster" else app.links.health())
         return RedirectResponse(to, status_code=302)
 
-    def front_door(request: Request):
-        """Kranto UI's Today when the page is mounted; else the install notice."""
+    async def front_door(request: Request):
+        """The page, when it is mounted; else the install notice."""
         if app.brb.mounted:
-            return RedirectResponse("/brb/")
+            return await brb_mod.document(app.brb, request)
         return app.install_notice(request)
 
     routes = [

@@ -81,7 +81,7 @@ class SelfCheckAPI:
                 theirs = list(fn()) if fn is not None else list(BRB_FALLBACK)
             except Exception:  # noqa: BLE001 - the builds UI's own reads still say it
                 theirs = list(BRB_FALLBACK)
-            out += ["/brb/"] + ["/brb" + p for p in theirs if isinstance(p, str)
+            out += ["/"] + ["/brb" + p for p in theirs if isinstance(p, str)
                                 and p.startswith("/")]
         return list(dict.fromkeys(out))
 

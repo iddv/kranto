@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pageUrl } from "../../lib/base";
   // Today's empty states (PLAN.md 1.5; UI-v4.md 1.4; the old page's readingLine): with no topic,
   // the mark, what will appear and when, and Add a topic, at the top of the list (main); while
   // the library is small (under 30 observations), what Kranto is reading, in the pane (side).
@@ -25,5 +26,5 @@
 {#if host && !t && !side}
   <section class="box" role="status"><MarkEmpty text="No topics yet. The kranto read nothing until you say what you are interested in; after the first ingest, what they keep shows up here, the newest first."><a class="btn primary" href="#/topics/new">Add a topic</a></MarkEmpty></section>
 {:else if host && small}
-  <section class="box" role="status"><div class="hero"><img src="static/brand/icon-192.png" alt="" width="72" height="72" /><p class="small muted">{`Kranto is reading ${plural(n, "source")} for ${plural(t, "topic")}. ${busy} Themes appear after about 30 observations (${host.observations} so far); ideas after the first map.`}</p></div></section>
+  <section class="box" role="status"><div class="hero"><img src={pageUrl("static/brand/icon-192.png")} alt="" width="72" height="72" /><p class="small muted">{`Kranto is reading ${plural(n, "source")} for ${plural(t, "topic")}. ${busy} Themes appear after about 30 observations (${host.observations} so far); ideas after the first map.`}</p></div></section>
 {/if}

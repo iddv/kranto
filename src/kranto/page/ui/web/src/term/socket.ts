@@ -3,15 +3,18 @@
 // text frames out are {"t":"exit","code"} and {"t":"dropped"} (this viewer fell behind: open
 // again for a fresh ticket and the screen from the ring).
 
+import { PAGE, pageUrl } from "../lib/base";
+
 export type SocketEvent =
   | { kind: "data"; bytes: Uint8Array }
   | { kind: "exit"; code: number | null }
   | { kind: "dropped" }
   | { kind: "closed"; reason: string };
 
-/** The socket's URL for a session and its one-time ticket, beside the page (/brb/…). */
-export function socketUrl(tid: string, ticket: string, here: Location = location): string {
-  const u = new URL(`term/ws/${encodeURIComponent(tid)}`, here.href.replace(/#.*$/, ""));
+/** The socket's URL for a session and its one-time ticket, under the page's own prefix
+ * (``/brb/term/ws/…`` while the document is drawn at ``/``). */
+export function socketUrl(tid: string, ticket: string, here: Location = location, base: string = PAGE): string {
+  const u = new URL(pageUrl(`term/ws/${encodeURIComponent(tid)}`, base), here.href.replace(/#.*$/, ""));
   u.protocol = here.protocol === "https:" ? "wss:" : "ws:";
   u.search = `ticket=${encodeURIComponent(ticket)}`;
   return u.toString();

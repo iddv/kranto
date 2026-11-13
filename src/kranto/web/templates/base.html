@@ -19,7 +19,7 @@
 {# the page is mounted at /brb/: one header for both tools (DESIGN-v3.md). #}
 <header class="hd">
   <div class="wrap hd-top">
-    <a class="brand" href="/brb/#/today">Kranto</a><span class="sub2">on this machine</span>
+    <a class="brand" href="/#/today">Kranto</a><span class="sub2">on this machine</span>
     <span class="grow"></span>
     <span class="hd-state" role="status">
       {% if paused %}
@@ -37,10 +37,10 @@
     {% endif %}
   </div>
   <nav class="wrap tabs" aria-label="Sections">
-    <a class="tab" href="/brb/#/today">Today</a>
-    <a class="tab" href="/brb/#/ideas"{% if nav == 'ideas' %} aria-current="page"{% endif %}>Ideas</a>
-    <a class="tab" href="/brb/#/library">Library</a>
-    <a class="tab" href="/brb/#/settings"{% if set_nav %} aria-current="page"{% endif %}>Settings</a>
+    <a class="tab" href="/#/today">Today</a>
+    <a class="tab" href="/#/ideas"{% if nav == 'ideas' %} aria-current="page"{% endif %}>Ideas</a>
+    <a class="tab" href="/#/library">Library</a>
+    <a class="tab" href="/#/settings"{% if set_nav %} aria-current="page"{% endif %}>Settings</a>
   </nav>
 </header>
 {% if paused %}<div class="flash" role="status"><strong>Paused.</strong>
@@ -58,11 +58,11 @@
 <main>
 {% if set_nav %}
 <nav class="subnav" aria-label="Settings pages">
-  <a href="/brb/#/settings"{% if nav == 'topics' %} aria-current="page"{% endif %}>Topics and sources</a>
-  <a href="/brb/#/settings/connections"{% if nav == 'connections' %} aria-current="page"{% endif %}>Connections</a>
-  <a href="/brb/#/settings/rules">Build rules</a>
-  <a href="/brb/#/settings/spend">Spend</a>
-  <a href="/brb/#/settings/health"{% if nav == 'health' %} aria-current="page"{% endif %}>Health</a>
+  <a href="/#/settings"{% if nav == 'topics' %} aria-current="page"{% endif %}>Topics and sources</a>
+  <a href="/#/settings/connections"{% if nav == 'connections' %} aria-current="page"{% endif %}>Connections</a>
+  <a href="/#/settings/rules">Build rules</a>
+  <a href="/#/settings/spend">Spend</a>
+  <a href="/#/settings/health"{% if nav == 'health' %} aria-current="page"{% endif %}>Health</a>
 </nav>
 {% endif %}
 {% block content %}{% endblock %}
