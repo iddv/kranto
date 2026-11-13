@@ -19,10 +19,14 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import time
 from collections.abc import Callable
 from pathlib import Path
 
+# imported here, never inside a function: ``kranto update`` follows the helper from the tool's
+# environment while the helper replaces it (and, crossing to the other shape, deletes it)
 from .. import legacy
+from ..proc import running as _proc_running
 from .apply import FINAL, cancel_path, helper_unit, read_json, state_path, update_dir, write_json
 
 # what the helper's copy needs beside it: it imports these two when it is not in the package
@@ -74,11 +78,8 @@ def running(home: Path) -> bool:
         return False
     pid = st.get("pid")
     if pid:
-        from ..proc import running as _running
-        return _running(pid, st.get("start"))
+        return _proc_running(pid, st.get("start"))
     try:   # launched, the helper not started yet: give it two minutes
-        import time
-
         return time.time() - state_path(home).stat().st_mtime < 120
     except OSError:
         return False

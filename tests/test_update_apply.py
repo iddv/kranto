@@ -1024,3 +1024,24 @@ def test_a_previous_git_install_from_before_the_rename_is_refused(world):
                       "version": "0.5.0"})
     assert world.helper(to="previous").run_all() == "cancelled"
     assert "older layout" in json.loads(apply.state_path(world.home).read_text())["reason"]
+
+
+def test_following_the_helper_imports_nothing_on_the_way():
+    """``kranto update`` follows the helper from the tool's environment while the helper replaces
+    it, and deletes it when the shape changes (the rehearsal on a copy found the follower
+    failing on a lazy import): ``launch.running``, which it calls every two seconds, imports
+    nothing; ``tail_update`` imports only at its first line, before the helper starts."""
+    import ast
+    import inspect
+    import textwrap
+
+    from kranto import launcher
+
+    def imports(fn):
+        tree = ast.parse(textwrap.dedent(inspect.getsource(fn)))
+        return [n for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
+
+    assert imports(launch.running) == []
+    tail = ast.parse(textwrap.dedent(inspect.getsource(launcher.tail_update))).body[0]
+    first = [n for n in tail.body if isinstance(n, (ast.Import, ast.ImportFrom))]
+    assert len(imports(launcher.tail_update)) == len(first)          # none further in
