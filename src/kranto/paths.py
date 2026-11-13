@@ -73,12 +73,14 @@ def unit_env(text: str, user_home: Path) -> dict[str, str]:
 
 
 def unit_home(user_home: Path, units: Path | None = None, unit: str | None = None) -> Path | None:
-    """The installed unit's ``KRANTO_HOME``, or None."""
+    """The installed unit's ``KRANTO_HOME`` (or its old name, ``legacy.adopt_env``), or None."""
     try:
         text = ((units or unit_dir(user_home)) / (unit or unit_name())).read_text()
     except OSError:
         return None
-    found = unit_env(text, Path(user_home)).get(KRANTO_HOME_ENV)
+    env = unit_env(text, Path(user_home))
+    legacy.adopt_env(env)
+    found = env.get(KRANTO_HOME_ENV)
     return Path(found).expanduser() if found else None
 
 

@@ -24,7 +24,7 @@ its SHA-256 like every other's.
 
 Another unit (``$KRANTO_UNIT``, the update's scratch instance) keeps its own directory,
 ``tokens.<unit>``, as it keeps its own home pointer; ``$KRANTO_TOKENS_DIR`` names one outright
-(tests). This file is stdlib only and is kept identical in the server (``the server/tokens.py``)
+(tests). This file is stdlib only (and ``legacy``) and is kept identical in the server (``the server/tokens.py``)
 and the page (``src/kranto/page/tokens.py``): both servers read the same store.
 
 What this is not: a wall between processes of the same Unix user. Anything running as the
@@ -46,6 +46,8 @@ import secrets
 import time
 from pathlib import Path
 
+from kranto import legacy
+
 DOORS = ("ui", "mcp", "console", "cli")
 COOKIE = "kranto_session"
 CODE_TTL_S = 600
@@ -63,13 +65,12 @@ class TokenError(ValueError):
 
 def tokens_dir(env: dict | None = None, home: Path | None = None) -> Path:
     """``$KRANTO_TOKENS_DIR``, else ``~/.config/kranto/tokens`` (``tokens.<unit>`` for another
-    ``$KRANTO_UNIT``)."""
+    ``$KRANTO_UNIT``; the old config folder on an install made before the rename:
+    ``legacy.unit_store``)."""
     env = os.environ if env is None else env
     if env.get(DIR_ENV):
         return Path(env[DIR_ENV]).expanduser()
-    unit = env.get("KRANTO_UNIT") or DEFAULT_UNIT
-    name = "tokens" if unit == DEFAULT_UNIT else "tokens." + unit.removesuffix(".service")
-    return Path(home or Path.home()) / ".config" / "kranto" / name
+    return legacy.unit_store("tokens", env, home)
 
 
 def cookie_name(port: int | None = None) -> str:
