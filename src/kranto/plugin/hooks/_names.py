@@ -23,6 +23,8 @@ _NAME = re.compile(r"[a-z][a-z0-9]{0,30}")
 
 def _load(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {path}")
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)

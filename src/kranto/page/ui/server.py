@@ -83,10 +83,10 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
                 jar.load(self.headers.get("Cookie") or "")
             except Exception:                       # noqa: BLE001 - a broken header: no cookie
                 pass
-            port = self.server.server_address[1]
             # a browser signed in before the rename carries the old name until it expires
-            morsel = jar.get(self.cookie_name) or jar.get(
-                f"{legacy.COOKIE}_{int(port)}" if port else legacy.COOKIE)
+            # (the same port suffix after it)
+            old = legacy.COOKIE + self.cookie_name[len(tokens_mod.COOKIE):]
+            morsel = jar.get(self.cookie_name) or jar.get(old)
             if morsel is not None:
                 ident = store.identify(morsel.value)
                 if ident and ident["origin"] == "ui":
