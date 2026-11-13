@@ -33,19 +33,19 @@ AGENT = {"origin": "token", "token": "agent"}
 
 def test_every_offered_site_has_open_and_no_way_is_copy():
     for s in sites.offered():
-        assert s.ways()[0] == "open", s.id        # Open comes first wherever a site has one
+        # Open comes first wherever a site has one; LinkedIn has none, so it is posted directly
+        assert s.ways()[0] == "open" or s.ways() == ("direct",), s.id
         assert set(s.ways()) <= {"open", "direct"}
-    assert {s.id for s in sites.offered()} == {"bluesky", "mastodon", "x", "threads"}
+    assert {s.id for s in sites.offered()} == {"bluesky", "mastodon", "x", "threads",
+                                               "linkedin"}
     assert "x" in sites.SITES and sites.SITES["x"].direct is None      # X: Open only, no API
 
 
-def test_substack_and_linkedin_are_not_offered_and_say_why():
-    for sid in ("substack", "linkedin"):
-        s = sites.get(sid)
-        assert s is not None and s.ways() == () and s.not_offered
-        assert sites.open_address(s, "x", None) is None
-    assert "no link that fills" in sites.get("substack").not_offered
-    assert sites.get("linkedin").later                     # posting directly, next release
+def test_substack_is_not_offered_and_linkedin_only_posted_directly():
+    s = sites.get("substack")
+    assert s is not None and s.ways() == () and "no link that fills" in s.not_offered
+    assert sites.open_address(s, "x", None) is None
+    assert sites.open_address(sites.get("linkedin"), "x", None) is None
 
 
 def test_open_addresses_carry_the_text_and_the_link():
@@ -567,7 +567,8 @@ def test_posting_refuses_what_is_not_offered_in_words(store):
     got = {s["id"]: s for s in out["sites"]}
     assert got["x"]["ticked"] and got["bluesky"]["direct"] and not got["x"]["direct"]
     assert got["mastodon"]["instance"] == "mastodon.social"
-    assert {g["id"] for g in out["not_offered"]} >= {"substack", "linkedin"}
+    assert {g["id"] for g in out["not_offered"]} >= {"substack"}
+    assert got["linkedin"]["ways"] == ["direct"]
     assert out["disclosure"].startswith("Drafted with ")
 
 

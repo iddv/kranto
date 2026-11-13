@@ -1,0 +1,13 @@
+{
+  "_source": "Hand-written from Threads' documented shapes, read 2026-11-13: posts (https://developers.facebook.com/docs/threads/posts: a container {id}, then threads_publish {id}), troubleshooting (container status FINISHED / IN_PROGRESS / ERROR), retrieve posts (permalink), profiles (me), long-lived tokens (refresh). The error object is the Graph API's general shape (https://developers.facebook.com/docs/graph-api/guides/error-handling); no Threads page shows one. Not yet a recorded real answer.",
+  "container": {"id": "17889615691921648"},
+  "in_progress": {"status": "IN_PROGRESS", "id": "17889615691921648"},
+  "finished": {"status": "FINISHED", "id": "17889615691921648"},
+  "error_status": {"status": "ERROR", "id": "17889615691921648", "error_message": "UNKNOWN"},
+  "published": {"id": "1234567"},
+  "permalink": {"permalink": "https://www.threads.com/@threadsapitestuser/post/abcdefg", "id": "1234567"},
+  "me": {"id": "1234567", "username": "threadsapitestuser"},
+  "refresh": {"token_type": "bearer", "expires_in": 5183944},
+  "expired": {"error": {"message": "Error validating access token: Session has expired.", "type": "OAuthException", "code": 190, "error_subcode": 463, "fbtrace_id": "Afaketrace"}},
+  "links": {"error": {"message": "THREADS_API__LINK_LIMIT_EXCEEDED", "type": "OAuthException", "code": 100, "fbtrace_id": "Afaketrace2"}}
+}

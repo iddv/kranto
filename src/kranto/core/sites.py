@@ -88,18 +88,21 @@ SITES: dict[str, Site] = {s.id: s for s in (
                   "the link in the text."),
     Site("threads", "Threads", 500, "characters, an emoji counted as its bytes", "threads",
          open="https://www.threads.com/intent/post?text={text}&url={url}",
-         open_takes_url=True, hashtags=1,
+         open_takes_url=True, hashtags=1, direct="threads_post", direct_kind="post.threads",
          playbook="One post. At most one topic tag. The link is added by Threads' composer "
                   "and drawn as a card: do not write the link in the text."),
+    Site("linkedin", "LinkedIn", 3000, "characters", "chars", hashtags=3,
+         direct="linkedin_post", direct_kind="post.linkedin", open_takes_url=True,
+         playbook="One post of 600 to 1,300 characters: a first line under 140 characters that "
+                  "stands alone (it is all that shows before \"see more\"), then two to four short "
+                  "paragraphs. At most three hashtags, on the last line. No emoji bullets, no "
+                  "\"I'm thrilled\", no question tacked on to farm comments, no mentions. Kranto "
+                  "attaches the link as a card: do not write the link in the text."),
 )}
 
 # What could not be offered, and why. Filled from the live check of 13 November 2026
 # (docs/posting.md, "Which sites, and why"): a site here appears under "Not possible today".
 NOT_OFFERED: dict[str, Site] = {s.id: s for s in (
-    Site("linkedin", "LinkedIn", 3000, "characters", "chars", hashtags=3,
-         not_offered="LinkedIn has no documented link that fills in a post's text, and posting "
-                     "directly needs your own LinkedIn app",
-         later="Posting directly with your own LinkedIn app comes in the next release"),
     Site("substack", "Substack", 0, "words", "chars",
          not_offered="Substack has no link that fills in a post or a Note, and no way for an "
                      "app to post"),
@@ -311,7 +314,10 @@ def choices(store) -> list[Choice]:
     out = []
     for s in offered():
         if s.id in ticked:
-            out.append(Choice(s, direct=direct.get(s.id) is True and "direct" in s.ways(),
+            # a site with no Open (LinkedIn) is posted directly, or not at all
+            only = s.ways() == ("direct",)
+            out.append(Choice(s, direct=only or (direct.get(s.id) is True
+                                                  and "direct" in s.ways()),
                               instance=row.instance if s.needs == "instance" else None,
                               disclose=disclose.get(s.id) is True))
     return out
@@ -325,8 +331,9 @@ SOURCES = {
     "threads": "https://developers.facebook.com/docs/threads/threads-web-intents "
                "(read 2026-11-13)",
     "linkedin": "https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/"
-                "plugins/share-plugin (a link to share carries an address only; read "
-                "2026-11-13)",
+                "plugins/share-plugin (a link to share carries an address only); posting: "
+                "https://learn.microsoft.com/en-us/linkedin/marketing/community-management/"
+                "shares/posts-api (version 2026-10; read 2026-11-13)",
     "substack": "https://substack.com/api-tos and https://on.substack.com/p/notes-faq (no "
                 "publishing API, no composer link; read 2026-11-13)",
 }

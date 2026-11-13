@@ -1,0 +1,8 @@
+{
+  "_source": "Hand-written from LinkedIn's documented shapes, read 2026-11-13: the Posts API (https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api, version 2026-10: a 201 with the post's id in x-restli-id, no body), error handling (https://learn.microsoft.com/en-us/linkedin/shared/api-guide/concepts/error-handling: {message, serviceErrorCode, status}), and userinfo (https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin-v2). Not yet a recorded real answer.",
+  "created_id": "urn:li:share:6844785523593134080",
+  "userinfo": {"sub": "782bbtaQ", "name": "Alex Example", "given_name": "Alex", "family_name": "Example", "locale": "en-US"},
+  "expired": {"message": "Expired access token", "serviceErrorCode": 65601, "status": 401},
+  "too_long": {"message": "Reduce the length of the commentary", "serviceErrorCode": 100, "status": 400, "code": "FIELD_LENGTH_TOO_LONG"},
+  "throttled": {"message": "Resource level throttle limit for calls to this resource is reached.", "serviceErrorCode": 101, "status": 429}
+}

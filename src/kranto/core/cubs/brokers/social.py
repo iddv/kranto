@@ -6,7 +6,8 @@ Every variant Kranto's writer makes (``kranto.social``) is a ``cub_drafts`` row 
 - ``post.open``: the site's composer is opened by the person (a plain link the page follows;
   the server sends nothing). Its confirm is **I posted it**: the performer makes no request off
   the machine and records ``posted by you``. Kranto's own kind: never grantable to a cub.
-- ``post.bluesky`` (``bluesky``), ``post.mastodon`` (``mastodon``): Kranto posts the draft
+- ``post.bluesky`` (``bluesky``), ``post.mastodon`` (``mastodon``), ``post.threads``
+  (``threads``), ``post.linkedin`` (``linkedin``, which has no Open): Kranto posts the draft
   after the person's yes, when they switched the site to Post directly.
 
 Every posting kind waits until it is answered (no time limit), is confirmed on the page only,
@@ -69,6 +70,15 @@ def register_kinds() -> None:
         meta={"verb": "Post to Bluesky", "button": "Post to Bluesky", "noun": "post",
               "done": "Posted", "not_done": "not posted",
               "question": "Post this to Bluesky?"}))
+    for kind, name, most in (("post.linkedin", "LinkedIn", 3000), ("post.threads", "Threads", 500)):
+        tickets.register(tickets.Kind(
+            kind, f"Post to {name}", {
+                "draft_ref": _F("str", pattern=r"draft:[0-9]{1,12}", max_len=20, label="Draft"),
+                "text": _F("str", max_len=most * 2, label="Text")},
+            expires_hours=None, per_day=30, first_party_only=True,
+            meta={"verb": f"Post to {name}", "button": f"Post to {name}", "noun": "post",
+                  "done": "Posted", "not_done": "not posted",
+                  "question": f"Post this to {name}?"}))
 
 
 def parts_of(content: dict) -> list[str]:

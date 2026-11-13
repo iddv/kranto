@@ -486,15 +486,19 @@ def social_lines(p: Preview) -> list[Result]:
     got = p.api(pg, "/api/post/sites")
     offered = got.get("sites") or []
     gone = {g.get("id"): g for g in got.get("not_offered") or []}
-    out.append(ok("SOC-0", "every site Kranto offers opens first; none is copy and open",
-                  bool(offered) and all((s.get("ways") or [""])[0] == "open" for s in offered)
+    out.append(ok("SOC-0", "every site Kranto offers opens first (LinkedIn, with no Open, is "
+                  "posted directly only); none is copy and open",
+                  bool(offered) and all((s.get("ways") or [""])[0] == "open"
+                                        or s.get("ways") == ["direct"] for s in offered)
                   and all(set(s.get("ways") or []) <= {"open", "direct"} for s in offered),
                   ", ".join(f"{s.get('name')}: {' or '.join(s.get('ways') or [])}"
                             for s in offered)))
-    out.append(ok("SOC-6", "Substack and LinkedIn are not offered as drafts, each with its reason",
-                  all(gone.get(k, {}).get("why") for k in ("substack", "linkedin")),
-                  "; ".join(f"{k}: {gone.get(k, {}).get('why')}"
-                            for k in ("substack", "linkedin"))))
+    li = next((s for s in offered if s.get("id") == "linkedin"), {})
+    out.append(ok("SOC-6", "Substack is not offered, with its reason; LinkedIn only as Post "
+                  "directly", bool(gone.get("substack", {}).get("why"))
+                  and li.get("ways") == ["direct"],
+                  f"substack: {gone.get('substack', {}).get('why')}; linkedin: "
+                  f"{' or '.join(li.get('ways') or []) or 'missing'}"))
     post = p.api(pg, "/api/post")
     short = [d for d in post.get("drafts") or [] if d.get("kind") == "short"]
     p.go(pg, "#/post")

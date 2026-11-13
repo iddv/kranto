@@ -36,14 +36,14 @@ was not tried with an account: the first real post of each is the owner's, and t
 | **Bluesky** | `https://bsky.app/intent/compose?text=…` | Yes: your handle and an app password (**Bluesky (posting)**) | 300 characters as a reader sees them (an emoji with its skin tone is one) | not yet sent for real |
 | **Mastodon** | `https://<your server>/share?text=…` (type your server once in Settings › Posting) | Yes: **Mastodon (posting)** | your server's limit (500 by default), each link counted as 23 | not yet sent for real |
 | **X** | `https://x.com/intent/tweet?text=…&url=…` | No: X's API is paid, and Kranto does not use it | 280, the link counted as 23, wide characters as two | not yet sent for real |
-| **Threads** | `https://www.threads.com/intent/post?text=…&url=…` | Not yet (your own Meta app: the next release) | 500 characters, an emoji counted as its bytes | not yet sent for real |
+| **Threads** | `https://www.threads.com/intent/post?text=…&url=…` | Yes: your own Meta app's token (**Threads (posting)**) | 500 characters, an emoji counted as its bytes | not yet sent for real |
+| **LinkedIn** | none: LinkedIn documents no link that fills in a post's text | Yes, and only this way: your own LinkedIn app's token (**LinkedIn (posting)**) | 3,000 characters | not yet sent for real |
 
 **Not possible today** (Settings › Posting lists them with these reasons):
 
 | Site | Why |
 |---|---|
 | **Substack** | No link fills in a post or a Note, and no API lets an app post (its developer terms cover reading public profile and publication information only). Its terms also forbid the private routes some tools use. |
-| **LinkedIn** | No documented link fills in a post's text: its share link carries an address only. Posting directly needs your own LinkedIn app with "Share on LinkedIn"; that comes in the next release, as Post directly only. |
 | **Instagram** | Pictures and video from a public address, not words. |
 | **Facebook Pages** | A Page post from your own app stays hidden until Meta reviews the app. |
 
@@ -87,7 +87,28 @@ your server and an access token with `read:accounts` and `write:statuses`).
 
 **Mastodon's Open** needs only your server's name (Settings › Posting).
 
-**X, Threads**: nothing to connect. Be signed in to the site in your browser.
+**X, Threads**: nothing to connect for Open. Be signed in to the site in your browser.
+
+**LinkedIn (posting)**, the only way Kranto offers LinkedIn (about ten minutes, once). "Kranto
+posts to your profile only a draft you approved." You need a LinkedIn Page to attach the app to
+(any Page you manage; LinkedIn's Create a company page takes a minute and can stay empty). Open
+`linkedin.com/developers/apps`, Create app, name it Kranto, pick your Page, add a small logo.
+On its Products tab request **Share on LinkedIn** and **Sign In with LinkedIn using OpenID
+Connect**. Then Docs and tools, OAuth Token Tools, Create token: tick `openid`, `profile` and
+`w_member_social`, Request access token, sign in and allow. Paste the token on Settings ›
+Posting, LinkedIn (posting). LinkedIn's tokens last 60 days: make a new one when Kranto says so.
+The post carries a link card Kranto builds (LinkedIn does not read the page), and its words are
+sent in LinkedIn's own format, so a "#" or a bracket reads as written and a tag is a tag.
+
+**Threads (posting)**, for Post directly (about ten minutes, once). At
+`developers.facebook.com/apps` choose Create app with the use case "Access the Threads API",
+name it Kranto. Under Use cases, Customize beside Threads, add `threads_content_publish`. Under
+App roles, Roles, Add people, add your own Threads account as a Threads tester, and accept the
+invitation in Threads (Settings, Account, Website permissions, Invites). Under User token
+generator choose Generate access token, allow, copy it, and paste it on Settings › Posting,
+Threads (posting). Kranto refreshes it while you use it (60 days at a time). The app stays in
+development mode, for you only. A thread is not written for Threads: a reply needs one more
+permission.
 
 ## What is stored
 
@@ -95,7 +116,7 @@ your server and an access token with `read:accounts` and `write:statuses`).
 |---|---|---|
 | `settings` key `post.sites` | the sites ticked, Post directly per site, your Mastodon server, the disclosure per site | `core.sites.choices`, `post_api.posting_read`/`posting_write`; a missing key or one stored as null reads as none |
 | `cub_drafts` of the filer `social` | one row a site: `site`, `group` (one write), `parts`, `text`, `link`, `extras`, `prose`, `language`, `card` (Bluesky posted directly) | Post's read (`_short_row`, `short_sheet`, `siblings`), the edit, the asks below |
-| `cub_tickets` kinds `post.open` (I posted it), `post.bluesky`; `post.mastodon` as before | each waits until you answer it; confirmed on the page only; refused on the preview before anything is written | `core.tickets`, `core.asks`, Post |
+| `cub_tickets` kinds `post.open` (I posted it), `post.bluesky`, `post.linkedin`, `post.threads`; `post.mastodon` as before | each waits until you answer it; confirmed on the page only; refused on the preview before anything is written | `core.tickets`, `core.asks`, Post |
 
 ## Routes
 
@@ -117,6 +138,14 @@ your server and an access token with `read:accounts` and `write:statuses`).
 - X's post link: <https://docs.x.com/x-for-websites/post-button/guides/web-intent>.
 - Threads' post link: <https://developers.facebook.com/docs/threads/threads-web-intents>.
 - LinkedIn's share link (an address only): <https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/plugins/share-plugin>;
-  posting with your own app: <https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/share-on-linkedin>.
+  posting with your own app: <https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/share-on-linkedin>;
+  the Posts API (version 2026-10), its little text format and `userinfo`:
+  <https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api>,
+  <https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/little-text-format>,
+  <https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin-v2>.
+- Threads posting (a container, then publish; the 30 seconds between), tokens and replies:
+  <https://developers.facebook.com/docs/threads/posts>,
+  <https://developers.facebook.com/docs/threads/get-started/long-lived-tokens>,
+  <https://developers.facebook.com/docs/threads/retrieve-and-manage-replies/create-replies>.
 - Substack's developer terms: <https://substack.com/api-tos>; Notes:
   <https://on.substack.com/p/notes-faq>.

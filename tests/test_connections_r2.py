@@ -931,6 +931,8 @@ def test_every_provider_through_the_web_and_no_secret_anywhere(rig, caplog):
             "x",
             "mastodon_post",
             "bluesky_post",
+            "linkedin_post",
+            "threads_post",
             "sanity",
             "resend",
             "buttondown",

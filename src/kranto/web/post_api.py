@@ -992,7 +992,9 @@ def posting_read(store) -> dict[str, Any]:
     for s in sites.offered():
         conn = connection_of(store, s.direct) if s.direct else None
         out.append({"id": s.id, "name": s.name, "ways": list(s.ways()),
-                    "ticked": s.id in ticked, "direct": direct.get(s.id) is True,
+                    "ticked": s.id in ticked,
+                    # a site with no Open (LinkedIn) is always posted directly
+                    "direct": direct.get(s.id) is True or s.ways() == ("direct",),
                     "can_direct": s.direct is not None,
                     "account": conn["account"] if conn and conn["state"] == "connected"
                     else None,
