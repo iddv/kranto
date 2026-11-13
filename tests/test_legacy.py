@@ -47,13 +47,20 @@ def test_an_old_home_keeps_its_settings_file_and_library_where_they_are(tmp_path
     assert Layout(tmp_path).config == tmp_path / product.HOME_FILE
 
 
-def test_the_config_folder_is_the_old_one_only_when_it_alone_exists(tmp_path):
-    assert legacy.config_dir(tmp_path) == tmp_path / ".config" / product.CONFIG_DIR
+def test_the_config_folder_is_the_old_one_until_the_new_one_holds_a_home(tmp_path):
+    new = tmp_path / ".config" / product.CONFIG_DIR
+    assert legacy.config_dir(tmp_path) == new                  # a new install
     old = tmp_path / ".config" / legacy.CONFIG_DIR
     old.mkdir(parents=True)
+    assert legacy.config_dir(tmp_path) == old                  # made before the rename
+    # a stray new folder (made by hand, or a scratch instance's own pointer and tokens) does
+    # not pull the old install away from its tokens and logins
+    new.mkdir()
+    (new / "home.kranto-test").write_text("/x\n")
+    (new / "tokens.kranto-test").mkdir()
     assert legacy.config_dir(tmp_path) == old
-    (tmp_path / ".config" / product.CONFIG_DIR).mkdir()
-    assert legacy.config_dir(tmp_path) == tmp_path / ".config" / product.CONFIG_DIR
+    (new / "home").write_text("/kb\n")                        # an install's own pointer
+    assert legacy.config_dir(tmp_path) == new
 
 
 def test_the_old_units_pointer_is_its_plain_home_file(tmp_path):

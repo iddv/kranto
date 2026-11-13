@@ -12,7 +12,9 @@ checking a release runs, `dev/` what a maintainer runs by hand.
 | `ci/no_attribution.py` | CI (`gitleaks`), and by hand in | refuses tool or agent attribution lines in a range of commits |
 | `release/decide.py` | whoever cuts | which heads a release takes, and whether it must be an rc first |
 | `release/cut_local.sh` | whoever cuts | builds, tags and publishes a release from green heads (`--prerelease rcN`, `--from-tag`) |
-| `release/build.sh`, `release/publish.py`, `release/notes.py` | `cut_local.sh` | the wheel; the GitHub release; its notes |
+| `release/build.sh`, `release/publish.py`, `release/notes.py` | `cut_local.sh` | the wheel (or, with `--shape compat`, the three wheels of the release that crosses an install made before the rename); the GitHub release; its notes |
+| `release/compat_wheels.py` | `build.sh --shape compat` | the three old-shape wheels, from temporary copies of the tree |
+| `release/names.py` | the release scripts | the product's names, the repository and the old names, read from `product.py`, `public.toml` and `legacy.py` |
 | `release/rc_check.sh` | whoever cuts an rc | the rc on a scratch copy: a fresh install, `kranto update` from the last release, a rollback |
 | `release/fresh_install.sh`, `release/smoke.sh`, `release/e2e_update.sh` | `rc_check.sh` (and by hand, step by step) | install as a newcomer does; install and start the wheels; the update's end-to-end steps |
 | `preview/kranto-preview`, `preview/copy_live.py` | the owner, and every track after a merge into `oss` (`refresh`) | the preview: a second Kranto built from a branch on `127.0.0.1:8766`, with a read-only copy of live's data, that cannot send (`docs/preview.md`) |

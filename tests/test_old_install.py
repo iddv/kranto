@@ -159,6 +159,9 @@ def test_cubs_stop_is_honoured_in_either_folder(user_home):
     (user_home / ".config" / product.CONFIG_DIR).mkdir()        # both folders now
     assert tickets.stop_file() == old["conf"] / "cubs.STOP"      # still honoured
     (old["conf"] / "cubs.STOP").unlink()
+    # an empty new folder does not pull the install away from its own folder
+    assert tickets.stop_file() == old["conf"] / "cubs.STOP"
+    (user_home / ".config" / product.CONFIG_DIR / "home").write_text("/kb\n")
     assert tickets.stop_file() == user_home / ".config" / product.CONFIG_DIR / "cubs.STOP"
 
 

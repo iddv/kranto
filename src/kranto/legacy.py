@@ -135,10 +135,13 @@ def db_file(data_dir: Path) -> Path:
 
 
 def config_dir(user_home: Path) -> Path:
-    """``~/.config/kranto``, or the old folder when only it exists (it is never moved)."""
+    """``~/.config/kranto``, or the old folder on an install made before the rename (it is never
+    moved). The new folder counts only once it holds an install's own home pointer: a stray or
+    half-made ``~/.config/kranto`` (a scratch instance's pointer, a folder made by hand) must not
+    pull an old install away from its tokens and logins."""
     base = Path(user_home) / ".config"
     new, old = base / product.CONFIG_DIR, base / CONFIG_DIR
-    return old if old.is_dir() and not new.exists() else new
+    return old if old.is_dir() and not (new / "home").is_file() else new
 
 
 def config_dirs(user_home: Path | str = "~") -> tuple[Path, Path]:
