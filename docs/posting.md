@@ -36,7 +36,7 @@ was not tried with an account: the first real post of each is the owner's, and t
 | **Bluesky** | `https://bsky.app/intent/compose?text=…` | Yes: your handle and an app password (**Bluesky (posting)**) | 300 characters as a reader sees them (an emoji with its skin tone is one) | not yet sent for real |
 | **Mastodon** | `https://<your server>/share?text=…` (type your server once in Settings › Posting) | Yes: **Mastodon (posting)** | your server's limit (500 by default), each link counted as 23 | not yet sent for real |
 | **X** | `https://x.com/intent/tweet?text=…&url=…` | No: X's API is paid, and Kranto does not use it | 280, the link counted as 23, wide characters as two | not yet sent for real |
-| **Threads** | `https://www.threads.com/intent/post?text=…&url=…` | Not yet (your own Meta app: the next release) | 500 characters | not yet sent for real |
+| **Threads** | `https://www.threads.com/intent/post?text=…&url=…` | Not yet (your own Meta app: the next release) | 500 characters, an emoji counted as its bytes | not yet sent for real |
 
 **Not possible today** (Settings › Posting lists them with these reasons):
 

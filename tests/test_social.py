@@ -77,6 +77,7 @@ def test_x_and_mastodon_count_a_link_as_23():
     assert sites.count("mastodon", f"hi {long}") == 3 + 23
     assert sites.count("x", "日本") == 4                    # CJK weighs two on X
     assert sites.count("threads", "日本") == 2
+    assert sites.count("threads", "ok 👍") == 3 + 4       # an emoji is its UTF-8 bytes
 
 
 def test_fit_keeps_whole_sentences_and_says_it_cut():

@@ -39,7 +39,7 @@ class Site:
     name: str
     limit: int                     # the most one post holds, in ``unit``
     unit: str                      # the words the counter says: "characters", …
-    counting: str                  # chars | graphemes | x | mastodon
+    counting: str                  # chars | graphemes | x | mastodon | threads
     open: str | None = None        # the composer's address: {text}, {url}, {instance}
     open_takes_url: bool = False   # the composer takes the link apart from the text
     direct: str | None = None      # the connection Kranto posts with, when it can
@@ -86,7 +86,7 @@ SITES: dict[str, Site] = {s.id: s for s in (
          playbook="One post. At most one hashtag, usually none. No @mentions. The link is "
                   "added after the text by X's composer, which draws its card: do not write "
                   "the link in the text."),
-    Site("threads", "Threads", 500, "characters", "chars",
+    Site("threads", "Threads", 500, "characters, an emoji counted as its bytes", "threads",
          open="https://www.threads.com/intent/post?text={text}&url={url}",
          open_takes_url=True, hashtags=1,
          playbook="One post. At most one topic tag. The link is added by Threads' composer "
@@ -174,12 +174,26 @@ def _x_weight(text: str) -> int:
     return w
 
 
+def _threads(text: str) -> int:
+    """Threads: "Text posts are limited to 500 characters", an emoji counted as "its number of
+    UTF-8 bytes" (developers.facebook.com/docs/threads/posts, read 2026-11-13)."""
+    n = 0
+    for ch in text:
+        cp = ord(ch)
+        emoji = cp > 0xFFFF or unicodedata.category(ch) == "So" or cp == 0x200D \
+            or 0xFE00 <= cp <= 0xFE0F
+        n += len(ch.encode()) if emoji else 1
+    return n
+
+
 def count(site: Site | str, text: str) -> int:
     """``text``'s length the site's way."""
     s = site if isinstance(site, Site) else get(site)
     text = text or ""
     if s is None or s.counting == "chars":
         return len(text)
+    if s.counting == "threads":
+        return _threads(text)
     if s.counting == "graphemes":
         return graphemes(text)
     links = URL.findall(text)
