@@ -1335,9 +1335,10 @@ def cmd_serve(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="afk", description="Patient LLM Kranto watching the sources you care about."
+        prog="python -m kranto",
+        description="Kranto's watcher alone: it reads the sources you pick and keeps what matters."
     )
-    parser.add_argument("--version", action="version", version=f"the server {__version__}")
+    parser.add_argument("--version", action="version", version=f"kranto {__version__}")
     parser.add_argument(
         "-w", "--workspace", help="workspace directory (default: $KRANTO_HOME or current directory)"
     )
