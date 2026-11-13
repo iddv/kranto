@@ -1665,7 +1665,11 @@ def front_14(p: Preview) -> Result:
 def front_15(p: Preview) -> Result:
     ctx, pg = p.page(NEW)
     p.go(pg, "#/watch/sources?sel=s999999", 4000)
+    # the page's own words, not the top bar (whose wordmark is the name in lowercase): no
+    # internal name of the server leaks into what the page says
     text = _text(pg, "#app")
+    if pg.query_selector("#top"):
+        text = text.replace(_text(pg, "#top"), "", 1)
     good = (
         "This source is not here any more" in text
         and "kranto" not in text
