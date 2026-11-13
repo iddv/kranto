@@ -236,9 +236,9 @@ def _row(rt, d: dict[str, Any], t: dict[str, Any] | None, accounts: dict[str, di
 
 def _short_row(d: dict[str, Any], t: dict[str, Any] | None) -> dict[str, Any]:
     """A short post's own fields (``kranto.social``'s drafts): ``site`` and its name, the
-    write it belongs to (``write``, the drafts' ``group``), and ``way`` (``open``: the person posts it in the site; ``direct``:
-    Kranto posts it after their yes). None of them for any other draft. A draft written before
-    short posts, or a key stored as null, reads as none."""
+    write it belongs to (``write``, the drafts' ``group``), and ``way`` (``open``: the person
+    posts it in the site; ``direct``: Kranto posts it after their yes). None of them for any
+    other draft. A draft written before short posts, or a key stored as null, reads as none."""
     if d["cub"] != SOCIAL:
         return {}
     from ..core import sites

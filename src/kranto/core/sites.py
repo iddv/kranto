@@ -3,8 +3,8 @@
 A post reaches a site in one of two ways, and never in a third:
 
 - **Open** (``open``): the site's own composer opens in the person's browser with the draft
-  filled in, and they post it there themselves. Kranto sends nothing. Offered first wherever a site has
-  one, even where Kranto could post directly.
+  filled in, and they post it there themselves. Kranto sends nothing. Offered first wherever a
+  site has one, even where Kranto could post directly.
 - **Post directly** (``direct``): Kranto posts the draft through the site's API, after the
   person's yes in the confirm dialog, with their own connection. Switched on per site in
   Settings › Posting; off until they do.
