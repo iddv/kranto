@@ -112,7 +112,8 @@ def _rt(store, tmp_path):
 
 
 def _material(link="https://ex.com/source"):
-    return social.Material(title="Battery swap ledger", facts="[1] ex.com: kiosks lose track",
+    return social.Material(title="Battery swap ledger\nA phone page per kiosk.\nThe thesis.",
+                           facts="[1] ex.com: kiosks lose track",
                            link=link, link_to="source",
                            card={"url": link, "title": "Battery swap ledger", "description": ""},
                            because={"ideas": [7]})

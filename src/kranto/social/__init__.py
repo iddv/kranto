@@ -80,6 +80,13 @@ class Material:
     card: dict[str, Any] | None = None
     because: dict[str, Any] = field(default_factory=dict)
     blog_draft: int | None = None
+    headline: str = ""             # what Post's row says: the post's or the card's title alone
+
+
+def headline_of(m: Material) -> str:
+    """The write's title for Post's row: ``headline``, else the material's first line."""
+    first = (m.title or "").strip().splitlines()
+    return (m.headline or (first[0] if first else "")).strip()[:200]
 
 
 def blog_target(store) -> dict[str, Any] | None:
@@ -107,7 +114,7 @@ def from_blog(store, draft: dict[str, Any], because: dict[str, Any]) -> Material
                                     body[:6000]) if x)
     return Material(title=title, facts=facts, link=link, link_to="post",
                     card={"url": link, "title": title, "description": excerpt} if link else None,
-                    because=because, blog_draft=int(draft["id"]))
+                    because=because, blog_draft=int(draft["id"]), headline=title)
 
 
 def from_sources(material: dict[str, str], best: str | None, because: dict[str, Any],
@@ -116,7 +123,7 @@ def from_sources(material: dict[str, str], best: str | None, because: dict[str, 
     return Material(title=material["title"], facts=material["facts"], link=best,
                     link_to="source",
                     card={"url": best, "title": card_title[:300], "description": ""}
-                    if best else None, because=because)
+                    if best else None, because=because, headline=card_title)
 
 
 def _parts(reply: dict) -> list[str]:
@@ -251,7 +258,7 @@ def file_variant(store, choice: sites_mod.Choice, v: dict[str, Any], m: Material
     parts = v["parts"]
     text = parts[0]
     content: dict[str, Any] = {
-        "site": site.id, "group": group, "about": about, "about_title": m.title[:200],
+        "site": site.id, "group": group, "about": about, "about_title": headline_of(m),
         "parts": [{"text": p} for p in parts], "text": text, "link": m.link,
         "link_to": m.link_to, "extras": v["extras"], "prose": v["prose"],
         "language": language, "blog_draft": m.blog_draft}

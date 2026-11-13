@@ -248,7 +248,10 @@ def _short_row(d: dict[str, Any], t: dict[str, Any] | None) -> dict[str, Any]:
     return {"site": site, "site_word": sites.name_of(site),
             "write": c.get("group") if isinstance(c.get("group"), str) else None,
             "way": "open" if kind in (None, "post.open") else "direct",
-            "title": str(c.get("about_title") or "") or title_of(c)}
+            # the write's title alone (a draft written before it was kept apart from the
+            # material held the card's one-liner and thesis on later lines)
+            "title": (str(c.get("about_title") or "").strip().splitlines() or [""])[0]
+            or title_of(c)}
 
 
 def post_read(rt, jobs=None) -> dict[str, Any]:

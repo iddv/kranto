@@ -463,6 +463,19 @@ SITE = re.compile(os.environ.get("KRANTO_ACCEPT_SITE", r"example\.?com"), re.I)
 HREFS = "() => [...document.querySelectorAll('a')].map((a) => a.getAttribute('href') || '')"
 
 
+# Settings' page links and the crumbs, as SOC-7 leaves them out: (words, controls)
+SETTINGS_CHROME = r"""(root) => {
+  const el = document.querySelector(root) || document.body;
+  const names = new Set(['Home', 'Settings', '?', 'Overview', 'Watching', 'Posting', 'Assistant',
+    'Spend', 'Privacy & access', 'System', 'Appearance']);
+  const ctl = [...el.querySelectorAll('a[href], button')].filter((e) =>
+    e.getClientRects().length > 0 && names.has((e.textContent || '').trim()));
+  const words = ctl.map((e) => (e.textContent || '').split(/\s+/).filter((w) => /\w/.test(w))
+    .length).reduce((a, b) => a + b, 0);
+  return { words, controls: ctl.length };
+}"""
+
+
 def social_lines(p: Preview) -> list[Result]:
     """SOCIAL's lines (short posts for the sites people use), as the owner's note of 13 November
     changes them: two ways only (Open, or post directly after a yes), Open first, Substack and
@@ -489,10 +502,16 @@ def social_lines(p: Preview) -> list[Result]:
     p.go(pg, "#/settings/posting")
     words += _text(pg, "#app")
     c = pg.evaluate(COUNT, _root(pg))
+    # the page's own content: the crumbs and Settings' eight page links (the same on every
+    # Settings page, counted by COUNT settings) are left out of SOC-7's budget
+    chrome = pg.evaluate(SETTINGS_CHROME, _root(pg))
+    own = {**c, "words": c["words"] - chrome["words"],
+           "controls": c["controls"] - chrome["controls"]}
     ticked = sum(1 for s in offered if s.get("ticked"))
     out.append(ok("SOC-7", f"Settings › Posting fits: 80 words or fewer, 7 controls or fewer "
-                  f"({ticked} sites ticked on this copy)", c["words"] <= 80 and c["controls"] <= 7,
-                  _counted(c), count=c))
+                  f"({ticked} sites ticked on this copy; Settings' own links left out)",
+                  own["words"] <= 80 and own["controls"] <= 7, _counted(own), count=c,
+                  chrome=chrome))
     add = pg.query_selector("#posting-add")
     sheet = ""
     if add:
