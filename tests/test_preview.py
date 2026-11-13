@@ -431,15 +431,35 @@ def test_6_serve_elsewhere_is_unchanged(user_home, monkeypatch):
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "preview" / "kranto-preview"
 ONE_LINE = (f"ssh -t -L 8766:127.0.0.1:8766 {socket.gethostname().split('.')[0]} "
-            "'~/kranto-preview/bin/kranto-preview open; exec $SHELL -l'")
+            "'~/bp/bin/kranto-preview open; exec $SHELL -l'")     # its folder, under ~
 
 
 def test_the_build_installs_kranto_with_its_mcp_extra():
     """ 18: kranto mcp on the preview said "install the MCP extra" (the operator added it by
-    hand for the outside test): the build installs kranto[mcp] and stops if mcp is missing."""
+    hand for the outside test): the build installs the one wheel with its mcp extra and stops if
+    mcp is missing."""
     src = SCRIPT.read_text()
-    assert '"kranto[mcp] @ file://$meta"' in src and '--find-links "$ROOT/dist"' in src
+    assert '"kranto[mcp,connections,notify] @ file://$whl"' in src
     assert "import mcp" in src
+
+
+def test_the_preview_is_built_from_one_clone():
+    src = SCRIPT.read_text()
+    assert 'URL="${KRANTO_PREVIEW_URL:-https://github.com/iddv/kranto}"' in src
+    assert 'BRANCH="${KRANTO_PREVIEW_BRANCH:-main}"' in src
+
+
+def test_through_a_link_in_an_older_previews_folder_it_keeps_that_folder(tmp_path):
+    import os
+    import subprocess
+    old = tmp_path / "older-preview"
+    (old / "home").mkdir(parents=True)
+    (old / "bin").mkdir()
+    os.symlink(SCRIPT, old / "bin" / "older-preview")
+    p = subprocess.run(["bash", str(old / "bin" / "older-preview"), "open"], capture_output=True,
+                       text=True, timeout=60, check=False,
+                       env={"HOME": str(tmp_path), "PATH": "/usr/bin:/bin"})
+    assert "'~/older-preview/bin/older-preview open; exec $SHELL -l'" in p.stdout
 
 
 def _library(home: Path) -> Path:
@@ -496,8 +516,8 @@ def _run(*args: str, root: Path) -> tuple[int, str, str]:
 
 def test_help_and_opens_first_line_carry_the_one_line_for_the_owners_pc(tmp_path):
     code, out, _ = _run("help", root=tmp_path)
-    assert code == 0 and ONE_LINE.replace(ONE_LINE.split()[4], "<this machine>") in out \
-        and "away [days]" in out
+    assert code == 0 and "away [days]" in out
+    assert "<this machine> '~/kranto-preview/bin/kranto-preview open; exec $SHELL -l'" in out
     _, out, _ = _run("open", root=tmp_path)        # not running here: it still says the line first
     assert out.splitlines()[0] == f"From your own PC, run this one line: {ONE_LINE}"
 

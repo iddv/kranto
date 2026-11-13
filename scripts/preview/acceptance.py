@@ -30,9 +30,14 @@ import subprocess
 import sys
 import time
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any
 
-PREVIEW = os.path.expanduser("~/kranto-preview/bin/kranto-preview")
+# the preview's folder (KRANTO_PREVIEW_ROOT, else ~/kranto-preview) and its command, the one in its
+# bin/ (an older preview's folder keeps its own name for both)
+ROOT = os.path.expanduser(os.environ.get("KRANTO_PREVIEW_ROOT") or "~/kranto-preview")
+PREVIEW = next((str(c) for c in sorted(Path(ROOT, "bin").glob("*")) if os.access(c, os.X_OK)),
+               os.path.join(ROOT, "bin", "kranto-preview"))
 LAYOUTS = [("new-light", 1400, 900, "light"), ("new-dark", 1400, 900, "dark"),
            ("phone-light", 390, 844, "light"), ("phone-dark", 390, 844, "dark")]
 NEW, PHONE = LAYOUTS[0], LAYOUTS[2]
@@ -210,14 +215,12 @@ def prev_lines(p: Preview) -> list[Result]:
     out.append(skip("PREV-3", "live says what it said; no file of live's is newer",
                     "a listing on the machine, not a page"))
     commits = pv.get("commits") or {}
-    out.append(ok("PREV-4", "kranto-preview status names the two oss commits",
-                  bool(commits.get("kranto")) and bool(commits.get("kranto.page")),
-                  f"the server {str(commits.get('kranto'))[:12]}, "
-                  f"the page {str(commits.get('kranto.page'))[:12]}"))
+    out.append(ok("PREV-4", "kranto-preview status names the commit it runs",
+                  bool(commits.get("kranto")), f"kranto {str(commits.get('kranto'))[:12]}"))
     return out
 
 
-PREVIEW_PY = os.path.expanduser("~/kranto-preview/venv/bin/python")
+PREVIEW_PY = os.path.join(ROOT, "venv", "bin", "python")
 
 
 def _prose_check(text: str, site: str) -> dict[str, Any] | None:
@@ -569,7 +572,7 @@ def tfix_fresh(p: Preview) -> list[Result]:
 
 # -- the archive, the retired settings, the words, the tables ------------------
 
-ROOT_PREVIEW = os.path.expanduser("~/kranto-preview")
+ROOT_PREVIEW = ROOT
 ARCH_WORDS = re.compile(r"\b(broker(?:s|age)?|invest|radar|(?:browser )?extension|IBKR)\b", re.I)
 GONE_KINDS = ("broker.", "browser.", "f.invest.", "f.radar.")
 # the counts on live's copy of 11 November (the design's acceptance line 1)
@@ -626,6 +629,17 @@ def _retired_tables(db: str) -> dict[str, int]:
         con.close()
 
 
+def _library(data: Path) -> Path:
+    """the copy's library: its name from before the rename too (kranto.legacy, from this
+    checkout's source)"""
+    src = str(Path(__file__).resolve().parents[2] / "src")
+    if src not in sys.path:
+        sys.path.append(src)          # after an installed kranto, which has the same module
+    from kranto import legacy
+
+    return legacy.db_file(data)
+
+
 def arch_lines(p: Preview, before: str | None) -> list[Result]:
     """the four lines: the archive's counts equal the databases', doctor's one line about
     Invest, no broker, Invest, radar or extension where a person or an assistant reads, and
@@ -633,7 +647,7 @@ def arch_lines(p: Preview, before: str | None) -> list[Result]:
     import tempfile
 
     out: list[Result] = []
-    db = os.path.join(ROOT_PREVIEW, "home", "data", "kranto.db")
+    db = str(_library(Path(ROOT_PREVIEW, "home", "data")))
     loop_db = os.path.join(ROOT_PREVIEW, "loop", "loop.db")
     with tempfile.TemporaryDirectory() as tmp:  # never in the copy's own home
         got = _kranto("archive", "--out", tmp, "--json")
@@ -834,7 +848,6 @@ def arch_words(p: Preview) -> list[Result]:
 
 # -- CUT: the lab and the factory leave (CUT; the rewording of line 2) ----------
 
-ROOT = os.path.expanduser("~/kranto-preview")
 KRANTO = os.path.join(ROOT, "venv", "bin", "kranto")
 CUT_PAGES = ["#/home", "#/news", "#/ideas", "#/watch", "#/post", "#/settings"]
 # the page server's factory routes: 404 since C2 (the page reads the server for everything else)
@@ -870,13 +883,16 @@ DOCTOR_CONSOLE = re.compile(r"^\s*ok\s+console\s+ready\b")
 
 
 def _doctor() -> tuple[int, str]:
-    """``kranto doctor`` on the preview's home (it reads; it writes nothing)."""
+    """``kranto doctor`` on the preview's home (it reads; it writes nothing), about the preview's
+    own unit (named after its command), never another Kranto's service on this machine."""
+    unit = os.path.basename(PREVIEW) + ".service"
     got = subprocess.run(
         [KRANTO, "--home", os.path.join(ROOT, "home"), "doctor"],
         capture_output=True,
         text=True,
         timeout=120,
         check=False,
+        env={**os.environ, "KRANTO_UNIT": unit, "KRANTO_TOKENS_DIR": os.path.join(ROOT, "tokens")},
     )
     return got.returncode, got.stdout + got.stderr
 

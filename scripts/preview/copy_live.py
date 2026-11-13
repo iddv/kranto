@@ -36,12 +36,17 @@ from pathlib import Path
 
 import yaml
 
+# the names of a home made before the rename (kranto.legacy), from this checkout's source
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+from kranto import legacy, product  # noqa: E402
+
 HOME_EXCLUDES = [".env", "data/secrets", "backups/", "update/", "telemetry/", "*.lock",
-                 "data/*.db", "data/*.db-*", "data/update.json", "kranto.yaml.bak*",
-                 "kranto.yaml.bak*", "tasks/", "*.jsonl"]
+                 "data/*.db", "data/*.db-*", "data/update.json",
+                 *(f"{n}.bak*" for n in (product.HOME_FILE, *legacy.HOME_FILES)),
+                 "tasks/", "*.jsonl"]
 LOOP_EXCLUDES = ["term/", "chat/", "inbox/", "trace.db", "trace.db-*", "*.lock", "daemon.pid",
                  "daemon.log", "loop.db", "loop.db-*", ".env"]
-DATABASES = {"home": ["data/kranto.db"], "loop": ["loop.db"]}
+DATABASES = {"home": [f"data/{product.DB_FILE}", f"data/{legacy.DB_FILE}"], "loop": ["loop.db"]}
 
 
 def rsync(src: Path, dst: Path, excludes: list[str]) -> None:
@@ -111,17 +116,15 @@ def live_named(text: str, user_home: Path, sources: list[Path]) -> list[str]:
 
 
 def config_of(home: Path) -> Path | None:
-    for name in ("kranto.yaml", "kranto.yaml"):
-        if (home / name).is_file():
-            return home / name
-    return None
+    found = legacy.home_file(home)
+    return found if found.is_file() else None
 
 
 def settle_home(home: Path, *, port: int, root: Path, swaps, copied_at: str,
                 commits: dict | None, fresh: bool) -> Path:
     cfg = config_of(home)
     if cfg is None:
-        raise SystemExit(f"copy: no kranto.yaml or kranto.yaml in {home}")
+        raise SystemExit(f"copy: no settings file in {home}")
     data = yaml.safe_load(cfg.read_text()) or {}
     data = rewrite(data, swaps)
     n = data.setdefault("notify", {})

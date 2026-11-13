@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# kranto-preview: a second kranto built from the `oss` branch, serving a copy of your data on
+# kranto-preview: a second Kranto built from a branch of the repository (main), serving a copy of your data on
 # 127.0.0.1:8766, that cannot send (docs/preview.md).
 #
 #   kranto-preview up             make ~/kranto-preview if absent, build, copy, start, wait
@@ -25,19 +25,23 @@ set -euo pipefail
 PATH="$HOME/.local/bin:$PATH"
 export PATH
 
-ROOT="${KRANTO_PREVIEW_ROOT:-$HOME/kranto-preview}"
+# Run through its link in an existing preview's folder (<root>/bin/<name>), it keeps that folder
+# and names its unit after the link; else ~/kranto-preview and the unit kranto-preview.
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ "$(basename "$SELF_DIR")" = bin ] && [ -d "$SELF_DIR/../home" ]; then
+  DEFAULT_ROOT="$(dirname "$SELF_DIR")"; DEFAULT_UNIT="$(basename "${BASH_SOURCE[0]}")"
+else
+  DEFAULT_ROOT="$HOME/kranto-preview"; DEFAULT_UNIT=kranto-preview
+fi
+ROOT="${KRANTO_PREVIEW_ROOT:-$DEFAULT_ROOT}"
 PORT="${KRANTO_PREVIEW_PORT:-8766}"
 FRESH_PORT="${KRANTO_PREVIEW_FRESH_PORT:-8767}"
-BRANCH="${KRANTO_PREVIEW_BRANCH:-oss}"
-AFK_BRANCH="${KRANTO_PREVIEW_AFK_BRANCH:-$BRANCH}"   # a track tries its own branch before merging
-BRB_BRANCH="${KRANTO_PREVIEW_BRB_BRANCH:-$BRANCH}"
-SRC_HOME="${KRANTO_PREVIEW_SRC_HOME:-$HOME/kranto-kb}"
-SRC_LOOP="${KRANTO_PREVIEW_SRC_LOOP:-$HOME/kranto-loop}"
-AFK_URL="${KRANTO_PREVIEW_AFK_URL:-https://github.com/iddv/kranto}"
-BRB_URL="${KRANTO_PREVIEW_BRB_URL:-https://github.com/iddv/kranto}"
+BRANCH="${KRANTO_PREVIEW_BRANCH:-main}"            # a track tries its own branch before merging
+URL="${KRANTO_PREVIEW_URL:-https://github.com/iddv/kranto}"
 CAP="${KRANTO_PREVIEW_MEMORY:-3G}"
-UNIT=kranto-preview
-FRESH_UNIT=kranto-preview-fresh
+UNIT="${KRANTO_PREVIEW_UNIT:-$DEFAULT_UNIT}"
+FRESH_UNIT="$UNIT-fresh"
+SRC="$ROOT/src/kranto"
 VENV="$ROOT/venv"
 KRANTO="$VENV/bin/kranto"
 STATE="$ROOT/state.json"
@@ -89,40 +93,44 @@ clone() {  # dir url branch
 
 version() {  # the last version tag on the branch, with the branch and the commit as a local part
   local tag base
-  tag=$(git -C "$ROOT/src/kranto" tag --merged HEAD --list 'v[0-9]*' --sort=-v:refname | head -n 1)
+  tag=$(git -C "$SRC" tag --merged HEAD --list 'v[0-9]*' --sort=-v:refname | head -n 1)
   base=$(python3 -I -c 'import re,sys
 t=sys.argv[1].lstrip("v")
 m=re.fullmatch(r"(\d+\.\d+\.\d+)(?:-?(dev|rc)\.?(\d+))?", t)
 print("0.0.0" if not m else m.group(1)+(("."+m.group(2)+m.group(3)) if m.group(2)=="dev" else (m.group(2)+m.group(3)) if m.group(2) else ""))' "${tag:-v0.0.0}")
-  printf '%s+%s.%s' "$base" "$BRANCH" "$(git -C "$ROOT/src/kranto" rev-parse --short=7 HEAD)"
+  printf '%s+%s.%s' "$base" "${BRANCH//[^A-Za-z0-9]/.}" "$(git -C "$SRC" rev-parse --short=7 HEAD)"
 }
 
 build() {
   mkdir -p "$ROOT/src"
-  clone "$ROOT/src/kranto" "$AFK_URL" "$AFK_BRANCH"
-  clone "$ROOT/src/kranto.page" "$BRB_URL" "$BRB_BRANCH"
+  clone "$SRC" "$URL" "$BRANCH"
   local v tag
   v=$(version); tag="v$v"
-  say "build $v (kranto $(git -C "$ROOT/src/kranto" rev-parse --short HEAD), kranto.page $(git -C "$ROOT/src/kranto.page" rev-parse --short HEAD))"
-  # build.sh tags both clones; these are the preview's own clones and the tags go again at once
-  VERSION="$v" TAG="$tag" AFK_DIR="$ROOT/src/kranto" BRB_DIR="$ROOT/src/kranto.page" \
-    DIST="$ROOT/dist" systemd-run --user --scope -q -p MemoryMax="$CAP" -- \
-    bash "$ROOT/src/kranto/scripts/release/build.sh" > "$ROOT/build.log" 2>&1 \
+  say "build $v (kranto $(git -C "$SRC" rev-parse --short HEAD))"
+  # build.sh tags the clone; this is the preview's own clone and the tag goes again at once
+  VERSION="$v" TAG="$tag" SRC="$SRC" DIST="$ROOT/dist" \
+    systemd-run --user --scope -q -p MemoryMax="$CAP" -- \
+    bash "$SRC/scripts/release/build.sh" > "$ROOT/build.log" 2>&1 \
     || { tail -n 30 "$ROOT/build.log" >&2; untag "$tag"; die "the build failed (see $ROOT/build.log)"; }
   untag "$tag"
   [ -x "$VENV/bin/python" ] || uv venv -q --python 3.12 "$VENV"
-  # kranto with its mcp extra (18: kranto mcp on the preview said "install the MCP extra");
-  # the extra's kranto.page[mcp] pin is this build's own wheel, found beside it
-  local meta
-  meta=$(ls "$ROOT"/dist/kranto-*.whl | head -n 1)
-  uv pip install -q --python "$VENV/bin/python" --reinstall --find-links "$ROOT/dist" \
-    "$ROOT"/dist/kranto-*.whl "$ROOT"/dist/kranto.page-*.whl "kranto[mcp] @ file://$meta"
+  # a preview built before the rename: its three distributions leave first (the one wheel ships
+  # bears_cub and the old command too, and an old one's uninstall would take them along later)
+  local old
+  old=$(python3 -I -c 'import sys; sys.path.insert(0, sys.argv[1]); from kranto import legacy
+print(" ".join(legacy.DISTS))' "$SRC/src")
+  # shellcheck disable=SC2086
+  uv pip uninstall -q --python "$VENV/bin/python" $old 2>/dev/null || true
+  # the one wheel with its mcp extra (kranto mcp on the preview needs it)
+  local whl
+  whl=$(ls "$ROOT"/dist/kranto-*.whl | head -n 1)
+  uv pip install -q --python "$VENV/bin/python" --reinstall "kranto[mcp,connections,notify] @ file://$whl"
   "$VENV/bin/python" -I -c 'import mcp' 2>/dev/null || die "the build has no MCP extra: kranto mcp would not start"
   "$KRANTO" --version
   has_switch
-  # ~/kranto-preview/bin/kranto-preview: this command as the branch now has it
-  local me="$ROOT/src/kranto/scripts/preview/kranto-preview"
-  if [ -f "$me" ]; then mkdir -p "$ROOT/bin"; ln -sfn "$me" "$ROOT/bin/kranto-preview"; fi
+  # <root>/bin/<unit>: this command as the branch now has it
+  local me="$SRC/scripts/preview/kranto-preview"
+  if [ -f "$me" ]; then mkdir -p "$ROOT/bin"; ln -sfn "$me" "$ROOT/bin/$UNIT"; fi
 }
 
 has_switch() {  # a build without the preview switch would send: it never starts as the preview
@@ -130,17 +138,19 @@ has_switch() {  # a build without the preview switch would send: it never starts
     || die "this build has no preview switch (kranto.preview): it would not stop sending; not started"
 }
 
-untag() { git -C "$ROOT/src/kranto" tag -d "$1" >/dev/null 2>&1 || true
-          git -C "$ROOT/src/kranto.page" tag -d "$1" >/dev/null 2>&1 || true; }
+untag() { git -C "$SRC" tag -d "$1" >/dev/null 2>&1 || true; }
 
-commits_json() {
-  printf '{"kranto": "%s", "kranto.page": "%s"}' \
-    "$(git -C "$ROOT/src/kranto" rev-parse HEAD)" "$(git -C "$ROOT/src/kranto.page" rev-parse HEAD)"
-}
+commits_json() { printf '{"kranto": "%s"}' "$(git -C "$SRC" rev-parse HEAD)"; }
+
+# an install made before the rename keeps its folders' names (kranto.legacy has them)
+legacy_name() { "$VENV/bin/python" -I -c "from kranto import legacy; print(legacy.$1)"; }
 
 # -- the data -----------------------------------------------------------------------------------
 
 copy_data() {
+  local SRC_HOME SRC_LOOP
+  SRC_HOME="${KRANTO_PREVIEW_SRC_HOME:-$HOME/$(legacy_name WORKSPACE | sed 's#^~/##')}"
+  SRC_LOOP="${KRANTO_PREVIEW_SRC_LOOP:-$HOME/$(legacy_name LOOP_HOME | sed 's#^~/##')}"
   [ -d "$SRC_HOME" ] || die "no live home at $SRC_HOME"
   say "copy $SRC_HOME and $SRC_LOOP into $ROOT (read-only on live)"
   python3 -I "$HERE/copy_live.py" --src-home "$SRC_HOME" --src-loop "$SRC_LOOP" --root "$ROOT" \
@@ -150,7 +160,8 @@ copy_data() {
 
 stamp_commits() {  # the copy's switch names the commits it now runs (kranto-preview status, the bar)
   local cfg
-  for cfg in "$1/kranto.yaml" "$1/kranto.yaml"; do [ -f "$cfg" ] && break; done
+  cfg=$("$VENV/bin/python" -I -c 'import sys; from pathlib import Path; from kranto import legacy
+print(legacy.home_file(Path(sys.argv[1])))' "$1")
   python3 -I - "$cfg" "$(commits_json)" <<'PY'
 import json, sys, yaml
 path, commits = sys.argv[1], json.loads(sys.argv[2])
@@ -199,7 +210,7 @@ stop_unit() {
 
 check_routes() {  # the new commits answer, and the routes resolve
   local want got
-  want=$(git -C "$ROOT/src/kranto" rev-parse HEAD)
+  want=$(git -C "$SRC" rev-parse HEAD)
   got=$(api "$PORT" /api/status | python3 -I -c 'import json,sys; d=json.load(sys.stdin); print(((d.get("preview") or {}).get("commits") or {}).get("kranto",""))')
   [ "$got" = "$want" ] || die "the preview answers with kranto $got, not $want"
   local try
@@ -238,7 +249,7 @@ cmd_refresh() {
   stop_unit "$UNIT"
   start_unit "$UNIT" "$ROOT/home" "$ROOT/loop" "$PORT" "$(state_get jobs || true)"
   check_routes
-  say "preview at $(git -C "$ROOT/src/kranto" rev-parse --short HEAD), $(git -C "$ROOT/src/kranto.page" rev-parse --short HEAD)"
+  say "preview at $(git -C "$SRC" rev-parse --short HEAD)"
 }
 
 cmd_refresh_data() {
@@ -253,8 +264,10 @@ cmd_refresh_data() {
 }
 
 one_line() {  # the one command to run on the owner's own PC (this machine's name, or KRANTO_PREVIEW_SSH)
-  printf "ssh -t -L %s:127.0.0.1:%s %s '~/kranto-preview/bin/kranto-preview open; exec \$SHELL -l'" \
-    "$PORT" "$PORT" "${KRANTO_PREVIEW_SSH:-$(hostname -s)}"
+  local here="$ROOT"
+  [[ $ROOT == "$HOME"/* ]] && here="~${ROOT#"$HOME"}"
+  printf "ssh -t -L %s:127.0.0.1:%s %s '%s/bin/%s open; exec \$SHELL -l'" \
+    "$PORT" "$PORT" "${KRANTO_PREVIEW_SSH:-$(hostname -s)}" "$here" "$UNIT"   # build links bin/<unit>
 }
 
 cmd_open() {
@@ -282,13 +295,13 @@ cmd_status() {
     python3 -I -c 'import json,sys
 d=json.loads(sys.argv[1]); p=d.get("preview") or {}; c=p.get("commits") or {}
 print("preview   http://127.0.0.1:%s  kranto %s" % (sys.argv[2], d.get("version")))
-print("oss       kranto %s, kranto.page %s" % ((c.get("kranto") or "?")[:12], (c.get("kranto.page") or "?")[:12]))
+print("built     kranto %s" % ((c.get("kranto") or "?")[:12]))
 print("data      copied from live at %s" % (p.get("copied_at") or "?"))
 print("bar       %s" % (p.get("line") or "NOT A PREVIEW: the switch is off"))
 print("jobs      %s" % ("on (the scheduler reads and spends)" if d.get("scheduler") else "off (a still copy)"))' "$st" "$PORT"
   else
     say "preview   not answering on 127.0.0.1:$PORT ($(systemctl --user is-active $UNIT.service 2>/dev/null || true))"
-    [ -d "$ROOT/src/kranto" ] && say "oss       kranto $(git -C "$ROOT/src/kranto" rev-parse --short=12 HEAD), kranto.page $(git -C "$ROOT/src/kranto.page" rev-parse --short=12 HEAD) (built)"
+    [ -d "$SRC" ] && say "built     kranto $(git -C "$SRC" rev-parse --short=12 HEAD)"
     say "data      copied from live at $(state_get data_copied_at)"
   fi
   say "unit      $UNIT.service: $(systemctl --user is-active $UNIT.service 2>/dev/null || true), MemoryMax=$CAP"
@@ -309,8 +322,8 @@ cmd_fresh() {
   [ -x "$KRANTO" ] || die "not built yet: kranto-preview up"
   stop_unit "$FRESH_UNIT"
   rm -rf "$ROOT/fresh"; mkdir -p "$ROOT/fresh"
-  "$VENV/bin/python" -I -c 'import sys; from pathlib import Path; from kranto import kranto
-kranto.make_home(Path(sys.argv[1]), int(sys.argv[2]), Path.home())' "$ROOT/fresh/home" "$FRESH_PORT"
+  "$VENV/bin/python" -I -c 'import sys; from pathlib import Path; from kranto import launcher
+launcher.make_home(Path(sys.argv[1]), int(sys.argv[2]), Path.home())' "$ROOT/fresh/home" "$FRESH_PORT"
   python3 -I "$HERE/copy_live.py" --fresh --root "$ROOT/fresh" --port "$FRESH_PORT" --commits "$(commits_json)"
   start_unit "$FRESH_UNIT" "$ROOT/fresh/home" "$ROOT/fresh/loop" "$FRESH_PORT" off
   say "fresh at http://127.0.0.1:$FRESH_PORT: ssh -L $FRESH_PORT:127.0.0.1:$FRESH_PORT ${KRANTO_PREVIEW_SSH:-$(hostname -s)}, then:"
