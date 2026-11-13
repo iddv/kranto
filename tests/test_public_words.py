@@ -84,15 +84,8 @@ def problems(rel: str, screen: str) -> list[str]:
     return found
 
 
-# The README's first screen still describes builds, a feature that left (docs/archive.md); it
-# is being rewritten. Strict: once it passes, this mark must go.
-README_PENDING = pytest.mark.xfail(
-    reason="the README's first screen still describes builds", strict=True
-)
-
-
 def _pages() -> list:
-    pages = [pytest.param("README.md", True, id="README.md", marks=README_PENDING)]
+    pages = [pytest.param("README.md", True, id="README.md")]
     for p in sorted((ROOT / "docs").glob("*.md")):
         rel = p.relative_to(ROOT).as_posix()
         if rel not in SKIP:

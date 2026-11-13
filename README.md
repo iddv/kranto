@@ -7,7 +7,7 @@
 drafts the post about it for you to approve.**
 
 It runs on your own Linux machine as one page in your browser. It needs one model key and costs
-cents a day. Nothing is sent until you press Send.
+cents a day. Nothing is sent until you click Send.
 
 ```
 gh release download -R iddv/kranto -p 'kranto-*.whl'
@@ -35,9 +35,10 @@ read every item (use a feed reader) or schedule posts across many networks (use 
 - **Ideas.** Once about 30 items are kept, Kranto writes idea cards: what the news suggests,
   linked to the items it came from.
 - **Post.** On any card or brief, ask for a draft: a blog post or a short post. You read it, edit
-  it, and press Send, or copy the text when no account is connected.
-- **The console.** Your own Claude Code in a panel beside every page, in a sandbox, working on the
-  same library under the same rules. Optional: Kranto works without it.
+  it, and click Send, or copy the text when no account is connected.
+- **The console.** Your own Claude Code in a panel beside every page, working on the same
+  library through the same tools. It runs as you, not in a sandbox
+  ([docs/threat-model.md](docs/threat-model.md)). Optional: Kranto works without it.
 
 ## What it costs, and how long it takes
 
@@ -58,8 +59,7 @@ Measured, each with what limits it:
   as an explicit choice, your Claude Code login (it uses your Claude plan's usage, shared with
   your own Claude Code; Anthropic's terms describe subscription login as meant for ordinary,
   individual use).
-- **For the console:** the [Claude Code](https://claude.com/claude-code) CLI signed in, and
-  bubblewrap (`sudo apt install bubblewrap`) for its sandbox.
+- **For the console:** the [Claude Code](https://claude.com/claude-code) CLI, signed in.
 - Kranto is not published on PyPI. Install it from a
   [release](https://github.com/iddv/kranto/releases); a package of the same name elsewhere is not
   this project.
