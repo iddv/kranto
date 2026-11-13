@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
-# Install the three wheels the way an owner does, into a throwaway tool dir, and start them.
+# Install a release's wheels the way an install does, into a throwaway tool dir, and start it.
 #
-#   VERSION=0.2.0 DIST=... WORK=... [PORT=8799] smoke.sh [setup]
+#   VERSION=0.2.0 DIST=... WORK=... [PORT=8799] [SHAPE=final|compat] smoke.sh [setup]
+#
+# SHAPE=final (the default): the one wheel, as install.sh and the update helper install it
+# (uv tool install "kranto[connections,notify,mcp] @ file://...whl"). SHAPE=compat: the three
+# wheels of the crossing, the way the update helper of an install made before the rename installs
+# them (the meta-package with --with each of the other two, under the old tool's name); both
+# commands, the product's and its old name, must answer VERSION.
 #
 # setup: instead of 'kranto up', the non-interactive wizard on a bare HOME
 # (WORK/setup/home, PATH = the tool's bin and /usr/bin:/bin only): 'kranto setup --yes
@@ -10,7 +16,7 @@
 # but the pieces a bare machine lacks (claude, gh, the model key), SIGTERM stops the wizard and
 # its server, a second run writes nothing, and nothing listens on PORT at the end.
 #
-# Checks: 'kranto --version' names VERSION three times; the build policy's prompts are in the
+# Checks: 'kranto --version' names VERSION; the build policy's prompts are in the
 # installed the page; 'kranto up --foreground' on a new home in WORK answers /api/status with
 # version VERSION and mounts the builds UI (/brb/api/header 200) within 60 s, and /brb/ links
 # and serves the web UI's built module from the wheel. The server is
@@ -20,26 +26,42 @@
 set -euo pipefail
 
 : "${VERSION:?}" "${DIST:?}" "${WORK:?}"
-PORT="${PORT:-8799}"
+PORT="${PORT:-8799}" SHAPE="${SHAPE:-final}"
 mkdir -p "$WORK"
 export UV_TOOL_DIR="$WORK/tools" UV_TOOL_BIN_DIR="$WORK/bin"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+DIST_NAME="$(python3 "$HERE/names.py" dist)"
 
-uv tool install --force --python 3.12 --with-executables-from kranto,kranto.page \
-  --with "$DIST/kranto-$VERSION-py3-none-any.whl" \
-  --with "$DIST/kranto.page-$VERSION-py3-none-any.whl" \
-  "$DIST/kranto-$VERSION-py3-none-any.whl"
+case "$SHAPE" in
+  final)
+    TOOL="$DIST_NAME"
+    uv tool install --force --python 3.12 \
+      "$DIST_NAME[connections,notify,mcp] @ file://$DIST/$DIST_NAME-$VERSION-py3-none-any.whl" ;;
+  compat)
+    mapfile -t compat < <(python3 "$HERE/names.py" compat)     # meta, server, page
+    TOOL="${compat[0]}"
+    uv tool install --force --python 3.12 --with-executables-from "${compat[1]},${compat[2]}" \
+      --with "$DIST/${compat[1]}-$VERSION-py3-none-any.whl" \
+      --with "$DIST/${compat[2]}-$VERSION-py3-none-any.whl" \
+      "${compat[0]}[mcp] @ file://$DIST/${compat[0]}-$VERSION-py3-none-any.whl" ;;
+  *) echo "smoke: SHAPE is final or compat, not '$SHAPE'" >&2; exit 2 ;;
+esac
+TOOL_PY="$WORK/tools/$TOOL/bin/python"
 
-want="kranto $VERSION (kranto $VERSION, kranto.page $VERSION)"
-got="$("$WORK/bin/kranto" --version)"
-if [ "$got" != "$want" ]; then
-  echo "smoke: kranto --version says '$got', not '$want'" >&2
-  exit 1
-fi
-echo "ok: $got"
+cmds=(kranto)
+[ "$SHAPE" = compat ] && cmds+=("$(python3 "$HERE/names.py" alias)")
+for c in "${cmds[@]}"; do
+  got="$("$WORK/bin/$c" --version)"
+  if [ "$got" != "kranto $VERSION" ]; then
+    echo "smoke: $c --version says '$got', not 'kranto $VERSION'" >&2
+    exit 1
+  fi
+  echo "ok: $c --version: $got"
+done
 
-# -P: not the current directory first on sys.path (run from a the page checkout, the check
+# -P: not the current directory first on sys.path (run from a checkout, the check
 # would find the checkout's policies instead of the installed wheel's)
-"$WORK/tools/kranto/bin/python" -P - <<'PY'
+"$TOOL_PY" -P - <<'PY'
 from kranto.page import resources
 p = resources.POLICIES / "v5" / "prompts"
 assert p.is_dir(), f"no build policy prompts at {p}"
@@ -176,7 +198,7 @@ if "$WORK/bin/kranto" doctor --help 2>/dev/null | grep -q -- '--routes'; then
   echo "ok: $(head -n 1 "$WORK/routes.log")"
   # ... and on the odd installs (A4; scripts/dev/odd_walk.sh): homes holding every
   # odd value this version's writers store, each served by it on 127.0.0.1:PORT+1
-  if ! ODD_DIR="$WORK/odd" ODD_PY="$WORK/tools/kranto/bin/python" \
+  if ! ODD_DIR="$WORK/odd" ODD_PY="$TOOL_PY" \
       bash "$(dirname "$0")/../dev/odd_walk.sh" "$((PORT + 1))" "$WORK/bin/kranto" \
       > "$WORK/odd.log" 2>&1; then
     echo "smoke: a page answered 500 or did not answer on an odd install" >&2
@@ -189,7 +211,7 @@ fi
 # The web UI's build is in the installed the page wheel: the page links one hashed
 # module at this version's address, and the mount serves it. (A the page from before the web
 # UI has no static.APP_DIR and nothing to check.)
-if [ "$("$WORK/tools/kranto/bin/python" -P -c 'from kranto.page.ui.routes import static; print(hasattr(static, "APP_DIR"))')" != "True" ]; then
+if [ "$("$TOOL_PY" -P -c 'from kranto.page.ui.routes import static; print(hasattr(static, "APP_DIR"))')" != "True" ]; then
   echo "ok: this kranto.page has no web UI build to check"
   exit 0
 fi
