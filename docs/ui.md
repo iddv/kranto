@@ -252,8 +252,8 @@ of a page that left or a name of the builds' routes.
 | Where | What |
 |---|---|
 | `src/kranto/page/ui/` | the web UI (served at `/`) and the page's own small server (`api.py`, `routes/`) |
-| `src/kranto/page/term/` | the console: the real Claude Code in the page, in its own copy of the folder |
-| `src/kranto/page/box/` | the console's sandbox: bubblewrap, the network proxy, the sign-in handoff, the one `claude -p` that only answers |
+| `src/kranto/page/term/` | the console (your own Claude Code or Codex in the page, run as you) and Open in Claude Code's sessions |
+| `src/kranto/page/box/` | Open in Claude Code's sandbox: bubblewrap, the network proxy, the sign-in handoff, the one `claude -p` that only answers |
 | `src/kranto/page/mcp/` | `kranto mcp`, the local MCP server ([mcp.md](mcp.md)) |
 | `src/kranto/page/trace/` | traces: Kranto's own runs and the console's sessions as a tree of spans, live ([traces.md](traces.md)) |
 | `src/kranto/page/settings/` | the page's settings file (`loop.yaml` over the defaults) and its one writer |

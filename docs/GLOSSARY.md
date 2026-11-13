@@ -120,9 +120,9 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
 
 ## Acting and spending
 
-- **Sandbox**: bubblewrap around the console and every cub: the system read-only, your home
-  hidden, the network only through a proxy that reaches public addresses
-  ([threat-model.md](threat-model.md)).
+- **Sandbox**: bubblewrap around every cub and every Open in Claude Code session: the system
+  read-only, your home hidden, the network only through a proxy that reaches public addresses.
+  The console is not in it: it runs as you ([threat-model.md](threat-model.md)).
 - **Action**: one thing Kranto can do (add a topic, approve a source, write a post…), the same
   from the page, the command line, `kranto mcp` or a Claude Code proposal you confirm. Some
   always wait for your click.

@@ -12,15 +12,15 @@ not backported to older releases.
 
 ## What runs where
 
-Kranto is two packages run as one app: the server (this repo: the watcher, the
-web server on 127.0.0.1:8765, the `kranto` launcher and `kranto update`) and
-[the page](https://github.com/iddv/kranto) (the builder, mounted at
-`/brb/`). On the host, as you, run: the server and its scheduler, every fetch
-of a source, the builds' git commands, `gh` calls with your login (repos,
-pushes, issues), the fetching of plugins and MCP servers when you add them,
-and the update helper. Model-written code runs only inside the page's
-bubblewrap sandbox; the page's [SECURITY.md](https://github.com/iddv/kranto/blob/main/SECURITY.md)
-has the table and the sandbox's limits.
+Kranto is one Python package, `kranto`, run as one app: the watcher, the web
+server on 127.0.0.1:8765, the page, the `kranto` command and `kranto update`.
+On the host, as you, run: the server and its scheduler, every fetch of a
+source, `gh` calls with your login when you use them, the fetching of plugins
+and MCP servers when you add them, the update helper, and **the console**
+(your own Claude Code or Codex beside the page, unsandboxed). The cubs (the
+small programs that write and send posts) and Open in Claude Code's sessions
+run inside a bubblewrap sandbox. [docs/threat-model.md](docs/threat-model.md)
+says what each of these can reach, in plain words.
 
 ## Threat model
 
@@ -38,7 +38,7 @@ agent tokens may only run actions (`POST /brb/api/act`), within their limits.
 `api.require_token: false` in `kranto.yaml` turns this off. What it is not:
 
 - **Reads need no token.** Any process or user that can reach the port can
-  read your library, idea cards, settings and builds. Nothing a read returns
+  read your library, idea cards and settings. Nothing a read returns
   is a secret (no key, no token), but on a machine shared with other users
   the library is readable by them.
 - **Not a wall between your own processes.** Anything running as you can
@@ -49,8 +49,7 @@ agent tokens may only run actions (`POST /brb/api/act`), within their limits.
   means rotating the `ui` token (`kranto token rotate ui`).
 
 **It binds to loopback.** The server binds to `127.0.0.1` by default, and
-`afk serve` warns if you bind it anywhere else; the builds UI is not mounted
-then. To reach it from another machine without exposing it, forward the port
+`kranto serve --host` warns if you bind it anywhere else. To reach it from another machine without exposing it, forward the port
 over SSH (`ssh -N -L 8766:127.0.0.1:8765 host`). In Docker, publish it as
 `-p 127.0.0.1:8765:8765`: the Host check below stops browsers, not a client
 on your network that sets the header itself.
@@ -94,8 +93,9 @@ or checked for markup. Model output never triggers an action in the server: the
 worst a successful prompt injection can do here is write misleading text into
 your library, and every such text links back to the raw model response and
 the source it came from. Idea-card citations are checked against the cited
-observation by a separate call. (A build started from an idea card runs a
-model that writes and runs code; that is the page's sandbox's job.)
+observation by a separate call. The console is the exception: it is an
+assistant with a shell, and [docs/threat-model.md](docs/threat-model.md) says
+what holds and what does not when a text in your library tries to steer it.
 
 **Secrets stay out of files that get shared.** The API key is read from an
 environment variable, or from a `.env` file in the workspace, never from

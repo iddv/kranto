@@ -19,7 +19,8 @@ own token (`kranto token add agent:<name>`, or Settings › Privacy & access ›
 
 It is not a wall between programs you run as yourself: any of them can read the token files,
 or run `kranto open`. It keeps each door's limits, says truthfully who did what, and keeps
-other websites and other users out. A console session's sandbox never sees the tokens.
+other websites and other users out. An Open in Claude Code session's sandbox never sees the
+tokens; the console runs as you, and only its file tools are denied them.
 
 ## The model key {#keys-model}
 
