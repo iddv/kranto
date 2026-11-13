@@ -25,6 +25,16 @@ LIFETIME_S = 60 * 86400
 REFRESH_AFTER_S = 86400          # Meta: a token at least 24 hours old, not expired
 
 
+class _Token(Bearer):
+    """A pasted token for the one check before it is kept (the HTTP layer's ``Auth``)."""
+
+    def params(self) -> dict[str, str]:
+        return {}
+
+    def observe(self, response) -> bool:
+        return False
+
+
 class ThreadsPostProvider(Provider):
     key = "threads_post"
     name = "Threads (posting)"
@@ -38,7 +48,7 @@ class ThreadsPostProvider(Provider):
 
     def paste(self, fields: dict) -> Grant:
         token = Secret(need(fields, "token", "The access token"))
-        http = self.http.with_auth(Bearer(HOST, token))
+        http = self.http.with_auth(_Token(HOST, token))
         try:
             r = http.get(f"https://{HOST}/v1.0/me", params={"fields": "id,username"},
                          deadline=30.0, errors=False)

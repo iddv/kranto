@@ -29,6 +29,16 @@ HOST = "api.linkedin.com"
 LIFETIME_S = 60 * 86400
 
 
+class _Token(Bearer):
+    """A pasted token for the one check before it is kept (the HTTP layer's ``Auth``)."""
+
+    def params(self) -> dict[str, str]:
+        return {}
+
+    def observe(self, response) -> bool:
+        return False
+
+
 class LinkedInPostProvider(Provider):
     key = "linkedin_post"
     name = "LinkedIn (posting)"
@@ -39,7 +49,7 @@ class LinkedInPostProvider(Provider):
 
     def paste(self, fields: dict) -> Grant:
         token = Secret(need(fields, "token", "The access token"))
-        http = self.http.with_auth(Bearer(HOST, token))
+        http = self.http.with_auth(_Token(HOST, token))
         try:
             r = http.get(f"https://{HOST}/v2/userinfo", deadline=30.0, errors=False)
         except SourceError as exc:
