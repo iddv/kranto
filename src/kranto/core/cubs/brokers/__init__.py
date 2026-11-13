@@ -45,7 +45,7 @@ def _register() -> None:
     for adapter in ADAPTERS.values():
         # a cub's adapter, or one that performs only Kranto's own kinds (Bluesky's send)
         if not adapter.cub_grantable and not all(
-                tickets.KINDS[k].first_party_only for k in adapter.kinds):
+                tickets.KINDS[name].first_party_only for name in adapter.kinds):
             continue
         for kind in adapter.kinds:
             spec = tickets.KINDS[kind]

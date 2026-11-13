@@ -84,7 +84,7 @@ class Material:
 
 def blog_target(store) -> dict[str, Any] | None:
     """The person's own site, when it can be the post's home: the Sanity connection, connected,
-    with the posts' address set (Settings › Connections › Sanity). None otherwise."""
+    with the posts' address set (Settings › Posting, Sanity). None otherwise."""
     from ..connections.sanity import site
     conn = connection_of(store, "sanity")
     if conn is None or conn["state"] != "connected":
@@ -224,7 +224,7 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
         where = "your blog post" if m.link_to == "post" else "the source"
         words = f"Links to {where}: {m.link}"
         if m.link_to == "post":
-            words += ". Publish it before you post this."
+            words += ". Put it on your blog before you post this."
         extras.append({"key": "link", "words": words, "drop": False})
     else:
         extras.append({"key": "link", "words": "No link: the card has no source address",
