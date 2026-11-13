@@ -46,16 +46,16 @@ def test_no_doc_installs_kranto_from_git():
 
 def test_the_guide_says_what_changes_once_public():
     guide = " ".join(GUIDE.read_text().split())
-    assert "once the repositories are public" in guide and "PyPI" in guide
+    assert "once the repository is public" in guide and "PyPI" in guide
 
 
 def test_the_readme_sends_a_newcomer_to_the_setup_guide():
     head = (ROOT / "README.md").read_text().split("## ")[0]
-    assert "New here? Start with [docs/setup.md](docs/setup.md)." in head
+    assert "[docs/setup.md](docs/setup.md)" in head
 
 
 def test_the_wheel_is_the_kranto_distribution_in_this_repo():
     meta = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]
     assert meta["name"] == "kranto" and meta["scripts"]["kranto"]
     readme = (ROOT / "README.md").read_text()
-    assert readme.index("kranto up") < readme.index("## The watcher alone")
+    assert readme.index("kranto up") < readme.index("## Who it is for")

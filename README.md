@@ -67,9 +67,19 @@ Measured, each with what limits it:
 ## Install
 
 The three lines above install the wheel of the latest release with `gh` (while the repository is
-private, `gh` must be logged in with access to it). Every release also carries `install.sh`,
-which installs uv when you have none, checks every file against `SHA256SUMS`, installs Kranto and
-runs `kranto setup`:
+private, `gh` must be logged in with access to it). The same, with every file checked against the
+release's `SHA256SUMS` first:
+
+```
+tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)
+gh release download "$tag" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "kranto-$tag"
+(cd "kranto-$tag" && sha256sum -c SHA256SUMS)
+uv tool install --python 3.12 "kranto-$tag"/kranto-*.whl
+kranto up
+```
+
+Every release also carries `install.sh`, which installs uv when you have none, checks every file
+against `SHA256SUMS`, installs Kranto and runs `kranto setup`:
 
 ```
 gh release download -R iddv/kranto -p install.sh
