@@ -405,14 +405,52 @@ def scan_message(text: str, label: str) -> list[Finding]:
     ]
 
 
+# Dependabot's own identity, and the sign-off it writes on its own commits. The bot's sign-off
+# counts only on a commit the bot both wrote and committed; anyone else's commit (a person who
+# rebased or edited a Dependabot branch included) needs that person's own sign-off.
+BOT_NAME = "dependabot[bot]"
+BOT_EMAIL = "49699333+dependabot[bot]@" + NOREPLY_DOMAIN
+BOT_SIGNOFF = "Signed-off-by: dependabot[bot] <support@" + "github.com>"
+_SIGNOFF_RE = re.compile(r"^Signed-off-by: (.+?) <([^<>]+)>\s*$", re.M)
+
+
+def is_bot(name: str, email: str) -> bool:
+    return name == BOT_NAME and email.lower() == BOT_EMAIL.lower()
+
+
+def dco_problem(author: tuple[str, str], committer: tuple[str, str], body: str) -> str | None:
+    """Why a commit's sign-off does not hold, or None. ``author`` and ``committer``: (name,
+    email).
+
+    - A commit Dependabot wrote and committed may carry the bot's own sign-off (``BOT_SIGNOFF``).
+    - Any other commit needs a sign-off with its author's address; one the bot wrote but a
+      person committed (a rebase or an edit of its branch) may instead carry the committer's,
+      who then certifies it. The bot's sign-off counts on no commit but the bot's own."""
+    offs = [(m[1].strip(), m[2].strip().lower()) for m in _SIGNOFF_RE.finditer(body)]
+    bot_commit = is_bot(*author) and is_bot(*committer)
+    if bot_commit and BOT_SIGNOFF in body.splitlines():
+        return None
+    human = [o for o in offs if o != (BOT_NAME, "support@" + "github.com")]
+    emails = {e for _, e in human}
+    if author[1].lower() in emails:
+        return None
+    if is_bot(*author) and committer[1].lower() in emails:
+        return None
+    if not offs:
+        return "no Signed-off-by line (git commit -s)"
+    if len(human) < len(offs):
+        return "the Dependabot sign-off counts only on a commit Dependabot wrote and committed"
+    return "no Signed-off-by line with the author's address (git commit -s)"
+
+
 def scan_commits(range_spec: str, repo: str | Path = ".", dco: bool = False) -> list[Finding]:
     """Check author and committer emails and messages for a range of commits; with ``dco``,
     each message also carries a sign-off (``Signed-off-by:``, the Developer Certificate of
-    Origin)."""
+    Origin) matching its author (``dco_problem``)."""
     proc = subprocess.run(
         [
             "git", "-C", str(repo), "log",
-            "--format=%H%x00%ae%x00%ce%x00%B%x1e", range_spec, "--",
+            "--format=%H%x00%an%x00%ae%x00%cn%x00%ce%x00%B%x1e", range_spec, "--",
         ],
         capture_output=True,
         check=True,
@@ -422,10 +460,10 @@ def scan_commits(range_spec: str, repo: str | Path = ".", dco: bool = False) -> 
         record = record.lstrip("\n")
         if not record.strip():
             continue
-        parts = record.split("\x00", 3)
-        if len(parts) < 4:
+        parts = record.split("\x00", 5)
+        if len(parts) < 6:
             continue
-        sha, author, committer, body = parts
+        sha, a_name, author, c_name, committer, body = parts
         label = sha[:12]
         for role, email in (("author", author), ("committer", committer)):
             if not email.lower().endswith("@" + NOREPLY_DOMAIN):
@@ -434,9 +472,15 @@ def scan_commits(range_spec: str, repo: str | Path = ".", dco: bool = False) -> 
                         "commit", label, 0, f"{role} email *** is not a GitHub no-reply address"
                     )
                 )
-        findings.extend(scan_message(body, label))
-        if dco and not re.search(r"^Signed-off-by: .+ <.+>$", body, re.M):
-            findings.append(Finding("commit", label, 0, "no Signed-off-by line (git commit -s)"))
+        scanned = body
+        if is_bot(a_name, author) and is_bot(c_name, committer):
+            # the bot's own sign-off names GitHub's support address: not a person's
+            scanned = "\n".join(ln for ln in body.splitlines() if ln != BOT_SIGNOFF)
+        findings.extend(scan_message(scanned, label))
+        if dco:
+            why = dco_problem((a_name, author), (c_name, committer), body)
+            if why:
+                findings.append(Finding("commit", label, 0, why))
     return findings
 
 
