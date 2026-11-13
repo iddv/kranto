@@ -817,13 +817,13 @@
   {
    "id": "A7-posting",
    "inv": "A7",
-   "what": "Settings › Posting (new): the accounts a draft is sent with, what Kranto writes",
+   "what": "Settings › Posting (new): the sites you post to, Add a site, your blog and newsletter",
    "kind": "page",
    "at": "settings/posting",
    "find": [
     "Posting",
-    "A newsletter",
-    "What Kranto writes"
+    "Sites you post to",
+    "Your blog and newsletter"
    ],
    "fate": "new"
   },

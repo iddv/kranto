@@ -2504,7 +2504,7 @@ export interface PostDraft {
   account: boolean;
   site?: string;
   site_word?: string;
-  group?: string | null;
+  write?: string | null;
   way?: "open" | "direct";
   sites?: PostSibling[];
 }
@@ -2587,9 +2587,10 @@ export interface PostSheet {
   account: boolean;
   site?: string;
   site_word?: string;
-  group: "waiting" | "sent" | "earlier";
+  write?: string | null;
   way?: "open" | "direct";
   sites?: PostSibling[];
+  group: "waiting" | "sent" | "earlier";
   markdown: string;
   filename: string;
   words: number;

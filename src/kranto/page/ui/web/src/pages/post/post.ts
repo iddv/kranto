@@ -17,8 +17,26 @@ export function draftHref(d: Pick<PostDraft, "id" | "cub" | "ref">): string {
 /** whether a draft opens in the page's sheet route (else the ask's own dialog opens it) */
 export const hasSheet = (): boolean => !!matchRoute(["post", "d", "1"]);
 
-/** a sent post's line: the platform's own words, else what happened, else "Sent" */
-export const sentLine = (d: PostDraft): string => d.note || d.said || "Sent";
+/** a sent post's line: the platform's own words, else what happened, else "Sent"; a short post
+ * says where it went first ("Posted to Bluesky · posted by you") */
+export function sentLine(d: PostDraft): string {
+  const said = d.note || d.said || "Sent";
+  return d.site_word ? `Posted to ${d.site_word} · ${said}` : said;
+}
+/** a write's short posts as plain words, a tick on those sent: "Bluesky ✓ · Mastodon · X" */
+export function sitesWords(d: Pick<PostDraft, "sites">): string {
+  return (d.sites || []).map((x) => x.word + (x.state === "sent" ? " ✓" : "")).join(" · ");
+}
+/** Post's one line about where posts go: the server's sites line, then the blog and the
+ * newsletter in a few words */
+export function whereLine(p: Pick<Post, "sites" | "accounts">): string {
+  const acct = (k: string) => (p.accounts || []).find((a) => a.key === k);
+  const blog = acct("blog"), nl = acct("newsletter");
+  const bits = [p.sites?.line || "No sites chosen for short posts yet."];
+  bits.push(`Blog: ${blog && blog.state === "connected" ? "connected" : "not set"}.`);
+  bits.push(`Newsletter: ${nl && nl.state === "connected" ? "connected" : "not set"}.`);
+  return bits.join(" ");
+}
 
 /** an account's state in words: "connected as …", "needs signing in again", "not set" */
 export function accountWords(a: PostAccount): string {
@@ -37,7 +55,7 @@ export function accountHref(a: PostAccount): string {
 
 /** a failed Write a post's line: "Write a blog post about ‹title› failed", its reason under it */
 export function failedTitle(f: Pick<PostFailed, "as" | "title">): string {
-  const what = f.as === "toot" ? "a short post" : "a blog post";
+  const what = f.as === "toot" ? "a short post" : f.as === "short" ? "short posts" : "a blog post";
   return `Write ${what} about ${f.title || "this"}: no draft`;
 }
 /** what a failed write was about, as Write a post's question knows it (Try again asks the same) */
@@ -58,4 +76,7 @@ export function unsendable(p: Pick<Post, "drafts"> | null | undefined, ticket: n
 }
 /** "Monday's issue", "from #143": the fact the read gives, else none (its kind is the row's mark;
  * the cub's name, "by examplecom", is never a fact: G4) */
-export const draftFact = (d: PostDraft): string => d.fact || "";
+export function draftFact(d: PostDraft): string {
+  const sites = sitesWords(d);
+  return [d.fact || "", sites].filter(Boolean).join(" · ");
+}

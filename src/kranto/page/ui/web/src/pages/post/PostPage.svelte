@@ -7,7 +7,9 @@
   // replaced, a declined one), each still openable. A draft opens in its sheet (#/post/d/<id>,
   // the P2: Copy, Download, Send, Decline, Details); before that route is there, Open is the
   // ask's own dialog (Send there opens SEND's dialog unchanged), or the cub's page for an earlier
-  // draft. Nothing here sends: Send is always the owner's click in the dialog.
+  // draft. A write's short posts are one row naming its sites ("Bluesky ✓ · Mastodon · X"); the
+  // accounts are one line, "Where posts go", with one control to Settings › Posting. Nothing here
+  // sends: Send is always the owner's click in the dialog.
   import Group from "../../ui/Group.svelte";
   import List from "../../ui/List.svelte";
   import Row from "../../ui/Row.svelte";
@@ -19,7 +21,7 @@
   import { ui } from "../../lib/shell.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { dismissWrite, retryWrite, writeAny } from "../../features/post/post";
-  import { accountHref, accountWords, connectedCount, draftFact, draftHref, failedAbout, failedTitle, hasSheet, POST_API, sentLine, type Post, type PostDraft } from "./post";
+  import { draftFact, draftHref, failedAbout, failedTitle, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
 
   let { view }: { view: View } = $props();
   const host = $derived(!!ui.facts?.header.host);
@@ -32,10 +34,11 @@
     const x = r?.data as Partial<Post> | undefined | null;
     if (!x) return null;
     const list = <T,>(v: T[] | undefined): T[] => (Array.isArray(v) ? v : []);
-    return { line: typeof x.line === "string" ? x.line : "Drafts wait here until you have seen them.", drafts: list(x.drafts), sent: list(x.sent), earlier: list(x.earlier), accounts: list(x.accounts), failed: list(x.failed) };
+    const sites = x.sites && typeof x.sites === "object" && typeof x.sites.line === "string" ? x.sites : { line: "No sites chosen for short posts yet.", ticked: 0 };
+    return { line: typeof x.line === "string" ? x.line : "Drafts wait here until you have seen them.", drafts: list(x.drafts), sent: list(x.sent), earlier: list(x.earlier), accounts: list(x.accounts), sites, failed: list(x.failed) };
   });
   const sheet = $derived(hasSheet());
-  const STATE: Record<string, string> = { newsletter: "✉", mastodon: "✎", blog: "✎" };
+  const STATE: Record<string, string> = { newsletter: "✉", mastodon: "✎", blog: "✎", short: "✎" };
 </script>
 
 <!-- a draft's one verb: Open (its sheet, or its ask's dialog until the sheet's route is there) -->
@@ -46,6 +49,9 @@
     <a class={"btn sm" + (main ? " primary" : "")} data-act="post-open" href={draftHref(x)}>Open</a>
   {/if}
 {/snippet}
+
+<!-- the accounts' one control: the sites you post to, on Settings › Posting -->
+{#snippet sitesEnd()}<a class="btn sm" id="post-sites" href="#/settings/posting">Sites</a>{/snippet}
 
 {#snippet draftRow(x: PostDraft, main: boolean)}
   {#snippet end()}{@render open(x, main)}{/snippet}
@@ -82,11 +88,8 @@
       {/each}
       {#if !d.sent.length}<li class="gempty"><span class="muted">Nothing sent yet. A sent post shows here with where it went and how many it reached.</span></li>{/if}
     </Group>
-    <Group id="post-accounts" title="Accounts" count={`${connectedCount(d.accounts)} of ${d.accounts.length}`} says="optional: every draft can be copied without one">
-      {#each d.accounts as a (a.key)}
-        {#snippet end()}<a class="btn sm" href={accountHref(a)}>{a.state === "connected" ? "Change" : a.state === "needs_login" ? "Sign in" : "Connect"}</a>{/snippet}
-        <Row title={a.word} meta={accountWords(a)} {end} />
-      {/each}
+    <Group id="post-accounts" title="Accounts" says="optional: every draft can be copied without one">
+      <Row title="Where posts go" meta={whereLine(d)} end={sitesEnd} />
     </Group>
     {#if d.earlier.length}
       <Group id="post-earlier" title="Earlier drafts" count={String(d.earlier.length)} fold="post:earlier" start>

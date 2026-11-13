@@ -82,6 +82,19 @@ export const settle = async (): Promise<void> => {
     flushSync();
   }
 };
+/** scripts/preview/acceptance.py's COUNT rule in jsdom: the words (a run of non-space with a
+ * letter or digit), the controls (links with an address, buttons, fields, summaries) and the
+ * primaries (.btn.primary); printed on the test's output as "COUNT <what>: {...}" so a budget's
+ * exact numbers are on record, not only its bound */
+export function count(el: Element, what: string): { words: number; controls: number; primaries: number } {
+  const c = {
+    words: (el.textContent || "").split(/\s+/).filter((w) => /\w/.test(w)).length,
+    controls: el.querySelectorAll("a[href], button, input, select, textarea, summary").length,
+    primaries: el.querySelectorAll(".btn.primary").length,
+  };
+  (globalThis as unknown as { process: { stdout: { write: (s: string) => void } } }).process.stdout.write(`COUNT ${what}: ${JSON.stringify(c)}\n`);
+  return c;
+}
 /** what the owner reads in an element: its text without the places a key belongs (a code span,
  * an Advanced fold, a field), as the browser smoke's OWNER_TEXT reads a page (QA B10) */
 export function ownerText(el: Element): string {

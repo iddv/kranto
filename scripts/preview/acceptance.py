@@ -1435,12 +1435,13 @@ def counts(p: Preview) -> list[Result]:
         both = {k: sheet[k] + q[k] for k in ("words", "controls", "primaries")}
         # the D4 was 180 words and 12 controls; the question then gained PROSE's "What do you
         # think?" (P-1: a field) and, while no voice is set, the "Set up how you write ›"
-        # (a link): 190 and 14 (decisions/LOG.md,)
+        # (a link): 190 and 14; then the angle step (SOCIAL, PROSE's rule 4): three proposed
+        # sentences, each a button you can read before choosing, and Skip: 220 and 18
         out.append(
             ok(
                 "COUNT card (fix 10, D4)",
-                "a card's sheet with Write a post's question: 190 words, 14 controls, 2 primaries",
-                both["words"] <= 190 and both["controls"] <= 14 and both["primaries"] <= 2,
+                "a card's sheet with Write a post's question: 220 words, 18 controls, 2 primaries",
+                both["words"] <= 220 and both["controls"] <= 18 and both["primaries"] <= 2,
                 f"card #{card['id']}: {_counted(both)}",
                 sheet=sheet,
                 question=q,

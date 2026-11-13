@@ -21,7 +21,7 @@
   const host = $derived(!!ui.facts?.header.host);
   // the accounts Kranto posts from: Mastodon's posting connection (mastodon_post), never the
   // read-only one that watches a timeline, which is Watching's (7, Codex 4)
-  const POSTING = new Set(["mastodon_post", "sanity"]);
+  const POSTING = new Set(["mastodon_post", "bluesky_post", "sanity"]);
   const fits = (key: string): boolean => (part === "posting" ? POSTING.has(key) : part === "reading" ? !POSTING.has(key) : true);
   // back from a sign-in, once: the flash, the server read again, the address without its words
   $effect(() => {

@@ -205,6 +205,12 @@ export function landOf(hash: string, doors: boolean = shellDoors(!!host())): str
       at = href("settings");
       break;
     }
+    // the short posts' old settings (the toot cub, folded into Kranto's own short posts) are
+    // Posting's, unless that cub is still installed
+    if (r.path[0] === "settings" && r.path.length === 2 && r.path[1] === "toot" && !featureOn("toot")) {
+      at = href("settings/posting");
+      break;
+    }
     // a posting cub's page is Post once a draft has its own sheet there
     // (#/post/d/<id>); a selection on the cub's page (its object) or one of its own lists (its
     // issues, its log: ?list=) still opens there

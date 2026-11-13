@@ -20,7 +20,12 @@ export interface PostDraft {
   id: number; ref: string; cub: string; kind: PostKind; word: string; title: string; fact: string;
   at: string; ticket: number | null; again: number | null; verb: string | null; line: string | null;
   said: string | null; note: string | null; link: string | null; account: boolean;
+  // a short post's own: its site, the write it belongs to, how it goes
+  site?: string; site_word?: string; group?: string | null; way?: "open" | "direct";
+  sites?: PostSibling[];
 }
+/** one site of a write's short posts: its newest draft and where it stands */
+export interface PostSibling { id: number; site: string; word: string; state: string }
 export interface Post {
   line: string;
   drafts: PostDraft[];
@@ -48,18 +53,39 @@ export interface PostSheet extends PostDraft {
   original_draft?: number;
   // SOCIAL's read fields, drawn when present: the editor uses parts, limit
   // and extras; the rest are the draft page's lines
-  site?: string;
-  tier?: "send" | "open" | "copy";
+  tier?: "send" | "open";
   parts?: PostPart[];
   extras?: PostExtra[];
-  siblings?: { id: number; site: string; state: string }[];
+  siblings?: PostSibling[];
+  // Open: the site's composer with the draft filled in (a plain link; nothing is sent), or why
+  // it is off (the preview, Mastodon's server not typed)
   open?: string | null;
+  open_off?: string | null;
+  // Post directly, when the person switched the site to it
+  direct?: { word: string; ready: boolean; why: string | null } | null;
+  // I posted it: the draft waits, so the person may say they posted it themselves
+  posted_by_you?: boolean;
 }
 /** the edit route's answer (post.edit) */
 export interface PostEdited { ok: boolean; id: number; ref: string; ticket: number; withdrew: boolean; say: string }
 export const editPath = (id: number | string): string => `${sheetPath(id)}/edit`;
 
 export const POST = "/api/post";
+/** Settings › Posting's sites (the server's GET /api/post/sites) */
+export const POSTING_API = "/api/post/sites";
+/** what Write a post writes: a blog post, or short posts for the ticked sites (as=toot, the
+ * toot cub's one Mastodon post, is still accepted by the server and no longer offered) */
+export type WriteAs = "blog" | "short" | "toot";
+/** one of the angle step's three proposals (POST /api/post/angles) */
+export interface Angle { kind: string; text: string; words: string }
+/** "Short posts for Bluesky, Mastodon and X" */
+export function shortLine(names: string[]): string {
+  if (!names.length) return "Short posts: choose your sites first";
+  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  return `Short posts for ${list}`;
+}
+/** a short post's words as Copy gives them: its parts, a blank line between */
+export const partsText = (parts: { text: string }[]): string => parts.map((p) => p.text.trim()).join("\n\n") + "\n";
 export const sheetPath = (id: number | string): string => `/api/post/d/${encodeURIComponent(String(id))}`;
 export const downloadHref = (id: number | string): string => `${sheetPath(id)}.md`;
 export const WRITING = "Writing the draft. It will be on Post in about a minute.";
@@ -96,13 +122,14 @@ export function writePost(a: About): void {
 
 /** Write draft: the job starts, the toast says where the draft will be; then the page follows
  * the job and says how it ended (a draft on Post, or why none was written) */
-export function startWrite(btn: HTMLElement | null, a: About, as: "blog" | "toot", done?: () => void, take = ""): void {
+export function startWrite(btn: HTMLElement | null, a: About, as: WriteAs, done?: () => void, angle = ""): void {
   const L = app();
   if (!L) return;
-  const line = take.trim().replace(/\s+/g, " ").slice(0, 600);
+  // the angle: one sentence, the owner's own or a proposal they picked; none is sent when empty
+  const line = angle.trim().replace(/\s+/g, " ").slice(0, 600);
   void L.act(btn, async () => {
     try {
-      return await L.api("/api/post/write", { about: aboutKey(a), as, ...(line ? { take: line } : {}) });
+      return await L.api("/api/post/write", { about: aboutKey(a), as, ...(line ? { angle: line } : {}) });
     } finally {
       afkDropPrefix("/api/post"); // a refusal (no model key) is kept on Post: read it again
     }
@@ -115,7 +142,7 @@ export function startWrite(btn: HTMLElement | null, a: About, as: "blog" | "toot
 
 /** a failed write's Try again: the same question, asked again */
 export function retryWrite(btn: HTMLElement | null, a: About, as: string): void {
-  startWrite(btn, a, as === "toot" ? "toot" : "blog");
+  startWrite(btn, a, as === "toot" ? "toot" : as === "short" ? "short" : "blog");
 }
 /** a failed write's Dismiss: its line on Post goes; nothing else changes */
 export function dismissWrite(btn: HTMLElement | null, about: string, as: string): void {
