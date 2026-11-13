@@ -1,0 +1,1121 @@
+{
+ "/api/cubs": {
+  "cubs": [
+   {
+    "enabled": true,
+    "grants": {
+     "requests": [
+      "send.newsletter"
+     ]
+    },
+    "id": "newsletter",
+    "installed_at": "2026-10-21T05:40:09Z",
+    "inventory": {
+     "findings": []
+    },
+    "last_run": null,
+    "limits": {
+     "cpu_pct": 100,
+     "kv_mb": 8,
+     "memory_mb": 512,
+     "pids": 64,
+     "tmp_mb": 64
+    },
+    "live": [],
+    "mode": "drafts only",
+    "paused": null,
+    "pinned": true,
+    "runs": [],
+    "source": {
+     "kind": "folder",
+     "path": "/opt/cubs/newsletter",
+     "sha": null
+    },
+    "spend": {
+     "calls_per_day": 10000,
+     "calls_today": 0,
+     "cap_usd": 2.0,
+     "month_usd": 0.0
+    },
+    "state": "installed",
+    "tickets_open": 1,
+    "title": "Newsletter",
+    "tree_ok": true,
+    "trust": "owner",
+    "update": {
+     "adds": [
+      "requests: send.newsletter"
+     ],
+     "job": "0123456789ab",
+     "needs": "house",
+     "sha": null,
+     "version": "1.3.0",
+     "why": "asks to send something new"
+    },
+    "updated": {
+     "at": "2026-10-23T03:00:00Z",
+     "by": "itself",
+     "version": "1.2.0"
+    },
+    "version": "1.2.0",
+    "words": []
+   }
+  ],
+  "enabled": true,
+  "limits_mode": "scope",
+  "sandbox": true,
+  "stop_file": false
+ },
+ "/api/cubs/newsletter": {
+  "enabled": true,
+  "grants": {
+   "requests": [
+    "send.newsletter"
+   ]
+  },
+  "id": "newsletter",
+  "installed_at": "2026-10-21T05:40:09Z",
+  "inventory": {
+   "findings": []
+  },
+  "last_run": null,
+  "limits": {
+   "cpu_pct": 100,
+   "kv_mb": 8,
+   "memory_mb": 512,
+   "pids": 64,
+   "tmp_mb": 64
+  },
+  "live": [],
+  "mode": "drafts only",
+  "paused": null,
+  "pinned": true,
+  "runs": [],
+  "source": {
+   "kind": "folder",
+   "path": "/opt/cubs/newsletter",
+   "sha": null
+  },
+  "spend": {
+   "calls_per_day": 10000,
+   "calls_today": 0,
+   "cap_usd": 2.0,
+   "month_usd": 0.0
+  },
+  "state": "installed",
+  "tickets_open": 1,
+  "title": "Newsletter",
+  "tree_ok": true,
+  "trust": "owner",
+  "update": {
+   "adds": [
+    "requests: send.newsletter"
+   ],
+   "job": "0123456789ab",
+   "needs": "house",
+   "sha": null,
+   "version": "1.3.0",
+   "why": "asks to send something new"
+  },
+  "updated": {
+   "at": "2026-10-23T03:00:00Z",
+   "by": "itself",
+   "version": "1.2.0"
+  },
+  "version": "1.2.0",
+  "words": []
+ },
+ "/api/f/newsletter/issues": {
+  "closed": [],
+  "sent": [],
+  "waiting": [
+   {
+    "brief_ids": [
+     1
+    ],
+    "briefs": [
+     "brief 1"
+    ],
+    "cites": [],
+    "date": "2026-10-21",
+    "id": "draft:1",
+    "intro": "A short intro.",
+    "item_count": 3,
+    "state": "waiting",
+    "subject": "This week: small robots in orchards",
+    "ticket": 1,
+    "trigger": "schedule",
+    "where": "kranto"
+   }
+  ]
+ },
+ "/api/f/newsletter/rows": {
+  "rows": []
+ },
+ "/api/features": {
+  "api": "cub/1",
+  "features": [
+   {
+    "cub": {
+     "limits_mode": "scope",
+     "live": [],
+     "mode": "drafts only",
+     "paused": null,
+     "state": "installed",
+     "update": null
+    },
+    "enabled": true,
+    "id": "newsletter",
+    "last_run": {
+     "finished_at": "2026-10-21T05:40:28Z",
+     "kind": "newsletter.weekly",
+     "status": "ok"
+    },
+    "manifest": {
+     "actions": [
+      {
+       "click": "click",
+       "doors": [
+        "ui",
+        "cli"
+       ],
+       "fields": [
+        {
+         "choices": [],
+         "hint": "",
+         "key": "briefs",
+         "kind": "choice",
+         "label": "From these briefs",
+         "read": "brief_choices",
+         "required": true
+        },
+        {
+         "choices": [
+          "plain",
+          "warm"
+         ],
+         "hint": "",
+         "key": "intro",
+         "kind": "enum",
+         "label": "Intro",
+         "read": null,
+         "required": false
+        },
+        {
+         "choices": [],
+         "hint": "",
+         "key": "subject",
+         "kind": "text",
+         "label": "Subject",
+         "read": null,
+         "required": false
+        }
+       ],
+       "kind": "newsletter.compose",
+       "method": "compose_now",
+       "place": "card",
+       "says": "",
+       "subjects": [],
+       "title": "Compose an issue"
+      },
+      {
+       "click": "click",
+       "doors": [
+        "ui",
+        "cli"
+       ],
+       "fields": [
+        {
+         "choices": [
+          "plain",
+          "warm"
+         ],
+         "hint": "",
+         "key": "intro",
+         "kind": "enum",
+         "label": "Intro",
+         "read": null,
+         "required": false
+        }
+       ],
+       "kind": "newsletter.redraft",
+       "method": "redraft",
+       "place": "card",
+       "says": "",
+       "subjects": [
+        "newsletter_issue"
+       ],
+       "title": "Redraft"
+      }
+     ],
+     "api": "cub/1",
+     "kranto": ">=0.5.10,<0.7",
+     "broker": {
+      "newsletter": [
+       "emails.create_draft",
+       "emails.get",
+       "drafts.list"
+      ]
+     },
+     "docs": {
+      "glossary": {
+       "Issue": "One newsletter: an intro and the week's brief items, sent through your newsletter platform after your press."
+      },
+      "page": "README.md",
+      "words": {
+       "newsletter.enabled": "The weekly issue"
+      }
+     },
+     "entry": "main.py",
+     "evals": [
+      "newsletter.tests"
+     ],
+     "events": {
+      "publish": [
+       "newsletter.drafted"
+      ],
+      "subscribe": [
+       {
+        "kind": "brief.published",
+        "min_trust": "first-party"
+       },
+       {
+        "kind": "ticket.resolved",
+        "method": "on_resolved",
+        "min_trust": "core"
+       }
+      ]
+     },
+     "grades": {
+      "newsletter_issue": [
+       [
+        "off_topic",
+        "off topic"
+       ],
+       [
+        "too_long",
+        "too long"
+       ],
+       [
+        "wrong_item",
+        "an item said something the brief did not"
+       ]
+      ]
+     },
+     "http": {
+      "hosts": []
+     },
+     "id": "newsletter",
+     "jobs": [
+      {
+       "at": "08:00",
+       "days": [
+        "mon"
+       ],
+       "deadline_s": 300,
+       "every_hours": 168,
+       "kind": "newsletter.weekly",
+       "method": "compose",
+       "on": [],
+       "per": null,
+       "purpose": "newsletter_intro",
+       "says": "Monday 08:00: composes the issue from the week's briefs and files a ticket to send it",
+       "when": "newsletter.enabled"
+      }
+     ],
+     "model": {
+      "monthly_usd": 2,
+      "purposes": [
+       "newsletter_intro"
+      ],
+      "tiers": [
+       "reason"
+      ]
+     },
+     "name": "local/newsletter",
+     "owns": [],
+     "prompts": [],
+     "provides": [
+      "issues",
+      "rows",
+      "count",
+      "brief_choices"
+     ],
+     "reads": [
+      "topics",
+      "briefs"
+     ],
+     "requests": [
+      "send.newsletter"
+     ],
+     "requirements": null,
+     "runtime": "python3.12",
+     "says": "Monday's issue from the week's News briefs, assembled item by item from what the briefs say, for you to read and send through your newsletter platform.",
+     "schema": 1,
+     "search": [],
+     "settings": {
+      "keys": {
+       "newsletter.enabled": {
+        "by_hand": false,
+        "choices": [],
+        "default": true,
+        "hi": null,
+        "lo": null,
+        "type": "bool",
+        "words": "the weekly issue"
+       },
+       "newsletter.intro": {
+        "by_hand": false,
+        "choices": [
+         "plain",
+         "warm"
+        ],
+        "default": "plain",
+        "hi": null,
+        "lo": null,
+        "type": "enum",
+        "words": "the intro's tone"
+       },
+       "newsletter.max_items": {
+        "by_hand": false,
+        "choices": [],
+        "default": 12,
+        "hi": 30,
+        "lo": 3,
+        "type": "int",
+        "words": "items an issue at most"
+       },
+       "newsletter.send_at": {
+        "by_hand": false,
+        "choices": [],
+        "default": "now",
+        "hi": null,
+        "lo": null,
+        "type": "str",
+        "words": "now, or a UTC time of day like 09:30: your press schedules it then (cancel it at the platform)"
+       },
+       "newsletter.subject_prefix": {
+        "by_hand": false,
+        "choices": [],
+        "default": "This week",
+        "hi": null,
+        "lo": null,
+        "type": "str",
+        "words": "the subject's first words"
+       },
+       "newsletter.topics": {
+        "by_hand": false,
+        "choices": [],
+        "default": [],
+        "hi": null,
+        "lo": null,
+        "type": "topics",
+        "words": "the topics an issue reads (none picked: every topic News is on for)"
+       }
+      },
+      "per_topic": [],
+      "sensitive": []
+     },
+     "spend": {
+      "caps": {},
+      "purposes": [
+       "newsletter_intro"
+      ]
+     },
+     "stages": [],
+     "storage": "own",
+     "telemetry": {
+      "counters": {
+       "newsletter.issues": [
+        0,
+        10000
+       ]
+      }
+     },
+     "title": "Newsletter",
+     "trust": "owner",
+     "ui": {
+      "area": null,
+      "cards": {
+       "issue": {
+        "actions": [
+         "newsletter.redraft"
+        ],
+        "fields": [
+         {
+          "key": "date",
+          "kind": "date",
+          "label": "Date"
+         },
+         {
+          "key": "briefs",
+          "kind": "list",
+          "label": "Briefs"
+         },
+         {
+          "key": "item_count",
+          "kind": "number",
+          "label": "Items"
+         },
+         {
+          "key": "where",
+          "kind": "text",
+          "label": "Draft"
+         },
+         {
+          "key": "state",
+          "kind": "text",
+          "label": "State"
+         }
+        ],
+        "image_ref": null,
+        "lines": [
+         "intro"
+        ],
+        "origin": "cites",
+        "title": "subject"
+       }
+      },
+      "forms": [
+       {
+        "cost": "about $0.01: one reason-tier call for the intro",
+        "fields": [
+         {
+          "choices": [],
+          "hint": "",
+          "key": "briefs",
+          "kind": "choice",
+          "label": "From these briefs",
+          "read": "brief_choices",
+          "required": true
+         },
+         {
+          "choices": [
+           "plain",
+           "warm"
+          ],
+          "hint": "",
+          "key": "intro",
+          "kind": "enum",
+          "label": "Intro",
+          "read": null,
+          "required": false
+         },
+         {
+          "choices": [],
+          "hint": "",
+          "key": "subject",
+          "kind": "text",
+          "label": "Subject",
+          "read": null,
+          "required": false
+         }
+        ],
+        "id": "compose",
+        "says": "An issue from the briefs you pick; every item is a brief's item, verbatim.",
+        "submit": "newsletter.compose",
+        "word": "Compose"
+       }
+      ],
+      "glyph": "mail",
+      "keys": {},
+      "kind": "send",
+      "lists": [
+       {
+        "card": "issue",
+        "count": "waiting",
+        "groups": [
+         {
+          "key": "waiting",
+          "word": "Waits for you"
+         },
+         {
+          "key": "sent",
+          "word": "Sent or scheduled"
+         },
+         {
+          "key": "closed",
+          "word": "Declined or expired"
+         }
+        ],
+        "id": "issues",
+        "read": "issues",
+        "word": "Issues"
+       }
+      ],
+      "nav": [],
+      "pages": [],
+      "settings_group": null,
+      "tile": {
+       "count": "count",
+       "line": "Monday's issue from the week's briefs",
+       "tone": "wait",
+       "words": "waits for Send"
+      },
+      "today_rows": [
+       {
+        "card": "issue",
+        "group": "needs_you",
+        "kind": "issue",
+        "primary": "send.newsletter",
+        "read": "rows"
+       }
+      ],
+      "widgets": []
+     },
+     "version": "1.2.0"
+    },
+    "mode": "drafts only",
+    "pinned": true,
+    "refused": null,
+    "says": "Monday's issue from the week's News briefs, assembled item by item from what the briefs say, for you to read and send through your newsletter platform.",
+    "settings": [
+     {
+      "by_hand": false,
+      "choices": [],
+      "default": true,
+      "hi": null,
+      "key": "newsletter.enabled",
+      "lo": null,
+      "per_topic": false,
+      "sensitive": false,
+      "type": "bool",
+      "value": true,
+      "words": "the weekly issue"
+     },
+     {
+      "by_hand": false,
+      "choices": [],
+      "default": [],
+      "hi": null,
+      "key": "newsletter.topics",
+      "lo": null,
+      "per_topic": false,
+      "sensitive": false,
+      "type": "topics",
+      "value": [],
+      "words": "the topics an issue reads (none picked: every topic News is on for)"
+     },
+     {
+      "by_hand": false,
+      "choices": [
+       "plain",
+       "warm"
+      ],
+      "default": "plain",
+      "hi": null,
+      "key": "newsletter.intro",
+      "lo": null,
+      "per_topic": false,
+      "sensitive": false,
+      "type": "enum",
+      "value": "plain",
+      "words": "the intro's tone"
+     },
+     {
+      "by_hand": false,
+      "choices": [],
+      "default": 12,
+      "hi": 30,
+      "key": "newsletter.max_items",
+      "lo": 3,
+      "per_topic": false,
+      "sensitive": false,
+      "type": "int",
+      "value": 12,
+      "words": "items an issue at most"
+     },
+     {
+      "by_hand": false,
+      "choices": [],
+      "default": "This week",
+      "hi": null,
+      "key": "newsletter.subject_prefix",
+      "lo": null,
+      "per_topic": false,
+      "sensitive": false,
+      "type": "str",
+      "value": "This week",
+      "words": "the subject's first words"
+     },
+     {
+      "by_hand": false,
+      "choices": [],
+      "default": "now",
+      "hi": null,
+      "key": "newsletter.send_at",
+      "lo": null,
+      "per_topic": false,
+      "sensitive": false,
+      "type": "str",
+      "value": "now",
+      "words": "now, or a UTC time of day like 09:30: your press schedules it then (cancel it at the platform)"
+     }
+    ],
+    "spend": {
+     "calls": 0,
+     "equiv_usd": 0.0,
+     "month_usd": 0.0,
+     "today_usd": 0.0
+    },
+    "tickets_open": 0,
+    "tile": {
+     "count": 1,
+     "line": "Monday's issue from the week's briefs",
+     "tone": "wait",
+     "words": "waits for Send"
+    },
+    "title": "Newsletter",
+    "trust": "owner",
+    "version": "1.2.0"
+   }
+  ],
+  "reads": [
+   "topics.list",
+   "library.observations",
+   "library.search",
+   "themes.list",
+   "themes.get",
+   "ideas.list",
+   "ideas.get",
+   "briefs.list",
+   "briefs.get",
+   "objects.get",
+   "events.read",
+   "spend.mine"
+  ],
+  "request_kinds": [
+   "book.propose",
+   "draft.sanity",
+   "post.mastodon",
+   "send.buttondown",
+   "send.newsletter"
+  ],
+  "request_schemas": {
+   "book.propose": {
+    "alias_of": null,
+    "doors": [
+     "ui"
+    ],
+    "expires_hours": 24,
+    "fields": [
+     {
+      "choices": [],
+      "key": "legs",
+      "label": "Legs",
+      "type": "str"
+     },
+     {
+      "choices": [],
+      "key": "total",
+      "label": "Total",
+      "type": "float"
+     },
+     {
+      "choices": [
+       "EUR",
+       "USD",
+       "GBP"
+      ],
+      "key": "currency",
+      "label": "Currency",
+      "type": "enum"
+     },
+     {
+      "choices": [],
+      "key": "links",
+      "label": "Where you pay",
+      "type": "str"
+     }
+    ],
+    "first_party_only": false,
+    "page_only": true,
+    "per_day": 3,
+    "performs": false,
+    "title": "Propose this trip"
+   },
+   "draft.sanity": {
+    "alias_of": null,
+    "doors": [
+     "ui"
+    ],
+    "expires_hours": 72,
+    "fields": [
+     {
+      "choices": [],
+      "key": "draft_ref",
+      "label": "Draft",
+      "type": "str"
+     },
+     {
+      "choices": [],
+      "key": "title",
+      "label": "Title",
+      "type": "str"
+     },
+     {
+      "choices": [],
+      "key": "slug",
+      "label": "Slug",
+      "type": "str"
+     },
+     {
+      "choices": [
+       "dispatch",
+       "build"
+      ],
+      "key": "category",
+      "label": "Category",
+      "type": "enum"
+     }
+    ],
+    "first_party_only": false,
+    "page_only": true,
+    "per_day": 3,
+    "performs": true,
+    "title": "File this draft in Sanity"
+   },
+   "post.mastodon": {
+    "alias_of": null,
+    "doors": [
+     "ui"
+    ],
+    "expires_hours": 48,
+    "fields": [
+     {
+      "choices": [],
+      "key": "draft_ref",
+      "label": "Draft",
+      "type": "str"
+     },
+     {
+      "choices": [],
+      "key": "text",
+      "label": "Text",
+      "type": "str"
+     },
+     {
+      "choices": [
+       "public",
+       "unlisted",
+       "private"
+      ],
+      "key": "visibility",
+      "label": "Visibility",
+      "type": "enum"
+     },
+     {
+      "choices": [],
+      "key": "language",
+      "label": "Language",
+      "type": "str"
+     }
+    ],
+    "first_party_only": false,
+    "page_only": true,
+    "per_day": 5,
+    "performs": true,
+    "title": "Publish this post"
+   },
+   "send.buttondown": {
+    "alias_of": "send.newsletter",
+    "doors": [
+     "ui"
+    ],
+    "expires_hours": 48,
+    "fields": [
+     {
+      "choices": [],
+      "key": "draft_ref",
+      "label": "Draft",
+      "type": "str"
+     },
+     {
+      "choices": [],
+      "key": "subject",
+      "label": "Subject",
+      "type": "str"
+     },
+     {
+      "choices": [
+       "all"
+      ],
+      "key": "audience",
+      "label": "To",
+      "type": "enum"
+     }
+    ],
+    "first_party_only": false,
+    "page_only": true,
+    "per_day": 3,
+    "performs": true,
+    "title": "Send this issue"
+   },
+   "send.newsletter": {
+    "alias_of": null,
+    "doors": [
+     "ui"
+    ],
+    "expires_hours": 48,
+    "fields": [
+     {
+      "choices": [],
+      "key": "draft_ref",
+      "label": "Draft",
+      "type": "str"
+     },
+     {
+      "choices": [],
+      "key": "subject",
+      "label": "Subject",
+      "type": "str"
+     },
+     {
+      "choices": [
+       "all"
+      ],
+      "key": "audience",
+      "label": "To",
+      "type": "enum"
+     },
+     {
+      "choices": [],
+      "key": "when",
+      "label": "When",
+      "type": "str"
+     }
+    ],
+    "first_party_only": false,
+    "page_only": true,
+    "per_day": 3,
+    "performs": true,
+    "title": "Send this issue"
+   }
+  }
+ },
+ "/api/shell": {
+  "cubs": [
+   {
+    "hidden": false,
+    "id": "newsletter",
+    "needs_you": true,
+    "new": true,
+    "pinned": true,
+    "place": 2,
+    "trust": "owner"
+   }
+  ],
+  "custom": true,
+  "doors": true,
+  "hidden": [],
+  "home": true,
+  "keys": [
+   {
+    "default": "new",
+    "hi": null,
+    "key": "shell.layout",
+    "lo": null,
+    "type": "enum",
+    "words": "the home and the four doors (new) or the navigator (classic)"
+   },
+   {
+    "default": null,
+    "hi": null,
+    "key": "shell.pins",
+    "lo": null,
+    "type": "list",
+    "words": "cubs pinned on the home, in order (at most 6)"
+   },
+   {
+    "default": [],
+    "hi": null,
+    "key": "shell.hidden",
+    "lo": null,
+    "type": "list",
+    "words": "cubs off the home, Needs you and New"
+   },
+   {
+    "default": 3,
+    "hi": 10,
+    "key": "shell.needs_cap",
+    "lo": 1,
+    "type": "int",
+    "words": "rows in Needs you at most"
+   },
+   {
+    "default": 4,
+    "hi": 10,
+    "key": "shell.new_cap",
+    "lo": 0,
+    "type": "int",
+    "words": "rows in New today at most"
+   },
+   {
+    "default": null,
+    "hi": null,
+    "key": "shell.widgets",
+    "lo": null,
+    "type": "list",
+    "words": "the home's widgets in order (null: the default home)"
+   }
+  ],
+  "layout": "new",
+  "needs_cap": 3,
+  "new_cap": 4,
+  "pins": [
+   "newsletter"
+  ],
+  "pins_max": 6,
+  "widgets": [
+   {
+    "builtin": true,
+    "id": "greeting",
+    "known": true,
+    "n": 0,
+    "options": {},
+    "phone": true,
+    "size": "L",
+    "sizes": [
+     "L"
+    ],
+    "title": "Greeting"
+   },
+   {
+    "builtin": true,
+    "id": "status",
+    "known": true,
+    "n": 1,
+    "options": {},
+    "phone": true,
+    "size": "L",
+    "sizes": [
+     "L",
+     "M"
+    ],
+    "title": "Status"
+   },
+   {
+    "builtin": true,
+    "id": "doors",
+    "known": true,
+    "n": 2,
+    "options": {},
+    "phone": true,
+    "size": "L",
+    "sizes": [
+     "L",
+     "M"
+    ],
+    "title": "Doors"
+   },
+   {
+    "builtin": true,
+    "id": "needs",
+    "known": true,
+    "n": 3,
+    "options": {},
+    "phone": true,
+    "size": "L",
+    "sizes": [
+     "L",
+     "M"
+    ],
+    "title": "Needs you"
+   },
+   {
+    "builtin": true,
+    "id": "new",
+    "known": true,
+    "n": 4,
+    "options": {},
+    "phone": true,
+    "size": "L",
+    "sizes": [
+     "L",
+     "M"
+    ],
+    "title": "New today"
+   },
+   {
+    "builtin": true,
+    "id": "cubs",
+    "known": true,
+    "n": 5,
+    "options": {},
+    "phone": true,
+    "size": "L",
+    "sizes": [
+     "L"
+    ],
+    "title": "Cubs"
+   },
+   {
+    "builtin": true,
+    "id": "foot",
+    "known": true,
+    "n": 6,
+    "options": {},
+    "phone": true,
+    "size": "L",
+    "sizes": [
+     "L"
+    ],
+    "title": "Foot"
+   }
+  ]
+ },
+ "/api/tickets": {
+  "tickets": [
+   {
+    "because": {
+     "briefs": [
+      1
+     ]
+    },
+    "created_at": "2026-10-21T05:40:00Z",
+    "expires_at": "2026-10-28T05:40:00Z",
+    "feature": "newsletter",
+    "id": 1,
+    "kind": "send.newsletter",
+    "readback": [
+     [
+      "Subject",
+      "This week: small robots in orchards"
+     ],
+     [
+      "Items",
+      "3"
+     ]
+    ],
+    "state": "needs_confirm",
+    "title": "Send this issue",
+    "trust": "owner"
+   }
+  ]
+ },
+ "/api/tickets/1": {
+  "because": {
+   "briefs": [
+    1
+   ]
+  },
+  "created_at": "2026-10-21T05:40:00Z",
+  "expires_at": "2026-10-28T05:40:00Z",
+  "feature": "newsletter",
+  "id": 1,
+  "kind": "send.newsletter",
+  "readback": [
+   [
+    "Subject",
+    "This week: small robots in orchards"
+   ],
+   [
+    "Items",
+    "3"
+   ]
+  ],
+  "state": "needs_confirm",
+  "title": "Send this issue",
+  "trust": "owner"
+ }
+}

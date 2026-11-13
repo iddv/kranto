@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: injector
+title: Injector
+says: Files posts that try to say more than a post.
+broker:
+  mastodon: [statuses.draft]
+requests: [post.mastodon]
+jobs:
+  - {kind: injector.file, method: file, every_hours: 24}
+storage: none

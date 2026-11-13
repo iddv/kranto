@@ -1,0 +1,204 @@
+name: ci
+# Every pull request and every push to main. Each job runs on the runner the repository variable
+# RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, and for a run
+# started by hand with "hosted", on GitHub's own runner. The required checks are the eight jobs
+# below: test, fast, slow, browser, frontend, lint, gitleaks and sandbox. A skipped required job
+# is never green.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      hosted:
+        description: "run every job on GitHub's own runner, whatever RUNNER says"
+        type: boolean
+        default: false
+
+# Read-only token: CI only reads the code and runs tests. No secret reaches any job.
+permissions:
+  contents: read
+
+# A newer push to the same pull request cancels its older run; each push to main keeps its own.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  UV_CACHE_DIR: ${{ github.workspace }}/../.uv-cache
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  # The server's tests (tests/, without tests/page), serial.
+  test:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --locked --extra dev --extra connections --extra notify
+      - name: pytest (the cub sandbox tests are the sandbox job's)
+        run: .venv/bin/pytest -q -rs tests
+
+  # The page's tests, everything under 5 s (tests/page/.test_durations decides).
+  fast:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --locked --extra dev --extra mcp
+      # a test skipped because an import failed fails the run here (tests/page/conftest.py)
+      - run: KRANTO_NO_IMPORT_SKIPS=1 uv run --no-sync pytest -q -rs tests/page -m "not slow" -n 4 --dist loadfile
+
+  # The page's tests of 5 s or more.
+  slow:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --locked --extra dev --extra mcp
+      - run: KRANTO_NO_IMPORT_SKIPS=1 uv run --no-sync pytest -q -rs tests/page -m slow -n 4 --dist loadfile
+
+  # The page in a real browser: every route on the fake app, no JS or HTTP error, no write.
+  browser:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --locked --extra dev --extra mcp --group browser
+      - run: python3 scripts/dev/build_ui.py
+      - run: bash scripts/ci/browser.sh
+
+  # The page's sources: type and a11y checks with warnings as errors, the component tests, the
+  # build within its size budget, and the audit of the lockfile. No install scripts.
+  frontend:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src/kranto/page/ui/web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: npm ci --ignore-scripts --no-audit --no-fund --prefer-offline
+      - run: npm run check
+      - run: npm test
+      - run: python3 ../../../../../scripts/dev/build_ui.py --no-install
+      - run: npm audit --audit-level=high
+
+  # Lint, the type check's ratchet, the stored-shape lint, the lock, and the public-tree scrub.
+  lint:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: uv.lock matches pyproject.toml
+        run: uv lock --check
+      - run: uv sync --locked --extra dev --extra mcp
+      - name: ruff
+        run: .venv/bin/ruff check src tests scripts
+      - name: the public tree (old names, private words, workflows)
+        run: python3 scripts/ci/scrub.py
+      - name: type check (mypy, the ratchet)
+        run: .venv/bin/python scripts/ci/typecheck.py
+      - name: stored-shape lint
+        run: .venv/bin/python scripts/ci/stored_shape_lint.py
+
+  # The commits this run adds: no attribution, no-reply author and committer addresses, the
+  # sign-off, the scrub's words over the messages and the pull request's text; and gitleaks.
+  gitleaks:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: the range this run adds
+        id: range
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          case "$EVENT" in
+            pull_request) range="$PR_BASE..$PR_HEAD" ;;
+            push) if git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then range="$BEFORE..$GITHUB_SHA"; else range="$GITHUB_SHA~1..$GITHUB_SHA"; fi ;;
+            *) range="HEAD~1..HEAD" ;;
+          esac
+          echo "range=$range" >> "$GITHUB_OUTPUT"
+      - name: No tool attribution in the commits or the pull request
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python3 scripts/ci/no_attribution.py "${{ steps.range.outputs.range }}"
+      - name: Commits and the pull request's text (addresses, words, sign-off)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python3 scripts/ci/scrub.py --commits "${{ steps.range.outputs.range }}" --dco
+      - name: Scan for secrets
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+          RANGE: ${{ steps.range.outputs.range }}
+        run: |
+          echo "scanning: $RANGE"
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          cd "$GITHUB_WORKSPACE"
+          "$RUNNER_TEMP/gitleaks" git --redact --verbose --no-banner --log-opts="$RANGE" .
+
+  # Both sandboxes in real bubblewrap, on every pull request: the cub runtime's security test
+  # plan and failure modes, and the console's box (the Claude token, credentials, the source
+  # repo, push, the network and an injected README, each tested against a probe inside the
+  # session). A sandbox that cannot start is a failure here, never a skip.
+  sandbox:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # GitHub's Ubuntu image has no bubblewrap, and its AppArmor forbids unprivileged user
+      # namespaces by default; a runner of your own brings its own (and has no sudo).
+      - name: bubblewrap (GitHub's runner only)
+        if: runner.environment == 'github-hosted'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends bubblewrap
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+      - name: can bubblewrap mount a fresh /proc here?
+        run: bwrap --unshare-all --die-with-parent --new-session --ro-bind / / --proc /proc true
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --locked --extra dev --extra connections --extra mcp
+      - name: the cub runtime's security plan and failure modes
+        run: >
+          KRANTO_CUBS_SANDBOX_REQUIRED=1 .venv/bin/pytest -q -rs
+          tests/test_cub_security.py tests/test_cub_runtime.py tests/test_cub_install.py
+          tests/test_brokers.py tests/test_examples_install.py
+      - name: the console's box
+        run: >
+          KRANTO_BWRAP_REQUIRED=1 KRANTO_TEST_REAL_CLAUDE="$(command -v claude || true)"
+          .venv/bin/pytest -q -rs tests/page/test_term_sandbox.py tests/page/test_term_door.py
+          tests/page/test_term_sources.py tests/page/test_print_call.py

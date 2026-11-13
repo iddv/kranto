@@ -1,0 +1,154 @@
+[build-system]
+requires = ["hatchling>=1.24", "hatch-vcs>=0.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kranto"
+# From the git tag (vX.Y.Z); between tags, X.Y.Z+1.devN+g<commit>.
+dynamic = ["version"]
+description = "Kranto watches the sources you care about, keeps what it notices, and turns it into ideas and posts."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{ name = "The Kranto authors" }]
+dependencies = [
+  "numpy>=1.26",
+  "fastembed>=0.4",
+  "pyyaml>=6.0",
+  "httpx>=0.27",
+  "defusedxml>=0.7",
+  "starlette>=0.40",
+  "jinja2>=3.1",
+  "uvicorn>=0.30",
+  # uvicorn's WebSocket protocol: the console's terminal (/brb/term/ws/<tid>).
+  # Without it uvicorn answers every upgrade with 404.
+  "websockets>=13",
+  "python-multipart>=0.0.9",
+  "scikit-learn>=1.4",
+  "umap-learn>=0.5.6",
+  "scipy>=1.10",
+  "trafilatura>=2.0",
+  # Registrable domains from the public suffix list (bundled, read offline). Already installed
+  # with trafilatura (through courlan).
+  "tld>=0.13",
+  # kranto cub eval runs a cub's own tests (its tests/, against bears_cub.testing.FakeHost)
+  "pytest>=8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff==0.16.10", "time-machine>=2.14", "cryptography>=42",
+       "jsonschema>=4.20", "hypothesis>=6.100", "mypy>=1.13", "pytest-randomly>=5.0.0",
+       "pytest-split>=0.11.0", "pytest-xdist>=3.8.0"]
+# Delivery of strikes, heartbeats and alarms to Apprise targets (BSD-2).
+notify = ["apprise>=1.6"]
+# Connected accounts: tokens encrypted with AES-256-GCM (Apache-2.0 / BSD-3).
+connections = ["cryptography>=42"]
+# kranto mcp (docs/mcp.md): the official MCP SDK, only for the local stdio server
+mcp = ["mcp>=1.8"]
+
+[dependency-groups]
+# the page in a real browser (tests/page/test_browser_*.py): only its CI job installs it
+browser = ["playwright==1.63.0"]
+
+[project.scripts]
+kranto = "kranto.launcher:main"
+# the command's name before the rename, the same function, kept until 1.0
+bears = "kranto.launcher:main"
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0+unknown"
+
+[tool.hatch.version.raw-options]
+local_scheme = "node-and-date"
+# A checkout's version counts from the last release that is not a nightly: setuptools-scm
+# refuses to count past a vX.Y.0-devN tag, so a clone with the tags could not build. Releases
+# set their version exactly (scripts/release/build.sh: SETUPTOOLS_SCM_PRETEND_VERSION).
+scm.git.describe_command = "git describe --dirty --tags --long --match v*.*.* --exclude *-dev*"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kranto", "src/bears_cub"]
+# The page's build (git-ignored, made by scripts/dev/build_ui.py before `uv build`) ships in the
+# wheel; its sources and node_modules never do. Users never need Node.
+artifacts = ["src/kranto/page/ui/static/app/**"]
+exclude = ["src/kranto/page/ui/web/**"]
+
+[tool.pytest.ini_options]
+# The server's tests. The page's tests (tests/page) are their own suite with their own
+# tests/page/pytest.ini: run them as `pytest tests/page`.
+testpaths = ["tests"]
+markers = ["slow: loads the real embedding model (downloads ~500MB on first use)"]
+addopts = "-m 'not slow' -p no:randomly"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["src/kranto/page/ui/web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# The page's code and tests: ignored until each is fixed by hand (a fix that changes code, not
+# a formatter's): long lines, closures over loop variables (each a possible bug, each with a
+# test), raise-from, open-without-with, the ContextVar default, and the rules after them.
+"src/kranto/page/**" = ["E501", "B023", "B904", "SIM115", "B039", "B007", "B017", "B905",
+                        "E402", "E702", "E731", "E741", "F402", "F811", "F841", "SIM102",
+                        "SIM105", "SIM108", "SIM201", "SIM222", "SIM401", "UP031"]
+"tests/page/**" = ["E501", "B023", "B904", "SIM115", "B039", "B007", "B017", "B905", "E402",
+                   "E702", "E731", "E741", "F402", "F811", "F841", "SIM102", "SIM105",
+                   "SIM108", "SIM201", "SIM222", "SIM401", "UP031"]
+"scripts/dev/build_ui.py" = ["E501"]
+"scripts/dev/gen_ts.py" = ["E501"]
+
+# The type check: scripts/ci/typecheck.py runs mypy with this table and compares each file's
+# error count with scripts/ci/typecheck_baseline.json, so a count can only fall. The overrides
+# are strict and widen one module set at a time.
+[tool.mypy]
+python_version = "3.12"
+files = ["src/kranto"]
+exclude = ["src/kranto/cubs/examples/", "src/kranto/page/ui/web/"]
+ignore_missing_imports = true        # fastembed, umap, trafilatura ship no stubs
+warn_unused_ignores = true
+warn_redundant_casts = true
+show_error_codes = true
+# the bodies of functions without annotations are checked too; the modules outside the strict
+# list keep their counts in typecheck_baseline.json, which only falls
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+# Strict where stored data is declared and read.
+module = ["kranto.stored", "kranto.stored.*", "kranto.web.types",
+          # sources.validation's readers and writers
+          "kranto.library", "kranto.source_health", "kranto.web.topics_api",
+          "kranto.scout", "kranto.resolve",
+          # runs.summary's readers and writers
+          "kranto.tick", "kranto.activity", "kranto.activity.*", "kranto.core.context",
+          "kranto.heartbeat", "kranto.doctor",
+          # the cards and the map
+          "kranto.ideate.cards", "kranto.web.ideas_api", "kranto.retention",
+          "kranto.map.read", "kranto.map.snapshot",
+          # the settings blobs, the events, the home
+          "kranto.core.events", "kranto.core.shell", "kranto.core.home", "kranto.setup",
+          "kranto.llm", "kranto.core.money", "kranto.newsletter",
+          # the cubs' registry, views, installs and tickets
+          "kranto.core.cubs.registry", "kranto.core.cubs.views", "kranto.core.cubs.install",
+          "kranto.core.tickets",
+          # the features' contracts and readers
+          "kranto.features.news", "kranto.features.news.api",
+          "kranto.features.news.brief", "kranto.features.news.check",
+          "kranto.features.news.cli", "kranto.features.news.evals",
+          "kranto.features.news.stored",
+          "kranto.product", "kranto.legacy"]
+# mypy's --strict, flag by flag: `strict` itself is global-only.
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+check_untyped_defs = true
+warn_return_any = true
+no_implicit_reexport = true
+strict_equality = true
+extra_checks = true

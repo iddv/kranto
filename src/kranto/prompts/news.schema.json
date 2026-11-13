@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["items", "quiet"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["headline", "body", "why", "cites", "date"],
+        "properties": {
+          "headline": {"type": "string"},
+          "body": {"type": "string"},
+          "why": {"type": "string"},
+          "cites": {"type": "array", "items": {"type": "string"}},
+          "date": {"type": "string"}
+        }
+      }
+    },
+    "quiet": {"type": ["string", "null"]}
+  }
+}

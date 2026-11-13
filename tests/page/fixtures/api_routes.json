@@ -1,0 +1,560 @@
+{
+ "GET /": [
+  200,
+  "text/html"
+ ],
+ "GET /index.html": [
+  200,
+  "text/html"
+ ],
+ "GET /static/theme.js": [
+  200,
+  "text/javascript"
+ ],
+ "GET /static/kranto.css": [
+  200,
+  "text/css"
+ ],
+ "GET /static/brand/favicon-16.png": [
+  200,
+  "image/png"
+ ],
+ "GET /static/nope.js": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /static/../api.py": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /static/": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /help": [
+  200,
+  "text/html"
+ ],
+ "GET /api/activity": [
+  200,
+  "application/json",
+  [
+   "afk_error",
+   "counts",
+   "failing",
+   "folded",
+   "health",
+   "incidents",
+   "next",
+   "now",
+   "paused",
+   "quiet",
+   "recent",
+   "running",
+   "scheduler",
+   "seq",
+   "waiting"
+  ]
+ ],
+ "GET /api/details": [
+  400,
+  "application/json",
+  "error: sel names the object: prep:<uuid>, ask:<id>, card:<n>, s<source id>"
+ ],
+ "GET /api/header": [
+  200,
+  "application/json",
+  [
+   "api_version",
+   "needs_you",
+   "onboarding",
+   "open_ideas",
+   "paused",
+   "queued",
+   "revising",
+   "running"
+  ]
+ ],
+ "GET /api/feedback/issue": [
+  200,
+  "application/json",
+  [
+   "can_file",
+   "gh",
+   "host",
+   "kinds",
+   "labels",
+   "line",
+   "login",
+   "places",
+   "reachable",
+   "repo",
+   "version"
+  ]
+ ],
+ "GET /api/term": [
+  200,
+  "application/json",
+  [
+   "ask",
+   "available",
+   "enabled",
+   "max_sessions",
+   "on",
+   "running",
+   "sandboxed",
+   "sessions",
+   "socket",
+   "sources_on",
+   "why"
+  ]
+ ],
+ "GET /api/term/session?tid=deadbeef": [
+  404,
+  "application/json",
+  "error: no such session"
+ ],
+ "GET /api/term/session": [
+  404,
+  "application/json",
+  "error: no such session"
+ ],
+ "GET /api/term/console": [
+  200,
+  "application/json",
+  [
+   "conversations",
+   "harness",
+   "harnesses",
+   "head",
+   "outside",
+   "plugin",
+   "settings",
+   "socket",
+   "why"
+  ]
+ ],
+ "GET /api/term/patch?tid=x&n=1": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/traces": [
+  200,
+  "application/json",
+  [
+   "next",
+   "traces"
+  ]
+ ],
+ "GET /api/traces?limit=x": [
+  400,
+  "application/json",
+  "error: limit must be a number"
+ ],
+ "GET /api/traces?source=build": [
+  200,
+  "application/json",
+  [
+   "next",
+   "traces"
+  ]
+ ],
+ "GET /api/traces?source=nope": [
+  400,
+  "application/json",
+  "error: source is one of all, session, afk, research, build, maint, loop"
+ ],
+ "GET /api/trace": [
+  400,
+  "application/json",
+  "error: trace is required (session:<tid>, afk:<uuid>)"
+ ],
+ "GET /api/trace?trace=build:nope/1": [
+  404,
+  "application/json",
+  "error: build traces left with the build loop: the list keeps their row, and they no longer open"
+ ],
+ "GET /api/trace?trace=session:deadbeef": [
+  404,
+  "application/json",
+  "error: no session 'deadbeef'"
+ ],
+ "GET /api/trace?trace=nope": [
+  404,
+  "application/json",
+  "error: not a trace id: 'nope'"
+ ],
+ "GET /api/trace/spans?trace=build:nope/1": [
+  404,
+  "application/json",
+  "error: build traces left with the build loop: the list keeps their row, and they no longer open"
+ ],
+ "GET /api/trace/spans": [
+  400,
+  "application/json",
+  "error: trace is required (session:<tid>, afk:<uuid>)"
+ ],
+ "GET /api/trace/span?trace=build:nope/1": [
+  400,
+  "application/json",
+  "error: span is required"
+ ],
+ "GET /api/trace/payload?trace=build:nope/1&span=x": [
+  404,
+  "application/json",
+  "error: build traces left with the build loop: the list keeps their row, and they no longer open"
+ ],
+ "GET /api/trace/download": [
+  400,
+  "application/json",
+  "error: trace is required (session:<tid>, afk:<uuid>)"
+ ],
+ "GET /api/trace/compare?a=x&b=y": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/trace/nope": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/tracer": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /classic": [
+  200,
+  "text/html"
+ ],
+ "GET /loop": [
+  200,
+  "text/html"
+ ],
+ "GET /loop/feed.xml": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /history": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/kranto": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/loop": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/loop/settings": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/models": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/spend/breakdown": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/prompts": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/capabilities": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/extensions": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/plugins": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/maintain/summary": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/projects": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/project?id=nope": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/changes": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/actions": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/outcomes": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/build?dir=nope": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/builds": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/run": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/events": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/text": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/info": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/chat": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/github/app": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/claude/login": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/nothing": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /nothing": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET ": [
+  200,
+  "text/html"
+ ],
+ "POST /api/activity/stop {}": [
+  404,
+  "application/json",
+  "error: no such run, or it cannot be stopped"
+ ],
+ "POST /api/term/settings {}": [
+  400,
+  "application/json",
+  "error: only the console's settings (term.…) are written here"
+ ],
+ "POST /api/term/settings {\"key\": \"loop.paused\", \"value\": true}": [
+  400,
+  "application/json",
+  "error: only the console's settings (term.…) are written here"
+ ],
+ "POST /api/feedback/issue {}": [
+  400,
+  "application/json",
+  "error: kind is one of bug, idea, question"
+ ],
+ "POST /api/term/open {}": [
+  503,
+  "application/json",
+  "error: Open in Claude Code needs Kranto itself (kranto up): `brb ui` alone has no terminal."
+ ],
+ "POST /api/term/end {}": [
+  404,
+  "application/json",
+  "error: no such session"
+ ],
+ "POST /api/term/answer {\"n\": \"x\", \"tid\": \"deadbeef\"}": [
+  400,
+  "application/json",
+  "error: n must be a number"
+ ],
+ "POST /api/act {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/act {\"kind\": \"nope\"}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/loop/add {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/new {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/start {\"dir\": \"nope\"}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/stop {\"dir\": \"nope\"}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/models {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/prompts {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/spend {\"daily_usd\": \"x\"}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/maintain/act {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/github/app {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/chat/send {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/nothing {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /nothing {}": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/term/settings {} as mcp": [
+  403,
+  "application/json",
+  "error: the mcp token does not write to the page; an assistant acts through Kranto's verbs"
+ ],
+ "POST /api/act {\"kind\": \"nope\"} as agent:helper": [
+  403,
+  "application/json",
+  "error: the agent:helper token does not write to the page; an assistant acts through Kranto's verbs"
+ ],
+ "POST /api/nothing {} as ui": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "GET /api/traces as agent:helper": [
+  403,
+  "application/json",
+  "error: a trace is the owner's to read: the page signed in, or the command line"
+ ],
+ "GET /api/traces as mcp": [
+  403,
+  "application/json",
+  "error: a trace is the owner's to read: the page signed in, or the command line"
+ ],
+ "GET /api/traces as ui": [
+  200,
+  "application/json",
+  [
+   "next",
+   "traces"
+  ]
+ ],
+ "PUT /": [
+  405,
+  "application/json",
+  "error: method not allowed"
+ ],
+ "DELETE /api/act": [
+  405,
+  "application/json",
+  "error: method not allowed"
+ ],
+ "HEAD /api/header": [
+  200,
+  "application/json",
+  [
+   "api_version",
+   "needs_you",
+   "onboarding",
+   "open_ideas",
+   "paused",
+   "queued",
+   "revising",
+   "running"
+  ]
+ ],
+ "HEAD /nothing": [
+  404,
+  "application/json",
+  "error: not found"
+ ],
+ "POST /api/act (not JSON)": [
+  400,
+  "application/json",
+  "error: body must be JSON"
+ ],
+ "POST /api/act (a list)": [
+  400,
+  "application/json",
+  "error: body must be a JSON object"
+ ]
+}

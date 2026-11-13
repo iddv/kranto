@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: hostile
+title: Hostile
+says: Hangs, forks, eats memory and spins.
+jobs:
+  - {kind: hostile.hang, method: hang, every_hours: 24, deadline_s: 10}
+  - {kind: hostile.fork, method: fork, every_hours: 24, deadline_s: 60}
+  - {kind: hostile.hog, method: hog, every_hours: 24, deadline_s: 60}
+  - {kind: hostile.spin, method: spin, every_hours: 24, deadline_s: 10}
+storage: none

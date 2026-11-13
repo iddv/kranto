@@ -1,0 +1,76 @@
+# A cub for Kranto (cub.yaml, schema 1). Every key kranto reads is here; the ones you do not
+# need may be deleted (each has a default). Kranto shows this file to its owner in words before
+# anything runs, and refuses a key it does not know.
+schema: 1
+api: cub/1
+id: my_cub                      # lowercase letters, digits and _; the prefix of everything below
+name: local/my-cub              # local/<name> for your own; io.github.<you>/<name> for the index
+version: 0.1.0                  # semver; a changed file needs a new version
+bears: ">=0.5.19,<0.7"          # Kranto versions you tested with; 0.5.19 first reads ui.primary, a list's empty, a group's tone and a card's open
+title: My cub
+says: Drafts one short post a week from your library's strongest observation, for you to read and approve.
+entry: main.py
+requirements: null              # or requirements.txt: exact pins with hashes only
+
+# What it may read (the v1 read surface): topics, library, themes, ideas, briefs, events,
+# objects, spend.
+reads: [topics, library]
+events:
+  subscribe:
+    - {kind: ticket.resolved, min_trust: core, method: on_resolved}   # Kranto's answer to its tickets
+  publish: []                   # kinds it owns, each starting with my_cub.
+jobs:
+  - kind: my_cub.weekly
+    method: weekly
+    every_hours: 168
+    at: "09:00"                 # local time; with days, once on those days
+    days: [fri]
+    when: my_cub.enabled
+    purpose: my_cub
+    deadline_s: 180
+    says: "Friday 09:00: drafts a post from the week's strongest observation"
+actions:
+  - kind: my_cub.draft_now
+    title: Draft a post now
+    method: draft_now
+    doors: [ui, cli]
+    fields:
+      - {key: tone, label: Tone, kind: enum, choices: [plain, playful]}
+provides: [posts, count, widget_waiting]   # reads the page's lists, tiles and widgets call
+requests: [post.mastodon]       # what it may ask you to do: each one a ticket you confirm
+broker:
+  mastodon: [statuses.draft]    # a draft Kranto holds; posting is Kranto's, after your press
+http: {hosts: []}               # public names it may GET through Kranto, without credentials
+model: {tiers: [reason], purposes: [my_cub], monthly_usd: 1}
+search: []
+storage: own                    # its own key-value store, held by Kranto
+settings:
+  keys:
+    my_cub.enabled: {type: bool, default: true, words: "a post a week"}
+    my_cub.tone: {type: enum, default: plain, choices: [plain, playful], words: "the post's tone", group: The post}
+  sensitive: []
+  per_topic: []
+ui:
+  kind: post
+  glyph: pen
+  tile: {line: "A post a week from your library", count: count, words: "waits for you", tone: wait}
+  # The page's head: its one primary (one of ui.forms; none: the first form). A list says, when
+  # empty, what will appear and when; a group's tone colours its rows (wait, good, bad, new, quiet).
+  lists:
+    - {id: posts, word: Posts, read: posts, card: post,
+       groups: [{key: waiting, word: Waits for you, tone: wait}, {key: done, word: Done, tone: good}], count: waiting,
+       empty: "No post yet. Each week a post is drafted from your library."}
+  cards:
+    post:
+      title: text
+      fields:
+        - {key: date, label: Date, kind: date}
+        - {key: state, label: State, kind: text}
+  # On the home only once its owner adds it from the library (Arrange › Add a widget). The read
+  # answers the kind's shape (stat: {value, words}); Kranto checks it and draws it as text.
+  widgets:
+    - {id: waiting, title: Posts waiting, says: "Drafted posts that wait for your press.",
+       kind: stat, read: widget_waiting, sizes: [S, M], every_s: 300, open: posts,
+       empty: "Nothing waits for you."}
+docs:
+  page: README.md

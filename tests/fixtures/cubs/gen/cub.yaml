@@ -1,0 +1,11 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: gen
+title: Generated
+says: Publishes a thing.
+events: {publish: [gen.thing]}
+jobs:
+  - {kind: gen.say, method: say, every_hours: 24}
+storage: none

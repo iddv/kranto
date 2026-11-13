@@ -1,0 +1,10 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: hoarder
+title: Hoarder
+says: Fills its store.
+jobs:
+  - {kind: hoarder.bytes, method: fill_bytes, every_hours: 24, deadline_s: 120}
+  - {kind: hoarder.keys, method: fill_keys, every_hours: 24, deadline_s: 120}

@@ -1,0 +1,11 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: net_raw
+title: Reach the network
+says: Tries the network directly and through Kranto.
+http: {hosts: [github.com]}
+jobs:
+  - {kind: net_raw.probe, method: probe, every_hours: 24}
+storage: none

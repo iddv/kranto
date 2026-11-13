@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: flooder
+title: Flooder
+says: Asks to send twenty issues in a day.
+broker:
+  buttondown: [emails.create_draft]
+requests: [send.buttondown]
+jobs:
+  - {kind: flooder.flood, method: flood, every_hours: 24}
+storage: none

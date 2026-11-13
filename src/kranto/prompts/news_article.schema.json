@@ -1,0 +1,125 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "headline", "standfirst", "sections", "numbers", "timeline", "series",
+               "entities", "relations", "themes", "idea_seed", "quiet"],
+  "properties": {
+    "kind": {"type": "string", "enum": ["paper", "release", "funding", "incident", "trend", "other"]},
+    "headline": {"type": "string"},
+    "standfirst": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "cites"],
+      "properties": {
+        "text": {"type": "string"},
+        "cites": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "paragraphs"],
+        "properties": {
+          "id": {"type": "string", "enum": ["what", "why", "before", "who", "next"]},
+          "title": {"type": "string"},
+          "paragraphs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["text", "cites"],
+              "properties": {
+                "text": {"type": "string"},
+                "cites": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          }
+        }
+      }
+    },
+    "numbers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "value", "unit", "cites"],
+        "properties": {
+          "label": {"type": "string"},
+          "value": {"type": "string"},
+          "unit": {"type": "string"},
+          "cites": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["date", "event", "cites"],
+        "properties": {
+          "date": {"type": "string"},
+          "event": {"type": "string"},
+          "cites": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "series": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "unit", "cites", "points"],
+          "properties": {
+            "name": {"type": "string"},
+            "unit": {"type": "string"},
+            "cites": {"type": "array", "items": {"type": "string"}},
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["x", "y"],
+                "properties": {"x": {"type": "string"}, "y": {"type": "number"}}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "kind", "cites"],
+        "properties": {
+          "name": {"type": "string"},
+          "kind": {"type": "string", "enum": ["company", "lab", "product", "model", "project",
+                                              "benchmark", "paper", "other"]},
+          "cites": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "kind", "cites"],
+        "properties": {
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "kind": {"type": "string"},
+          "cites": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "themes": {"type": "array", "items": {"type": "string"}},
+    "idea_seed": {"type": ["string", "null"]},
+    "quiet": {"type": ["string", "null"]}
+  }
+}

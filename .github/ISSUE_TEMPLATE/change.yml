@@ -1,0 +1,29 @@
+name: Change
+description: A feature or a design change
+labels: [enhancement]
+body:
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What goes wrong or is missing today. Evidence beats opinion; see docs/design/DECISIONS.md for how past decisions were argued.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: The tests or measurements that would show it works.
+    validations:
+      required: true
+  - type: textarea
+    id: principles
+    attributes:
+      label: Principles touched
+      description: Which entries in docs/design/DECISIONS.md this relies on or changes, if any.

@@ -1,0 +1,12 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: asker
+title: Asker
+says: Files a ticket, then waits.
+requests: [send.test]
+jobs:
+  - {kind: asker.ask, method: ask, every_hours: 24}
+  - {kind: asker.wait, method: wait, every_hours: 24, deadline_s: 120}
+storage: none

@@ -1,0 +1,15 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: reader
+title: Reader
+says: Reads the library.
+reads: [topics, library, objects]
+jobs:
+  - {kind: reader.probe, method: probe, every_hours: 24}
+settings:
+  keys:
+    reader.other_topic: {type: int, default: 0}
+    reader.other_obs: {type: int, default: 0}
+storage: none

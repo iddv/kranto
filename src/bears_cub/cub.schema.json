@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kranto.dev/schemas/cub.yaml/1",
+  "title": "cub.yaml, schema 1",
+  "description": "A cub's one declaration. Data only: code is attached by method name over the cub/1 pipe. Every object is closed (additionalProperties: false): a key the core does not know is refused, as capability.yaml's rule is. A first-party Feature's to_manifest() produces the same shape (with provides, owns and ui.pages filled, which a shipped cub.yaml may not use). The same validator checks both.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "api", "id", "version", "title", "says"],
+  "properties": {
+    "schema": {"const": 1, "description": "The manifest schema. A newer number needs a newer Kranto: refused in words."},
+    "api": {"const": "cub/1", "description": "The protocol this cub speaks. A cub/2 manifest is refused at install by a Kranto that speaks cub/1 only."},
+    "id": {"$ref": "#/$defs/id", "description": "Unique per install. The prefix of its events, jobs, actions, settings keys, purposes and its line on Spend. Never a reserved word: a kranto.yaml section name, a first-party feature id, core, Kranto, cub, cubs, shell."},
+    "name": {"type": "string", "pattern": "^(io\\.github\\.[a-z0-9-]{1,39}|com\\.[a-z0-9.-]{3,80}|local)/[a-z0-9-]{1,40}$", "description": "The namespace name for the index (reverse DNS,). Optional until the index exists; local/<id> for an owner's folder."},
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+([-+][0-9A-Za-z.-]+)?$", "description": "Semver. A changed tree or manifest without a new version refuses to run (the pin)."},
+    "bears": {"type": "string", "pattern": "^(>=|<=|<|>|==)\\d+\\.\\d+(\\.\\d+)?(\\s*,\\s*(>=|<=|<|>|==)\\d+\\.\\d+(\\.\\d+)?)*$", "description": "The host versions this cub was tested with (\">=0.5,<0.7\"). Outside it the cub runs dry only and the page says why. Absent: any."},
+    "title": {"type": "string", "minLength": 1, "maxLength": 80},
+    "says": {"type": "string", "minLength": 1, "maxLength": 300, "description": "Shown to the owner, never to a model."},
+    "trust": {"type": "string", "enum": ["first-party", "owner", "reviewed", "listed", "unreviewed", "generated"], "description": "Set by the core at install from the source; a value in a shipped file is ignored and overwritten. first-party is accepted only from an in-tree Feature."},
+    "entry": {"type": "string", "default": "main.py", "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]{0,120}\\.py$", "description": "The Python file the SDK runner loads, relative to the cub's folder; never a path outside it (.. refused)."},
+    "runtime": {"type": "string", "enum": ["python3.12"], "default": "python3.12", "description": "The base interpreter the core binds read-only. One value in schema 1."},
+    "requirements": {"type": ["string", "null"], "default": null, "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]{0,120}\\.txt$", "description": "A requirements file of exact pins with hashes (uv pip install --require-hashes --only-binary :all:), installed once at install time into the cub's own venv. null: no dependencies (the common case; the index's listed tier requires it)."},
+    "reads": {"type": "array", "maxItems": 8, "uniqueItems": true, "items": {"type": "string", "enum": ["topics", "library", "themes", "ideas", "briefs", "events", "objects", "spend"]}, "default": []},
+    "events": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "publish": {"type": "array", "maxItems": 10, "uniqueItems": true, "items": {"$ref": "#/$defs/kind"}, "description": "Kinds this cub owns. A cub's kinds are prefixed with its id (newsletter.drafted). A core kind or another publisher's kind is refused."},
+        "subscribe": {"type": "array", "maxItems": 20, "items": {
+          "type": "object", "additionalProperties": false, "required": ["kind"],
+          "properties": {
+            "kind": {"$ref": "#/$defs/kind"},
+            "min_trust": {"type": "string", "enum": ["core", "first-party", "owner", "reviewed", "listed", "unreviewed", "generated"], "default": "unreviewed", "description": "Events below this trust are never delivered to this cub."},
+            "method": {"$ref": "#/$defs/method", "description": "The handler the host calls with a batch (event.deliver). Absent: the cub pulls with events.read at its own run."}
+          }}}
+      },
+      "default": {"publish": [], "subscribe": []}
+    },
+    "jobs": {"type": "array", "maxItems": 10, "items": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "every_hours"],
+      "properties": {
+        "kind": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,39}\\.[a-z][a-z0-9_]{0,39}$", "description": "<id>.<job>; the runs.kind the host records."},
+        "method": {"$ref": "#/$defs/method", "description": "The SDK handler (default: the kind's second part)."},
+        "every_hours": {"type": "number", "minimum": 0.25, "maximum": 168},
+        "at": {"type": ["string", "null"], "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$", "default": null, "description": "Local clock time: with it the job is due once a day (or on the listed days) at or after this time, every_hours ignored but kept as the retry cap."},
+        "days": {"type": "array", "maxItems": 7, "uniqueItems": true, "items": {"type": "string", "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]}, "default": []},
+        "per": {"type": ["string", "null"], "enum": ["topic", null], "default": null},
+        "on": {"type": "array", "maxItems": 10, "items": {"$ref": "#/$defs/kind"}, "default": [], "description": "Event kinds that also make the job due (the cub must subscribe to them)."},
+        "when": {"type": ["string", "null"], "default": null, "description": "A bool setting key of this cub that turns the job off (shown off in Health, never absent)."},
+        "purpose": {"type": ["string", "null"], "default": null},
+        "deadline_s": {"type": "integer", "minimum": 10, "maximum": 3600, "default": 600},
+        "says": {"type": "string", "maxLength": 200, "default": ""}
+      }}, "default": []},
+    "actions": {"type": "array", "maxItems": 20, "items": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "title"],
+      "properties": {
+        "kind": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,39}\\.[a-z][a-z0-9_]{0,39}$"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 60},
+        "method": {"$ref": "#/$defs/method"},
+        "doors": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["ui", "cli"]}, "default": ["ui", "cli"], "description": "mcp and agent are never doors to a cub's action in schema 1."},
+        "click": {"type": "string", "enum": ["click", "confirm"], "default": "click", "description": "house is the core's alone."},
+        "subjects": {"type": "array", "maxItems": 3, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,39}$"}, "default": []},
+        "says": {"type": "string", "maxLength": 200, "default": ""},
+        "fields": {"$ref": "#/$defs/fields"},
+        "place": {"type": "string", "enum": ["card"], "default": "card", "description": "head is first-party only in schema 1."}
+      }}, "default": []},
+    "provides": {"type": "array", "maxItems": 20, "uniqueItems": true, "items": {"$ref": "#/$defs/method"}, "default": [], "description": "Read handlers the page's lists, tiles, rows and choices call (GET /api/f/<id>/<name>), served by the cub's process and cached 10 s by the host. A name of the form <family>.<verb> with a v1 family is refused for a cub (only first-party features add to the v1 surface)."},
+    "requests": {"type": "array", "maxItems": 5, "uniqueItems": true, "items": {"type": "string", "pattern": "^(post|send|draft|trade|book|publish)\\.[a-z][a-z0-9_]{0,39}$"}, "default": [], "description": "The core's high-trust actions this cub may ask for, each a ticket the owner confirms. Must exist in this Kranto (request_schemas)."},
+    "broker": {"type": "object", "maxProperties": 3, "additionalProperties": false, "patternProperties": {"^[a-z][a-z0-9_]{1,30}$": {"type": "array", "minItems": 1, "maxItems": 20, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"}}}, "default": {}, "description": "Typed operations on a named service the core performs with the owner's credential. Every (service, op) must be one the core's adapter offers as read or draft; a perform op is never grantable."},
+    "http": {"type": "object", "additionalProperties": false, "properties": {"hosts": {"type": "array", "maxItems": 20, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9]([a-z0-9-]{0,62}\\.)+[a-z]{2,}$"}, "default": []}}, "default": {"hosts": []}, "description": "Public DNS names the cub may GET through the host (http.fetch), without credentials. Never an IP literal, never a wildcard; a subdomain of a listed name is allowed."},
+    "model": {"type": "object", "additionalProperties": false, "properties": {
+      "tiers": {"type": "array", "maxItems": 2, "uniqueItems": true, "items": {"type": "string", "enum": ["judge", "reason"]}, "default": []},
+      "purposes": {"type": "array", "maxItems": 10, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,39}(_[a-z0-9_]{1,40})?$"}, "default": [], "description": "Each is the cub's id or starts with <id>_."},
+      "monthly_usd": {"type": ["number", "null"], "minimum": 0, "default": null, "description": "The cap the cub asks for. The owner's setting cubs.<id>.monthly_usd wins; the core's default for a stranger's cub is 5."}
+    }, "default": {"tiers": [], "purposes": [], "monthly_usd": null}},
+    "search": {"type": "array", "maxItems": 4, "uniqueItems": true, "items": {"type": "string", "enum": ["web", "discussion", "code", "papers"]}, "default": []},
+    "storage": {"type": "string", "enum": ["own", "none"], "default": "own", "description": "own: the host-held key-value store (kv.*) under the cub's quota, and /tmp. A cub never owns tables (owns must be empty)."},
+    "owns": {"type": "array", "maxItems": 0, "default": [], "description": "First-party only (a feature's <id>_ tables). Non-empty refuses a cub."},
+    "settings": {"type": "object", "additionalProperties": false, "properties": {
+      "keys": {"type": "object", "maxProperties": 40, "additionalProperties": false, "patternProperties": {"^[a-z][a-z0-9_]{1,39}\\.[a-z][a-z0-9_.]{0,60}$": {
+        "type": "object", "additionalProperties": false, "required": ["type"],
+        "properties": {
+          "type": {"type": "string", "enum": ["bool", "int", "float", "usd", "enum", "str", "list", "topics"], "description": "topics: which of the owner's topics, a list of topic ids (empty: every topic); the core draws its topic picker for it."},
+          "default": {},
+          "choices": {"type": "array", "maxItems": 50, "items": {"type": ["string", "integer", "number"]}, "default": []},
+          "lo": {"type": ["number", "null"], "default": null},
+          "hi": {"type": ["number", "null"], "default": null},
+          "words": {"type": "string", "maxLength": 120, "default": ""},
+          "by_hand": {"type": "boolean", "default": false},
+          "group": {"type": "string", "maxLength": 24, "default": "", "description": "The heading it sits under on Settings › <Cub> (empty: \"<Cub>'s settings\")."},
+          "advanced": {"type": "boolean", "default": false, "description": "Under the Settings page's Advanced fold."}
+        }}}, "default": {}},
+      "sensitive": {"type": "array", "items": {"type": "string"}, "default": []},
+      "per_topic": {"type": "array", "items": {"type": "string"}, "default": []}
+    }, "default": {"keys": {}, "sensitive": [], "per_topic": []}},
+    "ui": {"type": "object", "additionalProperties": false, "properties": {
+      "area": {"type": ["string", "null"], "default": null},
+      "nav": {"type": "array", "maxItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["route", "word", "under"], "properties": {"route": {"type": "string"}, "word": {"type": "string", "maxLength": 24}, "under": {"type": "string"}, "count": {"type": ["string", "null"]}}}, "default": []},
+      "pages": {"type": "array", "maxItems": 0, "default": [], "description": "First-party only: a cub ships no page code."},
+      "today_rows": {"type": "array", "maxItems": 3, "items": {"type": "object", "additionalProperties": false, "required": ["kind", "read"], "properties": {
+        "kind": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,39}$"},
+        "read": {"$ref": "#/$defs/method"},
+        "group": {"type": "string", "enum": ["needs_you", "new"], "default": "new"},
+        "primary": {"type": "string", "default": "open", "description": "open, confirm, one of its actions, or one of its request kinds."},
+        "card": {"type": ["string", "null"], "default": null}
+      }}, "default": []},
+      "cards": {"type": "object", "maxProperties": 10, "additionalProperties": false, "patternProperties": {"^[a-z][a-z0-9_]{0,39}$": {"type": "object", "additionalProperties": false, "properties": {
+        "title": {"type": "string", "maxLength": 80},
+        "lines": {"type": "array", "maxItems": 6, "items": {"type": "string", "maxLength": 80}, "default": []},
+        "fields": {"type": "array", "maxItems": 12, "items": {"type": "object", "additionalProperties": false, "required": ["key", "label", "kind"], "properties": {"key": {"type": "string", "maxLength": 80}, "label": {"type": "string", "maxLength": 40}, "kind": {"type": "string", "enum": ["text", "date", "money", "link", "ref", "number", "list"]}}}, "default": []},
+        "actions": {"type": "array", "maxItems": 3, "items": {"type": "string"}, "default": []},
+        "origin": {"type": ["string", "null"], "default": null},
+        "image_ref": {"type": ["string", "null"], "default": null},
+        "open": {"type": "string", "enum": ["sheet", "page"], "default": "sheet", "description": "page: an object you read opens as a page of its own (cub/<id>/o/<oid>), its body field the page's text; sheet: the one sheet."},
+        "body": {"type": ["string", "null"], "maxLength": 80, "default": null, "description": "The field (a dotted path) drawn as the page's text, as markdown drawn as text; open: page needs it."}
+      }}}, "default": {}},
+      "settings_group": {"type": ["array", "null"], "minItems": 2, "maxItems": 2, "items": {"type": "string"}, "default": null, "description": "Retired: read by no page; every cub has its own Settings page. Still accepted so an older cub.yaml installs."},
+      "keys": {"type": "object", "maxProperties": 0, "default": {}, "description": "First-party only: a cub asks for no key."},
+      "primary": {"type": ["string", "null"], "default": null, "description": "The page's one primary: one of its forms' ids (or, for Kranto's own, an action with place: head); none: its first form."},
+      "kind": {"type": "string", "enum": ["post", "send", "money", "book", "watch", "make", "other"], "default": "other"},
+      "glyph": {"type": "string", "enum": ["mail", "pen", "up", "plane", "play", "target", "swap", "grid", "dot"], "default": "dot"},
+      "tile": {"type": ["object", "null"], "additionalProperties": false, "properties": {"line": {"type": "string", "maxLength": 120, "default": ""}, "count": {"type": ["string", "null"], "default": null}, "words": {"type": "string", "maxLength": 120, "default": ""}, "tone": {"type": "string", "enum": ["new", "wait", "quiet"], "default": "quiet"}}, "default": null},
+      "lists": {"type": "array", "maxItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["id", "word", "read", "card"], "properties": {
+        "id": {"$ref": "#/$defs/id"}, "word": {"type": "string", "maxLength": 24}, "read": {"$ref": "#/$defs/method"}, "card": {"type": "string"},
+        "groups": {"type": "array", "maxItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["key", "word"], "properties": {"key": {"type": "string", "maxLength": 40}, "word": {"type": "string", "maxLength": 40}, "tone": {"type": "string", "enum": ["new", "wait", "quiet", "good", "bad"], "default": "quiet", "description": "Its rows' glyph and state word: wait amber (waits on you), good green, bad red, new blue, quiet grey."}}}, "default": []},
+        "count": {"type": ["string", "null"], "default": null},
+        "empty": {"type": "string", "maxLength": 160, "default": "", "description": "What the list says with nothing in it: what will appear and when (empty: \"Nothing here yet.\")."}
+      }}, "default": []},
+      "forms": {"type": "array", "maxItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["id", "word", "submit"], "properties": {
+        "id": {"$ref": "#/$defs/id"}, "word": {"type": "string", "maxLength": 24}, "submit": {"type": "string"}, "fields": {"$ref": "#/$defs/fields"}, "cost": {"type": "string", "maxLength": 80, "default": ""}, "says": {"type": "string", "maxLength": 200, "default": ""}
+      }}, "default": []},
+      "widgets": {"type": "array", "maxItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["id", "title", "kind", "read"], "properties": {
+        "id": {"$ref": "#/$defs/id", "description": "<cub>.<id> on the home; unique in the cub."},
+        "title": {"type": "string", "minLength": 1, "maxLength": 40},
+        "says": {"type": "string", "maxLength": 120, "default": "", "description": "The library's line under the title."},
+        "kind": {"type": "string", "enum": ["stat", "rows", "series", "table", "stages", "note"], "description": "What the core draws; the read's answer is checked against the kind (docs/cubs.md, Widgets)."},
+        "read": {"$ref": "#/$defs/method", "description": "One of provides, called with {size: S|M|L}."},
+        "sizes": {"type": "array", "minItems": 1, "maxItems": 3, "uniqueItems": true, "items": {"type": "string", "enum": ["S", "M", "L"]}, "default": ["M"], "description": "The first is the size it is added at."},
+        "every_s": {"type": "integer", "minimum": 60, "maximum": 86400, "default": 300, "description": "How often the home reads it again; at least a minute."},
+        "open": {"type": ["string", "null"], "default": null, "description": "One of its ui.lists (the widget's head opens it), or null: its page."},
+        "empty": {"type": "string", "maxLength": 160, "default": "", "description": "Its words when the read answers nothing to show."}
+      }}, "default": [], "description": "Widgets for the home: data the core draws, never code. None is on the home until its owner adds it from the library."}
+    }, "default": {}},
+    "spend": {"type": "object", "additionalProperties": false, "properties": {"purposes": {"type": "array", "items": {"type": "string"}, "default": []}, "caps": {"type": "object", "additionalProperties": {"type": "string"}, "default": {}}}, "default": {"purposes": [], "caps": {}}},
+    "telemetry": {"type": "object", "additionalProperties": false, "properties": {"counters": {"type": "object", "maxProperties": 10, "additionalProperties": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer"}}, "default": {}}}, "default": {"counters": {}}, "description": "Counts only, sent per trust tier, never with the cub's id (MR D10)."},
+    "prompts": {"type": "array", "maxItems": 0, "default": [], "description": "First-party only in schema 1: a cub's prompts are its own files; nothing of them enters the core's registry or a core prompt."},
+    "evals": {"type": "array", "maxItems": 4, "items": {"type": "string"}, "default": []},
+    "grades": {"type": "object", "maxProperties": 4, "additionalProperties": {"type": "array", "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"}}}, "default": {}},
+    "docs": {"type": "object", "additionalProperties": false, "properties": {"page": {"type": ["string", "null"], "default": null, "description": "A markdown file in the cub's folder, rendered as text, never run."}, "glossary": {"type": "object", "maxProperties": 10, "additionalProperties": {"type": "string", "maxLength": 200}, "default": {}}, "words": {"type": "object", "maxProperties": 40, "additionalProperties": {"type": "string", "maxLength": 80}, "default": {}}}, "default": {}},
+    "stages": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/stage"}, "default": [], "description": "build stages this cub adds. Validated by the same rules."}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,39}$"},
+    "kind": {"type": "string", "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*(@[0-9]+)?$"},
+    "method": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,39}$", "description": "The name of an SDK handler in the entry file (a Python identifier)."},
+    "fields": {"type": "array", "maxItems": 12, "items": {"type": "object", "additionalProperties": false, "required": ["key", "label"], "properties": {
+      "key": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,39}$"}, "label": {"type": "string", "maxLength": 40},
+      "kind": {"type": "string", "enum": ["text", "markdown", "enum", "choice", "bool", "int", "usd"], "default": "text"},
+      "choices": {"type": "array", "maxItems": 50, "items": {"type": ["string", "integer", "number"]}, "default": []},
+      "read": {"type": ["string", "null"], "default": null}, "hint": {"type": "string", "maxLength": 120, "default": ""}, "required": {"type": "boolean", "default": false}
+    }}, "default": []},
+    "stage": {"type": "object", "additionalProperties": false, "required": ["id", "title", "at", "kind"], "properties": {
+      "id": {"$ref": "#/$defs/id"}, "title": {"type": "string", "maxLength": 60}, "says": {"type": "string", "maxLength": 200, "default": ""},
+      "at": {"type": "string", "pattern": "^(after_brief|after_build|before_check|before_publish|after:[a-z][a-z0-9_.]{0,39})$"},
+      "kind": {"type": "string", "enum": ["code", "session"]},
+      "entry": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]{0,120}\\.py$", "default": null, "description": "code: the stage's file (loaded by the SDK runner; its @cub.stage handler)."},
+      "prompt": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]{0,120}\\.md$", "default": null, "description": "session: the prompt file, shown in full in the install dialog."},
+      "tree": {"type": "string", "enum": ["ro", "rw"], "default": "ro"},
+      "writes": {"type": "array", "maxItems": 20, "items": {"type": "string", "maxLength": 120}, "default": []},
+      "reads": {"type": "array", "maxItems": 10, "items": {"type": "string", "pattern": "^(spec|scope|findings|stages:[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*)$"}, "default": []},
+      "needs": {"type": "array", "maxItems": 5, "items": {"type": "string"}, "default": []},
+      "gives": {"type": "array", "maxItems": 3, "uniqueItems": true, "items": {"type": "string", "enum": ["findings", "patch", "artifacts"]}, "default": ["findings"]},
+      "requests": {"type": "array", "maxItems": 3, "items": {"type": "string", "pattern": "^(post|send)\\.[a-z][a-z0-9_]{0,39}$"}, "default": []},
+      "model": {"type": ["object", "null"], "additionalProperties": false, "properties": {"tier": {"type": "string", "enum": ["judge", "reason"]}, "role": {"type": "string", "enum": ["brief", "build", "harden", "check"]}, "purpose": {"type": "string"}, "max_usd": {"type": "number", "minimum": 0, "maximum": 20}}, "default": null},
+      "cap": {"type": "object", "additionalProperties": false, "properties": {"timeout_s": {"type": "integer", "minimum": 30, "maximum": 3600, "default": 600}, "max_turns": {"type": "integer", "minimum": 1, "maximum": 200, "default": 60}}, "default": {"timeout_s": 600, "max_turns": 60}},
+      "on_fail": {"type": "string", "enum": ["hold", "warn", "skip"], "default": "warn"},
+      "hold_at": {"type": ["string", "null"], "enum": ["info", "low", "medium", "high", "critical", null], "default": null},
+      "when": {"type": "object", "additionalProperties": false, "properties": {"traits": {"type": "array", "maxItems": 6, "items": {"type": "string", "enum": ["web", "cli", "library", "api"]}, "default": []}}, "default": {}},
+      "parallel": {"type": "boolean", "default": false},
+      "settings": {"type": "array", "maxItems": 10, "items": {"type": "string"}, "default": []},
+      "runs_on": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["build", "revise", "fix"]}, "default": ["build"]},
+      "needs_running": {"type": "boolean", "default": false},
+      "evals": {"type": "object", "additionalProperties": false, "properties": {"promises": {"type": "array", "maxItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["measure", "expect"], "properties": {"measure": {"type": "string", "maxLength": 40}, "expect": {"type": "string", "maxLength": 40}}}, "default": []}}, "default": {"promises": []}}
+    }}
+  }
+}

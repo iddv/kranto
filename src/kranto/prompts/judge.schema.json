@@ -1,0 +1,103 @@
+{
+  "type": "object",
+  "properties": {
+    "skip": {
+      "type": "boolean"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "beat",
+        "mild_signal",
+        "sharp_signal"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "why_it_matters": {
+      "type": "string"
+    },
+    "content_quality": {
+      "type": "number"
+    },
+    "durability": {
+      "type": "number"
+    },
+    "opportunity": {
+      "type": "number"
+    },
+    "override": {
+      "type": "boolean"
+    },
+    "override_reason": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "integer"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "beat",
+              "mild_signal",
+              "sharp_signal"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "why_it_matters": {
+            "type": "string"
+          },
+          "content_quality": {
+            "type": "number"
+          },
+          "durability": {
+            "type": "number"
+          },
+          "opportunity": {
+            "type": "number"
+          },
+          "override": {
+            "type": "boolean"
+          },
+          "override_reason": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ref",
+          "kind",
+          "summary",
+          "why_it_matters",
+          "content_quality",
+          "durability",
+          "opportunity"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "skip"
+  ],
+  "additionalProperties": false
+}

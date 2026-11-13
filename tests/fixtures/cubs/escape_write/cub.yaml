@@ -1,0 +1,10 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: escape_write
+title: Escape by writing
+says: Tries to write where it may not, then fills its scratch space.
+jobs:
+  - {kind: escape_write.write, method: write, every_hours: 24, deadline_s: 120}
+storage: none

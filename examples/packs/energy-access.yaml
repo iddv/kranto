@@ -1,0 +1,35 @@
+# Energy access and distributed clean energy.
+#
+# Checked 2026-09-26: a fresh workspace with these sources (and pv
+# magazine's Africa tag, removed after grading) ran one ingest with the tier-1
+# judge and default settings: 63 observations from these four sources, $0.0053
+# each. 37 of them, from a random draw, were graded blind against the topic
+# description: 31 on-topic, 6 adjacent (utility-scale plants, national grids
+# and tariffs), none off-topic. The sources this pack listed before gave 1
+# on-topic observation of 23 on the same day.
+#
+# The ESI Africa tag feeds are archives: a first run backfills 30 items going
+# back a year or more, and in 2026 each tag gained an item every month or two.
+# GOGLA and pv magazine's off-grid tag each published 3-4 items in the month
+# before the check. Expect a
+# quiet topic after the first run; that is the subject, not a fault.
+#
+# Removed after the same check: HN searches "off-grid solar" and "solar
+# microgrid" (0 items in the 14-day window), arXiv eess.SY (grid optimisation;
+# 4 of 6 off-topic observations in the 2026-09-25 sweep), ESI Africa's main
+# feed (South African utility news), Canary Media (US clean energy), pv
+# magazine's main feed and its Africa tag (global and utility-scale solar
+# industry, all adjacent), NextBillion (development finance; no energy items
+# in its last month).
+topics:
+  - name: Energy access
+    description: >
+      Getting reliable electricity to people and businesses the grid serves
+      badly: off-grid and pay-as-you-go solar, mini-grids, batteries, and the
+      financing and distribution models that make them work, especially in
+      Africa and South Asia.
+    sources:
+      - {kind: rss, value: "https://www.gogla.org/feed/"}
+      - {kind: rss, value: "https://www.pv-magazine.com/tag/off-grid/feed/"}
+      - {kind: rss, value: "https://www.esi-africa.com/tag/mini-grids/feed/"}
+      - {kind: rss, value: "https://www.esi-africa.com/tag/off-grid/feed/"}

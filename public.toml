@@ -1,0 +1,10 @@
+# What the published project is called and where it lives. Read by the release scripts and,
+# at build time, by the package's own metadata; shipped code reads kranto.product.
+name = "Kranto"
+command = "kranto"
+package = "kranto"
+repo = "iddv/kranto"
+holder = ""        # the copyright holder (NOTICE), written before the repository is public
+dco = true
+site = ""          # the project's site, once there is one; until then the repository's address
+contact = ""

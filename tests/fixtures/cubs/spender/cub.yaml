@@ -1,0 +1,11 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: spender
+title: Spender
+says: Calls the model until it is refused.
+model: {tiers: [judge], purposes: [spender], monthly_usd: 0.0005}
+jobs:
+  - {kind: spender.loop, method: loop, every_hours: 24, deadline_s: 120}
+storage: none

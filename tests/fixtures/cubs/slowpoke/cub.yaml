@@ -1,0 +1,10 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: slowpoke
+title: Slowpoke
+says: Answers its page slowly when told to.
+actions:
+  - {kind: slowpoke.slow_down, title: Slow down, method: slow_down}
+provides: [rows]

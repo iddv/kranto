@@ -1,0 +1,3 @@
+// GET /2/users/me, listed on https://docs.x.com/x-api/fundamentals/rate-limits, read 2026-10-17; a User object's default fields (id, name, username)
+// Written by hand; not from a real call (README.md).
+{"data": {"id": "2244994945", "name": "A Reader", "username": "reader"}}

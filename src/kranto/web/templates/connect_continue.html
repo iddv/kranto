@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Connect {{ provider }} - the server{% endblock %}
+{% block content %}
+<h1>Connect {{ provider }}</h1>
+<p>the server is registered with the instance. Continue there to sign in and allow read-only access; the instance then sends you back to <span class="mono">{{ callback }}</span>.</p>
+<p><a class="button primary" href="{{ url | safe_url }}">Continue to sign in</a> <a href="/connections">Cancel</a></p>
+<p class="muted">The link works once, for ten minutes.</p>
+{% endblock %}

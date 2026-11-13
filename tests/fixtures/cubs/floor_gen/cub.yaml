@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: floor_gen
+title: Floor generated
+says: Listens to gen.thing from generated up.
+events:
+  subscribe:
+    - {kind: gen.thing, min_trust: generated}
+jobs:
+  - {kind: floor_gen.look, method: look, every_hours: 24}
+storage: none

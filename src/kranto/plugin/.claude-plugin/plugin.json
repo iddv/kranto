@@ -1,0 +1,17 @@
+{
+  "name": "kranto",
+  "version": "0.6.0",
+  "description": "Kranto on this machine: every action of its pages (topics, sources, ideas, builds, News, cubs, settings) as tools, under your ladder, and a skill that says how to use them.",
+  "author": {"name": "kranto"},
+  "homepage": "https://github.com/iddv/kranto/blob/main/docs/assistant.md",
+  "repository": "https://github.com/iddv/kranto",
+  "license": "Apache-2.0",
+  "keywords": ["kranto", "mcp", "topics", "builds"],
+  "mcpServers": {
+    "kranto": {
+      "type": "stdio",
+      "command": "kranto",
+      "args": ["mcp"]
+    }
+  }
+}

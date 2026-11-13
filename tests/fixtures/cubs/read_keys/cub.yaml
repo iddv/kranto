@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: read_keys
+title: Read the keys
+says: Looks for anything secret.
+reads: [topics]
+jobs:
+  - {kind: read_keys.probe, method: probe, every_hours: 24}
+settings:
+  keys:
+    read_keys.note: {type: str, default: nothing}
