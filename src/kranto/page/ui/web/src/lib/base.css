@@ -76,7 +76,9 @@ header.hd { position: sticky; top: 0; z-index: 20; background: var(--head); bord
 #top .menu:hover { background: var(--inset); }
 #top .search { padding: 2px 8px 2px 10px; }
 .hd-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 14px; padding-bottom: 8px; }
-.brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: var(--text); letter-spacing: .01em; flex: none; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 650; font-size: 16px; color: var(--text); letter-spacing: -.01em; flex: none; }
+/* the wordmark: the name in lowercase (the product's name stays one string in product.ts) */
+.brand .word { text-transform: lowercase; color: var(--primary); }
 .brand:hover { text-decoration: none; }
 .brand img { width: 22px; height: 22px; flex: none; }
 .hd .host { color: var(--muted); font-size: 12px; white-space: nowrap; }
