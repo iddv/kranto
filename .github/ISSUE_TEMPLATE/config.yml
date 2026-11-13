@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Security vulnerability
+  - name: A security problem
+    url: https://github.com/iddv/kranto/blob/main/SECURITY.md
+    about: Report it privately, as SECURITY.md says. Never in a public issue.
+  - name: Report a vulnerability privately
     url: https://github.com/iddv/kranto/security/advisories/new
-    about: Report privately. Do not open a public issue for security problems.
+    about: GitHub's private reporting form for this repository.

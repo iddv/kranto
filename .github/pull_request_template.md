@@ -15,6 +15,7 @@ For a move (files or folders to another place or repo), answer the four: history
 paths clean (pasted).
 
 ## Checklist
+- [ ] A person read and ran this change, and every commit is signed off (`git commit -s`)
 - [ ] `pytest` and `ruff check src tests` pass
 - [ ] Tests make no model or network calls
 - [ ] No secret-shaped literals, even fake ones (`tests/test_no_secrets.py`)

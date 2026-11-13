@@ -1,10 +1,56 @@
 # Contributing
 
-Thanks for looking. the server is small on purpose, and most of its design
-choices were bought with a specific failure. Before you change how something
-judges, stores, measures or alerts, read [docs/design/DECISIONS.md](docs/design/DECISIONS.md):
-each entry says what went wrong without it. If you disagree with one, argue
-with its evidence in an issue first. That is a welcome kind of contribution.
+Thanks for looking. Kranto has one maintainer, so this page starts with what helps most and
+what does not, then how a change lands, then the setup and the rules the code depends on.
+
+## What helps most
+
+In the order it helps:
+
+1. **Install it somewhere new and say what broke.** A distribution nobody tried, a container, a
+   small VPS. This is the most useful thing anyone can do, and it needs no code. Open a **Bug**
+   with what you ran and what you saw.
+2. **Sources.** A recipe for a kind of source Kranto reads badly, or a fix to an adapter. The
+   interface is small and each adapter has its tests ("Adding a source kind", below).
+3. **Docs.** Anything you had to work out alone.
+4. **Packaging.** Nix, the AUR, a container file that is honest about what the sandbox needs.
+5. **The macOS sandbox.** It is large, and the first thing on the list. Talk first, in an
+   issue, before you write any of it.
+
+Kranto is small on purpose, and most of its design choices were bought with a specific failure.
+Before you change how something judges, stores, measures or alerts, read
+[docs/design/DECISIONS.md](docs/design/DECISIONS.md): each entry says what went wrong without
+it. If you disagree with one, argue with its evidence in an issue. That is a welcome kind of
+contribution too.
+
+## What is not wanted
+
+Said early, so nobody spends a weekend on it:
+
+- **A new feature without an issue first.** Open a **Feature** issue with the problem; the
+  answer may be [docs/scope.md](docs/scope.md).
+- **A redesign of a page.**
+- **A new place to post.** The engine behind posting makes no promise yet.
+- **Anything a person has not read and run.**
+
+## How a change lands
+
+- Open an issue first for anything bigger than a typo. The issue holds the reasoning.
+- A pull request says what it changes, what you ran, and plainly what you did not verify.
+- The maintainer applies an accepted change to the development tree with your name and your
+  sign-off kept on the commit. It ships in the next release, and the pull request is closed
+  with a link to that release. This repository receives one commit per release, so a pull
+  request is not merged here directly.
+- CI for pull requests runs on GitHub's own runners, with no secrets. A run started by an
+  outside contributor waits for the maintainer's approval.
+- Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md).
+  [SUPPORT.md](SUPPORT.md) says where questions go.
+
+## Changes made with a model's help
+
+Welcome, when a person has read them, run them and signs off on them. The sign-off below means
+the same thing whoever typed the code: you have read it, you stand behind it, and you have the
+right to submit it. Changes nobody has read are closed.
 
 For a deeper tour of how the system works and is operated, see
 [docs/OPERATING.md](docs/OPERATING.md).
@@ -37,7 +83,7 @@ The root:
 | `tests/` | everything CI runs: the server's suite, and the page's in `tests/page/` (its own `pytest.ini`); `tests/README.md` is the map |
 | `docs/` | what a user or contributor reads (`docs/README.md` lists every page); `docs/design/` why it is built this way |
 | `scripts/` | `ci/`, `release/`, `dev/`: who runs what is in `scripts/README.md` |
-| `examples/` | topic packs for `afk pack` |
+| `examples/` | topic packs for `python -m kranto.cli pack` |
 | `install.sh` | the installer every release carries |
 | `public.toml` | what the published project is called and where it lives |
 
@@ -60,7 +106,7 @@ The root:
 | `update/` | `kranto update`: the check, the staged wheels, the backup, the restart |
 | `evals/` | evaluating Kranto on a frozen set cut from a library's own history |
 | `newsletter/`, `websearch/` | newsletter platforms; live web search |
-| `page/` | the page: its web UI (`page/ui/`, its source in `page/ui/web/`), the console and its sandbox (`page/term/`, `page/box/`), `kranto mcp` (`page/mcp/`), traces (`page/trace/`); [docs/ui.md](docs/ui.md) |
+| `page/` | the page: its web UI (`page/ui/`, its source in `page/ui/web/`), the console and Open in Claude Code (`page/term/`), the latter's sandbox (`page/box/`), `kranto mcp` (`page/mcp/`), traces (`page/trace/`); [docs/ui.md](docs/ui.md) |
 | `plugin/` | the Claude Code plugin: its skills, its agent and its hooks |
 
 The flat modules are the watcher itself: `tick` (one ingest pass), `intern` (the judgment on
@@ -70,76 +116,50 @@ library), `retention`, `search`, `embed`, `llm` (the metered client), `scheduler
 names an install from before the rename still has), `wizard` and `setup`, `paths` (where Kranto keeps its
 files), `rowsafe` and `errtrace` (one bad row never takes a page down; an error as it may leave Kranto). Each opens with a docstring that says what it is for.
 
-## How work is organised
+## For the maintainer: merging and releasing
 
-- Every change starts as a GitHub issue. The issue holds the reasoning;
-  comments hold progress and decisions made along the way.
-- A PR says `Closes #N`, and explains what was verified and what was not.
-- CI runs the tests, lint and a gitleaks scan of the new commits (of the whole
-  history weekly); the Docker build that starts the server runs when dispatched.
-- Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md).
-  [SUPPORT.md](SUPPORT.md) says where questions go.
+CI runs the tests, the lint, the page's checks, the sandbox checks and a gitleaks scan of the new
+commits. In the development tree:
 
-## Merging and releasing
-
-The same rules hold in the server and the page, for people and for agents.
-
-- **Merge only when every check on the PR's exact head commit is green,** with
-  `scripts/ci/merge_when_green.sh OWNER/REPO PR --require <jobs>` (the server:
-  `test,gitleaks`; the page: `fast,slow,browser,frontend,lint,gitleaks,sandbox`).
-  It waits for the checks, refuses red, refuses a required check that was
-  skipped, refuses if the head moved, and squash-merges with
-  `--match-head-commit`. Never `--admin`, never on a local run alone, never
-  while checks are queued. A PR that conflicts with its base stops there;
-  `--merge-base` (run from the PR's clone) merges the base in with
-  `scripts/ci/merge_base.sh`, which makes the generated usage-reports page
-  (`docs/privacy/what-kranto-sends.md`) again instead of stopping on it, pushes,
-  and waits on the new head.
-- **A pull request from a fork** never runs on the project's self-hosted
-  runners: those jobs skip it, and the `fork` job runs the tests and lint on
-  GitHub's own runner instead (no secrets, a read-only token). Its first run
-  waits for a maintainer's approval, who reads any change under
-  `.github/workflows/` before approving (a fork's PR runs the workflow files
-  from the fork). It is merged with `--require fork`.
+- **Merge only when every check on the pull request's exact head commit is green,** with
+  `scripts/ci/merge_when_green.sh OWNER/REPO PR --require <jobs>`
+  (`test,fast,slow,browser,frontend,lint,gitleaks,sandbox`). It waits for the checks, refuses
+  red, refuses a required check that was skipped, refuses if the head moved, and squash-merges
+  with `--match-head-commit`. Never `--admin`, never on a local run alone, never while checks
+  are queued. `--merge-base` merges the base in with `scripts/ci/merge_base.sh`, which makes
+  the generated usage-reports page (`docs/privacy/what-kranto-sends.md`) again instead of
+  stopping on it.
 - **A merge never waits for a release.** Every cut from main is a nightly
   build; a promotion to stable is cut from a nightly build's own commits
   (`scripts/release/cut_local.sh --from-tag vX.Y.0-devN`), so what merged since
   rides the next one. `cut_local.sh` takes a lock, so two cuts never take the
   same version.
-- **A change split across the two repos says so:** a line `Needs kranto.page#N`
-  (or `Needs kranto#N`) in the PR's body. `cut_local.sh` (`pairing.py`)
-  refuses a pair whose one head carries such a PR and whose other head lacks
-  #N, and prints the PRs each head carries, from git: the cutter copies that
-  list into the "cutting now" note and the report.
 - **A red check gets one rerun** (`--rerun-once`). If it fails again it is a
   flake: fix it in its own PR, and merge nothing that depends on it meanwhile.
   Never skip or deselect a test to get a merge through. A job cancelled before
   any runner took it ran nothing: the script reruns it without counting it
   (up to three times).
-- **If main goes red** (the `push` run after a merge), the next merge in that
-  repo is the fix or the revert; nothing else merges until then.
-- **Releases are cut only from green commits.** `scripts/release/decide.py`
-  refuses when any check on either main is red, running or missing.
-- **A release cut for a change names it:** `cut_local.sh --must-include
-  the server@<merge commit>` (repeatable; `the page@` too) waits, bounded and
-  saying so, until that commit is in main and green, cuts from a head that
-  holds it, and refuses otherwise. 0.5.21 was cut while its fix's checks were
-  still running, so it took the commit before the fix and shipped nothing.
-- **Never an empty release.** `decide.py` refuses a cut when neither repo has a
-  commit since the previous tag.
-- **A release is not done until its commit list has been read and contains the
-  change it was cut for.** The notes end with each repo's `git log --oneline
-  <previous>..<tag>`, and `cut_local.sh` prints the same lists after
-  publishing; read them before saying a release is out.
+- **If main goes red** (the `push` run after a merge), the next merge is the fix or the revert;
+  nothing else merges until then.
+- **Releases are cut only from green commits.** `scripts/release/decide.py` refuses when any
+  check on main is red, running or missing.
+- **A release cut for a change names it:** `cut_local.sh --must-include <merge commit>` waits,
+  bounded and saying so, until that commit is in main and green, cuts from a head that holds
+  it, and refuses otherwise. 0.5.21 was cut while its fix's checks were still running, so it
+  took the commit before the fix and shipped nothing.
+- **Never an empty release.** `decide.py` refuses a cut when there is no commit since the
+  previous tag.
+- **A release is not done until its commit list has been read and contains the change it was
+  cut for.** The notes end with `git log --oneline <previous>..<tag>`, and `cut_local.sh`
+  prints the same list after publishing; read it before saying a release is out.
 - **Two lines: nightly and stable.** Every cut from green main is a nightly
   build, `vX.Y.0-devN` (a GitHub prerelease, numbered toward the next stable
   minor): installs on the nightly channel see it, stable installs never do.
-  **Stable is always the owner's choice, never a matter of time**: the owner
-  presses Promote to stable (Needs you, on the maintainer's install) when the
-  work is done, and the gate cuts `vX.Y.0` from that build's commits, runs
-  `rc_check.sh` and releases it. Its health checks block the press (a rollback
-  of the build, a new error still occurring, a failing page on the owner's
-  data or on the odd installs); nothing counts days. A fix for stable is
+  **Stable is always the maintainer's choice, never a matter of time**: the gate cuts
+  `vX.Y.0` from a nightly build's commits when the work is done, runs `rc_check.sh` and
+  releases it. Its health checks block the promotion (a rollback of the build, a new error
+  still occurring, a failing page on real data or on the odd installs); nothing counts
+  days. A fix for stable is
   cherry-picked onto `release/X.Y` (`hotfix.sh --stable`) and goes out right
   after its checks; fixes only, never features.
 - **rc_check when the release changes the update, the install, the
@@ -148,10 +168,10 @@ The same rules hold in the server and the page, for people and for agents.
   refused): the cut prints the line, and `scripts/release/rc_check.sh TAG
   PREVIOUS` runs on the published build itself on a scratch port (install the
   previous release, update, roll back, update again, every page, the odd
-  installs, no request storm on four pages) before the owner's install takes a
+  installs, no request storm on four pages) before the maintainer's install takes a
   nightly or before a held stable is released. Such a nightly is published
   unoffered: its notes open with "Do not install: being checked", which no
-  install's update check offers; once rc_check passed, re-read MQ, then
+  install's update check offers; once rc_check passed,
   `gate.py offer TAG` takes the line out (it refuses without the pass). A
   nightly that fails it is withdrawn (`gate.py withdraw`) and the next one
   carries the fix.
@@ -159,24 +179,23 @@ The same rules hold in the server and the page, for people and for agents.
   change (what a person sees or must do changes for everyone) is labelled
   `big` and, when it must not reach stable yet, sits behind a setting whose
   stable default is the old behaviour (`Setting(default_stable=...)`); the
-  owner turns it on for stable by a later choice, in a promotion whose notes
+  maintainer turns it on for stable by a later choice, in a promotion whose notes
   say so. `merge_when_green.sh` refuses a merge whose diff trips a hint (a
   default changed, a route, page, command or help heading removed, a migration
   that drops or renames: `scripts/release/guards.py big`) until the PR is
   labelled `big`, or `not-big` with a sentence in its body saying why; CI's
   `gitleaks` job says the same hints early, as a warning. A fix for stable is
   never `big`.
-- **A hotfix is one step:** `scripts/release/hotfix.sh kranto|kranto.page PR`
-  merges on green with the repo's required jobs, cuts a nightly with
+- **A hotfix is one step:** `scripts/release/hotfix.sh kranto PR`
+  merges on green with the required jobs, cuts a nightly with
   `--must-include` the merge commit (and `rc_check.sh` on it when `decide.py`
-  asks), updates the owner's install, reads back `kranto --version` and the
+  asks), updates the maintainer's install, reads back `kranto --version` and the
   commit list, and stops with a plain reason at the first step that fails.
   `--stable` then cherry-picks it onto the stable line as a pull request,
   merges it on green, cuts the fix held, runs `rc_check.sh` and releases it;
   `--dry-run` merges, tags, publishes and updates nothing. Runbook:
   `docs/OPERATING.md`, "A hotfix".
-- A weekly workflow (`audit.yml`, `scripts/ci/audit_merges.py`) files an issue
-  listing every merge whose merged commit was not green.
+- `scripts/ci/audit_merges.py` lists every merge whose merged commit was not green.
 
 ## Rules the code depends on
 
