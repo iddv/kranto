@@ -54,6 +54,7 @@ from pathlib import Path
 from . import config as config_mod
 from . import legacy, memory, paths, product
 from .config import KRANTO_CONFIG_FILENAME, KRANTO_HOME_ENV, ConfigError
+from .update.apply import tool_env_of
 
 DEFAULT_PORT = 8765
 DEFAULT_UNIT = paths.DEFAULT_UNIT
@@ -701,7 +702,7 @@ def install_paths(home: Path, host: Host) -> list[tuple[str, Path]]:
                     "tools")
     out += [("config", pointer_path(host.home).parent),
             ("service", host.unit_dir / host_unit(host)),
-            ("program", tool_dir / "kranto"),
+            ("program", tool_env_of(tool_dir)),
             ("commands", Path(os.environ.get("UV_TOOL_BIN_DIR") or host.home / ".local" / "bin")),
             ("cache", host.home / ".cache" / "kranto")]
     return out
