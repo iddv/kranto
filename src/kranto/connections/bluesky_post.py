@@ -9,7 +9,7 @@ post is sent, and made again when it has run out. Its requests carry the session
 person's own server (``bsky.social`` unless they type another).
 
 Separate from the read-only Bluesky connection, which keeps its narrow sign-in and never posts.
-Used only by the ``bluesky`` broker adapter, when the person presses Post to Bluesky in the
+Used only by the ``bluesky`` broker adapter, when the person approves Post to Bluesky in the
 confirm dialog; nothing else holds it.
 """
 

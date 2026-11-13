@@ -621,6 +621,12 @@ ROUTE_ALLOW: dict[tuple[str, str], str] = {
     ("POST", "/auth/code"): "signing a browser in: how the page gets its token",
     ("POST", "/auth/signout"): "signing this browser out",
     ("POST", "/api/telemetry/view"): "the page's own count of a page view (usage reports)",
+    ("POST", "/api/post/d/{id:int}/posted"): "I posted it: the person's own record, on the page "
+                                             "only, that they posted a draft in the site "
+                                             "themselves; never an assistant's (nothing is sent)",
+    ("POST", "/api/post/sites"): "Settings › Posting's choices (the sites ticked, Post "
+                                 "directly): the person's, on the page; an assistant may read "
+                                 "them (GET), never switch on a send",
     ("POST", "/api/home/visit"): "the home's own visit marker, moved as the page draws the home "
                                  "(While you were away counts from it); nobody's decision",
     ("POST", "/brb/{path:path}"): "the page's writes: its own registry and parity test",

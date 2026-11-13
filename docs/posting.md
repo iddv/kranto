@@ -1,12 +1,12 @@
 # Posting: your own site first, then the sites people use
 
-Kranto writes what you post. Nothing leaves Kranto without your press: either you post it yourself
+Kranto writes what you post. Nothing leaves Kranto without your yes: either you post it yourself
 in the site's own box, or Kranto posts it after your yes in the confirm dialog. This page is the
 reference: which sites, how each is reached, how the posts are written, and what to connect.
 
 ## Two ways, and only two
 
-| Way | What happens | Who presses Post |
+| Way | What happens | Who posts it |
 |---|---|---|
 | **Open** | Kranto opens the site's own box in your browser with the post written in it. Back in Kranto, **I posted it** moves the draft to Sent as "posted by you". Kranto sends nothing, and makes no request to the site. | You, in the site |
 | **Post directly** | Kranto posts the draft with your own posting account, after your yes in the confirm dialog, which shows the account, each post and what goes with it. | You, in Kranto's confirm dialog |
@@ -28,7 +28,7 @@ the news item and links to its best source.
 ## The sites
 
 Checked on 13 November 2026 against each site's own documents (the sources below). A site's Open
-was not pressed with an account: the first real post of each is the owner's, and this table says
+was not tried with an account: the first real post of each is the owner's, and this table says
 "not yet sent for real" until it is.
 
 | Site | Open (the site's box, written for you) | Post directly | Limit, as the site counts | Sent for real |

@@ -2441,7 +2441,7 @@ class PostDraft(TypedDict):
     # yes), and on Post's waiting row, every site of the write
     site: NotRequired[str]
     site_word: NotRequired[str]
-    group: NotRequired[str | None]
+    write: NotRequired[str | None]
     way: NotRequired[Literal["open", "direct"]]
     sites: NotRequired[list[PostSibling]]
 

@@ -236,7 +236,7 @@ def _row(rt, d: dict[str, Any], t: dict[str, Any] | None, accounts: dict[str, di
 
 def _short_row(d: dict[str, Any], t: dict[str, Any] | None) -> dict[str, Any]:
     """A short post's own fields (``kranto.social``'s drafts): ``site`` and its name, the
-    write's ``group``, and ``way`` (``open``: the person posts it in the site; ``direct``:
+    write it belongs to (``write``, the drafts' ``group``), and ``way`` (``open``: the person posts it in the site; ``direct``:
     Kranto posts it after their yes). None of them for any other draft. A draft written before
     short posts, or a key stored as null, reads as none."""
     if d["cub"] != SOCIAL:
@@ -246,7 +246,7 @@ def _short_row(d: dict[str, Any], t: dict[str, Any] | None) -> dict[str, Any]:
     site = c.get("site") if isinstance(c.get("site"), str) else d["service"]
     kind = (t or {}).get("kind")
     return {"site": site, "site_word": sites.name_of(site),
-            "group": c.get("group") if isinstance(c.get("group"), str) else None,
+            "write": c.get("group") if isinstance(c.get("group"), str) else None,
             "way": "open" if kind in (None, "post.open") else "direct",
             "title": str(c.get("about_title") or "") or title_of(c)}
 
@@ -274,7 +274,7 @@ def _one_row_a_write(store, waiting: list[dict[str, Any]]) -> list[dict[str, Any
     out: list[dict[str, Any]] = []
     seen: dict[str, dict[str, Any]] = {}
     for r in waiting:
-        g = r.get("group")
+        g = r.get("write")
         if not g:
             out.append(r)
             continue
@@ -939,7 +939,7 @@ def propose_angles(rt, about: Any, as_: Any = "blog") -> dict[str, Any]:
 
 def posted_by_you(rt, draft_id: int, identity: dict[str, Any] | None) -> dict[str, Any]:
     """I posted it: the person opened the site with the draft and posted it there themselves.
-    Only from the page (the person's own press, never the command line, an agent's token, the
+    Only from the page (the person's own click, never the command line, an agent's token, the
     console or a cub), never on the preview, only while the draft's ask waits. ``post.open``'s
     own confirm records it (its performer makes no request); a draft the person switched to
     Post directly but posted by hand is recorded the same way, with nothing sent. Kranto makes
@@ -954,7 +954,7 @@ def posted_by_you(rt, draft_id: int, identity: dict[str, Any] | None) -> dict[st
     if t is None or t["state"] != tickets.OPEN:
         raise WriteError("this draft does not wait for you: nothing to record", 409)
     if tickets.door_of(identity) != "ui":
-        raise WriteError("I posted it is the person's own press on the page (never the command "
+        raise WriteError("I posted it is yours to choose on the page (never the command "
                          "line, an agent's token, the console or a cub)", 403)
     if preview.enabled(getattr(getattr(rt, "cfg", None), "root", None)):
         raise WriteError(preview.NOTHING_SENT + ".", 409)

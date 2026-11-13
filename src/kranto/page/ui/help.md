@@ -401,7 +401,7 @@ the post opens on it. **Skip** writes without one: the draft then only says what
 **As** is **Blog post** or **Short posts** for the sites you ticked in Settings › Posting.
 
 **Short posts** go to the sites people use, in one of two ways only. **Open in Bluesky** (or X,
-Threads, Mastodon) opens the site's own box with the post written; you press Post there, and back
+Threads, Mastodon) opens the site's own box with the post written; you post it there yourself, and back
 here **I posted it** moves it to Sent as "posted by you" (Kranto sends nothing). Where you switched
 a site to **Post directly** (Bluesky and Mastodon, with their posting account connected), **Post to
 Bluesky** sits beside Open and posts it after your yes in the confirm dialog. Open always comes

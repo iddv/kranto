@@ -53,7 +53,7 @@ ASKED = ["/api/home",
          "/api/ideas?embedding=ref&origin=all",
          "/api/feedback/vocabulary", "/api/review/queue",
          "/api/review/queue?builds=plot-1&controls=2", "/api/grades/summary",
-         "/api/post"]
+         "/api/post", "/api/post/sites"]
 # typed paths checked by their own tests below: POSTs, and the scout's job
 ELSEWHERE = {"/api/sources/preview", "/api/topics/{id}/scout",
              "/api/sources/from-text", "/api/sources/from-text/{id}", "/api/sources/approve",

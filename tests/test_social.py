@@ -143,6 +143,7 @@ def test_each_sites_limit_is_kept_whatever_the_model_writes(store, tmp_path, sid
     assert len(v["parts"]) == 1
     full = v["parts"][0]
     assert sites.count(site, full) <= site.limit, (sid, sites.count(site, full))
+    assert "limits" not in str(v["prose"]["verdict"])     # the check of the words kept
     if site.open_takes_url:
         assert "https://ex.com/source" not in full     # the composer adds the link
     else:
@@ -309,7 +310,7 @@ def test_open_sites_wait_on_post_as_one_row_naming_the_sites(store, tmp_path):
     assert kinds == {"post.open"}
     rt.cubs = None
     read = post_api.post_read(rt)
-    (row,) = [d for d in read["drafts"] if d.get("group") == out["group"]]
+    (row,) = [d for d in read["drafts"] if d.get("write") == out["group"]]
     assert [s["word"] for s in row["sites"]] == ["Bluesky", "Mastodon", "X", "Threads"]
     assert row["word"] == "short posts" and row["title"] == "Battery swap ledger"
     assert "open in the site" in read["sites"]["line"]

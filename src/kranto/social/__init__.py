@@ -204,6 +204,8 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
         text, cut = sites_mod.fit(site, text, room_i)
         if cut:
             removed.append("the end of a sentence past the limit")
+            # what is stored is the check of the words kept, not of the words before the cut
+            got = prose.check(text, site.id, profile, kind="short", limits=lim_i, take=angle)
         left += [str(f.get("rule")) for f in got.get("flags") or []
                  if f.get("rule") != "site.length"]
         if i == 0:
