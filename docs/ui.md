@@ -6,7 +6,8 @@ snapshot of its own: every page reads what it shows from the server's API (`/api
 `/api/today`, `/api/home`, `/api/status`…) and the page server's own few routes (the header,
 Activity, the console, traces, feedback). It is one Svelte 5 app in TypeScript, built by Vite. The shell (the
 frame, the header, the navigator, the status bar, the splitters, the palette, the keys, the
-routes and the live feed) is Svelte since every page inside it is components since when the last of the old hand-written module went.
+routes and the live feed) is Svelte, and every page inside it has been Svelte components since
+the last of the old hand-written module went.
 
 | Part | Where | Notes |
 |---|---|---|
@@ -18,10 +19,12 @@ routes and the live feed) is Svelte since every page inside it is components sin
 | Styles and themes | `src/kranto/page/ui/static/kranto.css`, `looks.css`, `theme.js` | tokens only; `theme.js` first in `<head>` |
 | The DOM contract | `src/kranto/page/ui/web/CONTRACT.md` | the ids and classes the browser tests and the click stories use |
 
+## How the parts fit
+
 **Serving.** `routes/static.py` reads `static/app/.vite/manifest.json` and links the entry's
 module and CSS into the page at `static/v<version>/app/<hashed name>`, after `theme.js` and the
 stylesheets at the same versioned address. Every file there is cached for good (`immutable`); a
-new release is a new address. the server's mount gzips them once. A Kranto with no build (installed
+new release is a new address. The server's mount gzips them once. A Kranto with no build (installed
 from git, or a checkout nobody built) answers `/` with 503 and one line: install a release (the
 setup guide's step 2), or build it with `scripts/dev/build_ui.py`.
 
@@ -54,7 +57,7 @@ words and counts, Watch's topic scope, `classic` in the navigator's frame) and
 `title`, `facts` (one muted line), `lede`, at most one `primary`, `stop`, `more` (⋯), `gear`,
 `line`, `flash`, and for a page outside the doors its own `crumb` and `sub`. A page titled
 with one of its door's words is shown under the door's name, the subnav saying which. Without
-the doors (brb alone, or a component drawn by itself in a test) `PageTitle` draws the old
+the doors (the page alone, or a component drawn by itself in a test) `PageTitle` draws the old
 list head instead. A thing you read is `pages/Page.svelte` (the head, the outline, the body,
 the sections, the evidence); the states are `ui/Loading.svelte`, `ui/Empty.svelte` (one
 sentence and at most one link) and `ui/Failed.svelte` (the words, Try again, Tell us; an
@@ -87,7 +90,7 @@ a brief's day `#/news/b/:id` (`BriefPage.svelte`: Today's layout for that brief,
 Details), one page a story `#/news/i/:brief/:n` (`StoryPage.svelte`: the item and its article,
 `articles.get`, as one page; `#/news/a/:id` replaces its address with its story's) and Earlier
 (`NewsEarlier.svelte`: one row a day) are drawn in `pages/Page.svelte`; a draft's editor is
-`features/post/DraftEditor.svelte` with PROSE's flags (`ProseFlags.svelte`, `prose.ts`: `POST
+`features/post/DraftEditor.svelte` with the prose checker's flags (`ProseFlags.svelte`, `prose.ts`: `POST
 /api/prose/check`, `/api/prose/revise`, `/api/prose/learn`) and Save as `POST /api/post/d/<id>/edit`;
 Settings › Posting › How you write is `pages/settings/VoicePage.svelte` (`#/settings/posting/voice`,
 `GET /api/prose`, `POST /api/prose/voice`); the top bar's Needs you count is
@@ -98,7 +101,7 @@ drawn from the article's data, `diagram` choosing the lead one (`evidence`, the 
 dates, when nothing else has three points). A brief from `briefs.get`/`latest` carries
 `articles` (each item's newest), so Today and the brief's page link the article and the item page
 offers Deep dive now (`news.article_now`, a confirm). The page's policy allows `img-src https:`
-for the source's picture only (the owner's D3). Earlier's old `?sel=f<id>` lands on the brief's page. News › Topics'
+for the source's picture only. Earlier's old `?sel=f<id>` lands on the brief's page. News › Topics'
 rows are `Row` with News's switch; a row's sheet is `NewsTopicPane.svelte`.
 
 **A cub's page** declares its head like any page (`features/cub/CubPage.svelte`:
@@ -135,14 +138,14 @@ change already touches (the console's and Open in Claude Code's session records,
 model.
 
 **What Kranto is doing.** `GET /brb/api/activity` (`ui/api.py`'s `activity`) is the one read
-of every run as it goes: the server's (its `/api/activity`, through `afk`: the scheduled jobs,
+of every run as it goes: the server's (its `/api/activity`: the scheduled jobs,
 the actions, the cubs' jobs) and the open sessions, from their records. Running, waiting on
 you, next, recent (the hourly skips folded), failing; `subject=topic:12`, `kind=`, `limit=`,
 `all=1`, `run=<id>`; cached 2 s, so the header, the sheet and every line on a page share one
-read. A the server without the read says so in `afk_error`. `POST /brb/api/activity/stop {id}`
+read. A server without that read says so in `afk_error`. `POST /brb/api/activity/stop {id}`
 stops a run where it can stop: the server's at its next step, a session by End.
-the server's own read and its words are in [the server's docs/activity.md](https://github.com/iddv/kranto/blob/main/docs/activity.md).
-A the server run's trace (`afk:<uuid>`) is live while it runs: a page that follows it watches
+The server's own read and its words are in [activity.md](activity.md).
+A server run's trace (`afk:<uuid>`) is live while it runs: a page that follows it watches
 `activity.json` and reads its calls and marks again; its steps are stage spans, and its head
 says the run in one line ("Reading your sources · source 2 of 8 · 3 model calls · $0.02") with
 its Stop. The trace page (`#/sessions/<tid>/trace`, `#/research/<id>/trace`,
@@ -155,25 +158,25 @@ the feed is down (two errors in 30 s, or refused) it reads every 5 s, as before,
 feed again after 30 s; a read every 60 s runs whatever happens. A new version on the feed's
 `host` event reloads the page.
 
-**Building.** CI (`frontend` and `browser` jobs) and the release (`build.sh` in the server) run
+**Building the UI.** CI (`frontend` and `browser` jobs) and the release (`scripts/release/build.sh`) run
 `scripts/dev/build_ui.py`: `npm ci --ignore-scripts` from the lockfile, then `vite build`, then a
 check that the page's JavaScript and CSS stay under 200 KB gzipped. Users never need Node.
 CONTRIBUTING's "The web UI" has the commands and the dev loop.
 
 **The layout (shell.layout).** One set of pages, the doors' (their addresses, rows and sheet
 contents), in one frame: the home and the doors, `body.doors`, the sheet. The Classic frame was
-cut in open-source wave 1: `layoutOf` answers `new` whatever the file says,
+cut: `layoutOf` answers `new` whatever the file says,
 `frameClassic` is always false, the server keeps a stored `shell.layout: classic` and refuses a
 new write of it. `chrome.ts` `classicTree` stays as the ☰ drawer's tree; the frame's leftover CSS
-and code go in wave 3. A page that branches asks `shellDoors`/`doorsNow`. `coverage.test.ts`
+and code go later. A page that branches asks `shellDoors`/`doorsNow`. `coverage.test.ts`
 walks the matrix with both stored values. Without the server there is no shell to read: the
 pages say what they need the server for.
 
-**The doors and the home (open-source wave 2).** `shell/doors.ts` lists
+**The doors and the home.** `shell/doors.ts` lists
 the four doors (News, Ideas, Watch, Post): `Header.svelte` draws them after the brand on a wide
 screen, `TabBar.svelte` at the foot of a phone with ✦ (the console) as the fifth item; the lit one
-is `chrome.ts`'s `doorId` (`cubs` and `cub` are Post's). `#/post` draws today's Cubs page until
-S2's Post page; `#/cubs`, `#/cubs/approvals` and `#/cubs/tickets` redirect to it. The home
+is `chrome.ts`'s `doorId` (`cubs` and `cub` are Post's). `#/post` draws the posting cubs' page until
+Post has a page of its own; `#/cubs`, `#/cubs/approvals` and `#/cubs/tickets` redirect to it. The home
 (`pages/front/Home.svelte`) is one fixed order from the server's one read, `GET /api/home` (the
 sentence, today's brief, the five newest cards, the quiet line, `away`), plus the one thing, which
 it still works out from the reads it shares with Needs you (`home.ts` `coreNeeds`, the prepared
@@ -181,7 +184,7 @@ items, a cub's asks, `pages/front/needs.ts` `nextOf`). Needs you (`#/needs`; `#/
 there) is `pages/front/NeedsPage.svelte` and `Needs.svelte`, its pane `NeedsPane.svelte`. It posts `POST /api/home/visit` once a load when it draws
 the ordinary home, and from While you were away only on Show today or a row's click. The widgets,
 tiles and Arrange are gone from the page; `features/home.ts` keeps the widgets' writers (unused
-by the pages since S2) until wave 3 removes them with `home.arrange`.
+by the pages) until they are removed with `home.arrange`.
 
 **The console.** `term/Console.svelte` is mounted once by `App.svelte`, after
 `#app` and outside the routed panes, so a hash change never touches it: its xterm keeps its
@@ -191,7 +194,7 @@ sheet from the bottom under 760 px, and the whole window with Open full screen
 (`body.con-full`). Its place is kept per browser (`kranto.console`); a first visit follows
 `ask.open`. It reads `GET api/term/console` and opens with `POST api/term/console/open` (attach,
 or start resumed; a reload replays the screen from the server's ring). Where the server serves no
-terminal (`brb ui` alone, the browser tests) it draws nothing. ⌘J is `keys.json`'s, handled
+terminal (the page alone, the browser tests) it draws nothing. ⌘J is `keys.json`'s, handled
 before a terminal's own keys; `ctrl+]` leaves it. Each hash change tells the server the page's
 title (`api/term/console/here`) for the status line.
 
@@ -200,13 +203,13 @@ a new one nobody typed in) three questions stand above the prompt; a click start
 none runs and sends the sentence once its screen goes quiet (1.2 s without output). On a phone
 (`PHONE_MAX`, 760 px) the first visit is minimized and ✦ in the tab bar opens `term/PhoneSheet.svelte`
 instead of the terminal: the prepared items with Review (`/api/prepared`, the same dialog) and
-`GET api/term/console/last` (the page `term/console.py` `last_reply`: the newest assistant turn
+`GET api/term/console/last` (`term/console.py`'s `last_reply`: the newest assistant turn
 with words in Claude Code's transcript, its first six lines and the first `#/…` it links; Codex
 keeps none, so it says why). No terminal starts on a phone until Open the terminal full screen.
 
 **Settings (before it).** `#/settings` is the Overview (one row a
 page, its state in a line; the pane finds a setting by its name or its key), then seven pages in
-the order you set kranto up (`pages/settings/doorpages.ts`' `DOORS_PAGES`): Watching, Posting,
+the order you set Kranto up (`pages/settings/doorpages.ts`' `DOORS_PAGES`): Watching, Posting,
 Assistant (the console's settings in `loop.yaml`'s `ask:` and the server's ladder,
 `pages/settings/assistant.ts`), Spend, Privacy & access, System and Appearance. **Advanced**, folded,
 holds Prompts (the server's `/api/prompts`, read and written directly) and what a settings file
@@ -224,7 +227,7 @@ Save row `ui/SaveBar.svelte`, and every Save goes through `ui/save.ts` (`saveUnd
 (`confirmThen` in `ui/dialog.svelte.ts`, never the browser's own). The words are `lib/words.ts`'s
 `SETTING_WORDS` and `EFFECT`, pinned by `words.test.ts`.
 
-**Settings with the server (open-source wave 2).** Seven pages (`doorpages.ts`
+**Settings with the server.** Seven pages (`doorpages.ts`
 `DOORS_PAGES`): Watching (with `ConnectionsList` part `reading`: the logins sources are read
 with), Posting (`PostingList.svelte`: the newsletter platform, `ConnectionsList` part `posting`
 (Mastodon, Sanity), each posting cub's own page), Assistant, Spend, Privacy, System (the home's
@@ -242,7 +245,7 @@ queue), Ideas' New idea and Editor, Settings' Building, Publishing and Build too
 Building and Publishing steps and the trace comparison are gone. Each of their addresses is a
 redirect in `nodes.json` (to the home, Ideas, Needs you, Welcome or the Settings Overview; a
 build's or a project's says so in a toast, its `said`), and `src/cut.test.ts` fails on an import
-of a page that left or a name of the factory's routes.
+of a page that left or a name of the builds' routes.
 
 ## What is in the page's package
 
@@ -252,7 +255,7 @@ of a page that left or a name of the factory's routes.
 | `src/kranto/page/term/` | the console: the real Claude Code in the page, in its own copy of the folder |
 | `src/kranto/page/box/` | the console's sandbox: bubblewrap, the network proxy, the sign-in handoff, the one `claude -p` that only answers |
 | `src/kranto/page/mcp/` | `kranto mcp`, the local MCP server ([mcp.md](mcp.md)) |
-| `src/kranto/page/trace/` | agent traces: Kranto's own runs and the console's sessions as a tree of spans, live ([traces.md](traces.md)) |
+| `src/kranto/page/trace/` | traces: Kranto's own runs and the console's sessions as a tree of spans, live ([traces.md](traces.md)) |
 | `src/kranto/page/settings/` | the page's settings file (`loop.yaml` over the defaults) and its one writer |
 | `src/kranto/page/host_api.py` | exactly what the server may use of the page |
 | `src/kranto/page/feedback.py`, `report.py` | "File an issue" through your own `gh`, and the scrub it goes through |

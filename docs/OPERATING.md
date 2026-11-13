@@ -1,7 +1,7 @@
 # OPERATING
 
-The operator manual. It is written for whoever works on or runs the server
-next, human or agent, and goes deeper than the README. It covers how the
+The operator manual. It is written for whoever works on or runs Kranto's
+server next, and goes deeper than the README. It covers how the
 system behaves, where each part lives, what must never be broken, what to do
 when something goes wrong, and how work on the project is organised.
 
@@ -108,17 +108,16 @@ configured.
 | `heartbeat.py` | The weekly heartbeat. |
 | `grades.py` | Human verdicts (append-only, latest wins). |
 | `taste.py` | What the owner's ▲ ▼ on cards and evidence do: the order of every card list and `/api/ideas[].rank` (`{position, taste, line, parts}`), a deterministic function of the stored grades, citations, themes, topics and embeddings (no model); `grading.*` in `kranto.yaml`; `GET /api/grades/summary` (Your grades). |
-| `scheduler.py` | In-process jobs for `afk serve`; due-ness from the `runs` table. Second lanes (their own thread and interval) started and stopped with it. |
-| `looplane.py` | What is left of the build loop's lane (builds left Kranto): `loop_home` and empty reads for `kranto.py` until its own cut; `kranto serve` runs no loop lane. Imports nothing of the page. |
-| `kranto.py`, `packages/kranto/` | The `kranto` command (`up`, `serve`, `down`, `status`, `logs`, `doctor`, `adopt`) and the metadata-only `kranto` distribution that installs the server and the page together. |
+| `scheduler.py` | In-process jobs for `kranto serve`; due-ness from the `runs` table. Second lanes (their own thread and interval) started and stopped with it. |
+| `launcher.py` | The `kranto` command (`up`, `serve`, `down`, `status`, `logs`, `doctor`, `adopt`, …). |
 | `progress.py` | "What is missing" messages for empty pages. |
 | `packs.py`, `importers.py`, `bundle.py`, `doctor.py` | Topic packs, Parallax import, static bundle export, preflight checks. |
-| `web/` | Starlette app: the JSON API and the host of the page (drawn at `/`; its files and calls under `/brb/`). the server's old page addresses redirect there; without the page they and `/` show an install notice (Kranto is one app, D5). The only Jinja pages left are the connection sign-in pages. |
+| `web/` | Starlette app: the JSON API and the host of the page (drawn at `/`; its files and calls under `/brb/`). the old page addresses redirect there; without the page they and `/` show an install notice (Kranto is one app, D5). The only Jinja pages left are the connection sign-in pages. |
 | `core/cubs/` | The cub runtime: `sandbox.py` (bubblewrap under a systemd user scope, else rlimits), `process.py` and `host.py` (one process a cub, `cub/1` over its pipes, every call checked and written to `cub_calls`), `runtime.py` (start on demand, idle stop, the pause rules, the reaper, the STOP file, recovery, the daily gc), `install.py` and `inspect.py` (add, update, stop, remove; the tree's checks, the findings, the words), `brokers/` (the newsletter, through whichever platform `kranto/newsletter/` has connected, and Mastodon, with the owner's connection), `settings.py` (the `cubs:` section, read again when kranto.yaml changes), `cli.py` (`kranto cub`), `views.py`. |
 | `bears_cub/` (a package of its own in `src/`) | The SDK a cub imports (and the `bears-cub-sdk` wheel): the decorators, `ctx`, the wire, `FakeHost` for tests, the template, `python -m bears_cub.check` and `.standard`. |
 | `cubs/examples/` | The reference cubs, `newsletter`, `toot` and `blog`, installed like any cub (`kranto paths examples`); Kranto adds `blog` itself the first time a post is asked for. |
 | `web/cubs_api.py` | `/api/cubs/*`: the list, one cub, fetch jobs, install, update, remove, live and dry, stop and resume, the log, the `cubs.*` settings. |
-| `cli.py`, `runtime.py` | The `afk` command and object wiring. |
+| `cli.py`, `runtime.py` | The watcher's own command (`python -m kranto.cli`, written `afk` below) and object wiring. |
 
 ## 3. Data
 
@@ -129,7 +128,7 @@ key that holds an object and `activity.json` is declared in `src/kranto/stored/`
 feature's in `features/<id>/stored.py`), and read and written only through it. The registry
 (`stored.COLUMNS`, `SETTINGS`, `FILES`) is the data model's list of shapes; a reader gets a
 typed value, and a value stored in another shape reads as the field's default (logged once as
-"stored data not as declared ... (stored-<signature>)"), never a crash. the page's `loop.db`
+"stored data not as declared ... (stored-<signature>)"), never a crash. The page's `loop.db`
 has the same, in `src/kranto/page/stored/`. CONTRIBUTING's "Stored data" says how a shape changes.
 
 **Append-only, with one recorded way out.** Triggers reject UPDATE on every
@@ -219,7 +218,7 @@ the number that had failed.
 | `source_mutes` | A mute from Kranto UI's **mute…** (UI-v4 2.3): `muted_until` (not fetched until then) or `read_less` (read at half its items per run); latest row per source wins, and a row with neither is back to normal, so an undo is one more row (migration 20). |
 | `archive_themes`, `archive_theme_members` | Themes of an imported archive (migration 22, `importers.import_parallax_themes`): one row per lineage of Parallax's clustering per bundle (the latest row per lineage is the theme), with its name, earlier names, keywords, whether it is alive, size, first and last epoch, and history (size and share per epoch); members are imported observations by id, no foreign key. `/api/archive/themes` reads them; `/api/observations?theme=<lineage>` lists the members. |
 | `idea_topics`, `idea_citations` | A card's topic and its citations (migration 35, L2, `ideate/cards.insert_card`), each a child of its card written at the card's insert (the migration filled them for older cards): `idea_topics.topic_id` the user topic with the largest share of the card's evidence (NULL: none, as for a dispatch card's archive evidence) and `shares` the list the card's row shows (`[{id, name, kind, n, share}]`, user topics first), the newest row of a card counting; `idea_citations` one row per citation (`observation_id`, `n`, `role` evidence or demand), indexed by the observation ("which cards cite this"; no foreign key: retention may remove the observation, and the row stays). Append-only. |
-| `outcomes` | What happened to an idea card after it was written (migration 24, `outcomes.py`, PLAN 4.7): `idea_id`, `kind` (`editor` first: the weekly editor's class for the card, with `detail.week` and `detail.why`; later `pitch`, `build`, `verdict` and the rest), `value`, `detail` JSON, `source` (`kranto.page`). Written by the page through `POST /api/ideas/{id}/outcome`; append-only; the latest row of a kind counts, and `/api/ideas` sends the latest (`outcome`) and the latest editor row (`editor`). |
+| `outcomes` | What happened to an idea card after it was written (migration 24, `outcomes.py`): `idea_id`, `kind` (`editor` first: the weekly editor's class for the card, with `detail.week` and `detail.why`; later `pitch`, `build`, `verdict` and the rest), `value`, `detail` JSON, `source` (`kranto.page`). Written by the page through `POST /api/ideas/{id}/outcome`; append-only; the latest row of a kind counts, and `/api/ideas` sends the latest (`outcome`) and the latest editor row (`editor`). |
 | `api_spend` | What a paid API other than a model costs (migration 26, 5.3): one row per request that returned resources, X's reads first: `provider`, `source_id` and `run_uuid` (null for a preview or a Test), `kind` (`post_read`, `owned_read`, `user_read`, `list_read`, `xai_post`), `count`, `usd` at list price (`pricing.X_PRICES`). An estimate from above: the provider bills a resource read twice in one UTC day once. Ids and counts only; never purged. Live search adds `provider` `exa` (kind `search`, or `search_free` in Exa's free mode at 0), `anthropic_search`, and the free `hackernews`, `github`, `arxiv` at 0, and `caller` (migration 27: `scout`, `cards`, `editor`, `research`...; null for the owner's own). |
 | `search_cache` | Mutable, like `oauth_states` (migration 27): live search's day cache, one row per backend, query (a SHA-256 of it) and recency, holding titles, links, dates and snippets only; rows older than `search.cache_hours` are removed when a search writes. |
 | `events`, `event_cursors` | The feature core's bus (migration 30, `core/events.py`): one row per fact a feature or the core published (`kind` `<noun>.<verb>`, `feature`, `trust`, a payload of ids and small facts, never a document); a subscriber's cursor per kind is the newest `event_cursors` row. Append-only. See [features.md](features.md). |
@@ -333,37 +332,13 @@ journal says how each stop went (`stop: done in 1.2 s, clean`, or what was cut
 off), and `kranto update` reports a stop over 12 s as a warning with that line.
 
 **`kranto serve`** is `afk serve` with the scheduler on by default (the old
-`calibration.conf` drop-in is retired; `--no-scheduler` stays for cron) and
-the page's build loop as a second lane, when `brb.enabled` and `builds.enabled`
-are set, the page is installed and the server is on loopback.
+`calibration.conf` drop-in is retired; `--no-scheduler` stays for cron), and the
+page at `/` when `brb.enabled` is set and the server is on loopback.
 
-**Builds are off unless set.** `brb.enabled` is the page at `/`; `builds.enabled`
-(absent means off) is the half of it that builds: the loop lane and its maintenance
-poll, Build, Projects and Repos, Settings › Building, Publishing and Tools, "Send to
-build" on a card, Welcome's Building and Publishing steps, and the build loop's
-actions as `b.*` verbs for the page, `kranto mcp` and the console. Off, none of these
-is drawn or started, project topics are not read and are listed as paused (nothing
-is written: turning builds on finds them as they were), `kranto status` has no loop
-line, and `kranto doctor` checks only what the console needs. Nothing is deleted:
-`loop.db`, the task folders and the project topics stay on disk, untouched.
-
-```yaml
-builds:
-  enabled: true      # builds, projects and repo maintenance on
-```
-
-With builds on, every `tick_s` (30 s, the loop's
-`loop.yaml`) the lane runs `Loop.tick()`, the step `brb loop run` repeats, with a
-fresh `Loop` so settings apply on the next tick. It holds the loop's
-`daemon.lock` and writes `daemon.pid`, so a stray `brb loop run` refuses to
-start and the page's pages show the loop running; if a `brb loop run` already
-holds the lock the lane waits and takes over when it exits. `brb loop stop`
-ends the lane until the server restarts, as it ends the daemon. Builds are
-detached: `kranto.service` has `KillMode=process`, so stopping it leaves them
-running and the next start adopts them. The lane's state (`idle`, `waiting`,
-`stopped`; ticks, errors, last tick) is `lanes.loop` on `/api/status` and
-`/api/health`, and a line of `kranto status`. `afk serve` has no lane: run
-`brb loop run` beside it, as before.
+**Builds left Kranto.** A `builds:` section still in `kranto.yaml` is ignored, and
+`kranto doctor` says so in one line. Nothing is deleted: `loop.db`, the task folders
+and the project topics stay on disk, untouched, and `kranto archive` writes them out
+([archive.md](archive.md)).
 
 Run statuses: `ok` (everything worked), `degraded` (some sources or calls
 failed, a reply came back empty or was declined, or the run stopped early on budget
@@ -408,8 +383,8 @@ under 100), cluster names 168-372, judge replies up to 1418. At the old screen c
 degraded. The judge, the screen, rollups and cluster names ask once more
 with twice the room when a reply is cut off; only a second cut-off counts as an error. Measured reference points: Parallax
 judged items at about $0.0027 each on Haiku (April 2026, partial logs);
-the server's full-text fetching adds roughly 55% input tokens on the items it
-applies to (live sample, 27 of 30 items). No the server run has been costed with
+Kranto's full-text fetching adds roughly 55% input tokens on the items it
+applies to (live sample, 27 of 30 items). No server run has been costed with
 a real key yet; that is issue #21.
 
 **Looking before judging** (#84, `look.enabled`, on) makes two calls per item
@@ -618,8 +593,8 @@ reinstall if `pyproject.toml` changed, run the tests), one workspace per purpose
 (the local-first library, and a second one for the #63 benchmark), each served
 by a systemd user unit bound to 127.0.0.1 and reached through an SSH tunnel.
 Work that needs another branch uses a separate worktree, never the served
-checkout. `kranto adopt` moves an install from before Kranto (by default the
-workspace `~/kranto-kb`, the loop home `~/kranto-loop` and tasks in `~/tasks`;
+checkout. `kranto adopt` moves an install from before Kranto (by default that
+install's own workspace, loop home and task folders where the older release put them;
 `-w` and `--loop-home` for others) to `kranto.service` in place (backups next to
 the workspace in `<workspace>-backups`, the `brb` section written, migrations,
 then with a yes `kranto.service` and its drop-in replaced); `kranto adopt

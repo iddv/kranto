@@ -6,7 +6,7 @@ paragraph.
 
 ## Signing in and who may act {#access}
 
-Who may act on Kranto, and as whom. The history, the action log and each round say which of
+Who may act on Kranto, and as whom. The history, the action log and Activity say which of
 these did it.
 
 Every click, MCP tool and agent request carries a token. Kranto acts as that token's owner
@@ -106,7 +106,7 @@ more**. Each of those is made at once, with **Undo** in its toast. Paused and Ne
 News is on) are its switches. **Save** writes what changed of
 its words and switches and says so, with one **Undo** for all of it. **Archive** takes the topic off your lists and stops reading it; its evidence, themes and
 ideas stay readable, and Undo (or **Restore** under Archived on Watch › Topics) brings it back.
-Nothing is deleted: each change is a new row in the server, with where it came from.
+Nothing is deleted: each change is a new row in Kranto's library, with where it came from.
 
 **A new topic's first hour.** At the top of a new topic's page, four rows say how far it is, each
 with its time: **Sources** (how many are watched), **First read** (when it starts, or how much it
@@ -399,8 +399,8 @@ Cubs and its Approvals land here.
 
 ## Settings {#settings}
 
-Settings has seven pages, in the order you set kranto up: **Watching** (the model key and
-provider, the model for each job, how often kranto reads, live search, and the logins some
+Settings has seven pages, in the order you set Kranto up: **Watching** (the model key and
+provider, the model for each job, how often Kranto reads, live search, and the logins some
 sources are read with), **Posting** (the accounts a draft is sent with, and what Kranto writes:
 each posting job's own settings, like the weekly issue's day and topics), **Assistant**,
 **Spend**, **Privacy**, **System** (updates, the service, recent runs, your grades) and
@@ -484,7 +484,7 @@ line.
 
 **"Preview: a copy of your data from … Nothing is posted; no update or usage report goes out."**
 On the preview (a second Kranto built from a branch, on a copy of your data, `kranto-preview` in
-the server's `docs/preview.md`) this is the status bar's first cell, and on the phone a strip above
+Kranto's `docs/preview.md`) this is the status bar's first cell, and on the phone a strip above
 the doors. There nothing is posted: an approval says "This is the preview: nothing is sent", no
 kind can be turned live, no report or update goes out, and Check for updates says updates are off.
 A model key's test still asks its provider (that is how a key is checked). Every other install
@@ -574,7 +574,7 @@ To check now, click the version ("Kranto 0.5.10 · Check for updates": in the st
 Settings' Overview, and Check for updates under Settings › System › Updates), or ⌘K "Check for
 updates". The answer is said where you clicked: you're on the latest, a new version is ready
 (Restart to update, also ⌘K "Update Kranto"), or why the check failed and what to do. While the
-repositories are private, a check needs a GitHub login that can see them: run `gh auth login` on
+repository is private, a check needs a GitHub login that can see it: run `gh auth login` on
 the machine Kranto runs on. When the check has failed for more than two days, the top bar says
 "Can't check for updates" (point at it for the reason). An update ready says "Update" there,
 without its versions: Settings › Updates says them. The top bar holds nothing else daily: what
@@ -586,7 +586,7 @@ puts the previous one back by itself; the data is never rolled back. If the old 
 not stop when asked and had to be killed, the update's line under Settings › System › Updates says so:
 the new version runs, and the warning is worth reporting.
 
-Before it keeps a new version, kranto reads every page it serves once, on your own data: every
+Before it keeps a new version, Kranto reads every page it serves once, on your own data: every
 topic, every list's first page, the home, each cub's page, the activity (only reads; nothing
 is changed). If one fails (an error, or no answer), the new version is put back the same way,
 and Needs you says "0.5.x broke on your data and was rolled back", with **Send this error**
@@ -608,7 +608,7 @@ order (`kranto_list_ideas`, `kranto_get_idea`), and Later is the verb `idea.late
 ## Kranto's memory {#memory}
 
 Settings › System › Service › **Memory** is the most memory Kranto's service may use (`service.memory`,
-in GB; MemoryHigh is 1 GB under it, where the system starts slowing kranto down). **Auto** takes it
+in GB; MemoryHigh is 1 GB under it, where the system starts slowing Kranto down). **Auto** takes it
 from this machine's memory (half of it, at most 4 GB). Save applies it at once to the running
 service, with Undo, and the row shows what Kranto uses now. It is Kranto's own systemd drop-in
 (`~/.config/systemd/user/kranto.service.d/30-memory.conf`): change it here, or ask the console,

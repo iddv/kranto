@@ -1,7 +1,7 @@
 # The watcher
 
-the server is the half of Kranto that watches: it reads public sources for the topics you choose,
-with cheap language-model "kranto" that read each new post, article or discussion and write down
+The watcher is the part of Kranto that reads: it reads public sources for the topics you choose,
+with cheap language-model calls that read each new post, article or discussion and write down
 the few that are worth remembering. What they write goes into an append-only library on your
 machine, organised into a map of themes that emerge from the data, and it proposes ideas grounded
 in what Kranto saw, with every claim linked back to its source.
@@ -25,8 +25,8 @@ This page is the watcher in detail. To install Kranto, start with [setup.md](set
   citation is checked against the observation it cites. You grade them.
 - **Look before judging**: each item that passes the topic filter is first
   screened by a short, lenient model call that drops clear junk (spam, empty
-  pages, chatter far from every topic). For what passes, the kranto read what
-  is one step away before they judge: the Hacker News discussion, the pages
+  pages, chatter far from every topic). For what passes, Kranto reads what
+  is one step away before the judge sees it: the Hacker News discussion, the pages
   the post and its comments link to, the repositories it names. The judge sees
   the item with that material, and a linked source that holds up on its own
   becomes an observation of its own, linked to the item. A body that is only
@@ -47,43 +47,46 @@ messages to delivery targets you configure (none by default).
 
 ## The watcher alone
 
-Kranto runs all of this for you. To run only the watcher, as `afk`, you need
-Python 3.12 or newer, [uv](https://docs.astral.sh/uv/) and a key: the default is
-[OpenRouter](https://openrouter.ai), which reports the cost of every call; an
-Anthropic API key works too (`afk provider use anthropic --key-stdin`, which tests
-the key and switches the watcher to the Claude API).
+Kranto runs all of this for you. The watcher's own commands are not on your PATH: they run
+as `python -m kranto.cli` with Kranto's own Python. In a checkout that is
+`uv run python -m kranto.cli`; for an installed Kranto it is
+`~/.local/share/uv/tools/kranto/bin/python -m kranto.cli`. Below, `python -m kranto.cli` means
+either. The commands work on the folder given with `-w`, else `$KRANTO_HOME`, else the current
+folder: for an installed Kranto, set `KRANTO_HOME=~/.kranto`.
+
+To run only the watcher you need Linux, Python 3.12 or newer, [uv](https://docs.astral.sh/uv/)
+and a key: the default is [OpenRouter](https://openrouter.ai), which reports the cost of every
+call; an Anthropic API key works too (`python -m kranto.cli provider use anthropic --key-stdin`,
+which tests the key and switches the watcher to the Claude API). From a checkout:
 
 ```
-tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)
-gh release download "$tag" -R iddv/kranto -p 'kranto-*.whl' -D "kranto-$tag"
-uv tool install --python 3.12 "kranto-$tag"/kranto-*.whl
-afk init ~/kranto
+uv sync
+uv run python -m kranto.cli init ~/kranto
 echo 'OPENROUTER_API_KEY=sk-or-...' > ~/kranto/.env
-afk -w ~/kranto doctor
+uv run python -m kranto.cli -w ~/kranto doctor
 ```
 
-`afk doctor` checks the key, that the configured models exist, pricing, and
-the embedding model. `afk provider show` says which keys it finds and `afk
-provider test` tests one without spending anything. With an Anthropic key, `afk provider
-replay` asks your newest screens and judges again through the Claude API three ways (no
+`doctor` checks the key, that the configured models exist, pricing, and
+the embedding model. `provider show` says which keys it finds and `provider test` tests
+one without spending anything. With an Anthropic key, `provider replay` asks your newest screens and judges again through the Claude API three ways (no
 cache, cache, cache with schema-enforced replies) and says whether turning on structured
 outputs or low effort on screens keeps the verdicts; it spends at most `--max-usd` (default
 $0.20) and changes nothing. (`structured` turns schemas on for the watcher's own calls; a post
 writer's schema is always sent on the Claude API and the Claude Code login.) The embedding model (nomic-embed-text-v1.5, about 500MB)
 downloads on first use and runs on your CPU. Set `KRANTO_HOME=~/kranto` to drop
-the `-w` flag. (In a kranto install, `afk` finds the kranto home by itself.)
+the `-w` flag.
 
 Then tell Kranto what to watch. Either describe a topic and let a scout
 propose sources:
 
 ```
-afk -w ~/kranto topics add "Local-first software" \
+python -m kranto.cli -w ~/kranto topics add "Local-first software" \
   "Software that keeps working offline and keeps data on the user's devices: CRDTs, sync engines, and the products built on them."
 ```
 
 The scout makes one model call, test-fetches every source it proposes, and
 shows how many items each has and how closely they match your topic. Nothing
-is watched until you approve it (`afk sources approve ID`, or on the Topics
+is watched until you approve it (`sources approve ID`, or on the Topics
 page); add `--approve` to accept the proposals that match well. The scout
 also proposes three wildcards: sources unrelated to the topic that are likely
 to carry the same patterns. They are never auto-approved; an approved
@@ -93,7 +96,7 @@ Or start from a pack of hand-picked sources, with no model call (the packs are i
 repository's `examples/packs/`):
 
 ```
-afk -w ~/kranto pack examples/packs/local-first.yaml
+python -m kranto.cli -w ~/kranto pack examples/packs/local-first.yaml
 ```
 
 `examples/packs/broad.yaml` adds general feeds linked to no topic (the broad
@@ -103,7 +106,7 @@ costs more judge calls; the file says how many at most.
 Then start it:
 
 ```
-afk -w ~/kranto serve
+python -m kranto.cli -w ~/kranto serve
 ```
 
 and open http://127.0.0.1:8765. The UI is Kranto's (the page, at `/`; the
@@ -114,35 +117,26 @@ source's first run reaches further back), rebuilds the map daily once there
 are at least 30 observations, compacts observations past their retention age
 into weekly rollups after each map, proposes ideas after each new map, and
 sends a heartbeat weekly. Empty pages say what they are waiting for. In Kranto, finishing
-Welcome starts the first read; at any time, `afk run` reads now. If you prefer cron, run
-`afk serve --no-scheduler` and schedule `afk run`, `afk snapshot`, `afk compact`,
-`afk ideas`, `afk heartbeat` and `afk strikes --run` yourself; overlapping runs are
+Welcome starts the first read; at any time, `run` reads now. If you prefer cron, run
+`serve --no-scheduler` and schedule `run`, `snapshot`, `compact`, `ideas`, `heartbeat` and
+`strikes --run` yourself; overlapping runs are
 prevented with a lock.
 
-To be notified outside the browser, install the extra and name the targets
-(see the [Apprise URL formats](https://github.com/caronc/apprise/wiki)):
+To be notified outside the browser, install the extra (`uv sync --extra notify` in a
+checkout) and name the targets (see the
+[Apprise URL formats](https://github.com/caronc/apprise/wiki)):
 
 ```
-uv tool install --force --python 3.12 "kranto[notify] @ $(ls "$PWD/kranto-$tag"/kranto-*.whl)"
 echo 'KRANTO_NOTIFY_URLS=ntfy://ntfy.sh/your-topic' >> ~/kranto/.env
 ```
 
 (Kranto includes the notify extra.)
 
-### Docker
+### Containers
 
-The image runs the watcher alone. It is untested since 2026-10-08: CI's `docker` job runs
-only when dispatched, and nobody has built the image since.
-
-```
-docker build -t kranto .
-docker run -d --name kranto -p 127.0.0.1:8765:8765 -v kranto:/data \
-  -e OPENROUTER_API_KEY=sk-or-... kranto
-```
-
-The image keeps the config, the library and the model cache in `/data`, and
-creates a workspace there on first start. Add topics from the web UI, or run
-commands in the container with `docker exec kranto afk ...`.
+This repository carries no container image (checked 2026-11-13). If you build your own,
+publish its port on loopback only, for example `docker run -p 127.0.0.1:8765:8765 …`: the
+Host check stops a browser on another site, not a client on your network.
 
 ## Sources
 
@@ -203,33 +197,35 @@ who can reach the port can read the library. See [SECURITY.md](../SECURITY.md).
 
 ## Commands
 
+Each runs as `python -m kranto.cli …` (above).
+
 ```
-afk init DIR                 create a workspace
-afk doctor                   check key, models, pricing, sources, embedder
-afk topics add NAME DESC     add a topic and scout sources (--no-scout, --approve)
-afk topics scout ID          propose more sources for a topic
-afk topics edit ID           a new --name or --description (the id is kept)
-afk topics archive ID        not read, off the lists, evidence kept (--restore)
-afk sources add KIND VALUE   add a source by hand (--topic ID)
-afk sources list|approve|retire
-afk sources retention ID DAYS  keep one source's observations DAYS (0: forever, or default)
-afk pack FILE                add topics and sources from a pack
-afk run                      one ingest pass
-afk snapshot                 rebuild the map
-afk compact                  roll up and remove observations past their retention age
-afk ideas                    idea cards from the latest map (list, grade ID useful|not_useful,
-                             card LINEAGE: one card on that theme now)
-afk messages                 strikes, heartbeats and alarms
-afk strikes [-v] [--run]     candidates and why each was or was not sent
-afk heartbeat [--now]        send the weekly heartbeat
-afk grade TARGET ID GRADE    a card or evidence: grade idea 12 useful, grade observation 40
-                             not_useful (skip clears); other targets are not graded
-afk list | search QUERY | show ID | explain ID
-afk pause [REASON] | resume
-afk serve                    JSON API, scheduler, and the page at /
-afk export TABLE -o FILE     JSONL export of any table
-afk export bundle -o DIR     static copy of the latest map
-afk import parallax PATH     import a Parallax library
+init DIR                 create a workspace
+doctor                   check key, models, pricing, sources, embedder
+topics add NAME DESC     add a topic and scout sources (--no-scout, --approve)
+topics scout ID          propose more sources for a topic
+topics edit ID           a new --name or --description (the id is kept)
+topics archive ID        not read, off the lists, evidence kept (--restore)
+sources add KIND VALUE   add a source by hand (--topic ID)
+sources list|approve|retire
+sources retention ID DAYS  keep one source's observations DAYS (0: forever, or default)
+pack FILE                add topics and sources from a pack
+run                      one ingest pass
+snapshot                 rebuild the map
+compact                  roll up and remove observations past their retention age
+ideas                    idea cards from the latest map (list, grade ID useful|not_useful,
+                         card LINEAGE: one card on that theme now)
+messages                 strikes, heartbeats and alarms
+strikes [-v] [--run]     candidates and why each was or was not sent
+heartbeat [--now]        send the weekly heartbeat
+grade TARGET ID GRADE    a card or evidence: grade idea 12 useful, grade observation 40
+                         not_useful (skip clears); other targets are not graded
+list | search QUERY | show ID | explain ID
+pause [REASON] | resume
+serve                    JSON API, scheduler, and the page at /
+export TABLE -o FILE     JSONL export of any table
+export bundle -o DIR     static copy of the latest map
+import parallax PATH     import a Parallax library
 ```
 
 ## Data
@@ -237,7 +233,7 @@ afk import parallax PATH     import a Parallax library
 The library is append-only: SQLite triggers reject updates on every library
 table, and deletes on all of them except through one recorded path. A
 correction is a new row that points at the one it replaces. The only mutable
-state is a handful of settings such as the pause flag. `afk export` writes any
+state is a handful of settings such as the pause flag. `export` writes any
 table as JSONL.
 
 Observations are kept for 90 days by default (`retention` in `kranto.yaml`,

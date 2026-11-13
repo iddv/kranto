@@ -1,23 +1,22 @@
 # Glossary
 
-The words Kranto uses, in the app and in both repositories.
+The words Kranto uses, in the app, its commands and this repository.
 
 ## The app
 
 - **Kranto**: the app. One install (`uv tool install … kranto`), one start (`kranto up`), one
-  service (`kranto.service`), one page at http://127.0.0.1:8765/. It is two packages:
-- **the server**: the half that watches. It reads the sources of your topics, keeps what is
+  service (`kranto.service`), one page at http://127.0.0.1:8765/. It is one Python package,
+  `kranto`, in two parts:
+- **the server**: the part that watches. It reads the sources of your topics, keeps what is
   worth keeping in the library and writes idea cards. It also serves the page and holds the
   `kranto` command and `kranto update`.
-- **the page**: the half that builds. It takes an idea through the build pipeline to a
-  private GitHub repo, maintains what it published or adopted, and draws the builds part of
-  the page (drawn at `/`; its own files and calls under `/brb/`).
-- **`afk`, `brb`, `kranto`**: the commands. `kranto` runs the app; `afk` and `brb` are each half
-  on its own.
-- **Home**: where an install keeps its data. A kranto home (default `~/.kranto`) holds
-  `kranto.yaml`, `.env`, `data/` (the library), `loop/` (the build loop's `loop.yaml` and
-  ledger) and `tasks/` (one folder per build). `~/.config/kranto/home` records which home
-  `kranto` uses.
+- **the page**: the web UI in your browser (drawn at `/`; its own files and calls under
+  `/brb/`), with the console and `kranto mcp` (`src/kranto/page/`).
+- **`kranto`**: the command. The watcher's own commands also run from a checkout as
+  `python -m kranto.cli` ([watcher.md](watcher.md)).
+- **Home**: where an install keeps its data. A Kranto home (default `~/.kranto`) holds
+  `kranto.yaml`, `.env`, `data/` (the library) and `loop/` (the page's `loop.yaml`).
+  `~/.config/kranto/home` records which home `kranto` uses.
 - **Token**: who may act. Every write needs one (the page's session cookie, `kranto mcp`'s,
   the console's, the command line's, or a named agent's); reads do not. They live in
   `~/.config/kranto/tokens/`. A door is one of those callers.
@@ -32,7 +31,7 @@ The words Kranto uses, in the app and in both repositories.
 
 One name for each thing, in the pages, Welcome, `kranto setup` and the commands' help.
 
-- **Watching** and **building**: the two halves, never "monitoring". `kranto status` says
+- **Watching**: reading your sources, never "monitoring". `kranto status` says
   "watching $10.39 of $40.00 this month".
 - **Provider**: where model calls go: Claude API, OpenRouter, Another endpoint, Claude Code.
   The command line's choices stay `anthropic`, `openrouter`, `endpoint`, `claude_code`.
@@ -43,7 +42,7 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
 - **Account**: one you read sources with (Mastodon, Bluesky, X…); Connect and Disconnect…
   are its verbs.
 - **Door** and **agent**: who may act; the file each uses is a token.
-- **Cap**: a spend ceiling, always "X a month", "a day" or "one build"; "no cap" when there
+- **Cap**: a spend ceiling, always "X a month" or "a day"; "no cap" when there
   is none. Never "budget" or "limit" (a provider's own spend limit keeps its name).
 - **Source states**: watched, proposed, retired, failing, paced, needs an account. A source is
   **watched** (read every run), never "active" (a topic's state) nor "watching".
@@ -71,8 +70,8 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
   Mute, Read less and Retire act **everywhere** and say so. **Could not be fetched**: a proposal
   that was empty or unreachable when checked. **Imported labels**: names on observations
   imported from Parallax, never read.
-- **Bear**: one cheap model call that reads a new item and decides whether it is worth
-  remembering. (Older documents call them interns.)
+- **Judging**: one cheap model call that reads a new item and decides whether it is worth
+  remembering (in the code, the *intern*).
 - **Watching model** and **provider**: where Kranto's model calls go. The provider is the
   Claude API (an Anthropic key), OpenRouter, another OpenAI-compatible endpoint, or your Claude
   Code login (an explicit choice; its calls are billed to your Claude plan, shown as their
@@ -81,7 +80,7 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
   cards: Sonnet 5.5; `reason`). A provider can
   **pause** watching until a time (a spend limit reached, a Claude plan's usage window closed):
   nothing is lost, items wait and are read when it ends.
-- **Observation**: what a Kranto kept: a summary, three ratings, a verbatim excerpt and the link.
+- **Observation**: what the judging kept: a summary, three ratings, a verbatim excerpt and the link.
   Its **signal** combines the ratings.
 - **Library**: every observation, append-only. After the retention window observations are
   compacted into **rollups** (a weekly summary that keeps the trend and drops the text).
@@ -119,39 +118,18 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
   the file `~/.config/kranto/cubs.STOP` stops every cub and makes every approval practice
   while it exists.
 
-## Building (the page)
+## Acting and spending
 
-- **The loop**: the page's scheduler, running as a lane of `kranto serve`: ideas in, published
-  software out. Its settings are `loop.yaml`; its record is the **ledger** (`loop.db`).
-- **Idea**: something to build, from an idea card, the inbox, `brb loop add` or the page.
-  When builds start on their own is a setting (automatic builds wait until enough signals
-  agree; you can always pick an idea by hand).
-- **Pitch**: one model call that turns an idea into a product brief.
-- **Build**: the v5 pipeline that turns a brief into a repo, in **rounds** made of **stages**
-  (scope, build, verify, repair, readiness, deliver). Every session in it runs in the sandbox.
-- **Sandbox**: bubblewrap around every session that writes or runs code: the workspace
-  writable, the system read-only, your home hidden, the network only through a proxy that
-  reaches public addresses. See the page's SECURITY.md.
-- **Exam**: the checks a build is judged by (scenarios, the product's own tests, its README's
-  commands, the readiness scorecard), kept outside the product. **Readiness** is the stage
-  that reviews security, operations and the README.
-- **Gate**: the release check after a round. A build that passes is **ready**; one that does
-  not is **held**, with the reasons.
-- **Ask for changes** (revise): another round on a held or ready build, with your instructions.
-- **Publish**: a ready build becomes a **private** GitHub repo with a first release. It
-  becomes public only when you approve it.
-- **Project**: a published or adopted repo that Kranto keeps improving. Its **charter** says
-  what it is, for whom, and what it promises; the weekly **evolve** run proposes changes, and
-  the autonomy setting says which ones need you.
-- **Maintenance**: Kranto looking after a repo: triage, fixes as pull requests, dependency
-  updates. An **adopted** repo is one of yours that you asked Kranto to maintain.
-- **Action**: one thing Kranto can do (start a build, publish, close, revise…), the same from
-  the page, the command line, `kranto mcp` or a Claude Code proposal you confirm. Some always
-  wait for your click.
+- **Sandbox**: bubblewrap around the console and every cub: the system read-only, your home
+  hidden, the network only through a proxy that reaches public addresses
+  ([threat-model.md](threat-model.md)).
+- **Action**: one thing Kranto can do (add a topic, approve a source, write a post…), the same
+  from the page, the command line, `kranto mcp` or a Claude Code proposal you confirm. Some
+  always wait for your click.
 - **Spend**: what was spent, in dollars on Settings › Spend and in tokens everywhere else.
   There is no cap by default; every cap is configurable.
-- **Weekly editor**: once a week reads what was gathered and recommends at most one idea worth
-  building (the **nominee**), or says why not. The **research desk** checks a nominee against
-  what already exists before you see it.
-- **Review**: the page where you grade the week's cards and builds (`g r`). A build's own page
-  is opened with Open; a pull request with Open on GitHub ↗.
+- **Weekly editor**: once a week reads what was gathered and recommends at most one idea (the
+  **nominee**), or says why not.
+
+Builds, projects, pitches and maintenance left Kranto; what they kept is in
+[archive.md](archive.md).
