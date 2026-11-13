@@ -1045,3 +1045,25 @@ def test_following_the_helper_imports_nothing_on_the_way():
     tail = ast.parse(textwrap.dedent(inspect.getsource(launcher.tail_update))).body[0]
     first = [n for n in tail.body if isinstance(n, (ast.Import, ast.ImportFrom))]
     assert len(imports(launcher.tail_update)) == len(first)          # none further in
+
+
+def test_every_command_the_helper_runs_names_this_install_in_both_spellings(world):
+    """A version from before the rename reads only the old variable names: without them, its
+    `up` on the way back took the default unit and home (another install's, on the rehearsal's
+    machine)."""
+    seen = []
+    real = world.run
+
+    def run(cmd, env=None, timeout=None):
+        if cmd[0].startswith(str(world.bin)):
+            seen.append(env)
+        return real(cmd, env=env, timeout=timeout)
+
+    old_install(world)
+    old = legacy.ENV_PREFIXES[0]
+    world.run = run
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    assert world.helper(to="previous").run_all() == "done"
+    assert seen and all(e[old + "HOME"] == str(world.home) and e["KRANTO_HOME"] == str(world.home)
+                        and e[old + "UNIT"] == legacy.UNIT == e["KRANTO_UNIT"] for e in seen)
+

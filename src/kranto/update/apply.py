@@ -703,6 +703,11 @@ class Helper:
         legacy.adopt_env(self.env)            # a unit written before the rename names old ones
         self.unit = unit or legacy.unit_name(self.env)
         self.env.update(KRANTO_HOME=str(self.home), KRANTO_UNIT=self.unit)
+        # and under the old names: a version from before the rename (a rollback to it, or the
+        # crossing's first start) reads only those, and without them it would take the default
+        # unit and home, which may be another install's (the rehearsal on a copy found it)
+        old = legacy.ENV_PREFIXES[0]
+        self.env.update({old + "HOME": str(self.home), old + "UNIT": self.unit})
         user = Path(self.env.get("HOME") or Path.home())
         self.tool_dir = Path(self.env.get("UV_TOOL_DIR") or
                              user / ".local" / "share" / "uv" / "tools")
