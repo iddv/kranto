@@ -245,7 +245,7 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
     return Handler
 
 
-DEFAULT_PORT = 8790          # 8765 is the server's default (`afk serve`, Kranto)
+DEFAULT_PORT = 8790          # 8765 is the server's default (`python -m kranto serve`, Kranto)
 PORT_TRIES = 20
 
 

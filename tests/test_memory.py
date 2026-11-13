@@ -427,10 +427,10 @@ def test_enter_scope_replaces_the_process_or_returns(monkeypatch):
     execs = []
     monkeypatch.setattr(memory.os, "execvp", lambda f, a: execs.append(a))
     monkeypatch.setattr(memory, "scope_argv", lambda argv: None)
-    memory.enter_scope("afk run")
+    memory.enter_scope("python -m kranto run")
     assert execs == []
     monkeypatch.setattr(memory, "scope_argv", lambda argv: ["systemd-run", "--", *argv])
-    memory.enter_scope("afk run")
+    memory.enter_scope("python -m kranto run")
     assert execs and execs[0][0] == "systemd-run" and execs[0][2] == sys.executable
 
 

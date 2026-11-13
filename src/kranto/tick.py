@@ -313,7 +313,7 @@ def run_ingest(
     """``connections`` (``kranto.connections.Connections``) is what sources that read
     with a connected account use; without it they record "needs login" and the run
     goes on. ``on_progress`` is called as each source starts, once its new items are
-    known, and before each item (``afk run`` prints from it)."""
+    known, and before each item (``python -m kranto run`` prints from it)."""
     global _CURRENT
     report = RunReport(run_uuid=activity.run_uuid("ingest"))
     started = clock()

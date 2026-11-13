@@ -18,7 +18,7 @@ refused, the safe HTTP client fetches and measures it), and the batch is recorde
   one already watched is ``already_watching`` and is never added again.
 
 Nothing is approved here, ever: approval is a second, separate step (``approve``,
-``POST /api/sources/approve``, ``afk sources approve``), owner decisions D6 and D8.
+``POST /api/sources/approve``, ``python -m kranto sources approve``), owner decisions D6 and D8.
 
 The pasted text is data: it is one user message inside a document fence that the text
 cannot close (runs of three or more ``<`` or ``>`` are shortened), the prompt says so,
@@ -544,7 +544,8 @@ def approve(store: Store, ids: list[int], topic_id: int | None = None,
             note: str = "approved from a described list", *, strict: bool = True) -> dict[str, Any]:
     """Approve proposed sources by id, linking each to ``topic_id`` when given; one already
     approved is only linked. With ``strict`` (the page's Approve the ticked) an invalid or
-    retired source is skipped with why; without it (``afk sources approve``, as before) a
+    retired source is skipped with why; without it (``python -m kranto sources approve``, as
+    before) a
     person may approve one by its id. Unknown ids are skipped.
     Returns ``{"approved": [ids], "skipped": [{"id", "why"}]}``."""
     known = {s.id: s for s in library.list_sources(store)}

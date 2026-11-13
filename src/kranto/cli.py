@@ -63,7 +63,8 @@ def cmd_init(args) -> int:
     Store.open(cfg.db_path).close()
     print(f"created {path}")
     print(f"library: {cfg.db_path}")
-    print(f"next: export {cfg.llm.api_key_env}=... and add a topic with 'afk topics add'")
+    print(f"next: export {cfg.llm.api_key_env}=... and add a topic with "
+        f"'python -m kranto topics add'")
     print(f"responsible use: {RESPONSIBLE_USE_URL}")
     return 0
 
@@ -187,7 +188,7 @@ def _scout(rt: Runtime, topic_id: int, approve: bool) -> int:
     _print_scout(results)
     pending = sum(1 for r in results if r.status == "proposed")
     if pending:
-        print(f"\n{pending} proposed; approve with 'afk sources approve <id>'")
+        print(f"\n{pending} proposed; approve with 'python -m kranto sources approve <id>'")
     wild = sum(1 for r in results if r.proposal.role == "wildcard" and r.status == "proposed")
     if wild:
         print(f"{wild} of them are wildcards: unrelated to the topic, never auto-approved. "
@@ -318,8 +319,8 @@ def cmd_sources_describe(args) -> int:
     ready = [str(x.source_id) for x in batch.lines
              if x.status in ("valid", "unverified") and x.source_id]
     if ready:
-        print("Approve in Settings › Add source, or: afk sources approve " + " ".join(ready)
-              + (f" --topic {args.topic}" if args.topic is not None else ""))
+        print("Approve in Settings › Add source, or: python -m kranto sources approve "
+              + " ".join(ready) + (f" --topic {args.topic}" if args.topic is not None else ""))
     return 0
 
 
@@ -444,7 +445,8 @@ def _after_job(rt: Runtime) -> None:
 
 
 def _run_progress(out=None, clock=time.monotonic):
-    """``afk run``'s progress lines, to stderr (stdout keeps the report): each source as it
+    """``python -m kranto run``'s progress lines, to stderr (stdout keeps the report): each source
+    as it
     starts and once its new items are known, then every 10 items or 30 s."""
     out = out or sys.stderr
     t0 = clock()
@@ -475,7 +477,7 @@ def _run_progress(out=None, clock=time.monotonic):
 def cmd_run(args) -> int:
     from .delivery import ping_heartbeat
 
-    memory.enter_scope("afk run")
+    memory.enter_scope("python -m kranto run")
     rt = _runtime(args)
     try:
         report = run_ingest(rt.cfg, rt.store, rt.llm, rt.embedder, rt.http,
@@ -588,7 +590,8 @@ def cmd_search(args) -> int:
 
 
 def cmd_websearch(args) -> int:
-    """``afk websearch``: the live web, dated (the owner's check that a backend works)."""
+    """``python -m kranto websearch``: the live web, dated (the owner's check that a backend
+    works)."""
     from . import websearch
 
     rt = _runtime(args)
@@ -598,7 +601,7 @@ def cmd_websearch(args) -> int:
             results = websearch.for_runtime(rt).search(
                 args.query, recency=args.recency, kind=args.kind, n=args.n, backends=backends)
         except ValueError as exc:
-            print(f"afk websearch: {exc}", file=sys.stderr)
+            print(f"python -m kranto websearch: {exc}", file=sys.stderr)
             return 2
         if args.json:
             print(json.dumps(results.to_dict(), indent=2))
@@ -628,7 +631,7 @@ def cmd_show(args) -> int:
     )
     if r is None:
         hint = (" (observations past their retention age are compacted into rollups; "
-                "'afk search' finds those)"
+                "'python -m kranto search' finds those)"
                 if store.query_one("SELECT 1 FROM purges LIMIT 1") else "")
         raise CLIError(f"no observation {args.observation_id}{hint}")
     print(f"#{r['id']}  {r['kind']}  signal {r['signal']:.3f} = "
@@ -980,8 +983,8 @@ def cmd_provider_use(args) -> int:
     from . import providers, setup
     root = config_mod.find_workspace(args.workspace)
     if args.provider == "claude_code" and not args.accept_terms:
-        print(f"{providers.CLAUDE_CODE_TERMS}\nTo choose it anyway: afk provider use claude_code "
-              "--accept-terms", file=sys.stderr)
+        print(f"{providers.CLAUDE_CODE_TERMS}\nTo choose it anyway: "
+              "python -m kranto provider use claude_code --accept-terms", file=sys.stderr)
         return 2
     key = sys.stdin.readline().strip() if args.key_stdin else None
     try:
@@ -1191,7 +1194,8 @@ def early_briefs(rt):
 
 
 def server_jobs(rt, *, update_job: bool = False, port: int | None = None) -> list:
-    """The scheduler's jobs under ``kranto serve`` (``afk serve`` without ``update_job``):
+    """The scheduler's jobs under ``kranto serve`` (``python -m kranto serve`` without
+    ``update_job``):
     the server's own, the update check and the usage reports, the features', the cubs'
     sweep. Every one is a run; the tests walk this list."""
     from . import websearch
@@ -1281,7 +1285,7 @@ def cmd_serve(args) -> int:
     from .scheduler import Scheduler
     from .web.app import create_app
 
-    memory.enter_scope("afk serve")
+    memory.enter_scope("python -m kranto serve")
     rt = _runtime(args)
     scheduler = None
     if not args.no_scheduler:
@@ -1398,7 +1402,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--topic", type=int, action="append", help="topic id this source serves")
     p.add_argument("--no-check", action="store_true", help="skip the test fetch")
     p.add_argument("--from-text", metavar="FILE",
-                   help="the same as 'afk sources describe FILE' (proposes, approves nothing)")
+                   help="the same as "
+                       "'python -m kranto sources describe FILE' (proposes, approves nothing)")
     p.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     p.set_defaults(func=cmd_sources_add)
     p = srcs.add_parser("describe", help="propose sources from a pasted list or description "
@@ -1550,7 +1555,7 @@ def build_parser() -> argparse.ArgumentParser:
                    help="another host name or address the UI may be reached by (repeatable); "
                         "loopback names and --host are always allowed")
     p.add_argument("--no-scheduler", action="store_true",
-                   help="serve only; run ingest from cron with 'afk run' instead")
+                   help="serve only; run ingest from cron with 'python -m kranto run' instead")
     p.set_defaults(func=cmd_serve)
 
     p = sub.add_parser("messages", help="strikes, heartbeats and alarms, newest first")
@@ -1601,7 +1606,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_features)
     from .core.cubs import cli as cubs_cli
     cubs_cli.add_parser(sub).set_defaults(func=cmd_cub)
-    # each feature's own commands (afk news ..., afk invest ...), from its manifest
+    # each feature's own commands (python -m kranto news ..., and so on), from its manifest
     from .core.registry import features as _features
     for f in _features():
         if f.cli is not None:
@@ -1610,7 +1615,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def cmd_cub(args) -> int:
-    """``afk cub …``: ``kranto cub`` for this workspace."""
+    """``python -m kranto cub …``: ``kranto cub`` for this workspace."""
     from .core.cubs import cli as cubs_cli
     rt = _runtime(args) if getattr(args, "runtime_factory", None) else None
     return cubs_cli.run(args, config_mod.find_workspace(args.workspace), rt=rt)
@@ -1653,7 +1658,7 @@ def main(argv: list[str] | None = None, *, runtime_factory=None) -> int:
     try:
         return int(args.func(args) or 0)
     except (config_mod.ConfigError, CLIError, ValueError) as exc:
-        print(f"afk: {exc}", file=sys.stderr)
+        print(f"kranto: {exc}", file=sys.stderr)
         return 2
 
 

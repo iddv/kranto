@@ -17,10 +17,11 @@ Commands:
 
 - ``up``: make the home if there is none, install and start ``kranto.service`` (a systemd
   user unit) where systemd is usable, else serve in the foreground; open the browser;
-- ``serve``: ``afk serve`` with the scheduler on (what the unit runs); ``--no-scheduler``
+- ``serve``: ``python -m kranto serve`` with the scheduler on (what the unit runs);
+``--no-scheduler``
   stays for cron users;
 - ``down``, ``status``, ``logs``: the unit, a one-screen status, its journal;
-- ``doctor``: ``afk doctor`` plus the prerequisites nobody can install for you (the
+- ``doctor``: ``python -m kranto doctor`` plus the prerequisites nobody can install for you (the
   Claude Code CLI and its login, ``gh`` and its login, ``bwrap``), the unit's PATH, whether
   the console is ready, pending migrations;
 - ``adopt``: switch an existing installation (``~/kranto-kb``, ``~/kranto-loop``,

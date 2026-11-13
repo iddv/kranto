@@ -1,4 +1,4 @@
-"""The reply schemas beside the prompts and ``afk provider replay`` (PR-E, 6),
+"""The reply schemas beside the prompts and ``python -m kranto provider replay`` (PR-E, 6),
 against a fake Claude API on loopback: what each variant sends, the agreement it reports,
 the cap checked before anything is sent, and that every call is recorded."""
 
