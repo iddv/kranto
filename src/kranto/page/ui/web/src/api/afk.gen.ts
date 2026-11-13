@@ -2470,6 +2470,20 @@ export interface PostAccount {
   platform: string | null;
 }
 
+/** One site of a write's short posts: its newest draft, the site, its name and where the draft stands (``waiting``, ``sent``, ``earlier``). */
+export interface PostSibling {
+  id: number;
+  site: string;
+  word: string;
+  state: string;
+}
+
+/** Post's one line about where short posts go, and how many sites are ticked. */
+export interface PostSitesLine {
+  line: string;
+  ticked: number;
+}
+
 /** One draft's row on Post: ``kind`` the account it goes through (``newsletter``, ``mastodon``, ``blog``, else the service's name), ``word`` its kind in a word; ``ticket`` the open ask to Send, ``again`` the ask a press offers again; ``line`` where it stands and ``verb`` the ask's button (``core.asks.row``); ``said`` what happened in words; ``note`` and ``link`` the platform's own words and link once sent; ``account``: its account is connected. */
 export interface PostDraft {
   id: number;
@@ -2488,6 +2502,11 @@ export interface PostDraft {
   note: string | null;
   link: string | null;
   account: boolean;
+  site?: string;
+  site_word?: string;
+  group?: string | null;
+  way?: "open" | "direct";
+  sites?: PostSibling[];
 }
 
 export interface PostFailed {
@@ -2506,6 +2525,7 @@ export interface Post {
   sent: PostDraft[];
   earlier: PostDraft[];
   accounts: PostAccount[];
+  sites: PostSitesLine;
   failed: PostFailed[];
 }
 
@@ -2527,6 +2547,26 @@ export interface PostLimit {
   unit: string;
 }
 
+/** One post of a short post's draft, with its length counted the site's way. */
+export interface PostCounted {
+  text: string;
+  used: number;
+}
+
+/** What else goes with a short post's words, in a line: the link, the card, what Kranto took off. ``drop``: the person may remove it. */
+export interface PostExtra {
+  key: string;
+  words: string;
+  drop: boolean;
+}
+
+/** Post directly, when the person switched the site to it: the button's words, whether the account is connected, and why not. */
+export interface PostDirect {
+  word: string;
+  ready: boolean;
+  why: string | null;
+}
+
 /** ``GET /api/post/d/{id}``: a draft's row with its group, its words as markdown (what Copy and Download give), the file name Download uses, its length and its account. */
 export interface PostSheet {
   id: number;
@@ -2545,7 +2585,11 @@ export interface PostSheet {
   note: string | null;
   link: string | null;
   account: boolean;
+  site?: string;
+  site_word?: string;
   group: "waiting" | "sent" | "earlier";
+  way?: "open" | "direct";
+  sites?: PostSibling[];
   markdown: string;
   filename: string;
   words: number;
@@ -2557,6 +2601,55 @@ export interface PostSheet {
   edited: boolean;
   edited_from: number | null;
   original_draft: number;
+  parts?: PostCounted[];
+  extras?: PostExtra[];
+  siblings?: PostSibling[];
+  open?: string | null;
+  open_off?: string | null;
+  tier?: "open" | "send";
+  direct?: PostDirect | null;
+  posted_by_you?: boolean;
+}
+
+/** One site on Settings › Posting: the ways it can go (``open``, ``direct``), the person's choices, the posting account when Kranto can post there, and its limit. */
+export interface PostingSite {
+  id: string;
+  name: string;
+  ways: string[];
+  ticked: boolean;
+  direct: boolean;
+  can_direct: boolean;
+  account: string | null;
+  account_state: string;
+  connection: string | null;
+  needs: string | null;
+  instance: string | null;
+  limit: number;
+  unit: string;
+  disclose: boolean;
+}
+
+/** A site Kranto does not offer, with why, and what would make it possible. */
+export interface PostingGone {
+  id: string;
+  name: string;
+  why: string | null;
+  later: string | null;
+}
+
+/** The person's own site (Sanity), step one of Write a post. */
+export interface PostingBlog {
+  state: string;
+  account: string | null;
+  post_url: string | null;
+}
+
+/** ``GET /api/post/sites`` (Settings › Posting): every site Kranto offers with the person's choices, the ones it does not offer, the disclosure line, and the blog. */
+export interface Posting {
+  sites: PostingSite[];
+  not_offered: PostingGone[];
+  disclosure: string;
+  blog: PostingBlog;
 }
 
 /** ``POST /api/post/d/{id}/edit``: the new draft, its ask, whether a waiting send was withdrawn, and what the page says. */
@@ -2574,6 +2667,7 @@ export interface Routes {
   "/api/home": HomeToday;
   "/api/post": Post;
   "/api/post/d/{id}": PostSheet;
+  "/api/post/sites": Posting;
   "/api/status": Status;
   "/api/topics": Topics;
   "/api/sources": Sources;

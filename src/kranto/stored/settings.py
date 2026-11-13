@@ -56,6 +56,23 @@ class SanitySite(Stored):
 
 
 @dataclass(frozen=True)
+class PostingSites(Stored):
+    """The sites the person posts to (Settings › Posting, ``core.sites.choices``): ``sites``
+    ticked, in no order; ``direct`` site -> True where Kranto posts directly after their yes
+    (absent: Open only); ``instance`` the Mastodon server Open goes to; ``disclose`` site ->
+    True where a post ends with the disclosure line (off by default). Readers: ``sites.choices``,
+    ``web/post_api`` (``posting_read``, ``posting_write``); each takes a missing key and a key
+    stored as null."""
+
+    SETTING = "post.sites"
+    sites: list[str] = field(default_factory=list)
+    direct: dict[str, Any] = field(default_factory=dict)
+    instance: str | None = None
+    disclose: dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class MoneyHalt(Stored):
     """Invest's Stop in force (``core.money.halt``)."""
 

@@ -9,6 +9,9 @@
 | POST /api/post/write           | ``{about, as, angle}`` starts Write a post's job (409: cannot) |
 | POST /api/post/angles          | ``{about, as}``: three proposed angles (one model call, no row) |
 | POST /api/post/write/dismiss   | ``{about, as}``: a failed write's line on Post put away        |
+| POST /api/post/d/{id}/posted   | I posted it: the person posted an opened draft themselves     |
+| GET  /api/post/sites           | Settings › Posting's sites: ticked, the ways, the accounts    |
+| POST /api/post/sites           | the person's choices: sites, direct, instance, disclose |
 
 ``failed`` in ``GET /api/post`` is Write a post's jobs that failed in the last week and were not
 dismissed, each with its reason and the link that fixes it (no model key: Settings › Watching).
@@ -67,7 +70,9 @@ def kind_of(kind: str | None, service: str) -> str:
     return service
 
 
-WORD = {"newsletter": "newsletter", "mastodon": "short post", "blog": "blog post"}
+WORD = {"newsletter": "newsletter", "mastodon": "short post", "blog": "blog post",
+        "short": "short posts"}
+SOCIAL = "social"                 # Kranto's own short-post writer (``kranto.social``)
 
 
 def title_of(content: dict[str, Any]) -> str:
@@ -212,7 +217,7 @@ def _row(rt, d: dict[str, Any], t: dict[str, Any] | None, accounts: dict[str, di
          group: str) -> dict[str, Any]:
     """A draft's row. Its ask's line and button only while it waits: an earlier draft's line
     is what happened to it (``said``)."""
-    kind = kind_of(t["kind"] if t else None, d["service"])
+    kind = "short" if d["cub"] == SOCIAL else kind_of(t["kind"] if t else None, d["service"])
     ask = asks.row(rt, t) if t and group == "waiting" else None
     note = str((t or {}).get("note") or "")
     link = URL.search(note) if t and t["state"] == "done" else None
@@ -225,7 +230,25 @@ def _row(rt, d: dict[str, Any], t: dict[str, Any] | None, accounts: dict[str, di
             "said": (t or {}).get("said"),
             "note": note or None if t and t["state"] in ("done", "unknown") else None,
             "link": link.group(0) if link else None,
-            "account": bool(acct and acct["state"] == "connected")}
+            "account": bool(acct and acct["state"] == "connected") or kind == "short",
+            **_short_row(d, t)}
+
+
+def _short_row(d: dict[str, Any], t: dict[str, Any] | None) -> dict[str, Any]:
+    """A short post's own fields (``kranto.social``'s drafts): ``site`` and its name, the
+    write's ``group``, and ``way`` (``open``: the person posts it in the site; ``direct``:
+    Kranto posts it after their yes). None of them for any other draft. A draft written before
+    short posts, or a key stored as null, reads as none."""
+    if d["cub"] != SOCIAL:
+        return {}
+    from ..core import sites
+    c = d["content"]
+    site = c.get("site") if isinstance(c.get("site"), str) else d["service"]
+    kind = (t or {}).get("kind")
+    return {"site": site, "site_word": sites.name_of(site),
+            "group": c.get("group") if isinstance(c.get("group"), str) else None,
+            "way": "open" if kind in (None, "post.open") else "direct",
+            "title": str(c.get("about_title") or "") or title_of(c)}
 
 
 def post_read(rt, jobs=None) -> dict[str, Any]:
@@ -238,9 +261,73 @@ def post_read(rt, jobs=None) -> dict[str, Any]:
         t = _newest_ask(store, d["cub"], d["ref"])
         group = _group(store, t)
         groups[group].append(_row(rt, d, t, accounts, group))
-    return {"line": LINE, "drafts": groups["waiting"], "sent": groups["sent"],
-            "earlier": groups["earlier"], "accounts": [accounts[k] for k, _ in ACCOUNTS],
+    return {"line": LINE, "drafts": _one_row_a_write(store, groups["waiting"]),
+            "sent": groups["sent"], "earlier": groups["earlier"],
+            "accounts": [accounts[k] for k, _ in ACCOUNTS], "sites": sites_line(store),
             "failed": failed_writes(store, jobs)}
+
+
+def _one_row_a_write(store, waiting: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The waiting drafts with each write's short posts as one row (the first site's draft,
+    in the registry's order, opens), carrying ``sites``: each site's ``{id, site, word,
+    state}`` (``waiting``, ``sent``), so the row names them ("Bluesky · Mastodon ✓ · X")."""
+    out: list[dict[str, Any]] = []
+    seen: dict[str, dict[str, Any]] = {}
+    for r in waiting:
+        g = r.get("group")
+        if not g:
+            out.append(r)
+            continue
+        if g in seen:
+            continue
+        sibs = siblings(store, g)
+        first = next((x for x in sibs if x["state"] == "waiting"), None)
+        row = dict(r)
+        if first is not None and first["id"] != r["id"]:
+            row["id"] = first["id"]
+        row["sites"] = sibs
+        seen[g] = row
+        out.append(row)
+    return out
+
+
+def siblings(store, group: str) -> list[dict[str, Any]]:
+    """The newest draft of each site of one write, in the registry's order: ``{id, site, word,
+    state}``; ``state`` the draft's group (``waiting``, ``sent``, ``earlier``)."""
+    from ..core import sites
+    rows = store.query("SELECT * FROM cub_drafts WHERE cub = ? AND "
+                       "json_extract(content, '$.group') = ? ORDER BY id DESC", (SOCIAL, group))
+    newest: dict[str, dict[str, Any]] = {}
+    for r in rows:
+        if r["service"] not in newest:
+            newest[r["service"]] = dict(r)
+    order = [*sites.SITES, *sites.NOT_OFFERED]
+    out = []
+    for site in sorted(newest, key=lambda x: order.index(x) if x in order else len(order)):
+        r = newest[site]
+        t = _newest_ask(store, r["cub"], r["ref"])
+        out.append({"id": int(r["id"]), "site": site, "word": sites.name_of(site),
+                    "state": _group(store, t)})
+    return out
+
+
+def sites_line(store) -> dict[str, Any]:
+    """Post's one line about where short posts go: ``{line, ticked}``. "Bluesky and Mastodon
+    open in the site; Kranto posts to Bluesky after your yes." or "No sites chosen yet"."""
+    from ..core import sites
+    ch = sites.choices(store)
+    if not ch:
+        return {"line": "No sites chosen for short posts yet.", "ticked": 0}
+    direct = [c.site.name for c in ch if c.direct]
+    opened = [c.site.name for c in ch]
+    line = f"{_and(opened)} open in the site, with the draft filled in."
+    if direct:
+        line += f" Kranto posts to {_and(direct)} after your yes."
+    return {"line": line, "ticked": len(ch)}
+
+
+def _and(names: list[str]) -> str:
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
 
 
 def draft_sheet(rt, draft_id: int) -> dict[str, Any] | None:
@@ -265,7 +352,65 @@ def draft_sheet(rt, draft_id: int) -> dict[str, Any] | None:
             "filename": filename(row["title"]),
             "words": len(str(content.get("body") or content.get("text") or "").split()),
             "account_of": accounts.get(row["kind"]),
-            **editable(store, d, t, group, row["kind"])}
+            **editable(store, d, t, group, row["kind"]),
+            **short_sheet(rt, d, t, group)}
+
+
+def short_sheet(rt, d: dict[str, Any], t: dict[str, Any] | None, group: str
+                ) -> dict[str, Any]:
+    """A short post's draft page (``GET /api/post/d/{id}``): ``parts`` (each ``{text, used}``,
+    counted the site's way), ``limit``, ``extras``, ``siblings``, ``open`` (the composer's
+    address with the draft filled in, or None) and ``open_off`` (why Open is off: the preview,
+    or Mastodon's server not typed yet), ``tier`` (``open`` or ``send``), ``direct``
+    (``{word, ready, why}`` when the person switched the site to Post directly) and
+    ``posted_by_you`` (the I posted it the page offers after Open). None for other drafts."""
+    if d["cub"] != SOCIAL:
+        return {}
+    from .. import preview
+    from ..core import sites
+    from ..core.cubs.brokers.base import connection_of
+    from ..core.cubs.brokers.social import parts_of
+    c = d["content"]
+    site_id = c.get("site") if isinstance(c.get("site"), str) else d["service"]
+    site = sites.get(site_id)
+    parts = parts_of(c)
+    stored = c.get("extras")
+    extras = [e for e in stored if isinstance(e, dict) and isinstance(e.get("words"), str)] \
+        if isinstance(stored, list) else []
+    g = c.get("group") if isinstance(c.get("group"), str) else None
+    sibs = siblings(rt.store, g) if g else []
+    waits = group == "waiting" and t is not None and t["state"] == tickets.OPEN
+    out: dict[str, Any] = {
+        "parts": [{"text": p, "used": sites.count(site or site_id, p)} for p in parts],
+        "limit": {"max": site.limit, "unit": site.unit} if site and site.limit else None,
+        "extras": extras, "siblings": sibs, "open": None, "open_off": None,
+        "tier": "open", "direct": None, "posted_by_you": waits}
+    if site is None:
+        return out
+    link = c.get("link") if isinstance(c.get("link"), str) else None
+    words = parts[0] if parts else ""
+    if link and site.open_takes_url:
+        words = words.replace(link, "").strip()
+    instance = c.get("instance") if isinstance(c.get("instance"), str) else None
+    if site.needs == "instance" and not instance:
+        instance = next((x.instance for x in sites.choices(rt.store) if x.site.id == site.id),
+                        None)
+    address = sites.open_address(site, words, link, instance=instance) if waits else None
+    on_preview = preview.enabled(getattr(getattr(rt, "cfg", None), "root", None))
+    if waits and on_preview:
+        out["open_off"] = "This is the preview: nothing is posted."
+    elif waits and address is None and site.open:
+        out["open_off"] = "Type your Mastodon server on Settings › Posting to open it there."
+    else:
+        out["open"] = address
+    if t is not None and t["kind"] != "post.open":
+        out["tier"] = "send"
+        conn = connection_of(rt.store, site.direct)
+        ready = conn is not None and conn["state"] == "connected"
+        out["direct"] = {"word": f"Post to {site.name}", "ready": ready,
+                         "why": None if ready else f"Connect {site.name} (posting) on "
+                                                   "Settings › Posting to post it from here"}
+    return out
 
 
 # -- Edit (the verb ``post.edit``) --------------------------------------------
@@ -331,6 +476,10 @@ def editable(store, d: dict[str, Any], t: dict[str, Any] | None, group: str,
     edit: dict[str, Any] = {"title": str(content.get(tkey) or "") if tkey else None}
     if wkey == "body":
         edit["body"] = words
+    elif d["cub"] == SOCIAL:
+        from ..core.cubs.brokers.social import parts_of
+        edit["title"] = None
+        edit["parts"] = [{"text": p} for p in parts_of(content)] or [{"text": words}]
     else:
         edit["parts"] = [{"text": words}]
     why = None
@@ -339,9 +488,15 @@ def editable(store, d: dict[str, Any], t: dict[str, Any] | None, group: str,
     elif group != "waiting":
         why = "Only a draft that waits can be edited: copy this one instead."
     edited_from = content.get("edited_from")
+    limit = {"max": SHORT_MAX[kind], "unit": "characters"} if kind in SHORT_MAX \
+        and wkey == "text" else None
+    if d["cub"] == SOCIAL:
+        from ..core import sites
+        site = sites.get(content.get("site") if isinstance(content.get("site"), str)
+                         else d["service"])
+        limit = {"max": site.limit, "unit": site.unit} if site and site.limit else None
     return {"edit": edit, "can_edit": why is None, "cannot_edit": why,
-            "limit": {"max": SHORT_MAX[kind], "unit": "characters"} if kind in SHORT_MAX
-            and wkey == "text" else None,
+            "limit": limit,
             "edited": content.get("edited") is True,
             "edited_from": edited_from if isinstance(edited_from, int) else None,
             "original_draft": _original_version(store, d)}
@@ -383,7 +538,9 @@ def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dic
         if not isinstance(title, str) or not title.strip() or len(title) > TITLE_MAX:
             raise WriteError(f"the title is 1 to {TITLE_MAX} characters")
         new[tkey] = " ".join(title.split())
-    if parts is not None:
+    if parts is not None and d["cub"] == SOCIAL:
+        _edit_short(new, content, parts, t)
+    elif parts is not None:
         if not isinstance(parts, list) or not parts or not all(
                 isinstance(p, dict) and isinstance(p.get("text"), str) for p in parts):
             raise WriteError("parts is a list of {text}")
@@ -411,6 +568,8 @@ def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dic
     for ckey, fkey in ASK_FIELDS.items():
         if fkey in fields and isinstance(new.get(ckey), str):
             fields[fkey] = new[ckey]
+    if "parts" in fields and isinstance(new.get("parts"), list):
+        fields["parts"] = len(new["parts"])
     withdrew = t["state"] == tk.OPEN
     subject = (t["subject_kind"], t["subject_id"]) if t.get("subject_kind") else None
     try:
@@ -435,6 +594,37 @@ def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dic
             "withdrew": withdrew, "say": say}
 
 
+def _edit_short(new: dict[str, Any], content: dict[str, Any], parts: Any,
+                t: dict[str, Any]) -> None:
+    """A short post's edited parts into ``new``: each counted the site's way and refused past
+    its limit in words; a thread only where the draft's send can carry one (Bluesky posted
+    directly); ``text`` is the first part (what the ask repeats)."""
+    from ..core import sites
+    from ..core.cubs.brokers.social import parts_of
+    if not isinstance(parts, list) or not parts or not all(
+            isinstance(p, dict) and isinstance(p.get("text"), str) for p in parts):
+        raise WriteError("parts is a list of {text}")
+    site = sites.get(content.get("site") if isinstance(content.get("site"), str) else None)
+    most = 3 if t["kind"] == "post.bluesky" else 1
+    if len(parts) > most:
+        raise WriteError("this draft is one post: send one part" if most == 1
+                         else f"a thread here holds at most {most} posts")
+    texts = [p["text"].strip() for p in parts]
+    if not all(texts):
+        raise WriteError("a post's words cannot be empty")
+    for i, text in enumerate(texts, 1):
+        n = sites.count(site, text) if site else len(text)
+        if site and site.limit and n > site.limit:
+            which = "" if len(texts) == 1 else f"post {i}: "
+            raise WriteError(f"{which}{n:,} {site.unit.split(',')[0]}: {site.name} takes "
+                             f"{site.limit:,}")
+        if t["kind"] == "post.mastodon" and len(text) > SHORT_MAX["mastodon"]:
+            raise WriteError(f"{len(text):,} characters: at most 500 for this post")
+    _ = parts_of(content)
+    new["parts"] = [{"text": x} for x in texts]
+    new["text"] = texts[0]
+
+
 # -- Write a post (the verb ``post.write``) -------------------------------------------
 
 WRITING = "Writing the draft. It will be on Post in about a minute."
@@ -448,6 +638,11 @@ WRITERS: dict[str, tuple[str, dict[str, tuple[str, str]]]] = {
     "toot": ("toot", {"card": ("toot.draft", "draft_card")}),
 }
 BUILT_IN = ("blog",)              # added by Kranto from its own folder the first time it is asked
+# Short posts for the sites the person ticked (Kranto's own writer, ``kranto.social``): with their
+# blog connected, the blog post first, then a post a site about it
+SHORT = "short"
+NO_SITES = ("Short posts need the sites you post to: choose them on Settings › Posting, then "
+            "write the post again.")
 
 
 TAKE_MAX = 600
@@ -471,12 +666,22 @@ def plan_write(about: Any, as_: Any, take: Any = None,
         angle = take
     take = angle
     as_ = str(as_ or "blog")
-    if as_ not in WRITERS:
-        raise WriteError("as is blog or toot")
+    if as_ not in (*WRITERS, SHORT):
+        raise WriteError("as is blog, short or toot")
     m = ABOUT.fullmatch(str(about or ""))
     if m is None:
         raise WriteError("about is card:<number>, brief:<id>:<item> or week")
     subject = "card" if m.group("card") else "item" if m.group("brief") else "week"
+    if as_ == SHORT:
+        if subject == "week":
+            raise WriteError("short posts are about one idea card or one news item: write a "
+                             "blog post about this week instead")
+        if take is not None and (not isinstance(take, str) or len(take) > TAKE_MAX):
+            raise WriteError(f"angle is one sentence of at most {TAKE_MAX} characters")
+        short: dict[str, Any] = {"about": str(about)}
+        if isinstance(take, str) and take.strip():
+            short["angle"] = " ".join(take.split())
+        return SHORT, SHORT, SHORT, short
     cub, actions = WRITERS[as_]
     if subject not in actions:
         raise WriteError("a short post is about one idea card: write a blog post about this "
@@ -530,6 +735,8 @@ def write(rt, about: Any, as_: Any, *, door: str, take: Any = None,
     """The work of one Write draft, run in the background (``web/jobs.py``): the writer
     added if it must be, then its action, which ends in a draft and its ask on Post."""
     cid, kind, method, fields = plan_write(about, as_, take, angle)
+    if cid == SHORT:
+        return write_short(rt, str(about), str(fields.get("angle") or ""), door=door)
     ensure_writer(rt, cid, door=door)
     try:
         out = rt.cubs.action(cid, kind, method, fields, door=door)
@@ -538,6 +745,106 @@ def write(rt, about: Any, as_: Any, *, door: str, take: Any = None,
     if isinstance(out, dict) and out.get("ok") is False:
         raise WriteError(not_written(str(out.get("say") or out.get("error") or "")))
     return {"cub": cid, "say": (out or {}).get("say") if isinstance(out, dict) else None}
+
+
+def _sources_of(rt, about: str) -> tuple[str | None, str, dict[str, Any]]:
+    """``(best source address, the card's title, because)`` of a card or a news item."""
+    from types import SimpleNamespace
+    m = ABOUT.fullmatch(about)
+    if m is not None and m.group("card"):
+        from ..core.api import ReadError, cards_get
+        try:
+            card = cards_get(SimpleNamespace(store=rt.store), {"id": int(m.group("card"))})
+        except ReadError as exc:
+            raise WriteError(str(exc), 404) from None
+        urls = [s.get("url") for s in card.get("sources") or []
+                if str(s.get("url") or "").startswith(("https://", "http://"))]
+        return (urls[0] if urls else None, str(card.get("title") or ""),
+                {"ideas": [int(card["id"])]})
+    if m is not None and m.group("brief"):
+        from ..core import registry
+        from ..features import FEATURES
+        from ..features.news.api import briefs_get
+        news = next((f for f in FEATURES if f.id == "news"), None)
+        if news is None:
+            return None, "", {}
+        try:
+            brief = briefs_get(registry.context(rt, news), {"id": int(m.group("brief"))})
+        except ValueError:
+            return None, "", {}
+        items = brief.get("items") or []
+        n = int(m.group("item"))
+        it = items[n - 1] if 1 <= n <= len(items) else {}
+        urls = [u for u in it.get("sources") or [] if isinstance(u, str)
+                and u.startswith(("https://", "http://"))]
+        return (urls[0] if urls else None, str(it.get("headline") or ""),
+                {"briefs": [int(m.group("brief"))]})
+    return None, "", {}
+
+
+def _newest_blog_draft(store, after: int) -> dict[str, Any] | None:
+    r = store.query_one("SELECT * FROM cub_drafts WHERE cub = 'blog' AND service = 'sanity' "
+                        "AND id > ? ORDER BY id DESC LIMIT 1", (int(after),))
+    if r is None:
+        return None
+    try:
+        content = json.loads(r["content"])
+    except (TypeError, ValueError):
+        return None
+    return {**dict(r), "content": content} if isinstance(content, dict) else None
+
+
+def write_short(rt, about: str, angle: str, *, door: str) -> dict[str, Any]:
+    """Write a post › Short posts (the work of the job): the sites ticked; with the blog
+    connected, the blog post first and every short post from its words, linking to it; else
+    from the card or item, linking to its best source. One site's failure keeps the others."""
+    from .. import prose, social
+    from ..core import sites
+    store = rt.store
+    choices = sites.choices(store)
+    if not choices:
+        raise WriteError(NO_SITES, 409)
+    best, title, because = _sources_of(rt, about)
+    if social.blog_target(store) is not None:
+        top = store.query_one("SELECT MAX(id) AS n FROM cub_drafts")
+        before = int((top["n"] if top else 0) or 0)
+        write(rt, about, "blog", door=door, angle=angle or None)
+        draft = _newest_blog_draft(store, before)
+        if draft is None:
+            raise WriteError("No short post was written: the blog post they link to was not "
+                             "written. Activity has what happened.", 502)
+        material = social.from_blog(store, draft, because)
+    else:
+        material = social.from_sources(material_for(rt, about), best, because, title)
+    llm = getattr(rt, "llm", None)
+    if llm is None or not llm.has_key:
+        raise WriteError(NO_KEY, 409)
+    profile = prose.load(rt.cfg, store)
+    own = profile.writer_model(social.FILER)
+
+    def complete(messages: list[dict], schema: dict) -> dict:
+        extra = {"provider": own["provider"], "model": own["model"]} if own else {}
+        got = llm.complete(tier="reason", purpose=social.PURPOSE, messages=messages,
+                           prompt_version=social.PROMPT_VERSION, max_tokens=900,
+                           temperature=0.4, schema=schema, **extra)
+        return {"text": got.text, "structured": got.structured}
+
+    out = social.write_all(rt, choices, material, angle, about=about, complete=complete,
+                           profile=profile)
+    names = [sites.name_of(s) for s in out["written"]]
+    if not names:
+        why = "; ".join(f"{sites.name_of(k)}: {v}" for k, v in out["failed"].items())
+        raise WriteError(not_written(why), 502)
+    say = f"Short posts written for {', '.join(names)}: they wait on Post."
+    if material.link_to == "post":
+        say = "Your blog post is written first. " + say + " Each links to your blog post."
+    if out["failed"]:
+        say += " Not for " + ", ".join(f"{sites.name_of(k)} ({v})"
+                                       for k, v in out["failed"].items()) + "."
+    if not angle:
+        say += (" They have no angle, so they only say what the material says: give it one "
+                "sentence of yours and write them again.")
+    return {"cub": social.FILER, "say": say, "group": out["group"]}
 
 
 # -- the angle step (rule 4, P-9): three angles to pick, for a card or an item --
@@ -601,9 +908,9 @@ def propose_angles(rt, about: Any, as_: Any = "blog") -> dict[str, Any]:
     if llm is None or not llm.has_key:
         raise WriteError(NO_ANGLES_KEY, 409)
     profile = prose.load(rt.cfg, rt.store)
-    writer = WRITERS[as_][0]
+    writer = "social" if as_ == SHORT else WRITERS[as_][0]
     own = profile.writer_model(writer)
-    site = "blog" if as_ == "blog" else "mastodon"
+    site = "blog" if as_ == "blog" else "short" if as_ == SHORT else "mastodon"
     used: dict[str, Any] = {}
 
     def complete(messages: list[dict], schema: dict) -> dict:
@@ -625,6 +932,141 @@ def propose_angles(rt, about: Any, as_: Any = "blog") -> dict[str, Any]:
             from None
     return {"about": about, "as": as_, "angles": out, "model": used.get("model"),
             "say": "Pick one, change it, or write your own sentence."}
+
+
+# -- I posted it, and Settings › Posting's sites ---------------------------------------------
+
+
+def posted_by_you(rt, draft_id: int, identity: dict[str, Any] | None) -> dict[str, Any]:
+    """I posted it: the person opened the site with the draft and posted it there themselves.
+    Only from the page (the person's own press, never the command line, an agent's token, the
+    console or a cub), never on the preview, only while the draft's ask waits. ``post.open``'s
+    own confirm records it (its performer makes no request); a draft the person switched to
+    Post directly but posted by hand is recorded the same way, with nothing sent. Kranto makes
+    no request to any site here."""
+    from .. import preview
+    from ..core.cubs.brokers.social import POSTED_BY_YOU
+    store = rt.store
+    r = store.query_one("SELECT * FROM cub_drafts WHERE id = ?", (int(draft_id),))
+    if r is None or r["cub"] != SOCIAL:
+        raise WriteError("no such short post", 404)
+    t = _newest_ask(store, r["cub"], r["ref"])
+    if t is None or t["state"] != tickets.OPEN:
+        raise WriteError("this draft does not wait for you: nothing to record", 409)
+    if tickets.door_of(identity) != "ui":
+        raise WriteError("I posted it is the person's own press on the page (never the command "
+                         "line, an agent's token, the console or a cub)", 403)
+    if preview.enabled(getattr(getattr(rt, "cfg", None), "root", None)):
+        raise WriteError(preview.NOTHING_SENT + ".", 409)
+    if t["kind"] == "post.open":
+        try:
+            tickets.confirm(store, t["id"], identity=identity, confirm=True, context=rt)
+        except tickets.TicketError as exc:
+            raise WriteError(str(exc), exc.code) from None
+    else:
+        tickets.append_state(store, t["id"], "done", door="ui", note=POSTED_BY_YOU)
+        done = tickets.get(store, t["id"])
+        if done:
+            tickets.resolved(store, done, "done")
+    return {"ok": True, "say": "Recorded: posted by you. Nothing was sent by Kranto.",
+            "ticket": t["id"]}
+
+
+def posting_read(store) -> dict[str, Any]:
+    """``GET /api/post/sites``: every site with the person's choices. ``sites``: the offered
+    ones, each ``{id, name, ways, ticked, direct, can_direct, account, needs, instance, limit,
+    unit, disclose}``; ``not_offered``: ``{id, name, why, later}``; ``disclosure``: the line a
+    post ends with where it is switched on (off by default)."""
+    from .. import product
+    from ..core import sites
+    from ..core.cubs.brokers.base import connection_of
+    from ..stored.settings import PostingSites, get_blob
+    row = get_blob(store, PostingSites.SETTING, PostingSites) or PostingSites()
+    ticked = {s for s in row.sites or [] if isinstance(s, str)}
+    direct = row.direct if isinstance(row.direct, dict) else {}
+    disclose = row.disclose if isinstance(row.disclose, dict) else {}
+    out = []
+    for s in sites.offered():
+        conn = connection_of(store, s.direct) if s.direct else None
+        out.append({"id": s.id, "name": s.name, "ways": list(s.ways()),
+                    "ticked": s.id in ticked, "direct": direct.get(s.id) is True,
+                    "can_direct": s.direct is not None,
+                    "account": conn["account"] if conn and conn["state"] == "connected"
+                    else None,
+                    "account_state": conn["state"] if conn else "not set",
+                    "connection": s.direct, "needs": s.needs,
+                    "instance": row.instance if s.needs == "instance" else None,
+                    "limit": s.limit, "unit": s.unit,
+                    "disclose": disclose.get(s.id) is True})
+    gone = [{"id": s.id, "name": s.name, "why": s.not_offered, "later": s.later}
+            for s in sites.NOT_OFFERED.values()]
+    return {"sites": out, "not_offered": gone,
+            "disclosure": f"Drafted with {product.NAME}.",
+            "blog": _blog_state(store)}
+
+
+def _blog_state(store) -> dict[str, Any]:
+    """The person's own site, step one of Write a post: ``{state, account, post_url}``."""
+    from ..connections.sanity import site
+    from ..core.cubs.brokers.base import connection_of
+    conn = connection_of(store, "sanity")
+    return {"state": conn["state"] if conn else "not set",
+            "account": conn["account"] if conn else None,
+            "post_url": site(store).get("post_url") if conn else None}
+
+
+INSTANCE = re.compile(r"[a-z0-9][a-z0-9.-]{1,251}\.[a-z]{2,63}")
+
+
+def posting_write(store, body: dict[str, Any]) -> dict[str, Any]:
+    """``POST /api/post/sites``: the person's choices, each optional: ``sites`` (the ids
+    ticked), ``direct`` (site -> bool: Post directly), ``instance`` (the Mastodon server Open
+    goes to), ``disclose`` (site -> bool). Unknown sites and keys are refused in words."""
+    from dataclasses import replace
+
+    from ..core import sites
+    from ..stored.settings import PostingSites, get_blob, set_blob
+    known = {s.id: s for s in sites.offered()}
+    extra = set(body) - {"sites", "direct", "instance", "disclose"}
+    if extra:
+        raise WriteError(f"Posting takes sites, direct, instance and disclose, not "
+                         f"{', '.join(sorted(extra))}")
+    row = get_blob(store, PostingSites.SETTING, PostingSites) or PostingSites()
+    if "sites" in body:
+        ids = body["sites"]
+        if not isinstance(ids, list) or not all(isinstance(x, str) for x in ids):
+            raise WriteError("sites is a list of site names")
+        bad = [x for x in ids if x not in known]
+        if bad:
+            why = "; ".join(f"{sites.name_of(x)}: {sites.NOT_OFFERED[x].not_offered}"
+                            if x in sites.NOT_OFFERED else f"no site {x}" for x in bad)
+            raise WriteError(f"Not offered: {why}")
+        row = replace(row, sites=sorted(set(ids)))
+    for key in ("direct", "disclose"):
+        if key in body:
+            got = body[key]
+            if not isinstance(got, dict) or not all(isinstance(v, bool) for v in got.values()):
+                raise WriteError(f"{key} is site -> true or false")
+            bad = [x for x in got if x not in known]
+            if bad:
+                raise WriteError(f"no site {', '.join(bad)}")
+            if key == "direct":
+                cannot = [known[x].name for x, v in got.items() if v and not known[x].direct]
+                if cannot:
+                    raise WriteError(f"{_and(cannot)} cannot be posted from Kranto: it opens "
+                                     "in the site")
+            old = getattr(row, key) if isinstance(getattr(row, key), dict) else {}
+            row = replace(row, direct={**old, **got}) if key == "direct" \
+                else replace(row, disclose={**old, **got})
+    if "instance" in body:
+        inst = body["instance"]
+        if inst is not None:
+            inst = str(inst).strip().lower().removeprefix("https://").rstrip("/")
+            if not INSTANCE.fullmatch(inst):
+                raise WriteError("your Mastodon server is a host name like mastodon.social")
+        row = replace(row, instance=inst or None)
+    set_blob(store, PostingSites.SETTING, row)
+    return {"ok": True, **posting_read(store)}
 
 
 NO_KEY = ("No draft was written: no model key is set. Add one on Settings › Watching, then "
@@ -796,6 +1238,31 @@ class PostAPI:
             return JSONResponse({"error": exc.words}, status_code=exc.code)
         return JSONResponse(out)
 
+    async def posted(self, request: Request):
+        """``POST /api/post/d/{id}/posted``: I posted it (``posted_by_you``)."""
+        from .auth import IDENTITY
+        identity = request.scope.get(IDENTITY)
+        try:
+            out = await run_in_threadpool(posted_by_you, self.rt, request.path_params["id"],
+                                          identity)
+        except WriteError as exc:
+            return JSONResponse({"error": exc.words}, status_code=exc.code)
+        return JSONResponse(out)
+
+    async def sites(self, request: Request):
+        """``GET /api/post/sites`` (Settings › Posting) and ``POST`` (the person's choices)."""
+        if request.method == "GET":
+            return JSONResponse(await run_in_threadpool(posting_read, self.rt.store))
+        from .app import _json_body
+        body = await _json_body(request)
+        if body is None:
+            return JSONResponse({"error": "expected a JSON object"}, status_code=400)
+        try:
+            out = await run_in_threadpool(posting_write, self.rt.store, body)
+        except WriteError as exc:
+            return JSONResponse({"error": exc.words}, status_code=exc.code)
+        return JSONResponse(out)
+
     async def download(self, request: Request):
         out = await run_in_threadpool(draft_sheet, self.rt, request.path_params["id"])
         if out is None:
@@ -812,4 +1279,6 @@ class PostAPI:
                 Route("/api/post/write", self.job),
                 Route("/api/post/d/{id:int}.md", self.download),
                 Route("/api/post/d/{id:int}/edit", self.edit, methods=["POST"]),
+                Route("/api/post/d/{id:int}/posted", self.posted, methods=["POST"]),
+                Route("/api/post/sites", self.sites, methods=["GET", "POST"]),
                 Route("/api/post/d/{id:int}", self.sheet)]

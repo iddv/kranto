@@ -47,6 +47,8 @@ from ..stored.misc import ConnectionScopes
 from . import oauth
 from .base import Grant, Provider
 from .bluesky import BlueskyProvider
+from .bluesky_post import INFO as BLUESKY_POST_INFO
+from .bluesky_post import BlueskyPostProvider
 from .github import GitHubProvider
 from .mastodon import MastodonProvider
 from .mastodon_post import MastodonPostProvider
@@ -317,6 +319,7 @@ PROVIDER_INFO = [
      "fields": [{"key": "instance", "label": "Instance", "placeholder": "mastodon.social"},
                 {"key": "token", "label": "Access token", "secret": True}],
      "sources": []},
+    BLUESKY_POST_INFO,
     SANITY_INFO,
 ]
 INFO = {p["key"]: p for p in PROVIDER_INFO}
@@ -389,6 +392,7 @@ class Connections:
             "stackexchange": StackExchangeProvider(http, self),
             "x": XProvider(http, self),
             "mastodon_post": MastodonPostProvider(http, self),
+            "bluesky_post": BlueskyPostProvider(http, self),
             "sanity": SanityProvider(http, self),
             **{key: cls(http, self) for key, cls in REGISTERED.items()},
         }

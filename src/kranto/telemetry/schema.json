@@ -192,6 +192,8 @@
               "/api/post/d/{id:int}",
               "/api/post/d/{id:int}.md",
               "/api/post/d/{id:int}/edit",
+              "/api/post/d/{id:int}/posted",
+              "/api/post/sites",
               "/api/post/write",
               "/api/post/write/dismiss",
               "/api/prepared",

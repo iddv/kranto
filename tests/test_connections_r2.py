@@ -930,6 +930,7 @@ def test_every_provider_through_the_web_and_no_secret_anywhere(rig, caplog):
             "reddit",
             "x",
             "mastodon_post",
+            "bluesky_post",
             "sanity",
             "resend",
             "buttondown",
