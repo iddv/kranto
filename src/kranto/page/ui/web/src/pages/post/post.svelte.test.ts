@@ -6,7 +6,7 @@ import type { Facts } from "../../lib/app";
 import { ui } from "../../lib/shell.svelte";
 import { answering, count, draw, settle, stub, where } from "../testing.svelte";
 import PostPage from "./PostPage.svelte";
-import { accountHref, accountWords, connectedCount, draftFact, dueLine, failedAbout, failedTitle, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
+import { accountHref, accountWords, connectedCount, draftFact, dueLine, dueShort, failedAbout, failedTitle, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
 import { outcomeLine, whenOf } from "../../features/ask";
 import { mount, unmount } from "svelte";
 import AboutWhatDialog from "../../features/post/AboutWhatDialog.svelte";
@@ -157,6 +157,10 @@ describe("Post with short posts", () => {
     expect(none.target.querySelector("[aria-labelledby=post-scheduled]")).toBeNull();   // only when something is
     none.done();
     expect(dueLine({ due_words: null, site_word: "Mastodon" })).toBe("Scheduled · Mastodon");
+    const now = new Date(2026, 10, 16, 8, 0);
+    expect(dueShort(new Date(2026, 10, 16, 9, 0).toISOString(), now)).toBe("09:00");
+    expect(dueShort(new Date(2026, 10, 17, 9, 0).toISOString(), now)).toBe("Tue");
+    expect(dueShort(new Date(2026, 11, 1, 9, 0).toISOString(), now)).toBe("1 Dec");
   });
 
   it("says a missed hour on the draft's row, so it is asked again", async () => {
@@ -175,7 +179,7 @@ describe("Post with short posts", () => {
     const foot = "No numbers from LinkedIn: LinkedIn gives its numbers only to approved partners.";
     const { target, done } = await page({ ...POST, sent: [sky, li], reach_foot: foot });
     const metas = [...target.querySelectorAll("[aria-labelledby=post-sent] .c-meta")].map((x) => x.textContent);
-    expect(metas[0]).toBe("Posted to Bluesky · posted: https://bsky.app/profile/a/post/x · 4 replies, 9 reposts, 31 likes");
+    expect(metas[0]).toBe("Posted to Bluesky · 4 replies, 9 reposts, 31 likes · posted: https://bsky.app/profile/a/post/x");
     expect(metas[1]).not.toMatch(/likes/);
     expect(target.querySelectorAll("#post-reach-foot").length).toBe(1);
     expect(target.querySelector("#post-reach-foot")?.textContent).toBe(foot);

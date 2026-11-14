@@ -24,7 +24,7 @@
   import { ui } from "../../lib/shell.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { dismissWrite, retryWrite, writeAny } from "../../features/post/post";
-  import { cancelHour, draftFact, draftHref, dueLine, failedAbout, failedTitle, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
+  import { cancelHour, draftFact, draftHref, dueLine, dueShort, failedAbout, failedTitle, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
 
   let { view }: { view: View } = $props();
   const host = $derived(!!ui.facts?.header.host);
@@ -59,7 +59,8 @@
 {#snippet draftRow(x: PostDraft, main: boolean)}
   {#snippet end()}{@render open(x, main)}{/snippet}
   <Row title={x.title} href={sheet ? draftHref(x) : null} meta={x.missed || draftFact(x)} age={ago(dt(x.at))} {end}>
-    {#snippet st()}<span class="gl c-violet" role="img" aria-label={x.word}><span class="hglyph" aria-hidden="true">{STATE[x.kind] || "•"}</span><span class="gl-w" aria-hidden="true">{x.word}</span></span>{/snippet}
+    <!-- a post whose hour passed while Kranto was stopped: an amber mark a phone keeps too -->
+    {#snippet st()}{#if x.missed}<span class="gl c-amber" role="img" aria-label="its hour passed"><span class="hglyph" aria-hidden="true">!</span><span class="gl-w" aria-hidden="true">hour passed</span></span>{:else}<span class="gl c-violet" role="img" aria-label={x.word}><span class="hglyph" aria-hidden="true">{STATE[x.kind] || "•"}</span><span class="gl-w" aria-hidden="true">{x.word}</span></span>{/if}{/snippet}
   </Row>
 {/snippet}
 
@@ -89,14 +90,14 @@
       <Group id="post-scheduled" title="Scheduled" count={String(d.scheduled.length)}>
         {#each d.scheduled as x (x.id)}
           {#snippet end()}<button type="button" class="btn sm" data-act="post-cancel" onclick={(e) => cancelHour(e.currentTarget, x.id)}>Cancel</button>{/snippet}
-          <Row title={x.title} href={sheet ? draftHref(x) : null} meta={dueLine(x)} {end} />
+          <Row title={x.title} href={sheet ? draftHref(x) : null} meta={dueLine(x)} age={dueShort(x.due)} {end} />
         {/each}
       </Group>
     {/if}
     <Group id="post-sent" title="Sent" count={String(d.sent.length)}>
       {#each d.sent as x (x.id)}
         {#snippet end()}{#if x.link}<a class="btn sm quiet" href={x.link} target="_blank" rel="noopener noreferrer" title="Where it went">↗</a>{/if}{/snippet}
-        <Row title={x.title} meta={sentLine(x)} age={ago(dt(x.at))} {end} />
+        <Row title={x.title} href={sheet ? draftHref(x) : null} meta={sentLine(x)} age={ago(dt(x.at))} {end} />
       {/each}
       {#if !d.sent.length}<li class="gempty"><span class="muted">Nothing sent yet. A sent post shows here with where it went and how many it reached.</span></li>{/if}
       {#if d.sent.length && d.reach_foot}<li class="gempty" id="post-reach-foot"><span class="muted small">{d.reach_foot}</span></li>{/if}

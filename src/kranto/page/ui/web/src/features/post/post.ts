@@ -25,6 +25,8 @@ export interface PostDraft {
   sites?: PostSibling[];
   // its hour, while scheduled (the person's own time), or the words of a missed one
   due?: string | null; due_words?: string | null; missed?: string | null;
+  // a sent post's newest numbers, where its site gives them
+  reach?: { replies: number | null; reposts: number | null; likes: number | null; quotes: number | null; views: number | null; read_at: string; words: string } | null;
 }
 /** one site of a write's short posts: its newest draft and where it stands */
 export interface PostSibling { id: number; site: string; word: string; state: string }

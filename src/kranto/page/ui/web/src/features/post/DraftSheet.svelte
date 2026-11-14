@@ -158,6 +158,7 @@
       </p>
       {#if askPosted}<p class="acts small" id="draft-posted"><button type="button" class="btn sm" id="draft-posted-yes" onclick={(e) => posted(e.currentTarget)}>I posted it</button><button type="button" class="linkish small" id="draft-posted-no" onclick={() => (notYet = true)}>Not yet</button></p>{/if}
       {#if s.edited && s.can_edit && s.original_draft != null && s.original_draft !== s.id}<p class="small" id="draft-again"><a href={href(`post/d/${s.original_draft}`)}>The original draft ›</a>{" · "}<button type="button" class="linkish small" onclick={again}>Start again from the original</button></p>{/if}
+      {#if s.reach?.words}<p class="small" id="draft-reach">{`${s.reach.words} (read ${rel(dt(s.reach.read_at))})`}</p>{/if}
       {#if s.link}<p class="small" id="draft-link"><a href={s.link} target="_blank" rel="noopener noreferrer">Where it went ↗</a></p>{/if}
     {/if}
   </section>

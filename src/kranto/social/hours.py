@@ -18,7 +18,9 @@
 - **The preview never presses** (the lane does nothing there; the confirm is refused before a
   hold is written).
 
-Every row is appended, never edited: the newest row of a ticket says where it stands.
+Every row is appended, never edited: the newest row of a ticket says where it stands, and
+the rows are the record (no event: the core's event kinds are a fixed list). The press itself
+writes the ask's own ``confirmed`` and outcome rows and its ``ticket.resolved`` event.
 """
 
 from __future__ import annotations
@@ -115,7 +117,6 @@ def hold(store: Store, t: dict[str, Any], *, when: str, door: str | None,
     row = _write(store, t["id"], HELD, due_at=iso(due), fields_hash=r["fields_hash"], door=door,
                  note=f"moved from {before['due_at']}" if before and before["state"] == HELD
                  else None, now=now)
-    _event(store, t, "post.scheduled", due_at=row["due_at"])
     return {**row, "said": f"Goes {said_at(due)}. Until then you can move or cancel it on Post."}
 
 
@@ -127,23 +128,8 @@ def cancel(store: Store, ticket_id: int, *, door: str | None,
     cur = newest(store, ticket_id)
     if cur is None or cur["state"] != HELD:
         raise HoursError("nothing is scheduled for this post", 409)
-    row = _write(store, ticket_id, CANCELLED, due_at=cur["due_at"],
-                 fields_hash=cur["fields_hash"], door=door, note="cancelled by you", now=now)
-    from ..core import tickets
-    t = tickets.get(store, ticket_id)
-    if t:
-        _event(store, t, "post.unscheduled", due_at=cur["due_at"])
-    return row
-
-
-def _event(store: Store, t: dict[str, Any], name: str, **extra: Any) -> None:
-    from ..core import events
-    try:
-        events.core_publish(store, name, {"ticket_id": int(t["id"]), "kind": t["kind"],
-                                          "cub": t["cub"], **extra},
-                            subject=("ticket", t["id"]))
-    except Exception:  # noqa: BLE001 - an event nobody may read must not stop the hold
-        log.exception("could not publish %s", name)
+    return _write(store, ticket_id, CANCELLED, due_at=cur["due_at"],
+                  fields_hash=cur["fields_hash"], door=door, note="cancelled by you", now=now)
 
 
 def held(store: Store) -> list[dict[str, Any]]:
@@ -196,7 +182,6 @@ def tick(store: Store, context: Any = None, now: datetime | None = None) -> list
             out.append(_write(store, tid, MISSED, due_at=h["due_at"],
                               fields_hash=h["fields_hash"],
                               note=f"{MISSED_WORDS}: say yes again to post it", now=now))
-            _event(store, t, "post.missed", due_at=h["due_at"])
             _missed_message(store, t, h, now)
             continue
         # the hold is spent before the press, so a press that dies half-way is never pressed
