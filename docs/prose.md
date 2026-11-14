@@ -16,7 +16,7 @@ detectors, and nothing here claims it does.
 | **Your voice card** | how you write, in plain words, at most about 250 words. Your old tone setting (`blog.tone`, `toot.tone`, `newsletter.intro`) became its first line, once | `<home>/prose/voice.md` |
 | **Your samples** | things you wrote; the 3 closest to each post (by embedding) go in as examples | `<home>/prose/samples/<id>.md` (a first line `site: mastodon` is optional) |
 | **Your lists** | **never** (words, or `/regular expressions/`), **keep** (your phrases the checker leaves alone), **always** (a sign-off) | `<home>/prose/never.txt`, `keep.txt`, `always.txt`: one a line, `#` a comment |
-| **Switches** | length (short, medium, long), register (casual, neutral, formal), opinions (only mine, or suggest one marked for you), emoji (never, sparingly), hashtags (never, the site's), links (in the post, or in the first reply), reading level (a grade, 8), salt (plain, dry or salty; plain by default) and more salt on thin items (on: a thin item, with few facts or about a product note or a small tool, goes one step saltier) | the `settings` row `prose.profile` |
+| **Switches** | length (short, medium, long), register (casual, neutral, formal), opinions (only mine, or suggest one marked for you), emoji (never, sparingly), hashtags (never, the site's), links (in the post, or in the first reply), reading level (a grade, 8), salt (plain, wry or salty; plain by default) and more salt on thin items (on: a thin item, with few facts or about a product note or a small tool, goes one step saltier) | the `settings` row `prose.profile` |
 | **The checker** | strictness (off, light, strict) and the rules you turned off | `prose.profile` |
 | **Guides per site** | which guides each site's writer follows (the floor always) | `prose.profile` |
 | **Disclosure** | per site, off by default; a ready line: "Drafted with Kranto from my notes; edited and sent by me." | `prose.profile` |
@@ -42,7 +42,7 @@ refuses an experience, a stock prediction ("within a year, more X will Y"), a to
 leads, a bet with no number or name, and an angle that only restates the item; a refused one is
 asked for once more, and a stock one that comes back is left out.
 
-**Salt** is how much wit and bite a post carries: plain, dry (understatement) or salty (a jab at
+**Salt** is how much wit and bite a post carries: plain, wry (understatement) or salty (a jab at
 the thing: the product, the claim, the hype). Salt is aimed at things, never at a person or a
 group, never a slur, and a salty post names no private person: the checker flags a name or a
 handle the material doesn't have (`salt.person`).
