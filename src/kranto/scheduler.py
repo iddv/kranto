@@ -1,4 +1,4 @@
-"""In-process scheduler for ``afk serve``.
+"""In-process scheduler for ``python -m kranto serve``.
 
 Due-ness is computed from the ``runs`` table, not from process uptime, so a
 restart neither skips a run nor starts a duplicate one. A job that raises
@@ -8,7 +8,7 @@ would stay due forever; it is retried with a growing backoff, from
 tick. Every job runs inside one ``activity.run``: a ``started`` mark when it begins,
 an ``ended`` mark when it is over, so what runs shows while it runs. Jobs
 take the same
-file locks as the CLI, so a cron-driven ``afk run`` and the server can
+file locks as the CLI, so a cron-driven ``python -m kranto run`` and the server can
 coexist.
 
 A scheduler may also carry **lanes**: something that ticks on its own short

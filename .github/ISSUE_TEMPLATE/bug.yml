@@ -1,58 +1,66 @@
 name: Bug
-description: Something does not work as documented
+description: Something does not work as documented, or an install that broke
 labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Remove API keys, delivery URLs and personal data from everything you paste. Security problems go to the Security tab, not here.
-  - type: textarea
-    id: what
-    attributes:
-      label: What happened
-    validations:
-      required: true
-  - type: textarea
-    id: expected
-    attributes:
-      label: What you expected
-    validations:
-      required: true
-  - type: textarea
-    id: reproduce
-    attributes:
-      label: How to reproduce
-      description: Commands and config (`kranto.yaml`, keys removed).
-    validations:
-      required: true
+      value: |
+        **This issue is public, and tools read it. Paste no keys or tokens**, no delivery URLs and no personal data, in any field.
+        A security problem goes to the Security tab (Report a vulnerability), not here.
   - type: input
     id: version
     attributes:
       label: Version
-      description: Output of `afk --version`, or the commit you run.
+      description: The output of `kranto --version`.
+      placeholder: kranto 0.x.y
+    validations:
+      required: true
+  - type: input
+    id: distribution
+    attributes:
+      label: Distribution
+      description: The Linux distribution and its version (`cat /etc/os-release` shows it), and whether it runs in a container or a VPS.
+      placeholder: Debian 13, on a small VPS
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Model provider
+      description: The model that reads for you (Settings › Watching).
+      options:
+        - Anthropic API key
+        - Claude Code login
+        - OpenRouter
+        - Another OpenAI-compatible endpoint
+        - None yet
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: What you did, one step a line, from the start. Commands exactly as you typed them.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
     validations:
       required: true
   - type: textarea
     id: doctor
     attributes:
-      label: afk doctor
-      description: Output of `afk doctor --skip-embedder`.
+      label: kranto doctor
+      description: The output of `kranto doctor`. Read it before you paste it.
       render: text
     validations:
       required: true
   - type: textarea
-    id: evidence
+    id: more
     attributes:
-      label: Evidence
-      description: The run status and error from the Health page or `afk status`, and any alarm from `afk messages --kind alarm`.
+      label: Anything else
+      description: The error as the page showed it, or the file `kranto report` wrote. Keys and tokens removed.
       render: text
-  - type: dropdown
-    id: install
-    attributes:
-      label: How you run it
-      options:
-        - Kranto (one app with the page)
-        - afk from a clone or pip install
-        - Docker
-        - other
-    validations:
-      required: true

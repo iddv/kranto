@@ -1,16 +1,14 @@
 # Evaluating Kranto
 
-`kranto eval` measures whether a change made Kranto better. Three
-layers at three prices:
+`kranto eval` measures whether a change made Kranto better, at two prices:
 
 - **Free, on every CI run.** Recorded model replies (cassettes) replayed through the current code
   (`kranto eval replay`; `tests/test_evals.py` on the synthetic cassettes in
-  `tests/fixtures/evals/`), and `prompts.lock.json`: a change to a prompt the server ships, or to
+  `tests/fixtures/evals/`), and `prompts.lock.json`: a change to a prompt Kranto ships, or to
   TENETS, fails `tests/test_prompt_lock.py` until the lock names the scorecard that evaluated the
   new version, or says why it was skipped.
 - **Cents to a few dollars, by hand.** A stage asked again on a frozen set through the product's
   own provider seam, under `--budget`, writing a dated scorecard.
-- The build benchmark (`kranto eval builds`) left with builds.
 
 A model is never asked under CI: `kranto eval` refuses when `CI` or `GITHUB_ACTIONS` is set.
 

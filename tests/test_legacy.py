@@ -47,13 +47,20 @@ def test_an_old_home_keeps_its_settings_file_and_library_where_they_are(tmp_path
     assert Layout(tmp_path).config == tmp_path / product.HOME_FILE
 
 
-def test_the_config_folder_is_the_old_one_only_when_it_alone_exists(tmp_path):
-    assert legacy.config_dir(tmp_path) == tmp_path / ".config" / product.CONFIG_DIR
+def test_the_config_folder_is_the_old_one_until_the_new_one_holds_a_home(tmp_path):
+    new = tmp_path / ".config" / product.CONFIG_DIR
+    assert legacy.config_dir(tmp_path) == new                  # a new install
     old = tmp_path / ".config" / legacy.CONFIG_DIR
     old.mkdir(parents=True)
+    assert legacy.config_dir(tmp_path) == old                  # made before the rename
+    # a stray new folder (made by hand, or a scratch instance's own pointer and tokens) does
+    # not pull the old install away from its tokens and logins
+    new.mkdir()
+    (new / "home.kranto-test").write_text("/x\n")
+    (new / "tokens.kranto-test").mkdir()
     assert legacy.config_dir(tmp_path) == old
-    (tmp_path / ".config" / product.CONFIG_DIR).mkdir()
-    assert legacy.config_dir(tmp_path) == tmp_path / ".config" / product.CONFIG_DIR
+    (new / "home").write_text("/kb\n")                        # an install's own pointer
+    assert legacy.config_dir(tmp_path) == new
 
 
 def test_the_old_units_pointer_is_its_plain_home_file(tmp_path):
@@ -77,7 +84,8 @@ def test_the_two_name_modules_are_standard_library_only():
         tree = ast.parse(Path(mod.__file__).read_text())
         names = {a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
         froms = {(n.level, n.module) for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
-        assert names <= {"os"}, (mod.__name__, names)
+        # ``import product``: the update helper's standalone copy, beside product.py
+        assert names <= {"os", "product"}, (mod.__name__, names)
         assert froms <= {(0, "__future__"), (0, "pathlib"), (0, "typing"), (1, None)}, \
             (mod.__name__, froms)
 
@@ -88,3 +96,57 @@ def test_the_page_settings_old_section_reads_as_the_new_one():
                                          "concurrency": 1}
     both = {legacy.LOOP_SECTION: {"url": "a"}, "kranto": {"url": "b"}}
     assert legacy.loop_settings(both) == both
+
+
+def test_the_unit_is_named_else_the_old_one_when_only_it_is_installed(tmp_path):
+    units = tmp_path / ".config" / "systemd" / "user"
+    env = {"HOME": str(tmp_path)}
+    assert legacy.unit_name(env) == product.UNIT               # a new install
+    units.mkdir(parents=True)
+    (units / legacy.UNIT).write_text("[Unit]\n")
+    assert legacy.unit_name(env) == legacy.UNIT                # made before the rename
+    (units / product.UNIT).write_text("[Unit]\n")
+    assert legacy.unit_name(env) == product.UNIT               # both: the new one
+    assert legacy.unit_name({**env, "KRANTO_UNIT": "x.service"}) == "x.service"
+    old_var = legacy.ENV_PREFIXES[0] + "UNIT"
+    assert legacy.unit_name({**env, old_var: "y.service"}) == "y.service"
+    assert legacy.unit_name({"HOME": "/nowhere", "XDG_CONFIG_HOME": str(tmp_path / ".config")}) \
+        == product.UNIT
+
+
+def test_a_unit_store_is_in_the_old_folder_on_an_old_install(tmp_path):
+    env = {"HOME": str(tmp_path)}
+    assert legacy.unit_store("tokens", env) == tmp_path / ".config" / product.CONFIG_DIR / "tokens"
+    old = tmp_path / ".config" / legacy.CONFIG_DIR
+    old.mkdir(parents=True)
+    units = tmp_path / ".config" / "systemd" / "user"
+    units.mkdir(parents=True)
+    (units / legacy.UNIT).write_text("[Unit]\n")
+    assert legacy.unit_store("tokens", env) == old / "tokens"   # the old unit is the default
+    assert legacy.unit_store("claude", {**env, "KRANTO_UNIT": "kranto-test.service"}) \
+        == old / "claude.kranto-test"
+
+
+def test_mcp_answers_to_the_name_it_was_started_as():
+    assert legacy.mcp_server_for("/home/user/.local/bin/" + legacy.COMMAND) == legacy.MCP_SERVER
+    assert legacy.mcp_server_for("kranto") == product.MCP_SERVER
+    assert legacy.mcp_server_for(None) == product.MCP_SERVER
+    assert f"mcp__{legacy.MCP_SERVER}__{legacy.MCP_SERVER}_" in legacy.MCP_ALLOW_PREFIXES
+    assert legacy.alias_notice().endswith("both commands work.")
+
+
+def test_the_compat_set_names_the_old_distributions():
+    assert set(legacy.COMPAT_DISTS) == set(legacy.DISTS)
+    assert legacy.TOOL == legacy.COMPAT_META == legacy.COMMAND
+
+
+def test_a_unit_written_before_the_rename_is_known_by_its_text():
+    old_var = legacy.ENV_PREFIXES[0] + "HOME"
+    old = ("[Unit]\nDescription=x\n[Service]\nEnvironment=" + old_var + "=%h/kb\n"
+           "ExecStart=%h/.local/bin/" + legacy.COMMAND + " serve --port 10025\n")
+    assert legacy.is_old_unit(old)
+    assert legacy.is_old_unit("[Service]\nExecStart=/x/" + legacy.COMMAND + " serve\n")
+    assert legacy.is_old_unit("[Service]\nEnvironment=\"" + old_var + "=/kb\"\n")
+    new = ("[Unit]\nDescription=x\n[Service]\nEnvironment=KRANTO_HOME=%h/kb\n"
+           "ExecStart=%h/.local/bin/kranto serve --port 10025\n")
+    assert not legacy.is_old_unit(new)

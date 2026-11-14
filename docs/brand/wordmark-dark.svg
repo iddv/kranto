@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 208 48" width="208" height="48" role="img" aria-label="kranto">
+  <rect x="0" y="0" width="48" height="48" rx="10.5" fill="#aeb6ff"/>
+  <path fill="#14163a" d="M12 9h6v30h-6zM16.5 28.5L27 18h7.5L16.5 36zM21.75 30.75l3.75-3.75 12 12H30z"/>
+  <text x="60" y="35" font-family="Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="34" font-weight="650" letter-spacing="-0.6" fill="#aeb6ff">kranto</text>
+</svg>

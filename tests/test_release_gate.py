@@ -45,7 +45,7 @@ RELEASES = [rel("v0.6.0-dev3", True, published=2), rel("v0.6.0-dev2", True, publ
 
 class FakeGH:
     def __init__(self, releases=None, body=HELD_BODY, prs=None):
-        self.repo, self.brb_repo = "iddv/kranto", "iddv/kranto"
+        self.repo = "iddv/kranto"
         self.rels = RELEASES if releases is None else releases
         self.text, self.edits, self.notes = body, [], []
         self.prs = prs if prs is not None else {
@@ -414,15 +414,15 @@ def test_withdraw_marks_a_nightly_so_no_install_is_offered_it(tmp_path):
 
 def test_the_notes_open_with_the_line():
     commits = "## Commits\n\nkranto:\n\n```\n4b1f506 The fix\n```"
-    text = notes.render("0.6.0.dev12", "v0.6.0-dev12", "iddv/kranto", "iddv/kranto",
-                        [{"number": 332, "title": "The fix", "mergedAt": "x"}], [],
+    text = notes.render("0.6.0.dev12", "v0.6.0-dev12", "iddv/kranto",
+                        [{"number": 332, "title": "The fix", "mergedAt": "x"}],
                         "2026-10-23", commits=commits, kind="nightly")
     assert "**Nightly build** 12 toward 0.6.0" in text and "Held" not in text
     assert text.index("## Merged") < text.index("## Commits") < text.index("## Pins")
     from kranto.update.sources import note_lines
     shown = note_lines(text)
     assert shown[:1] == ["- The fix (#332)"]
-    promo = notes.render("0.6.0", "v0.6.0", "r", "b", [], [], "2026-10-23", kind="promotion",
+    promo = notes.render("0.6.0", "v0.6.0", "r", [], "2026-10-23", kind="promotion",
                          from_tag="v0.6.0-dev12",
                          big=[{"number": 360, "title": "Today: a calmer home", "mergedAt": "x"}],
                          off=[{"key": "shell.layout", "default": "new",
@@ -432,10 +432,10 @@ def test_the_notes_open_with_the_line():
     assert notes.HELD_LINE.startswith(gate.HELD_PREFIXES)
     assert "- Today: a calmer home" in promo and "`shell.layout`: stable keeps " \
         "`classic`" in promo and "from nightly build v0.6.0-dev12" in promo
-    fix = notes.render("0.6.1", "v0.6.1", "r", "b", [], [], "2026-10-23", kind="fix")
+    fix = notes.render("0.6.1", "v0.6.1", "r", [], "2026-10-23", kind="fix")
     assert "**Fix for stable 0.6**" in fix and "release/0.6" in fix
     assert "no pull request since the previous stable is labelled big" in notes.render(
-        "0.6.0", "v0.6.0", "r", "b", [], [], "x", kind="promotion")
+        "0.6.0", "v0.6.0", "r", [], "x", kind="promotion")
 
 
 def test_the_previous_release_is_told_by_its_tag(monkeypatch):

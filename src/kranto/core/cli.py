@@ -1,4 +1,5 @@
-"""What a feature's commands (``afk <id> ...``) stand on: a runtime and the feature's context,
+"""What a feature's commands (``python -m kranto <id> ...``) stand on: a runtime and the feature's
+context,
 opened the way every ``afk`` command opens them. The command line is the owner's ``cli`` door."""
 
 from __future__ import annotations

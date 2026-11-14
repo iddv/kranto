@@ -15,6 +15,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # beside it, even under -I
+import _names  # noqa: E402
+
 TOOLS = {"Read", "Edit", "MultiEdit", "Write", "NotebookEdit", "Bash", "Grep", "Glob",
          "shell", "apply_patch", "read_file", "write_file"}
 REASON = ("Kranto's secrets are off limits to the assistant (keys, tokens and logins are the "
@@ -22,11 +25,12 @@ REASON = ("Kranto's secrets are off limits to the assistant (keys, tokens and lo
 
 
 def config_dirs() -> list[Path]:
-    """Kranto's config folders: ``~/.config/kranto``, and any other folder there that holds a
-    ``tokens`` folder (an install made before the product's rename keeps its own name). The
-    hook runs alone, without the package, so it cannot ask which names those were."""
+    """Kranto's config folders: both names (``_names.config_dirs``: the new and, run from the
+    package, the one an install made before the rename keeps), and any other folder there that
+    holds a ``tokens`` folder (a plugin copied away from the package cannot ask which names
+    those were)."""
     base = Path.home() / ".config"
-    found = [base / "kranto"]
+    found = _names.config_dirs()
     with contextlib.suppress(OSError):
         found += [d for d in sorted(base.iterdir()) if d not in found and (d / "tokens").is_dir()]
     return found

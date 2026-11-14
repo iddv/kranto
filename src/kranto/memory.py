@@ -12,7 +12,8 @@ that whatever grows next is held and said:
   (``systemctl --user edit Kranto``, ``[Service]`` ``MemoryMax=6G``) overrides them and
   survives updates, which rewrite ``kranto.service`` only.
 - A server started in the foreground (``kranto up --foreground``, a home without systemd for
-  the service) and ``afk run`` put themselves in a ``systemd-run --user --scope`` with the same
+  the service) and ``python -m kranto run`` put themselves in a ``systemd-run --user --scope`` with
+  the same
   caps when this machine has a user systemd and they are not capped already.
 - The server checks its use every scheduler tick: one log line when it crosses 80% of its cap
   and one when it is back under; ``/api/health`` carries it (Settings › System shows it).

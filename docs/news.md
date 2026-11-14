@@ -2,7 +2,7 @@
 
 A short, professional brief per topic: what happened since the last brief, three to seven
 items, each one sentence or two with why it matters, and **every item cited** to an
-observation your watchers kept or to a dated live search result. Nothing in a brief comes from
+observation Kranto kept or to a dated live search result. Nothing in a brief comes from
 the model's memory: an item whose citations name nothing in the material is dropped by code
 before you see it.
 
@@ -21,8 +21,10 @@ hour is: Sources, First read, First brief, First ideas, each with its time
 
 - **On the page:** News › Topics, the topic's row, its switch. One click turns it off or on;
   on, the brief is written daily at 07:00 from then on. The row's Brief now writes one at once.
-- **On the command line:** `afk news on Robotics` (or `--cadence weekdays|weekly`,
-  `--hour 6`); `afk news run Robotics` writes one now; `afk news off Robotics`.
+- **On the command line** (the watcher's own commands, run as in
+  [watcher.md](watcher.md#the-watcher-alone)): `python -m kranto.cli news on Robotics` (or
+  `--cadence weekdays|weekly`, `--hour 6`); `python -m kranto.cli news run Robotics` writes one
+  now; `python -m kranto.cli news off Robotics`.
 
 `news.enabled: false` in `kranto.yaml` turns the whole feature off (no job runs, nothing shows).
 
@@ -52,7 +54,7 @@ now") is text to the model, never an order, and the checks below run whatever it
 | repeats | an item about what the previous brief said is dropped unless it says what is new |
 | count | at most 7 items (`news.max_items`); none left is a quiet brief: "nothing new worth your time since …" |
 
-Each brief keeps what the checks did (`afk news show ID --json`, `checks`).
+Each brief keeps what the checks did (`python -m kranto.cli news show ID --json`, `checks`).
 
 ## Cost
 
@@ -100,7 +102,7 @@ ahead counts); an entity's name must be in its cited lines and a relation must j
 a person the cited lines do not name in a role
 becomes "a person"; no URL or address stays in the text (Sources carries the links). Under 120
 checked words or no What happened: the article is **quiet** and the item stays a plain item.
-`afk news show ID --article --json` shows what the checks did (`checks`).
+`python -m kranto.cli news show ID --article --json` shows what the checks did (`checks`).
 
 **The figure** is always one the page draws: the story's timeline with 3 or more points, else the numbers, else the relationship map, else the
 evidence timeline (the cited lines' own dates and today), which cannot fail. Never a picture
@@ -115,7 +117,7 @@ no picture, the drawn figure only.
 **When.** The hourly `news.brief` job writes the day's article after the brief; a failed one is
 tried again at the next hour, at most twice a day. Brief now writes the brief and then its
 article. **Deep dive now** on any item with an observation writes one now (it asks first: it
-reads the pages and calls the model once). `afk news article BRIEF ITEM` does the same from the
+reads the pages and calls the model once). `python -m kranto.cli news article BRIEF ITEM` does the same from the
 command line; `--dry-run` prints the material and the prompt and calls nothing.
 
 **Cost.** One call on `news.model` (reason by default): measured 7 to 10 cents an article on
@@ -136,10 +138,10 @@ the brief's sheet lists the ideas made from it.
 
 ## The eval
 
-`afk news eval` scores recent briefs, free: citation validity, the mix of observation and
+`python -m kranto.cli news eval` scores recent briefs, free: citation validity, the mix of observation and
 search citations, repeats, words per item, sentences per body, headline length, hype words, and
 whether any item obeyed a planted instruction. the two model judges wait for a frozen
-set of 30 briefs. `afk news eval --articles` scores the articles the same way, free: the
+set of 30 briefs. `python -m kranto.cli news eval --articles` scores the articles the same way, free: the
 citations the checks removed and the paragraphs they dropped, the figures kept against those
 dropped, words and sections, your lines (observations, pages, briefs) against search results, the
 figures drawn, and whether any article carries a trade instruction, an address or a planted line.
@@ -151,7 +153,7 @@ figures drawn, and whether any article carries a trade instruction, an address o
 (null, briefs and articles together); for articles `articles_per_day` (1), `depth`
 (standard), `sources` (pages, search, library, briefs), `lead_image` (true) and, by hand,
 `article_min` (0.15). A topic's own on/off, cadence and hour live with the topic (the page's
-row, or `afk news on`).
+row, or `python -m kranto.cli news on`).
 
 ## Not in this release
 

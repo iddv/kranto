@@ -128,7 +128,7 @@ def test_scout_records_proposals_and_never_offers_invalid_ones(store, embedder, 
 def test_scout_that_returns_nothing_is_an_error_not_a_silent_success(
         store, embedder, make_client, tmp_path):
     """#38: the reasoning model spent all of max_tokens, content was null, and
-    `afk topics add` exited 0 having added nothing."""
+    `python -m kranto topics add` exited 0 having added nothing."""
     from types import SimpleNamespace
 
     import pytest

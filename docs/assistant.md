@@ -1,15 +1,15 @@
 # Use Kranto from your own Claude Code or Codex
 
 Everything you can do on Kranto's pages is also a tool your own assistant can use: add a
-topic, approve sources, brief a topic, retry a build, publish one. The assistant reaches Kranto
+topic, approve sources, brief a topic, write a post about an idea. The assistant reaches Kranto
 through `kranto mcp` on this machine, and Kranto decides on its side what an assistant may do by
 itself ([verbs.md](verbs.md): the ladder on Settings › Assistant).
 
 ## Claude Code: the plugin
 
-    claude plugin marketplace add iddv/kranto && claude plugin install Kranto@Kranto
+    claude plugin marketplace add iddv/kranto && claude plugin install kranto@kranto
 
-or let kranto run those two lines for you, after showing them: `kranto assistant global claude`
+or let Kranto run those two lines for you, after showing them: `kranto assistant global claude`
 (it changes nothing until you add `--yes`). The plugin carries:
 
 - **Kranto's tools** (`kranto mcp`): one tool per verb you may run, the reads, and `kranto_verbs`
@@ -22,7 +22,8 @@ or let kranto run those two lines for you, after showing them: `kranto assistant
   you; it gathers the evidence (the version, what was done, `kranto_outcomes`' refusal, a
   repro) and prepares the issue with `kranto_factory_issue`, which your approval in Needs you
   files. Kranto makes the issue's fingerprint itself.
-- **`kranto-digger`**, a read-only agent for a deep dive into a held build or a topic's sources.
+- **`kranto-digger`**, a read-only helper for a deep dive into a topic's sources and evidence,
+  or a run's trace, so the main conversation stays short.
 - **three hooks**: your assistant cannot read or edit Kranto's secrets (`data/secrets/`, `.env`,
   `~/.config/kranto/tokens/`); Kranto's own tools are not asked about twice: Kranto's ladder
   already decides them, so Claude Code does not prompt for them as well; and the usage hook
@@ -60,11 +61,23 @@ Assistant › Restart now, or the next time Kranto starts.
 
 ## Codex
 
+Codex is the client to use if you do not use Claude Code. One line adds Kranto:
+
     codex mcp add kranto -- kranto mcp --compact
 
-Codex loads every tool's definition on every turn, so `--compact` gives it the few generic
-tools (`kranto_read`, `kranto_verbs`, `kranto_act`, `kranto_search`, …): the same verbs, through
-`kranto_act`. `kranto assistant global codex` runs that line and copies the skills into
+Codex keeps its MCP servers in `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`), and the
+line adds this entry there. You can write it by hand instead:
+
+```toml
+[mcp_servers.kranto]
+command = "kranto"
+args = ["mcp", "--compact"]
+```
+
+Kranto must be running (`kranto up`); `kranto mcp` never starts it, and each tool says so when it
+is down. Codex loads every tool's definition on every turn, so `--compact` gives it the few
+generic tools (`kranto_read`, `kranto_verbs`, `kranto_act`, `kranto_search`, …): the same verbs,
+through `kranto_act`. `kranto assistant global codex` runs that line and copies the skills into
 `~/.agents/skills`, after showing both. In Kranto's own folder, `kranto assistant setup` writes
 `AGENTS.md`, the skills (`.agents/skills/`), the agent (`.codex/agents/`) and the hooks
 (`.codex/hooks.json`: the secrets hook and the usage hook, on Codex's SessionStart,
@@ -75,9 +88,13 @@ own door.
 
 ## Any other MCP client
 
-    claude mcp add kranto -- kranto mcp
+Any client that starts a local MCP server over stdio can use Kranto. Its configuration names the
+command `kranto` with the argument `mcp` (add `--compact` for a client that loads every tool's
+definition on every turn). In the common JSON form:
 
-The tools only: no skill, no hooks.
+    {"mcpServers": {"kranto": {"command": "kranto", "args": ["mcp"]}}}
+
+The tools only: no skill, no hooks. [mcp.md](mcp.md) has how the server works and every tool.
 
 ## What every client gets, and what it does not
 

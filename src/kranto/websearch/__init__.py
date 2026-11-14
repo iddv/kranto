@@ -254,7 +254,7 @@ class Searcher:
         return replace(self, caller=caller)
 
     def state(self) -> dict:
-        """What Settings, the doctor and ``afk websearch`` say about live search."""
+        """What Settings, the doctor and ``python -m kranto websearch`` say about live search."""
         free = [b for b in FREE_BACKENDS if self.cfg.free and b in self.backends]
         return {"provider": self.cfg.provider, "web": self.web,
                 "web_label": self.label(self.web) if self.web else None,

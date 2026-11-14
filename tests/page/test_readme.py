@@ -22,7 +22,7 @@ def test_no_install_from_git():
 
 def test_kranto_is_installed_first():
     assert INSTALL in README
-    assert README.index(INSTALL) < README.index("## The watcher alone")
+    assert README.index(INSTALL) < README.index("## Usage reports")
     assert "## Research history" not in README and "src/kranto/page/lab/" not in README   # the lab left
 
 

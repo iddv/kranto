@@ -5,8 +5,9 @@
 #
 #   scripts/release/hotfix.sh REPO PR [--stable] [--dry-run] [--no-update]
 #
-# REPO is the server or the page (or octo-owner/<name>). In order, each step said as it starts, and the
-# first that fails stops the run with exit 1 and its reason in plain words.
+# REPO is the one repository: kranto (public.toml's repo) or OWNER/kranto. In order, each step
+# said as it starts, and the first that fails stops the run with exit 1 and its reason in plain
+# words.
 #
 # The nightly half (always):
 #   1. tools: its own PATH (~/.local/bin first: a non-interactive ssh lacks it), then git, gh,
@@ -47,7 +48,7 @@
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
-usage() { echo "usage: $0 kranto|kranto.page PR [--stable] [--dry-run] [--no-update]" >&2; exit 2; }
+usage() { echo "usage: $0 kranto|OWNER/kranto PR [--stable] [--dry-run] [--no-update]" >&2; exit 2; }
 [ $# -ge 2 ] || usage
 REPO_ARG="$1" PR="$2"; shift 2
 DRY="" NO_UPDATE="" STABLE=""
@@ -62,12 +63,12 @@ while [ $# -gt 0 ]; do
     *) usage ;;
   esac
 done
-NAME="${REPO_ARG##*/}"
-case "$NAME" in kranto|kranto.page) ;; *) echo "hotfix: REPO is kranto or kranto.page, not '$REPO_ARG'" >&2; exit 2 ;; esac
-[[ "$PR" =~ ^[0-9]+$ ]] || { echo "hotfix: PR is a number, not '$PR'" >&2; exit 2; }
-OWNER="${HOTFIX_OWNER:-octo-owner}"
-FULL="$OWNER/$NAME"
 HERE="$(cd "$(dirname "$0")" && pwd)"
+NAME="${REPO_ARG##*/}"
+DIST_NAME="$(python3 "$HERE/names.py" dist)"
+[ "$NAME" = "$DIST_NAME" ] || { echo "hotfix: REPO is $DIST_NAME or OWNER/$DIST_NAME, not '$REPO_ARG'" >&2; exit 2; }
+[[ "$PR" =~ ^[0-9]+$ ]] || { echo "hotfix: PR is a number, not '$PR'" >&2; exit 2; }
+case "$REPO_ARG" in */*) FULL="$REPO_ARG" ;; *) FULL="$(python3 "$HERE/names.py" repo)" ;; esac
 WORK="${HOTFIX_WORK:-$HOME/.cache/kranto-release/hotfix-$(date -u +%Y%m%dT%H%M%SZ)}"
 STOP="${HOTFIX_STOP:-$HOME/.cache/kranto-release/hotfix.STOP}"
 KRANTO="${KRANTO_BIN:-kranto}"
@@ -176,8 +177,8 @@ else
 fi
 
 step "the release's commit list (read it: it must hold the fix)"
-python3 "$HERE/guards.py" log "$PREVIOUS" "$TAG" "kranto=$CUT_DIR/kranto" \
-  "kranto.page=$CUT_DIR/kranto.page" | sed 's/^/   /' || fail "cannot read $TAG's commit list"
+python3 "$HERE/guards.py" log "$PREVIOUS" "$TAG" "$NAME=$CUT_DIR/$NAME" | sed 's/^/   /' \
+  || fail "cannot read $TAG's commit list"
 if [ "$MERGED_SHA" != "-" ]; then
   python3 "$HERE/guards.py" contains "$CUT_DIR/$NAME" "$TAG" "$MERGED_SHA" | sed 's/^/   /'
   python3 "$HERE/guards.py" contains "$CUT_DIR/$NAME" "$TAG" "$MERGED_SHA" >/dev/null \
@@ -211,7 +212,7 @@ fi
 # -- the stable half -------------------------------------------------------------------------
 step "the stable line"
 SRC="$CUT_DIR/$NAME"
-BRANCH="$(python3 "$HERE/decide.py" --afk "$CUT_DIR/kranto" --brb "$CUT_DIR/kranto.page" --stable-branch)" \
+BRANCH="$(python3 "$HERE/decide.py" --src "$CUT_DIR/$NAME" --stable-branch)" \
   || fail "no stable release yet, so no stable line to fix"
 git -C "$SRC" fetch --quiet origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" 2>/dev/null \
   || fail "$FULL has no $BRANCH yet: before the first promotion of ${BRANCH#release/}.0 there is no stable line (stable installs get the fix at the next promotion)"
@@ -242,9 +243,8 @@ else
     STABLE_SHA="-"
   else
     git -C "$SRC" push --quiet origin "$PICK"
-    needs="$(gh pr view "$PR" -R "$FULL" --json body -q .body | grep -oE 'Needs kranto(afk|brb)#[0-9]+' | sort -u | tr '\n' ' ' || true)"
     NEW_PR="$(gh pr create -R "$FULL" --base "$BRANCH" --head "$PICK" --title "$TITLE (stable $MINOR)" \
-      --body "Cherry-pick of #$PR (${MERGED_SHA:0:10}) for stable $MINOR, by hotfix.sh --stable. ${needs}" | grep -oE '[0-9]+$')" \
+      --body "Cherry-pick of #$PR (${MERGED_SHA:0:10}) for stable $MINOR, by hotfix.sh --stable." | grep -oE '[0-9]+$')" \
       || fail "could not open the cherry-pick's pull request"
     echo "   opened $FULL#$NEW_PR"
     step "merge the cherry-pick on green"
@@ -281,8 +281,8 @@ else
 fi
 
 step "the fix's commit list (read it: it must hold the cherry-pick)"
-python3 "$HERE/guards.py" log "$FIX_PREV" "$FIX" "kranto=$WORK/stable/kranto" \
-  "kranto.page=$WORK/stable/kranto.page" | sed 's/^/   /' || fail "cannot read $FIX's commit list"
+python3 "$HERE/guards.py" log "$FIX_PREV" "$FIX" "$NAME=$WORK/stable/$NAME" | sed 's/^/   /' \
+  || fail "cannot read $FIX's commit list"
 if [ "$STABLE_SHA" != "-" ]; then
   python3 "$HERE/guards.py" contains "$WORK/stable/$NAME" "$FIX" "$STABLE_SHA" >/dev/null \
     || fail "$FIX does not hold $NAME@$STABLE_SHA"

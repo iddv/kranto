@@ -6,6 +6,8 @@
    A custom theme keeps its five colours and the tokens worked out from them under
    LOOK_CUSTOM_KEY; they are set on <html> as --c-*, which looks.css reads. The header's ◐, the
    palette's theme commands and Settings › Appearance all go through here. */
+import { adoptStored, newKey, stored } from "./legacy";
+
 export type Base = "auto" | "light" | "dark";
 /** a custom theme's five colours */
 export interface Colours {
@@ -20,16 +22,16 @@ export interface Custom {
   vars: Record<string, string>;
 }
 
-const THEME_KEY = "kranto.theme";
-const LOOK_KEY = "kranto.look";
-const LOOK_CUSTOM_KEY = "kranto.look.custom";
+const THEME_KEY = newKey("theme");
+const LOOK_KEY = newKey("look");
+const LOOK_CUSTOM_KEY = newKey("look.custom");
 export const LOOKS: [string, string, string][] = [["kranto", "Kranto", "the lavender default"], ["plum", "Plum", "deep purple, a bright blue highlight"], ["paper", "Paper", "a clean white sidebar, blue accent"],
   ["harbor", "Harbor", "deep navy, sky blue"], ["reef", "Reef", "teal, pale aqua"], ["fern", "Fern", "forest green, leaf"], ["clay", "Clay", "warm terracotta, sand"],
   ["graphite", "Graphite", "charcoal and mint"], ["rosewood", "Rosewood", "dusky rose, blush"], ["brass", "Brass", "slate and gold"], ["midnight", "Midnight", "near-black, violet"],
   ["contrast", "High contrast", "black and white, AAA text"]];
 const html = (): HTMLElement => document.documentElement;
 export function themeNow(): Base {
-  try { return (localStorage.getItem(THEME_KEY) as Base | null) || "auto"; } catch { return "auto"; }
+  return (stored("theme") as Base | null) || "auto";
 }
 export function setTheme(t: Base): void {
   try { if (t === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, t); } catch { /* storage off: this page only */ }
@@ -51,7 +53,7 @@ export function flipTo(): Base {
 export const baseWords = (t: Base): string => (t === "auto" ? `Auto: follows your device (${deviceDark() ? "dark" : "light"} now)` : t === "dark" ? "Dark, until you switch back" : "Light, until you switch back");
 export function customNow(): Custom | null {
   try {
-    const c = JSON.parse(localStorage.getItem(LOOK_CUSTOM_KEY) || "null") as Custom | null;
+    const c = JSON.parse(stored("look.custom") || "null") as Custom | null;
     return c && c.in && c.vars ? c : null;
   } catch { return null; }
 }
@@ -163,6 +165,21 @@ export function customTokens(c: Colours): { vars: Record<string, string>; checks
     ["Button text", Math.min(contrast(vars["--c-primary-text-l"] as string, linkL), contrast(vars["--c-primary-text-d"] as string, linkD)), 4.5],
     ["Text on a selected row", Math.min(...["text", "muted", "ink3", "link"].flatMap((t) => [contrast(pg.l[t] as string, selL), contrast(pg.d[t] as string, selD)])), 4.5]];
   return { vars, checks, ok: checks.every(([, r, n]) => r >= n), moved: [linkL !== c.accent ? "darker on light pages" : null, linkD !== c.accent ? "lighter on dark ones" : null].filter((x): x is string => !!x) };
+}
+/** this browser's choices kept under the names from before the rename (lib/legacy.ts), copied to
+    the new names once as the app loads and applied as static/theme.js applies the new ones before
+    the first paint (it ran before they were there); the names copied */
+export function adoptOld(): string[] {
+  const copied = adoptStored();
+  if (!copied.length) return copied;
+  const t = themeNow();
+  if (t === "light" || t === "dark") html().setAttribute("data-theme", t);
+  const c = customNow();
+  if (c) applyCustom(c.vars);
+  const l = stored("look");
+  if (l && l !== "kranto" && (LOOKS.some((x) => x[0] === l) || (l === "custom" && c))) html().setAttribute("data-look", l);
+  (window as { krantoLayout?: { apply: () => unknown } }).krantoLayout?.apply();
+  return copied;
 }
 /** a custom theme saved before it had a page of its own (TH): its colours are worked out again
     from the five it keeps, once, as the app loads */

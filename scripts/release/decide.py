@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Decide the next Kranto release: one version for the server, the page and Kranto (lockstep), on
-one of the two lines (the owner's decisions of 2026-10-24).
+"""Decide the next release: one version, one checkout of the one repository, on one of the two
+lines (the owner's decisions of 2026-10-24).
 
 - **nightly** (the default): every cut from ``main``. Numbered toward the next stable minor:
   while the newest stable tag is ``v0.6.x`` nightly is ``v0.7.0-devN`` (wheel ``0.7.0.devN``),
@@ -8,31 +8,35 @@ one of the two lines (the owner's decisions of 2026-10-24).
   nightly before it for the same target, else the newest stable tag.
 - **promotion** (``--from-tag vX.Y.0-devN``): the owner's choice to make a nightly build stable.
   Version ``X.Y.0``, cut from the dev tag's own commits; ``previous`` is the newest stable tag;
-  ``branch`` is the ``release/X.Y`` the cut creates in both repos. Time never decides it.
+  ``branch`` is the ``release/X.Y`` the cut creates. Time never decides it.
 - **stable** (``--line stable``): a fix cut from ``release/X.Y`` (the checkout's HEAD), the
   newest stable minor's patch plus one; ``previous`` the newest tag of that minor.
 
 Tags read: ``vX.Y.Z``, ``vX.Y.0-devN`` and the retired ``vX.Y.Z-rcN`` (still parsed, never
 cut: ``--prerelease rcN`` is refused).
 
-With ``--repo`` and ``--brb-repo`` (``cut_local.sh`` passes both), a release is cut only when
-every check on both commits being cut is green (``scripts/ci/checks.py``).
+**The floor**: no nightly is numbered below ``v0.7.0-dev1`` (``FLOOR``), the first tag of this
+repository: an install made before it runs ``0.6.0.devN``, and the next build it is offered
+must be newer, whatever older tags a clone holds.
+
+With ``--repo`` (``cut_local.sh`` passes it), a release is cut only when every check on the
+commit being cut is green (``scripts/ci/checks.py``).
 
 **rc_check** (``rc_check.required``): the release's changes since ``previous`` touch the update,
 the install, the packaging, a migration or the service unit (``RC_PATHS``), or it is a
 promotion (always). The check runs on the published build itself (``rc_check.sh TAG
 PREVIOUS``) before the owner's install takes a nightly, and before a held stable is released.
 
-**Never an empty release**: when neither head has a commit since ``previous``,
-nothing is cut.
+**Never an empty release**: when the head has no commit since ``previous``, nothing is cut.
 
 Prints one JSON object: ``line``, ``version`` (PEP 440: ``0.7.0.dev12``), ``tag``
 (``v0.7.0-dev12``), ``previous``, ``prerelease`` (a nightly), ``held`` (a stable or promotion:
-published as a prerelease until it is released), ``branch``, ``commits``, ``since``,
+published as a prerelease until it is released), ``branch``, ``commit`` (the head
+being cut), ``since`` (its commits since ``previous``),
 ``rc_check``. Standard library only.
 
-    decide.py --afk DIR --brb DIR [--line nightly|stable] [--from-tag vX.Y.0-devN] [--plan]
-              [--repo OWNER/NAME --brb-repo OWNER/NAME]
+    decide.py --src DIR [--line nightly|stable] [--from-tag vX.Y.0-devN] [--plan]
+              [--repo OWNER/NAME]
 """
 
 from __future__ import annotations
@@ -51,6 +55,8 @@ DEV_TAG = re.compile(r"^v(\d+)\.(\d+)\.0-dev(\d+)$")
 # The version every package carried before the first tag.
 # with no tag yet: the first nightly is v0.7.0-dev1, above every release an install may run
 BEFORE_TAGS = (0, 6, 0)
+# the first tag of this repository; no nightly is numbered below it
+FLOOR = (0, 7, 0)
 LINES = ("nightly", "stable")
 
 
@@ -77,9 +83,10 @@ def tag_of(base: tuple[int, int, int]) -> str:
 
 
 def nightly_target(tags: list[str]) -> tuple[int, int, int]:
-    """The stable minor nightly builds toward: the newest stable tag's minor plus one."""
+    """The stable minor nightly builds toward: the newest stable tag's minor plus one, never
+    below FLOOR."""
     s = newest_stable(tags) or BEFORE_TAGS
-    return (s[0], s[1] + 1, 0)
+    return max((s[0], s[1] + 1, 0), FLOOR)
 
 
 def dev_numbers(tags: list[str], target: tuple[int, int, int]) -> list[int]:
@@ -129,32 +136,28 @@ def next_fix(tags: list[str]) -> tuple[str, str, str, str]:
 
 
 # What the scratch rc check (rc_check.sh: install the previous release, update, roll back,
-# update again) can find a fault in: the paths of each repo whose change needs it.
-RC_PATHS = {
-    "kranto": (
-        "src/kranto/update/",
-        "src/kranto/launcher.py",
-        "src/kranto/store.py",
-        "scripts/release/",
-        "packages/kranto/",
-        "pyproject.toml",
-    ),
-    "kranto.page": (
-        "src/kranto/page/loop/ledger.py",
-        "src/kranto/page/den/store.py",
-        "scripts/build_ui.py",
-        "pyproject.toml",
-    ),
-}
+# update again) can find a fault in: the paths whose change needs it.
+RC_PATHS = (
+    "src/kranto/update/",
+    "src/kranto/launcher.py",
+    "src/kranto/legacy.py",
+    "src/kranto/store.py",
+    "src/kranto/page/loop/ledger.py",
+    "src/kranto/page/den/store.py",
+    "scripts/release/",
+    "scripts/dev/build_ui.py",
+    "install.sh",
+    "pyproject.toml",
+)
 
 
-def rc_reasons(repo: Path, name: str, previous: str | None) -> list[str]:
-    """The files changed since ``previous`` under ``RC_PATHS[name]``; none before the first
+def rc_reasons(repo: Path, previous: str | None) -> list[str]:
+    """The files changed since ``previous`` under ``RC_PATHS``; none before the first
     release, which has nothing to update from."""
     if previous is None or previous not in tags_of(repo):
         return []
     changed = git(repo, "diff", "--name-only", f"{previous}..HEAD").splitlines()
-    return [f"{name}: {f}" for f in changed if f.startswith(RC_PATHS[name])]
+    return [f for f in changed if f.startswith(RC_PATHS)]
 
 
 def commits_since(repo: Path, previous: str | None) -> int | None:
@@ -212,20 +215,20 @@ def node_version() -> tuple[int, int] | None:
 
 
 def decide(
-    afk: Path,
-    brb: Path,
+    src: Path,
     *,
     line: str = "nightly",
     from_tag: str = "",
     prerelease: str = "",
     green: Callable[[str, str], tuple[bool, str]] | None = None,
-    repos: tuple[str, str] = ("iddv/kranto", "iddv/kranto"),
+    repo: str = "",
     node: Callable[[], tuple[int, int] | None] = node_version,
     plan: bool = False,
 ) -> dict:
-    """``green(repo, sha) -> (ok, why)``: when given, both commits must be green. A the page
-    with a web UI (``src/kranto/page/ui/web``) needs ``node()`` at NODE_FLOOR or newer to build it.
-    ``plan`` is accepted for hotfix.sh: nothing is refused for an rc any more."""
+    """``green(repo, sha) -> (ok, why)``: when given, the commit must be green in ``repo``. A
+    tree with the page's web UI (``src/kranto/page/ui/web``) needs ``node()`` at NODE_FLOOR or
+    newer to build it. ``plan`` is accepted for hotfix.sh: nothing is refused for an rc any
+    more."""
     if prerelease:
         raise DecideError(
             "--prerelease rcN is retired: every nightly is a prerelease and is "
@@ -233,7 +236,7 @@ def decide(
         )
     if line not in LINES:
         raise DecideError(f"line must be nightly or stable, not {line!r}")
-    if (brb / "src" / "kranto" / "page" / "ui" / "web" / "package.json").is_file():
+    if (src / "src" / "kranto" / "page" / "ui" / "web" / "package.json").is_file():
         v = node()
         if v is None or v < NODE_FLOOR:
             found = ".".join(map(str, v)) if v else "none"
@@ -242,7 +245,7 @@ def decide(
                 f"{'.'.join(map(str, NODE_FLOOR))} or newer on this machine "
                 f"(found {found}); users of the release never need it"
             )
-    tags = sorted(set(tags_of(afk)) | set(tags_of(brb)))
+    tags = sorted(tags_of(src))
     branch = None
     if from_tag:
         version, tag, previous, branch = promotion(tags, from_tag)
@@ -255,27 +258,23 @@ def decide(
         kind = "nightly"
     if tag in tags:
         raise DecideError(f"{tag} already exists")
-    since = {"kranto": commits_since(afk, previous), "kranto.page": commits_since(brb, previous)}
-    if previous and all(n == 0 for n in since.values()):
+    since = commits_since(src, previous)
+    if previous and since == 0:
         raise DecideError(
-            f"nothing was merged since {previous} in either repo (both heads are "
-            f"at {previous}): an empty release is refused"
+            f"nothing was merged since {previous} (the head is at {previous}): an empty "
+            "release is refused"
         )
-    why = rc_reasons(afk, "kranto", previous) + rc_reasons(brb, "kranto.page", previous)
+    why = rc_reasons(src, previous)
     if kind == "promotion":
         why = [f"a promotion to stable ({from_tag} -> {tag})", *why]
-    commits = {
-        "kranto": git(afk, "rev-parse", "HEAD"),
-        "kranto.page": git(brb, "rev-parse", "HEAD"),
-    }
+    commit = git(src, "rev-parse", "HEAD")
     if green is not None:
-        for (name, sha), repo in zip(commits.items(), repos, strict=True):
-            ok, said = green(repo, sha)
-            if not ok:
-                raise DecideError(
-                    f"{name} at {sha[:10]} is not green ({said}); a release is "
-                    "cut only from commits whose checks all passed"
-                )
+        ok, said = green(repo, commit)
+        if not ok:
+            raise DecideError(
+                f"{repo} at {commit[:10]} is not green ({said}); a release is "
+                "cut only from commits whose checks all passed"
+            )
     return {
         "release": True,
         "line": line,
@@ -289,15 +288,14 @@ def decide(
         "held": kind != "nightly",
         "since": since,
         "rc_check": {"required": bool(why), "why": why},
-        "commits": commits,
+        "commit": commit,
         "checked": green is not None,
     }
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--afk", required=True, type=Path, help="the the server checkout")
-    p.add_argument("--brb", required=True, type=Path, help="the the page checkout")
+    p.add_argument("--src", required=True, type=Path, help="the checkout being cut")
     p.add_argument("--line", default="nightly", choices=LINES)
     p.add_argument("--from-tag", default="", help="vX.Y.0-devN: promote this nightly build")
     p.add_argument("--prerelease", default="", help="retired (refused with the reason)")
@@ -308,25 +306,19 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="print the stable line's branch (release/X.Y) and stop",
     )
-    p.add_argument("--repo", default="", help="the server's OWNER/NAME: check its commit is green")
-    p.add_argument(
-        "--brb-repo", default="", help="the page's OWNER/NAME: check its commit is green"
-    )
+    p.add_argument("--repo", default="", help="OWNER/NAME: check the commit is green there")
     args = p.parse_args(argv)
-    if bool(args.repo) != bool(args.brb_repo):
-        p.error("--repo and --brb-repo go together")
     try:
         if args.stable_branch:
-            print(next_fix(sorted(set(tags_of(args.afk)) | set(tags_of(args.brb))))[3])
+            print(next_fix(sorted(tags_of(args.src)))[3])
             return 0
         result = decide(
-            args.afk,
-            args.brb,
+            args.src,
             line=args.line,
             from_tag=args.from_tag.strip(),
             prerelease=args.prerelease.strip(),
             green=gh_green if args.repo else None,
-            repos=(args.repo, args.brb_repo),
+            repo=args.repo,
             plan=args.plan,
         )
     except DecideError as exc:

@@ -1,4 +1,4 @@
-"""``kranto cub …`` and ``afk cub …``: the same functions as the page's API,
+"""``kranto cub …`` and ``python -m kranto cub …``: the same functions as the page's API,
 from a terminal. Every command prints words (``--json``: the record) and exits 0, 2 when Kranto
 refused it (with why), 1 on an error.
 

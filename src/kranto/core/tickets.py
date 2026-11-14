@@ -42,6 +42,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from .. import legacy
 from ..store import Store, iso, utcnow
 from ..stored.cubs import TicketBecause, TicketFields
 from . import events
@@ -527,9 +528,15 @@ def door_of(identity: dict[str, Any] | None) -> str | None:
 
 def stop_file() -> Path:
     """``~/.config/kranto/cubs.STOP``: while it exists no cub runs and every press of a cub's
-    ticket resolves ``dry`` (a phone shell's ``touch``)."""
-    return Path(os.environ.get("KRANTO_CUBS_STOP") or
-                Path.home() / ".config" / "kranto" / "cubs.STOP")
+    ticket resolves ``dry`` (a phone shell's ``touch``). The file is honoured in either config
+    folder (an install made before the rename keeps the old one); where none exists, the path
+    is the install's own config folder (``legacy.config_dir``)."""
+    if os.environ.get("KRANTO_CUBS_STOP"):
+        return Path(os.environ["KRANTO_CUBS_STOP"])
+    for d in legacy.config_dirs(Path.home()):
+        if (d / "cubs.STOP").exists():
+            return d / "cubs.STOP"
+    return legacy.config_dir(Path.home()) / "cubs.STOP"
 
 
 def press_mode(store: Store, cfg: Any, t: dict[str, Any]) -> tuple[str, str | None]:

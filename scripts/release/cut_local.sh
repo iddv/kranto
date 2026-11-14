@@ -5,16 +5,17 @@
 # go public).
 #
 #   scripts/release/cut_local.sh [--line nightly|stable] [--from-tag vX.Y.0-devN]
-#                                [--must-include the server@SHA]... [--plan] [--dry-run]
+#                                [--shape final|compat] [--must-include kranto@SHA]...
+#                                [--plan] [--dry-run]
 #
 # The two lines (the owner's decisions of 2026-10-24; decide.py numbers them):
 #   (no flag)            a nightly build from main's newest green commits: vX.Y.0-devN, a GitHub
 #                        prerelease. Installs on the nightly channel see it; stable never does.
 #   --from-tag vX.Y.0-devN
 #                        a promotion: the owner chose to make that nightly build stable. vX.Y.0
-#                        from the dev tag's own commits in both repos, published held (a
-#                        prerelease with its vX.Y.Z tag), and release/X.Y created in both repos
-#                        at those commits (release branches older than the two newest are
+#                        from the dev tag's own commit, published held (a
+#                        prerelease with its vX.Y.Z tag), and release/X.Y created
+#                        at that commit (release branches older than the two newest are
 #                        deleted; their tags stay). Time never decides it: the press does.
 #   --line stable        a fix on the stable line: vX.Y.(Z+1) from release/X.Y's newest green
 #                        commits (a cherry-pick merged there; hotfix.sh --stable), published held.
@@ -28,22 +29,29 @@
 # gate.py offer TAG (only after rc_check passed on it) removes the line. The rc tags
 # (--prerelease rcN) are retired: every candidate is checked on itself.
 #
-# Clones both repos into a fresh work dir (RELEASE_WORK, default ~/.cache/kranto-release/<time>),
-# so nothing in a working checkout is touched, and cuts from each branch's newest commit whose
+# --shape (build.sh's): final (the default), the one wheel; compat, the three wheels of the one
+# nightly that crosses an install made before the rename over (refused once a final release
+# exists, and a final release is refused until the release before it carries the helper for
+# both shapes: guards.py shape, checked here before the build and again by publish.py;
+# RELEASES_JSON, a file of GitHub's release list, stands in for gh's).
+#
+# Clones the one repository (REPO, default public.toml's repo) into a fresh work dir
+# (RELEASE_WORK, default ~/.cache/kranto-release/<time>), so nothing in a working checkout is
+# touched, and cuts from the branch's newest commit whose
 # checks are all green (checks.py newest-green), not from a head still being checked. --dry-run stops
 # before publish: no tag or branch is pushed and no release is created; the wheels,
 # SHA256SUMS, manifest.json and notes.md stay in the work dir. One cut at a time on this
 # machine (a lock, RELEASE_LOCK): two cuts never take the same version. Needs git, gh (logged
-# in, with write access to both repos), uv, python3 and flock; ~/.local/bin is put on PATH.
+# in, with write access to the repository), uv, python3 and flock; ~/.local/bin is put on PATH.
 #
 # The guards (guards.py):
-# --must-include REPO@SHA (repeatable; REPO is the server or the page): wait, bounded
+# --must-include kranto@SHA (repeatable; OWNER/kranto@SHA too): wait, bounded
 #   (RELEASE_MUST_INCLUDE_WAIT seconds, 2700 by default, saying so while it waits), until SHA is
 #   in the branch being cut (main, or release/X.Y with --line stable) and every check on it is
 #   green, then cut from a head that holds it; refuse when its checks fail, when the wait runs
 #   out, or when the head (with --from-tag, the dev tag) does not hold it.
-# An empty release is refused (decide.py): no commit since the previous tag in either repo.
-# The release notes end with each repo's `git log --oneline <previous>..<tag>`, and the cut
+# An empty release is refused (decide.py): no commit since the previous tag.
+# The release notes end with `git log --oneline <previous>..<tag>`, and the cut
 # prints the same lists after publishing: a release is not done until its commit list has been
 # read and holds the change it was cut for.
 # --plan stops after decide.py: what would be cut, from which commits, and whether rc_check is
@@ -51,10 +59,10 @@
 set -euo pipefail
 export PATH="$HOME/.local/bin:$PATH"
 
-LINE=nightly DRY_RUN="" FROM_TAG="" PLAN="" PRERELEASE=""
+LINE=nightly DRY_RUN="" FROM_TAG="" PLAN="" PRERELEASE="" SHAPE=final
 MUST=()
 usage() {
-  echo "usage: $0 [--line nightly|stable] [--from-tag vX.Y.0-devN]" \
+  echo "usage: $0 [--line nightly|stable] [--from-tag vX.Y.0-devN] [--shape final|compat]" \
        "[--must-include kranto@SHA]... [--plan] [--dry-run]" >&2
   exit 2
 }
@@ -62,6 +70,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --line) LINE="$2"; shift 2 ;;
     --from-tag) FROM_TAG="$2"; shift 2 ;;
+    --shape) SHAPE="$2"; shift 2 ;;
     --must-include) MUST+=("$2"); shift 2 ;;
     --plan) PLAN=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
@@ -77,10 +86,13 @@ if [ -n "$PRERELEASE" ]; then
   exit 2
 fi
 case "$LINE" in nightly|stable) ;; *) echo "cut_local: --line is nightly or stable, not '$LINE'" >&2; exit 2 ;; esac
+case "$SHAPE" in final|compat) ;; *) echo "cut_local: --shape is final or compat, not '$SHAPE'" >&2; exit 2 ;; esac
 HERE="$(cd "$(dirname "$0")" && pwd)"
+NAME="$(python3 "$HERE/names.py" dist)"
 for m in ${MUST[@]+"${MUST[@]}"}; do
-  [[ "$m" =~ ^([A-Za-z0-9_.-]+/)?(kranto|kranto.page)@[0-9a-fA-F]{7,40}$ ]] || {
-    echo "cut_local: --must-include takes kranto@SHA or kranto.page@SHA, not '$m'" >&2; exit 2; }
+  [[ "$m" =~ ^([A-Za-z0-9_.-]+/)?([A-Za-z0-9_.-]+)@[0-9a-fA-F]{7,40}$ ]] \
+    && [ "${BASH_REMATCH[2]}" = "$NAME" ] || {
+    echo "cut_local: --must-include takes $NAME@SHA, not '$m'" >&2; exit 2; }
 done
 for t in git gh uv python3 flock; do
   command -v "$t" >/dev/null || {
@@ -92,8 +104,12 @@ if [ -n "$FROM_TAG" ]; then
     exit 2; }
   [ "$LINE" = nightly ] || { echo "cut_local: --from-tag is a promotion; drop --line" >&2; exit 2; }
 fi
+if [ "$SHAPE" = compat ] && { [ -n "$FROM_TAG" ] || [ "$LINE" != nightly ]; }; then
+  echo "cut_local: the compat shape is the one nightly crossing; not a promotion or a fix" >&2
+  exit 2
+fi
 
-REPO="${REPO:-iddv/kranto}" BRB_REPO="${BRB_REPO:-iddv/kranto}"
+REPO="${REPO:-$(python3 "$HERE/names.py" repo)}"
 LOCK="${RELEASE_LOCK:-$HOME/.cache/kranto-release/lock}"
 mkdir -p "$(dirname "$LOCK")"
 exec 9>"$LOCK"
@@ -105,27 +121,21 @@ echo "work dir: $WORK"
 
 gh auth status >/dev/null 2>&1 || { echo "cut_local: gh is not logged in ('gh auth login')" >&2; exit 2; }
 BRANCH=main
-for pair in "kranto:$REPO" "kranto.page:$BRB_REPO"; do
-  name="${pair%%:*}" repo="${pair#*:}"
-  git clone --quiet "${RELEASE_GIT_BASE:-https://github.com}/$repo" "$WORK/$name"
-  git -C "$WORK/$name" fetch --quiet --tags origin
-done
+SRC="$WORK/$NAME" DIST="$WORK/dist"
+git clone --quiet "${RELEASE_GIT_BASE:-https://github.com}/$REPO" "$SRC"
+git -C "$SRC" fetch --quiet --tags origin
 if [ "$LINE" = stable ]; then
   # the stable line's branch, from the newest stable tag (release/X.Y)
-  BRANCH="$(python3 "$HERE/decide.py" --afk "$WORK/kranto" --brb "$WORK/kranto.page" \
-    --stable-branch)" || { echo "cut_local: no stable line to cut a fix on" >&2; exit 2; }
-  for name in kranto kranto.page; do
-    git -C "$WORK/$name" rev-parse -q --verify "origin/$BRANCH" >/dev/null || {
-      echo "cut_local: $name has no $BRANCH yet (it is made by the first promotion to" \
-           "${BRANCH#release/}.0); nothing was cut" >&2; exit 2; }
-  done
+  BRANCH="$(python3 "$HERE/decide.py" --src "$SRC" --stable-branch)" \
+    || { echo "cut_local: no stable line to cut a fix on" >&2; exit 2; }
+  git -C "$SRC" rev-parse -q --verify "origin/$BRANCH" >/dev/null || {
+    echo "cut_local: $REPO has no $BRANCH yet (it is made by the first promotion to" \
+         "${BRANCH#release/}.0); nothing was cut" >&2; exit 2; }
 fi
-for pair in "kranto:$REPO" "kranto.page:$BRB_REPO"; do
-  name="${pair%%:*}" repo="${pair#*:}"
-  musts=()
-  for m in ${MUST[@]+"${MUST[@]}"}; do
-    m_repo="${m%@*}"; [ "${m_repo##*/}" = "$name" ] && musts+=("${m#*@}")
-  done
+name="$NAME" repo="$REPO"
+musts=()
+for m in ${MUST[@]+"${MUST[@]}"}; do musts+=("${m#*@}"); done
+{
   if [ -n "$FROM_TAG" ]; then
     git -C "$WORK/$name" checkout --quiet "$FROM_TAG^{commit}" || {
       echo "cut_local: $repo has no tag $FROM_TAG" >&2; exit 2; }
@@ -152,13 +162,12 @@ for pair in "kranto:$REPO" "kranto.page:$BRB_REPO"; do
     python3 "$HERE/guards.py" contains "$WORK/$name" HEAD "$m" || {
       echo "cut_local: the $name head being cut does not hold $m; nothing was cut" >&2; exit 1; }
   done
-done
-AFK_DIR="$WORK/kranto" BRB_DIR="$WORK/kranto.page" DIST="$WORK/dist"
+}
 
-# Cut only from green commits: decide refuses when any check on either head is red, running
+# Cut only from green commits: decide refuses when any check on the head is red, running
 # or missing (CONTRIBUTING, "Merging and releasing").
-python3 "$HERE/decide.py" --afk "$AFK_DIR" --brb "$BRB_DIR" --line "$LINE" \
-  ${FROM_TAG:+--from-tag "$FROM_TAG"} --repo "$REPO" --brb-repo "$BRB_REPO" ${PLAN:+--plan} \
+python3 "$HERE/decide.py" --src "$SRC" --line "$LINE" \
+  ${FROM_TAG:+--from-tag "$FROM_TAG"} --repo "$REPO" ${PLAN:+--plan} \
   > "$WORK/decide.json"
 cat "$WORK/decide.json"
 if [ -n "$PLAN" ]; then
@@ -168,12 +177,16 @@ fi
 read -r VERSION TAG PREVIOUS KIND HELD NEW_BRANCH RC_CHECK < <(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d["version"], d["tag"], d["previous"] or "-", d["kind"], int(d["held"]), d["branch"] or "-", int(d["rc_check"]["required"]))' "$WORK/decide.json")
 [ "$PREVIOUS" = "-" ] && PREVIOUS=""
 
-VERSION="$VERSION" TAG="$TAG" AFK_DIR="$AFK_DIR" BRB_DIR="$BRB_DIR" DIST="$DIST" \
-  bash "$HERE/build.sh"
-VERSION="$VERSION" DIST="$DIST" WORK="$WORK/smoke" bash "$HERE/smoke.sh"
+# the shape guard before the build (publish.py checks it again before it publishes)
+python3 "$HERE/guards.py" shape "$SHAPE" "$TAG" --repo "$REPO" \
+  ${RELEASES_JSON:+--releases "$RELEASES_JSON"} || {
+  echo "cut_local: a $SHAPE release is refused at $TAG; nothing was built" >&2; exit 2; }
+VERSION="$VERSION" TAG="$TAG" SRC="$SRC" DIST="$DIST" REPO="$REPO" \
+  bash "$HERE/build.sh" --shape "$SHAPE"
+VERSION="$VERSION" DIST="$DIST" WORK="$WORK/smoke" SHAPE="$SHAPE" bash "$HERE/smoke.sh"
 # the non-interactive wizard on a bare HOME, served and stopped (a release with 'kranto setup')
 if "$WORK/smoke/bin/kranto" setup --help > /dev/null 2>&1; then
-  VERSION="$VERSION" DIST="$DIST" WORK="$WORK/smoke" bash "$HERE/smoke.sh" setup
+  VERSION="$VERSION" DIST="$DIST" WORK="$WORK/smoke" SHAPE="$SHAPE" bash "$HERE/smoke.sh" setup
 fi
 
 # The regression corpus (docs/exam.md): with KRANTO_CORPUS set, the new the page recomputes
@@ -184,7 +197,7 @@ if [ -n "${KRANTO_CORPUS:-}" ]; then
   replay=(corpus replay --root "$KRANTO_CORPUS")
   [ -n "${KRANTO_CORPUS_EXPECT:-}" ] && replay+=(--expect "$KRANTO_CORPUS_EXPECT")
   [ -n "${KRANTO_CORPUS_RUN:-}" ] && replay+=(--run)
-  "$WORK/smoke/bin/brb" "${replay[@]}" || {
+  "$WORK/smoke/bin/kranto" "${replay[@]}" || {
     echo "cut_local: the corpus replay found unexpected changes; nothing published" >&2
     exit 1
   }
@@ -193,11 +206,10 @@ fi
 # a milestone's opening section (RELEASE_INTRO: a Markdown file, "What 0.4.0 is"), before the changes
 intro=()
 [ -n "${RELEASE_INTRO:-}" ] && intro=(--intro "$RELEASE_INTRO")
-# the commit list (C4): each repo's `git log --oneline <previous>..<tag>`, in the notes too
+# the commit list (C4): `git log --oneline <previous>..<tag>`, in the notes too
 extra=()
 if [ -n "$PREVIOUS" ]; then
-  python3 "$HERE/guards.py" log "$PREVIOUS" "$TAG" "kranto=$AFK_DIR" "kranto.page=$BRB_DIR" \
-    --markdown > "$WORK/commits.md"
+  python3 "$HERE/guards.py" log "$PREVIOUS" "$TAG" "$NAME=$SRC" --markdown > "$WORK/commits.md"
   extra+=(--commits "$WORK/commits.md" --previous "$PREVIOUS")
 fi
 if [ -n "$FROM_TAG" ]; then
@@ -212,29 +224,24 @@ fi
 # a nightly that rc_check must check is published unoffered: its notes open with
 # "Do not install", which pick() honours, until gate.py offer removes it after rc_check passed
 [ "$KIND" = nightly ] && [ "$RC_CHECK" = 1 ] && extra+=(--checking)
-# the notes list what the cut holds: up to each repo's commit (a dev tag's, with --from-tag)
+# the notes list what the cut holds: up to its commit (a dev tag's, with --from-tag)
 python3 "$HERE/notes.py" --tag "$TAG" --version "$VERSION" --repo "$REPO" \
-  --brb-repo "$BRB_REPO" --out "$WORK/notes.md" --kind "$KIND" "${intro[@]}" "${extra[@]}" \
-  --until "$(git -C "$AFK_DIR" log -1 --format=%cI HEAD)" \
-  --brb-until "$(git -C "$BRB_DIR" log -1 --format=%cI HEAD)"
-python3 "$HERE/publish.py" manifest --dist "$DIST" --version "$VERSION" --tag "$TAG" \
-  --repo "$REPO" --afk "$AFK_DIR" --brb "$BRB_DIR"
+  --out "$WORK/notes.md" --kind "$KIND" --shape "$SHAPE" "${intro[@]}" "${extra[@]}" \
+  --until "$(git -C "$SRC" log -1 --format=%cI HEAD)"
 
 # what the release holds, read before anyone calls it done (C4): the same lists as the notes',
 # and each --must-include found in them
 commit_list() {
-  [ -n "$PREVIOUS" ] && python3 "$HERE/guards.py" log "$PREVIOUS" "$TAG" \
-    "kranto=$AFK_DIR" "kranto.page=$BRB_DIR"
+  [ -n "$PREVIOUS" ] && python3 "$HERE/guards.py" log "$PREVIOUS" "$TAG" "$NAME=$SRC"
   for m in ${MUST[@]+"${MUST[@]}"}; do
-    m_repo="${m%@*}"; m_repo="${m_repo##*/}"
-    python3 "$HERE/guards.py" contains "$WORK/$m_repo" "$TAG" "${m#*@}" || return 1
+    python3 "$HERE/guards.py" contains "$SRC" "$TAG" "${m#*@}" || return 1
   done
 }
 
-# a promotion makes the stable line's branch in both repos at the cut commits, and keeps the
+# a promotion makes the stable line's branch at the cut commit, and keeps the
 # two newest release branches (older ones go; their tags stay)
 release_branches() {
-  for name in kranto kranto.page; do
+  for name in "$NAME"; do
     if [ -n "$DRY_RUN" ]; then
       echo "dry run: would push $name $(git -C "$WORK/$name" rev-parse --short HEAD) to $NEW_BRANCH"
       continue
@@ -258,7 +265,7 @@ fi
 how=(--prerelease)
 [ "$HELD" = 1 ] && how=(--hold)
 python3 "$HERE/publish.py" publish --dist "$DIST" --version "$VERSION" --tag "$TAG" \
-  --repo "$REPO" --afk "$AFK_DIR" --brb "$BRB_DIR" --notes "$WORK/notes.md" "${how[@]}"
+  --repo "$REPO" --src "$SRC" --shape "$SHAPE" --notes "$WORK/notes.md" "${how[@]}"
 echo "published $TAG; its commits:"
 commit_list || { echo "cut_local: $TAG does not hold what it was cut for" >&2; exit 1; }
 [ "$KIND" = promotion ] && release_branches

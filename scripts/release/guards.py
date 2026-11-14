@@ -11,6 +11,12 @@ newest green commit before the fix and shipped nothing; it was called done unrea
         exit 0 when REF (a head or a tag) holds SHA, 1 when it does not
     guards.py log PREVIOUS NEW NAME=CHECKOUT... [--markdown]
         ``git log --oneline PREVIOUS..NEW`` of each checkout, plain or as the notes' section
+    guards.py shape compat|final TAG [--repo R] [--releases FILE]
+        exit 0 when a release of that shape may be built and published at TAG, 1 (and why) when
+        not: a final release only after a release that carries the two-shape helper
+        (TWO_SHAPE_MIN or newer), a compat release only as a nightly and never once a final
+        release exists (``shape_refusal``). The releases come from gh, or from FILE (GitHub's
+        JSON list; a build with no gh login)
     guards.py previous TAG < tags
         the release before TAG on its line, from the tags on stdin (one a line): for a nightly
         (vX.Y.0-devN) the newest nightly before it, else the newest stable before it; for a
@@ -47,7 +53,6 @@ from pathlib import Path
 
 GREEN, RED, TIMED_OUT = 0, 1, 4
 SHA = re.compile(r"^[0-9a-f]{7,40}$")
-NAMES = ("kranto", "kranto.page")
 
 
 class GuardError(Exception):
@@ -55,12 +60,13 @@ class GuardError(Exception):
 
 
 def parse_must(spec: str) -> tuple[str, str]:
-    """``the server@4b1f506`` or ``iddv/kranto@4b1f506`` -> ("kranto", "4b1f506")."""
+    """``<name>@4b1f506`` or ``OWNER/<name>@4b1f506`` -> (<name>, "4b1f506"); <name> is the
+    one repository's (product.DIST)."""
     repo, sep, sha = spec.partition("@")
     name = repo.rsplit("/", 1)[-1]
-    if not sep or name not in NAMES or not SHA.match(sha.lower()):
-        raise GuardError(f"--must-include takes the server@SHA or the page@SHA (7 to 40 hex), "
-                         f"not '{spec}'")
+    dist = _final_dist()
+    if not sep or name != dist or not SHA.match(sha.lower()):
+        raise GuardError(f"--must-include takes {dist}@SHA (7 to 40 hex), not '{spec}'")
     return name, sha.lower()
 
 
@@ -175,6 +181,77 @@ def previous(tag: str, tags: list[str]) -> str | None:
         dev = [t for t in older if tag_key(t)[3] == 0]
         return (dev or stable or [None])[-1]
     return (stable or [None])[-1]
+
+
+# -- the two shapes --------------------------------------------------------------------------
+
+# The first tag of this repository, the first release whose update helper installs both shapes
+# (the old shape, three wheels, for the one crossing; the final shape, one wheel, after it).
+TWO_SHAPE_MIN = "0.7.0.dev1"
+
+
+def as_tag(version: str) -> str:
+    """``0.7.0.dev1`` -> ``v0.7.0-dev1``; a tag is returned as it is."""
+    v = version.strip()
+    if v.startswith("v"):
+        return v
+    return "v" + re.sub(r"rc(\d+)$", r"-rc\1", v.replace(".dev", "-dev"))
+
+
+def _final_dist() -> str:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import names
+    return names.product().DIST
+
+
+def is_final(release: dict, dist: str | None = None) -> bool:
+    """A release in the final shape: it carries the product's own wheel."""
+    dist = dist or _final_dist()
+    return any(re.fullmatch(rf"{re.escape(dist)}-[^-]+-py3-none-any\.whl", a.get("name") or "")
+               for a in release.get("assets") or [])
+
+
+def shape_refusal(shape: str, tag: str, releases: list[dict],
+                  dist: str | None = None) -> str | None:
+    """Why a release of ``shape`` at ``tag`` must not be built or published, or None.
+
+    ``releases``: the repository's releases as GitHub's API lists them (``tag_name``,
+    ``draft``, ``assets``); drafts and ``tag`` itself (a re-run) do not count.
+
+    - ``final``: the release an install runs before it, on its line (``previous``; with none on
+      its line, the newest older release of any line), must be ``TWO_SHAPE_MIN`` or newer, so
+      the helper that installs it knows the one-wheel shape. With no release before it, it is
+      refused: the first release is the crossing (compat).
+    - ``compat``: a nightly build's tag only, and never once a final release exists (an install
+      that took a final release cannot go back to the old shape)."""
+    dist = dist or _final_dist()
+    if tag_key(tag) is None:
+        return f"{tag} is not a release tag"
+    others = [r for r in releases if not r.get("draft") and r.get("tag_name") != tag
+              and tag_key(r.get("tag_name") or "")]
+    if shape == "compat":
+        if "-dev" not in tag:
+            return f"the compat shape is the one nightly crossing (vX.Y.0-devN), not {tag}"
+        finals = sorted((r["tag_name"] for r in others if is_final(r, dist)), key=tag_key)
+        if finals:
+            return (f"a final release exists ({finals[-1]}): the compat shape is never built "
+                    "or published after it")
+        return None
+    if shape != "final":
+        return f"the shape is compat or final, not {shape!r}"
+    tags = [r["tag_name"] for r in others]
+    prev = previous(tag, tags)
+    if prev is None:
+        older = sorted((t for t in tags if tag_key(t) < tag_key(tag)), key=tag_key)
+        prev = older[-1] if older else None
+    if prev is None:
+        return (f"no release before {tag}: an install updates to the final shape only from a "
+                f"release that carries the two-shape helper ({as_tag(TWO_SHAPE_MIN)} or newer); "
+                "the first release is the compat crossing")
+    if tag_key(prev) < tag_key(as_tag(TWO_SHAPE_MIN)):
+        return (f"the release before {tag} is {prev}, older than {as_tag(TWO_SHAPE_MIN)}: its "
+                "update helper installs only the old shape, so a final release is refused")
+    return None
 
 
 # -- big -----------------------------------------------------------------------
@@ -380,6 +457,12 @@ def main(argv: list[str] | None = None) -> int:
     j.add_argument("pr")
     pv = sub.add_parser("previous")
     pv.add_argument("tag")
+    sh = sub.add_parser("shape")
+    sh.add_argument("shape", choices=("compat", "final"))
+    sh.add_argument("tag")
+    sh.add_argument("--repo", default="", help="OWNER/NAME (default: public.toml's repo)")
+    sh.add_argument("--releases", type=Path,
+                    help="the releases as JSON (GitHub's list) instead of asking gh")
     b = sub.add_parser("big")
     b.add_argument("repo", nargs="?")
     b.add_argument("pr", nargs="?")
@@ -401,6 +484,25 @@ def main(argv: list[str] | None = None) -> int:
             return code
         if a.cmd == "previous":
             print(previous(a.tag, sys.stdin.read().split()) or "")
+            return 0
+        if a.cmd == "shape":
+            if a.releases:
+                rels = json.loads(a.releases.read_text() or "[]")
+            else:
+                sys.path.insert(0, str(Path(__file__).resolve().parent))
+                import names
+                repo = a.repo or names.repo()
+                r = subprocess.run(["gh", "api", f"repos/{repo}/releases?per_page=100"],
+                                   capture_output=True, text=True, check=False)
+                if r.returncode != 0:
+                    raise GuardError(f"cannot read {repo}'s releases (gh api): "
+                                     f"{(r.stderr or r.stdout).strip()[:200]}")
+                rels = json.loads(r.stdout or "[]")
+            why = shape_refusal(a.shape, a.tag, rels)
+            if why:
+                print(f"guards: {why}", file=sys.stderr)
+                return 1
+            print(f"{a.tag}: the {a.shape} shape is allowed")
             return 0
         if a.cmd == "jobs":
             print(",".join(required_jobs(a.repo, pr_files(a.repo, a.pr))))

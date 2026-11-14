@@ -1,4 +1,4 @@
-"""The JSON API served by ``afk serve``, and the host of Kranto UI (``/brb/``).
+"""The JSON API served by ``python -m kranto serve``, and the host of Kranto UI (``/brb/``).
 
 The UI is Kranto's (the page's pages, mounted at ``/brb/``); the server's old page
 addresses redirect there. the server alone is not a supported way to run (D5): those
@@ -746,7 +746,7 @@ class App:
                                  "error": f"Not started: {title}: {why}. Ask again when it "
                                           "has ended."}, status_code=409)
         if self.scheduler is None:
-            msg = "The scheduler is disabled; use 'afk run'."
+            msg = "The scheduler is disabled; use 'python -m kranto run'."
         elif self.scheduler.trigger(kind, origin="press", by=verbs.acting_by() or "ui"):
             msg = f"Started {kind}. Refresh to see it in the runs table when it finishes."
             if kind == "snapshot":
@@ -1040,7 +1040,7 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
                bind_host: str | None = None, port: int | None = None,
                tokens=None, stop=None) -> Starlette:
     """``allowed_hosts`` are the names the server may be reached by (Host
-    header, without port). Loopback names by default; ``afk serve`` adds the
+    header, without port). Loopback names by default; ``python -m kranto serve`` adds the
     bound address and any ``--allow-host``. ``bind_host`` is the address the
     server is bound to: the page (``brb.enabled``) is mounted only on loopback.
     ``port`` is the one it listens on: the mounted the page reads idea cards
