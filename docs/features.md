@@ -158,7 +158,7 @@ Write a post is `POST /api/post/write` with `{about, as, angle?}` (the verb `pos
 is `card:<n>`, `brief:<id>:<item>` (the item from 1) or `week`, `as` is `blog` (the default) or
 `toot` (a short post, about a card only), and `angle` is the owner's angle, one sentence of their
 own or one of the three `POST /api/post/angles` proposes (optional, at most 600 characters; the
-post opens on its claim, prediction or question, and with none it is a plain summary that says
+post opens on its angle (where it leads, a bet or a scene) and argues past the item, and with none it is a plain summary that says
 so: [prose.md](prose.md)); `take`, its old name, still works. It answers at once (202, "Writing the draft. It will be
 on Post in about a minute.") and the writing cub's action runs in the background
 (`GET /api/post/write?about=&as=` reads its job; asking again while it runs gets the same job,

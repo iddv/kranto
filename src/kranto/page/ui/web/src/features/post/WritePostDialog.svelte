@@ -1,8 +1,8 @@
 <script lang="ts">
   // Write a post's question (the decision dialog): "Write a post about this idea?",
   // the facts (About, As, Then), the angle step (one box, "Why does this interest you? One
-  // sentence.", with three proposals from POST /api/post/angles beside it: a claim, a prediction
-  // and a question; one press fills the box, Skip empties it and no angle is sent), Details,
+  // sentence.", with three proposals from POST /api/post/angles beside it: where it leads, a bet
+  // and a scene; one press fills the box, Skip empties it and no angle is sent), Details,
   // Cancel and Write draft (the drafts wait on Post; nothing is sent from here). As is a blog post, or short posts for the sites ticked on Settings ›
   // Posting (a card or a news item; this week's news is a blog post). Nothing is sent from here;
   // the drafts wait on Post.
@@ -36,7 +36,8 @@
   });
   // a proposal's button is its sentence, readable before it is chosen; a press fills the box,
   // where it is changed (counted: about 92 words, 11 controls with three proposals)
-  const kindWord = (k: string): string => ({ claim: "A claim", prediction: "A prediction", question: "A question" } as Record<string, string>)[k] || k;
+  // round 3's kinds, and round 2's (a stored draft or an older server may still name them)
+  const kindWord = (k: string): string => ({ end: "Where it leads", bet: "A bet", scene: "A scene", claim: "A claim", prediction: "A prediction", question: "A question" } as Record<string, string>)[k] || k;
   async function propose(k: string, a: WriteAs): Promise<void> {
     const L = app();
     if (!L) return;

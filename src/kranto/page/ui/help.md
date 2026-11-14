@@ -243,8 +243,9 @@ on it and speaks for you only from it.
 
 **Settings › Posting › How you write** is your voice card (how you write, in plain words; Draft it
 from my samples writes one for you to read), four switches (how long, how formal, opinions,
-emoji), "What do you think?" on or off, and your samples. Under Advanced: the other switches, the
-checker's strictness and rules, your never, keep and always lists, the guides each site follows,
+emoji), "What do you think?" on or off, and your samples. Under Advanced: the other switches
+(among them **Salt**: plain, dry or salty, and **More salt on thin items**), the checker's
+strictness and rules, your never, keep and always lists, the guides each site follows,
 and a disclosure line for each site. Save keeps what you changed.
 
 **Needs you** shows in the top bar as "Needs you 4" while something waits (a dot on the
@@ -396,8 +397,8 @@ writes it, and it waits here), or an idea (Ideas opens; a card's own Write a pos
 it). ⚙ is Settings › Posting. Old links to Cubs and its Approvals land here.
 
 **Write a post** asks one thing: "Why does this interest you? One sentence." Beside the box are
-three proposals (a claim, a prediction, a question); pick one, change it, or write your own, and
-the post opens on it. **Skip** writes without one: the draft then only says what the sources say.
+three proposals (where it leads, a bet, a scene), each going past the item; pick one, change it,
+or write your own, and the post opens on it and argues it. **Skip** writes without one: the draft then only says what the sources say.
 **As** is **Blog post** or **Short posts** for the sites you ticked in Settings › Posting.
 
 **Short posts** go to the sites people use, in one of two ways only. **Open in Bluesky** (or X,

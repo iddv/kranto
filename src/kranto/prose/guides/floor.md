@@ -17,9 +17,15 @@ and samples win where they differ (if their samples use dashes, use dashes at ab
    Not: "The sources give no details beyond this." / "So the honest reading is this: …" / "It
    is worth keeping in mind that this comes from the FT's reporting." / "self-reported" twice.
    Do: "The FT says regulators feared the robots' data would leave the country to train AI."
-3. **Take a stance when the angle has one, and be willing to be wrong.** A prediction is good:
-   people answer a prediction. This is one person's writing, not a company's.
-   Do: "My bet: this is the first of many robotics deals stopped over data."
+3. **Take a stance when the angle has one, go past the item, and be willing to be wrong.** The
+   item is the evidence; the post says what it means: where it leads, what else must be true,
+   and how likely that is. A specific bet is good: people answer a prediction. Say the
+   speculation as yours ("I think", "my bet"), never as a fact. This is one person's writing,
+   not a company's.
+   Not: "Within a year, more labs will publish similar results."
+   Do: "If a hand can learn to grasp from video alone, the bottleneck moves from data to
+   hardware: my bet is that by 2030 the cheapest good hand, not the biggest dataset, decides
+   who wins."
 4. **Tell the reader why they should care, first.** Open on their interest, not on the news'
    subject and verb. A post that only restates facts has failed, even when every fact is right.
    Not: "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299."

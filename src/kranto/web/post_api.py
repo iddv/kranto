@@ -871,12 +871,9 @@ def material_for(rt, about: Any) -> dict[str, str]:
             card = cards_get(SimpleNamespace(store=rt.store), {"id": int(m.group("card"))})
         except ReadError as exc:
             raise WriteError(str(exc), 404) from None
-        title = "\n".join(str(x) for x in (card.get("title"), card.get("one_liner"),
-                                           card.get("thesis"), card.get("insight"),
-                                           card.get("why")) if x)
-        facts = "\n".join(f"[{s['n']}] {s.get('source') or ''}: {s.get('claim') or ''}"
-                          for s in card.get("sources") or []) or "(no sources)"
-        return {"title": title, "facts": facts}
+        # round 3: the change the card's sources show leads; the idea is labelled background
+        from ..prose.material import card as card_material
+        return card_material(card)
     from ..core import registry
     from ..features import FEATURES
     from ..features.news.api import briefs_get

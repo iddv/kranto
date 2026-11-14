@@ -127,6 +127,21 @@ def _repeats(new: str, rest: str) -> bool:
     return False
 
 
+def _self_repeat(new: str) -> bool:
+    """A replacement that says the same clause twice inside itself (a hook written in front of
+    the sentence it was asked to replace: "Who gets the call when A block B at 2 a.m.: A block
+    B.")."""
+    from .checker import _content
+    parts = [{w[:5] for w in _content(x)} for x in re.split(r"[.:;!?]\s+|\s+—\s+", new)
+             if x.strip()]
+    for i, a in enumerate(parts):
+        for b in parts[i + 1:]:
+            small, big = (a, b) if len(a) <= len(b) else (b, a)
+            if len(small) >= 4 and len(small & big) / len(small) >= 0.75:
+                return True
+    return False
+
+
 def splice(text: str, spans: list[dict], edits: dict[int, str]) -> tuple[str, list[dict]]:
     """The text with each answered span replaced, from the end backwards; the rest untouched.
     A cut span takes one space before it with it, so no double space is left."""
@@ -144,7 +159,7 @@ def splice(text: str, spans: list[dict], edits: dict[int, str]) -> tuple[str, li
             continue
         if any(u not in urls for u in _URL.findall(new)):
             continue
-        if _repeats(new, out[:s] + " " + out[e:]):
+        if _repeats(new, out[:s] + " " + out[e:]) or _self_repeat(new):
             continue                       # it says again what a sentence already says
         if new == "" and s > 0 and out[s - 1] == " " and (e >= len(out) or out[e] in " \n.,"):
             s -= 1
