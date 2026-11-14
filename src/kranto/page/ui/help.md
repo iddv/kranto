@@ -609,6 +609,11 @@ puts the previous one back by itself; the data is never rolled back. If the old 
 not stop when asked and had to be killed, the update's line under Settings › System › Updates says so:
 the new version runs, and the warning is worth reporting.
 
+If an update is cut off while it installs (the machine restarts, or the update is killed), the
+way back by hand is in `update/RECOVER.txt` in Kranto's home: `kranto status` names it, and so
+does the `kranto` command itself while no version is installed. `sh` runs its lines; they put
+the previous version back. An update that ends by itself removes the file.
+
 Before it keeps a new version, Kranto reads every page it serves once, on your own data: every
 topic, every list's first page, the home, each cub's page, the activity (only reads; nothing
 is changed). If one fails (an error, or no answer), the new version is put back the same way,

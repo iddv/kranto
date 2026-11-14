@@ -315,15 +315,19 @@ def check_pressed(home: Path, store, *, by: str = "ui") -> None:
 
 
 def apply_state(home: Path) -> dict:
-    """The helper's state file; a run whose helper died mid-way reads as ``failed``."""
-    from .apply import FINAL
+    """The helper's state file; a run whose helper died mid-way reads as ``failed``, and names
+    the way back by hand (``RECOVER.txt``) when the helper left it (``recover``)."""
+    from .apply import FINAL, recover_path
     from .launch import running
 
     st = read_json(state_path(home), None) or {"state": "idle"}
+    recover = recover_path(home)
     if st.get("state", "idle") not in (*FINAL, "idle") and not running(home):
         st = {**st, "state": "failed", "reason": st.get("reason") or
               f"the update helper stopped while {st.get('state')}; see its log "
               f"({st.get('log') or 'journalctl --user -u kranto-update'})"}
+    if st.get("state") == "failed" and recover.is_file():
+        st = {**st, "recover": str(recover)}
     return st
 
 
@@ -476,7 +480,9 @@ def status_line(home: Path) -> str:
     state = st.get("state", "idle")
     if state in ("rolled_back", "failed"):
         return (f"{here} · update to {st.get('to')} {state.replace('_', ' ')}: "
-                f"{st.get('reason') or 'see kranto-update in the journal'}")
+                f"{st.get('reason') or 'see kranto-update in the journal'}"
+                + (f" · the way back by hand: {st['recover']} (sh {st['recover']})"
+                   if st.get("recover") else ""))
     if state not in ("idle", "done", "cancelled"):
         return f"{here} · updating to {st.get('to')}: {state}" + \
             (f" ({st['detail']})" if st.get("detail") else "")

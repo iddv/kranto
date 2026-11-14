@@ -85,7 +85,7 @@ def test_the_two_name_modules_are_standard_library_only():
         names = {a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
         froms = {(n.level, n.module) for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
         # ``import product``: the update helper's standalone copy, beside product.py
-        assert names <= {"os", "product"}, (mod.__name__, names)
+        assert names <= {"os", "shlex", "product"}, (mod.__name__, names)
         assert froms <= {(0, "__future__"), (0, "pathlib"), (0, "typing"), (1, None)}, \
             (mod.__name__, froms)
 
