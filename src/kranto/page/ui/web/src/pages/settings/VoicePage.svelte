@@ -241,5 +241,13 @@
   .voice-key label { flex-basis: 100%; }
   .voice-key input { width: min(100%, 320px); }
   #voice-writers input { margin-left: 6px; width: min(100%, 220px); }
+  #voice-writers select, #voice-writers input { max-width: 100%; }
+  #voice-disclosure input { width: min(100%, 420px); }
+  /* a phone: each writer's label above its choice, so nothing runs past the screen's edge */
+  @media (max-width: 640px) {
+    #voice-writers, #voice-disclosure { display: block; }
+    #voice-writers dd, #voice-disclosure dd { margin: 2px 0 10px; min-width: 0; }
+    #voice-writers input { margin: 6px 0 0; }
+  }
   @media (max-width: 640px) { .voice-rules { columns: 1; } }
 </style>
