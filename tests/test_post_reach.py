@@ -78,6 +78,18 @@ def test_a_bluesky_post_is_read_from_the_public_appview_with_its_did_address(sto
     assert reach.run(rt, now=NEXT_DAY + timedelta(hours=2))["read"] == 0   # once a day
 
 
+def test_a_bluesky_count_left_out_is_zero():
+    """The AppView leaves a count of zero out of a post it answers for."""
+    post = {k: v for k, v in FX["bluesky_posts"]["posts"][0].items()
+            if k not in ("quoteCount", "replyCount")}
+
+    def handler(req):
+        return httpx.Response(200, json={"posts": [post]})
+    got = reach.read_bluesky(_http(handler), [URI])[URI]
+    assert got["quotes"] == 0 and got["replies"] == 0 and got["likes"] == 31
+    assert reach.words(got) == "0 replies, 9 reposts, 31 likes, 0 quotes"
+
+
 def test_mastodon_and_threads_readers_take_the_documented_shapes():
     def mast(method, url, **kw):
         assert method == "GET" and url == "https://mastodon.example/api/v1/statuses/1"

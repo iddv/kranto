@@ -154,10 +154,12 @@ def read_bluesky(http: Any, uris: list[str]) -> dict[str, dict[str, int | None]]
             continue
         for post in (body.get("posts") if isinstance(body, dict) else None) or []:
             if isinstance(post, dict) and isinstance(post.get("uri"), str):
-                out[post["uri"]] = {"replies": _int(post.get("replyCount")),
-                                    "reposts": _int(post.get("repostCount")),
-                                    "likes": _int(post.get("likeCount")),
-                                    "quotes": _int(post.get("quoteCount")), "views": None}
+                # the AppView leaves a count of zero out: a count missing from a post it
+                # answered for is 0 (views it gives only to the signed-in author: none)
+                out[post["uri"]] = {"replies": _int(post.get("replyCount", 0)),
+                                    "reposts": _int(post.get("repostCount", 0)),
+                                    "likes": _int(post.get("likeCount", 0)),
+                                    "quotes": _int(post.get("quoteCount", 0)), "views": None}
     return out
 
 
