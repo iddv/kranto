@@ -38,7 +38,8 @@ def test_a_card_is_ordered_by_its_facts_never_by_its_score(store):
 
 
 def test_every_grade_is_a_feedback_row(store):
-    """The pages (POST /api/feedback) and ``afk grade`` write through ``grades.add_grade``
+    """The pages (POST /api/feedback) and ``python -m kranto grade`` write through
+    ``grades.add_grade``
     or ``feedback.add``: one feedback row, read back with its context. ▲ ▼ only now
    ; an older "wrong" is still read."""
     cid = add_card(store, "a card", live_shaped(1, 0, ["a.org"]))

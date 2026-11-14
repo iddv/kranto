@@ -3,14 +3,14 @@
 A second Kranto on the same machine as yours, built from a branch of this repository (`main` by default), serving **a copy of
 your data** on `127.0.0.1:8766`, that **cannot send**. You try a branch on it before anything
 reaches Kranto you use. It never touches your Kranto's folders, and it is never updated by
-`kranto update`: `kranto-preview refresh` builds it again from the branch.
+`kranto update`: `kranto-preview refresh` makes it again from the branch.
 
 | | Your Kranto | The preview |
 |---|---|---|
 | Address | `127.0.0.1:8765` | `127.0.0.1:8766` (loopback only; its own sign-in) |
 | Unit | `kranto.service` | `kranto-preview.service`, a transient user unit with a 3 GB memory cap (nothing is written under `~/.config/systemd`; after a reboot, `kranto-preview up` starts it again) |
 | Code | a release | the wheel built from the branch, in `~/kranto-preview/venv` |
-| Data | `~/kranto-kb`, `~/kranto-loop`, `~/tasks` | `~/kranto-preview/home` and `~/kranto-preview/loop`: a copy (below); `~/tasks` is not copied |
+| Data | your home and its loop home (`~/.kranto` and `~/.kranto/loop` on a new install; an older install's own folders) | `~/kranto-preview/home` and `~/kranto-preview/loop`: a copy (below); an older install's task folders are not copied |
 | Secrets | yours | none: no model key, no account |
 | Jobs | on | off (a still copy: every page works, nothing new is read) until `kranto-preview jobs on` |
 | Sending | as you choose | never |
@@ -20,7 +20,7 @@ reaches Kranto you use. It never touches your Kranto's folders, and it is never 
 1. On your own PC, run this one line:
 
    ```
-   ssh -t -L 8766:127.0.0.1:8766 the server '~/kranto-preview/bin/kranto-preview open; exec $SHELL -l'
+   ssh -t -L 8766:127.0.0.1:8766 <this machine> '~/kranto-preview/bin/kranto-preview open; exec $SHELL -l'
    ```
 
    It opens the tunnel, prints a one-time sign-in link and keeps the tunnel open while that
@@ -58,8 +58,8 @@ folder and names its unit after the link: an older preview keeps its folder, uni
 bookmarks. It puts `~/.local/bin` (where
 `uv` is) on its own PATH, so it works over a plain `ssh <this machine> '…'` with no login shell.
 
-`scripts/preview/acceptance.py` checks a running preview read-only against the owner's Gate A
-lines, the word test and the page counts; it exits non-zero on a failure (its `--help` says how).
+`scripts/preview/acceptance.py` checks a running preview read-only: the status bar's lines, the
+word test and the page counts; it exits non-zero on a failure (its `--help` says how).
 
 ## The copy
 
@@ -84,7 +84,7 @@ each line has a test in `tests/test_preview.py`.
 3. `kranto update`, the update check and the cubs' own updates are off.
 4. `/api/status` carries `preview`: the bar's sentence, when the copy was taken, the commits.
 5. `kranto serve` refuses to start as the preview when its home or loop home is one of your
-   Kranto's folders (`~/kranto-kb`, `~/kranto-loop`, `~/tasks`, or the home `kranto.service` names),
+   Kranto's folders (the home `kranto.service` names, its loop home, or an older install's folders),
    or when its port is your Kranto's port.
 
 `kranto-preview` itself refuses to start a build that has no switch (one from before the switch

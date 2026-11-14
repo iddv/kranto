@@ -2,7 +2,7 @@
 
 ``<workspace>/data/secrets/connections.json``: one file, encrypted as a whole
 with AES-256-GCM, written atomically, mode 0600 in a 0700 directory. Never in
-kranto.yaml, never in the library database (which ``afk export`` and bundles
+kranto.yaml, never in the library database (which ``python -m kranto export`` and bundles
 read), never in git (``data/`` is outside the config, and ``.gitignore`` names
 ``data/secrets/``).
 
@@ -13,7 +13,8 @@ copy of the salt alone. This defends against backups, exports and accidental
 copies, not against root on the box.
 
 Needs the ``cryptography`` package (``pip install 'kranto[connections]'``).
-Reads and writes take a file lock, so ``afk serve`` and a cron ``afk run`` that
+Reads and writes take a file lock, so ``python -m kranto serve`` and a cron ``python -m kranto
+run`` that
 both refresh a token do not lose each other's writes; ``locked`` holds it across a
 whole refresh for a provider whose old refresh token dies when a new one is issued.
 """

@@ -17,7 +17,8 @@ labels the account ``@username`` and keeps its numeric id for the timelines that
 grant with any scope beyond these, or without a refresh token, is revoked and refused.
 
 Tokens last two hours. X rotates the refresh token on every refresh and the old one stops
-working, so ``afk serve`` and a cron ``afk run`` must not both spend it: this provider says
+working, so ``python -m kranto serve`` and a cron ``python -m kranto run`` must not both spend it:
+this provider says
 ``rotates_refresh`` and the registry refreshes it under the vault's file lock (read the entry,
 ask X, write the new pair, release). Disconnect revokes the refresh token, then the access
 token, at ``/2/oauth2/revoke``.

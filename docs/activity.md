@@ -1,14 +1,14 @@
 # What Kranto is doing: runs, recorded as they go
 
 Everything Kranto does in the background is a **run**: a scheduled job (reading your sources,
-the map, a cub's weekly post), an action that does work (Brief now, the scout, an
+the map, a weekly post), an action that does work (Brief now, the scout, an
 explanation, Card it now) or the update check. A run has a kind, a title in words, a trigger
-(the schedule, your approval), a subject (a topic, a cub), a state and a trace.
+(the schedule, your approval), a subject (a topic, an extension), a state and a trace.
 
 | State | Says |
 |---|---|
 | running | it is working now; its stage in words ("source 2 of 8, Lobsters · 3 kept so far") |
-| waiting | it stopped for you: a cub's ask to approve; the verb and the action |
+| waiting | it stopped for you: an ask to approve; the verb and the action |
 | ok | done |
 | degraded | done with problems (a source failing, a model error on one item) |
 | failed | it failed, with the reason |
@@ -26,7 +26,7 @@ its marks', so its trace is one id from the first mark to the last call.
 Writes never slow the work: every mark is a queue put that **one writer thread** commits in
 batches, at most every second or 50 marks, a run's progress marks coalesced (the newest wins)
 and dropped first when the queue is long; `started`, `waiting`, `stopping` and `ended` are never
-dropped and are committed at once. Measured on a copy of live, a mark costs the job about 0.07
+dropped and are committed at once. Measured on a copy of a real library, a mark costs the job about 0.07
 ms; the read and the server's stop commit what is queued first. After each batch the writer rewrites `data/activity.json` (the runs in progress; mode 0600), which the live
 feed watches.
 
@@ -52,7 +52,7 @@ counts as a failure here.
 ## The read
 
 `GET /api/activity` (the server's half; the page's `GET /brb/api/activity` merges it with the
-build loop's runs, the builds and the sessions):
+sessions):
 
 ```
 {"seq", "running": [Run], "waiting": [Run], "next": [Scheduled], "recent": [Run],

@@ -2,8 +2,8 @@
 
 `kranto mcp` is a small local MCP server. It lets an MCP client (Claude Code, Codex, Claude
 Desktop) read Kranto and do what the page does: add a topic, approve a source, brief a
-topic, and every other verb Kranto has. Each tool is one verb of Kranto's registry (the server
-`docs/verbs.md`), under the same rules for every client.
+topic, and every other verb Kranto has. Each tool is one verb of Kranto's registry
+([verbs.md](verbs.md)), under the same rules for every client.
 
 ## Add it
 
@@ -21,7 +21,7 @@ tool search) the few generic tools only (`kranto_status`, `kranto_reads`, `krant
 
 It needs the MCP extra (the official Python SDK). Without it, `kranto mcp` says how to get it:
 
-Install `kranto[mcp]` from the release's wheels, as the server's
+Install `kranto[mcp]` from the release's wheels, as the
 [setup guide](https://github.com/iddv/kranto/blob/main/docs/setup.md#2-install) shows (step 2:
 the `uv tool install` line's last argument becomes `"kranto[mcp] @ $(ls "$PWD/kranto-$tag"/kranto-*.whl)"`).
 `kranto update` keeps the extra.

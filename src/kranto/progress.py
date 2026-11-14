@@ -45,7 +45,8 @@ class Progress:
                     "sources make one likelier.")
         n = self.candidate_clusters
         return (f"The latest map has {n} cluster{'s' if n != 1 else ''} ideas can be written "
-                "from. Cards are generated on the ideas schedule, or now with 'afk ideas'.")
+                "from. Cards are generated on the ideas schedule, or now with "
+                "'python -m kranto ideas'.")
 
 
 def observation_count(store: Store) -> int:

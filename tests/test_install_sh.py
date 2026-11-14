@@ -117,6 +117,23 @@ def test_from_a_folder_it_verifies_installs_and_runs_setup(box):
     assert log.splitlines()[-1] == "kranto setup --yes --port 9021"
 
 
+def test_a_release_without_a_kranto_wheel_is_refused_in_one_line(box):
+    """The crossing's release carries only the old names' wheels: install.sh installs the final
+    shape only, and says so in one line."""
+    d = box["tmp"] / "crossing"
+    d.mkdir()
+    sums = []
+    for name in ("meta", "server", "page"):
+        w = d / f"old{name}-9.9.9-py3-none-any.whl"
+        w.write_bytes(name.encode())
+        sums.append(f"{hashlib.sha256(w.read_bytes()).hexdigest()}  {w.name}")
+    (d / "SHA256SUMS").write_text("\n".join(sums) + "\n")
+    r, log = run(box, "--from", str(d))
+    assert r.returncode != 0 and "uv tool install" not in log
+    said = [ln for ln in r.stderr.splitlines() if ln.strip()]
+    assert len(said) == 1 and "has no kranto wheel" in said[0], r.stderr
+
+
 def test_a_hash_that_does_not_match_installs_nothing(box):
     rel = release_dir(box["tmp"], corrupt=True)
     r, log = run(box, "--from", str(rel))
@@ -299,12 +316,13 @@ def test_every_release_carries_install_sh(tmp_path, monkeypatch):
     rel = release_dir(tmp_path)
     (rel / "manifest.json").write_text("{}")
     calls = []
-    monkeypatch.setattr(publish, "check_set", lambda dist, v: sorted(dist.glob("*.whl")))
+    before = [{"tag_name": "v9.9.8", "draft": False, "assets": []}]
     monkeypatch.setattr(publish, "push_tag", lambda repo, tag: "pushed")
     monkeypatch.setattr(publish, "run", lambda *cmd, cwd=None: calls.append(cmd) or "")
     monkeypatch.setattr(publish.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(
         a, 1, "", "release not found"))
-    publish.publish(rel, "9.9.9", "v9.9.9", "iddv/kranto", ROOT, ROOT, tmp_path / "n", False)
+    publish.publish(rel, "9.9.9", "v9.9.9", "iddv/kranto", ROOT, tmp_path / "n", False,
+                    known=before)
     create = next(c for c in calls if c[:3] == ("gh", "release", "create"))
     assert str(ROOT / "install.sh") in create
 

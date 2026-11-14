@@ -1,0 +1,25 @@
+name: Feature
+description: Something Kranto should do. The problem first, the idea second.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read [what Kranto will not become](https://github.com/iddv/kranto/blob/main/docs/scope.md) first. **This issue is public: paste no keys or tokens.**
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What goes wrong or is missing for you today, in your own use. A real case beats a general one.
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: What you do about it now
+      description: The workaround, if any.
+  - type: textarea
+    id: idea
+    attributes:
+      label: An idea, if you have one
+      description: How Kranto could help. Optional; the problem is what matters.

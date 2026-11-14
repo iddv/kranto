@@ -14,8 +14,8 @@ stores:
    was chosen** (the RCA's row: without a topic the similarity is not measured);
 4. a preset's form (``source_health.add_from_preset``): ``items``, ``preset``, ``fields``,
    ``checked: "preview"``, no ``status``;
-5. ``afk pack``: ``items``, ``checked: "pack"``;
-6. ``afk source add`` and the plain add form: ``items``, ``checked: "manual"``;
+5. ``python -m kranto pack``: ``items``, ``checked: "pack"``;
+6. ``python -m kranto source add`` and the plain add form: ``items``, ``checked: "manual"``;
 7. the Parallax import: no record at all (the column is NULL).
 
 So every key but ``items`` may be absent, and ``status`` is absent on four writers.

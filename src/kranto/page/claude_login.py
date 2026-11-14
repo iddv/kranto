@@ -23,6 +23,8 @@ import re
 import time
 from pathlib import Path
 
+from kranto import legacy
+
 DIR_ENV = "KRANTO_CLAUDE_DIR"
 DEFAULT_UNIT = "kranto.service"
 VAR = "CLAUDE_CODE_OAUTH_TOKEN"
@@ -42,10 +44,7 @@ def store_dir(env: dict | None = None, home: Path | None = None) -> Path:
     env = os.environ if env is None else env
     if env.get(DIR_ENV):
         return Path(env[DIR_ENV]).expanduser()
-    unit = env.get("KRANTO_UNIT") or DEFAULT_UNIT
-    name = "claude" if unit == DEFAULT_UNIT else "claude." + unit.removesuffix(".service")
-    base = Path(home) if home else Path(env.get("HOME") or Path.home())
-    return base / ".config" / "kranto" / name
+    return legacy.unit_store("claude", env, home)    # the old folder on an old install
 
 
 def check(token: str) -> str:

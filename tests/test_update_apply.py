@@ -9,17 +9,20 @@ import fcntl
 import json
 import shutil
 import subprocess
+import sys
 from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
 from kranto import config as config_mod
+from kranto import legacy
 from kranto.update import apply, check, launch
 
 from .test_update_check import write_set
 
-GIT = {"kranto": "1" * 40, "kranto.page": "2" * 40}
+GIT = {"kranto": "1" * 40}
+OLD = "0.6.0.dev18"          # the last version before the rename: it has the old command only
 
 
 class World:
@@ -45,37 +48,57 @@ class World:
         self.calls = []
         self.now = 0.0
         self.on_sleep = None
+        self.overlap = []         # tools that existed beside the one being installed
+        self.unit = "kranto.service"
         # how the old server ended: a clean SIGTERM exit (systemd counts it a success)
         self.stopped = "Result=success\nExecMainCode=2\nExecMainStatus=15\n"
         self.stop_s = 0.4
         self.journal = ""         # what the old server logged while it stopped
         self.set_git(GIT, "0.1.0")
 
-    # -- the tool environment ------------------------------------------------------------
+    # -- the tool environments ------------------------------------------------------------
 
-    def _write(self, name, version, url):
-        sp = self.tools / "kranto" / "lib" / "python3.12" / "site-packages"
-        for d in sp.glob(f"{name}-*.dist-info"):
-            if d.name.split("-")[0] == name:
-                shutil.rmtree(d)
+    def _write(self, tool, name, version, url):
+        sp = self.tools / tool / "lib" / "python3.12" / "site-packages"
         d = sp / f"{name}-{version}.dist-info"
         d.mkdir(parents=True)
         (d / "METADATA").write_text(f"Name: {name}\nVersion: {version}\n\n")
         (d / "direct_url.json").write_text(json.dumps(url))
 
-    def set_git(self, commits, version):
-        for n in apply.NAMES:
-            self._write(n, version, {"url": "https://github.com/octo-owner/x",
-                                     "vcs_info": {"vcs": "git", "commit_id": commits[n]}})
+    def _fresh(self, tool, version):
+        """``uv tool install --force``: the tool's venv made again, its commands linked (the
+        version before the rename has only the old command)."""
+        shutil.rmtree(self.tools / tool, ignore_errors=True)
+        (self.tools / tool).mkdir(parents=True)
+        self.overlap += [t for t in set(apply.TOOLS.values()) - {tool}
+                         if (self.tools / t).is_dir()]
+        self.bin.mkdir(parents=True, exist_ok=True)
+        names = [legacy.COMMAND] if version == OLD else ["kranto", legacy.COMMAND]
+        for n in ("kranto", legacy.COMMAND):
+            (self.bin / n).unlink(missing_ok=True)
+        for n in names:
+            (self.bin / n).write_text(tool)
 
-    def set_wheels(self, folder, version):
-        for n in apply.NAMES:
-            self._write(n, version, {"url": f"file://{folder}/{n}-{version}-py3-none-any.whl",
-                                     "archive_info": {}})
+    def set_git(self, commits, version):
+        self._fresh("kranto", version)
+        self._write("kranto", "kranto", version, {
+            "url": "https://github.com/octo-owner/x",
+            "vcs_info": {"vcs": "git", "commit_id": commits["kranto"]}})
+
+    def set_wheels(self, folder, version, shape="final"):
+        tool = apply.TOOLS[shape]
+        self._fresh(tool, version)
+        for n in apply.SHAPES[shape]:
+            self._write(tool, n, version, {
+                "url": f"file://{folder}/{n}-{version}-py3-none-any.whl", "archive_info": {}})
+
+    @property
+    def tool(self):
+        return apply.tool_env_of(self.tools).name
 
     @property
     def version(self):
-        return apply.installed(self.tools / "kranto")["version"]
+        return apply.installed(apply.tool_env_of(self.tools))["version"]
 
     # -- the fakes ---------------------------------------------------------------------------
 
@@ -99,8 +122,14 @@ class World:
                 self.active = True
             return ok
         if cmd[0] == "journalctl":
-            assert cmd[1:4] == ["--user", "-u", "kranto.service"] and cmd[4] == "--since"
+            assert cmd[1:4] == ["--user", "-u", self.unit] and cmd[4] == "--since"
             return subprocess.CompletedProcess(cmd, 0, self.journal, "")
+        if cmd[:3] == ["uv", "tool", "uninstall"]:
+            # uv removes the commands of the tool's names, whoever has since taken them
+            shutil.rmtree(self.tools / cmd[3])
+            for n in ("kranto", legacy.COMMAND):
+                (self.bin / n).unlink(missing_ok=True)
+            return ok
         if cmd[:3] == ["uv", "tool", "install"]:
             if self.uv_fails:
                 self.uv_fails -= 1
@@ -110,16 +139,15 @@ class World:
             if last.endswith(".whl"):
                 path = Path(last.split("file://", 1)[1]) if "file://" in last else Path(last)
                 v = path.name.split("-")[1]
-                self.set_wheels(path.parent, v)
+                shape = "compat" if "--with-executables-from" in cmd else "final"
+                self.set_wheels(path.parent, v, shape)
             else:
-                # the meta-package's own git deps are replaced by the overrides file's pins
-                assert "--with" not in cmd and "--overrides" in cmd
-                lines = Path(cmd[cmd.index("--overrides") + 1]).read_text().splitlines()
-                commits = {"kranto": lines[0].rsplit("@", 1)[1],
-                           "kranto.page": lines[1].rsplit("@", 1)[1]}
-                self.set_git(commits, "0.1.0")
+                assert "--with" not in cmd and "@ git+" in last
+                self.set_git({"kranto": last.rsplit("@", 1)[1]}, "0.1.0")
             return ok
-        if cmd[0] == str(self.bin / "kranto"):
+        if cmd[0] in (str(self.bin / "kranto"), str(self.bin / legacy.COMMAND)):
+            if not Path(cmd[0]).exists():
+                return subprocess.CompletedProcess(cmd, 127, "", f"{cmd[0]}: not found")
             if cmd[1] == "backup":
                 dest = Path(cmd[2])
                 dest.mkdir(parents=True, exist_ok=True)   # the clock is frozen in tests
@@ -141,8 +169,7 @@ class World:
                 return ok
             if cmd[1] == "--version":
                 v = self.version
-                return subprocess.CompletedProcess(cmd, 0, f"Kranto {v} (the server {v}, "
-                                                   f"the page {v})\n", "")
+                return subprocess.CompletedProcess(cmd, 0, f"kranto {v}\n", "")
         raise AssertionError(cmd)
 
     def http(self, method, url, body=None, timeout=10):
@@ -187,8 +214,8 @@ class World:
     routes_said = {"ok": True, "checked": 40, "of": 40, "failed": [], "unchecked": 0,
                    "seconds": 3.2}
 
-    def stage(self, tag="v0.2.0"):
-        write_set(apply.releases_dir(self.home) / tag, apply.tag_version(tag))
+    def stage(self, tag="v0.2.0", shape="final"):
+        write_set(apply.releases_dir(self.home) / tag, apply.tag_version(tag), shape=shape)
 
 
 @pytest.fixture
@@ -222,8 +249,11 @@ def test_update_from_git_to_a_release(world):
     hist = apply.history(world.home)
     assert hist[0]["state"] == "done" and hist[0]["to"] == "0.2.0"
     install = next(c for c in world.calls if c[:3] == ["uv", "tool", "install"])
-    assert install[3:6] == ["--force", "--python", "3.12"] and "--with-executables-from" in install
+    assert install[3:6] == ["--force", "--python", "3.12"]
+    assert "--with-executables-from" not in install
+    assert install[-1].startswith("kranto[connections,notify] @ file://")
     assert install[-1].endswith("kranto-0.2.0-py3-none-any.whl")
+    assert not any(c[:3] == ["uv", "tool", "uninstall"] for c in world.calls)
 
 
 def test_a_clean_stop_is_recorded_as_one(world):
@@ -292,20 +322,18 @@ def test_a_forced_exit_is_a_warning_even_inside_the_time(world):
 
 def test_the_extras_kranto_was_installed_with_are_kept(world):
     # installed as "kranto[mcp] @ git+…" (uv's receipt says so): the update, the previous spec
-    # and the rollback all keep the mcp extra, and the git pin keeps the page's own mcp extra
+    # and the rollback all keep the mcp extra beside the defaults
     (world.tools / "kranto" / "uv-receipt.toml").write_text(
         '[tool]\nrequirements = [\n    { name = "kranto", extras = ["mcp"], git = "https://x" },\n'
-        '    { name = "kranto" },\n]\n')
+        ']\n')
     assert world.helper().run_all() == "done"
-    assert world.installed_target.startswith("kranto[mcp] @ file://")
+    assert world.installed_target.startswith("kranto[connections,mcp,notify] @ file://")
     assert world.installed_target.endswith("/v0.2.0/kranto-0.2.0-py3-none-any.whl")
     prev = json.loads(apply.previous_path(world.home).read_text())
     assert prev["kranto_extras"] == ["mcp"]
     assert world.helper(to="previous").run_all() == "done"
-    assert world.installed_target.startswith("kranto[mcp] @ git+https://github.com/iddv/kranto@")
-    overrides = (apply.update_dir(world.home) / "git-overrides.txt").read_text()
-    want = "kranto.page[mcp] @ git+https://github.com/iddv/kranto@" + GIT["kranto.page"]
-    assert want in overrides
+    assert world.installed_target == ("kranto[connections,mcp,notify] @ "
+                                      "git+https://github.com/iddv/kranto@" + GIT["kranto"])
 
 
 def test_the_receipt_is_read_without_tomllib_too(tmp_path, monkeypatch):
@@ -384,10 +412,7 @@ def test_roll_back_to_the_previous_version(world):
     assert world.helper().run_all() == "done"
     assert world.helper(to="previous").run_all() == "done"
     assert world.version == "0.1.0"
-    assert (
-        apply.installed(world.tools / "kranto")["spec"]["commits"]["kranto.page"]
-        == GIT["kranto.page"]
-    )
+    assert apply.installed(world.tools / "kranto")["spec"]["commits"] == GIT
     prev = json.loads(apply.previous_path(world.home).read_text())
     assert prev["kind"] == "wheels" and prev["version"] == "0.2.0"
 
@@ -559,12 +584,9 @@ def test_the_double_failure_is_failed_with_the_way_back_by_hand(world):
     assert st["detail"].startswith(
         "by hand: systemctl --user stop kranto.service; uv tool install --force"
     )
-    overrides = apply.update_dir(world.home) / "git-overrides.txt"
-    assert f"--overrides {overrides}" in st["detail"]
-    assert overrides.read_text().splitlines() == [
-        "kranto[connections,notify] @ git+https://github.com/iddv/kranto@" + GIT["kranto"],
-        "kranto.page @ git+https://github.com/iddv/kranto@" + GIT["kranto.page"],
-    ]
+    assert ('"kranto[connections,notify] @ git+https://github.com/iddv/kranto@'
+            + GIT["kranto"] + '"') in st["detail"]
+    assert "uv tool uninstall" not in st["detail"]
 
 
 def test_a_rollback_that_fails_too_is_failed(world):
@@ -763,6 +785,9 @@ def test_launch_runs_the_helper_as_a_transient_unit(tmp_path):
         "4321",
     ]
     assert (home / "update" / "apply.py").read_text() == Path(apply.__file__).read_text()
+    # the two name modules the copy imports beside it
+    assert (home / "update" / "legacy.py").read_text() == Path(legacy.__file__).read_text()
+    assert (home / "update" / "product.py").exists()
     st = json.loads(apply.state_path(home).read_text())
     assert st["state"] == "requested"
     with pytest.raises(launch.LaunchError, match="already running"):
@@ -782,15 +807,23 @@ def test_a_helper_that_died_reads_as_failed(tmp_path):
     assert st["state"] == "failed" and "stopped while installing" in st["reason"]
 
 
-def test_the_helper_needs_only_the_standard_library():
+def test_the_helper_needs_only_the_standard_library(tmp_path):
+    """It imports nothing of Kranto but the two name modules (standard library only), from the
+    package or, as launch copies it, from beside it; the copy runs on its own."""
     src = Path(apply.__file__).read_text()
     imports = {
         line.split()[1].split(".")[0]
         for line in src.splitlines()
-        if line.startswith(("import ", "from ")) and not line.startswith("from __future__")
+        if line.strip().startswith(("import ", "from ")) and "__future__" not in line
     }
     assert not imports & {"kranto", "httpx", "yaml", "starlette"}, imports
-    assert "from ." not in src
+    assert "from .. import legacy, product" in src
+    for f in (apply.__file__, legacy.__file__, Path(legacy.__file__).with_name("product.py")):
+        shutil.copy2(f, tmp_path / Path(f).name)
+    r = subprocess.run([sys.executable, str(tmp_path / "apply.py"), "--help"],
+                       capture_output=True, text=True, cwd=tmp_path, timeout=60,
+                       env={"PATH": "/usr/bin", "HOME": str(tmp_path)})
+    assert r.returncode == 0 and "--unit" in r.stdout, r.stderr
 
 
 # -- kranto update's side -----------------------------------------------------------------------
@@ -855,3 +888,182 @@ def test_tail_prints_each_step_until_final(tmp_path, monkeypatch):
         "  reason: forced: verify",
     ]
     assert launcher.UPDATE_EXIT["rolled_back"] == 3
+
+
+# -- the crossing: an install made before the rename ---------------------------------------
+
+
+def old_install(world):
+    """The owner's install: the old three wheels in the old tool, only the old command, the old
+    unit (no unit variable set), the old config folder."""
+    shutil.rmtree(world.tools / "kranto")
+    folder = apply.releases_dir(world.home) / "v0.6.0-dev18"
+    write_set(folder, OLD, shape="compat")
+    world.set_wheels(folder, OLD, "compat")
+    units = world.tmp / ".config" / "systemd" / "user"
+    units.mkdir(parents=True)
+    (units / legacy.UNIT).write_text("[Unit]\nDescription=x\n")
+    (world.tmp / ".config" / legacy.CONFIG_DIR).mkdir()
+    world.unit = legacy.UNIT
+    world.stage("v0.7.0-dev1", shape="compat")
+    world.stage("v0.7.0-dev2")
+    return folder
+
+
+def uv_calls(world):
+    return [c[:4] for c in world.calls if isinstance(c, list) and c[0] == "uv"]
+
+
+def test_the_crossing_there_and_back_twice(world):
+    """old -> K0 -> back -> K0 -> K1 -> back -> K1, as the rehearsal runs it."""
+    old_install(world)
+    assert world.tool == legacy.TOOL and not (world.bin / "kranto").exists()
+    # K0: the old shape in the same tool, now with both commands
+    h = world.helper(to="v0.7.0-dev1")
+    assert h.unit == legacy.UNIT and h.tool_env == world.tools / legacy.TOOL
+    assert h.run_all() == "done"
+    assert world.version == "0.7.0.dev1" and world.tool == legacy.TOOL
+    assert (world.bin / "kranto").exists() and (world.bin / legacy.COMMAND).exists()
+    backup = next(c for c in world.calls if isinstance(c, list) and c[1:2] == ["backup"])
+    assert backup[0] == str(world.bin / legacy.COMMAND)    # the old version's only command
+    assert ["systemctl", "--user", "stop", legacy.UNIT] in world.calls
+    assert ["uv", "tool", "uninstall"] not in [c[:3] for c in uv_calls(world)]
+    # back to the version before the rename (its own command only), then K0 again
+    assert world.helper(to="previous").run_all() == "done"
+    assert world.version == OLD and not (world.bin / "kranto").exists()
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    # K1: the old tool goes first, then kranto, which carries both commands
+    world.calls.clear()
+    assert world.helper(to="v0.7.0-dev2").run_all() == "done"
+    assert world.version == "0.7.0.dev2" and world.tool == "kranto"
+    assert not (world.tools / legacy.TOOL).exists()
+    assert (world.bin / "kranto").read_text() == "kranto"
+    assert (world.bin / legacy.COMMAND).read_text() == "kranto"
+    assert uv_calls(world) == [["uv", "tool", "uninstall", legacy.TOOL],
+                               ["uv", "tool", "install", "--force"]]
+    prev = json.loads(apply.previous_path(world.home).read_text())
+    assert (prev["shape"], prev["tool"], prev["version"]) == ("compat", legacy.TOOL, "0.7.0.dev1")
+    # back: kranto goes first, the old tool comes back with both commands
+    world.calls.clear()
+    assert world.helper(to="previous").run_all() == "done"
+    assert world.version == "0.7.0.dev1" and world.tool == legacy.TOOL
+    assert uv_calls(world)[0] == ["uv", "tool", "uninstall", "kranto"]
+    assert not (world.tools / "kranto").exists() and (world.bin / "kranto").exists()
+    assert world.helper(to="v0.7.0-dev2").run_all() == "done"
+    assert world.tool == "kranto" and world.version == "0.7.0.dev2"
+    assert world.overlap == []                 # two tools never stood side by side
+    assert [r["state"] for r in apply.history(world.home, 10)] == ["done"] * 6
+
+
+@pytest.mark.parametrize("fail", ["install", "start", "verify", "selfcheck"])
+def test_a_failed_first_crossing_puts_the_old_version_back(world, fail):
+    old_install(world)
+    got = world.helper(to="v0.7.0-dev1", env={"KRANTO_UPDATE_FAIL": fail}).run_all()
+    assert got == "rolled_back"
+    assert world.version == OLD and world.tool == legacy.TOOL and world.active
+    assert (world.bin / legacy.COMMAND).exists()
+
+
+@pytest.mark.parametrize("fail", ["install", "start", "verify", "selfcheck"])
+def test_a_failed_second_crossing_puts_the_old_tool_back(world, fail):
+    old_install(world)
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    got = world.helper(to="v0.7.0-dev2", env={"KRANTO_UPDATE_FAIL": fail}).run_all()
+    assert got == "rolled_back"
+    assert world.version == "0.7.0.dev1" and world.tool == legacy.TOOL and world.active
+    assert not (world.tools / "kranto").exists()
+    assert (world.bin / legacy.COMMAND).exists() and (world.bin / "kranto").exists()
+    assert world.overlap == []
+
+
+def test_a_failed_crossing_back_says_how_by_hand(world):
+    old_install(world)
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    got = world.helper(to="v0.7.0-dev2",
+                       env={"KRANTO_UPDATE_FAIL": "verify,rollback"}).run_all()
+    assert got == "failed"
+    st = json.loads(apply.state_path(world.home).read_text())
+    meta, server, page = legacy.COMPAT_DISTS
+    assert st["detail"].startswith(f"by hand: systemctl --user stop {legacy.UNIT}; "
+                                   "uv tool uninstall kranto; uv tool install --force "
+                                   f"--python 3.12 --with-executables-from {server},{page}")
+    assert f"{world.bin / legacy.COMMAND} up --no-browser" in st["detail"]
+
+
+def test_the_old_install_s_token_is_read_where_it_is(world):
+    old_install(world)
+    tokens = world.tmp / ".config" / legacy.CONFIG_DIR / "tokens"
+    tokens.mkdir(parents=True)
+    value = "t" + "0" * 15
+    (tokens / "cli.token").write_text(value + "\n")
+    sent = []
+    real = world.http
+
+    def http(method, url, body=None, timeout=10, headers=None):
+        sent.append((method, (headers or {}).get("Authorization")))
+        return real(method, url, body)
+
+    h = world.helper(to="v0.7.0-dev1")
+    h.http = http
+    assert h.run_all() == "done"
+    assert ("POST", f"Bearer {value}") in sent
+    assert apply.cli_token({"HOME": str(world.tmp)}, legacy.UNIT) == value
+
+
+def test_the_old_server_s_stop_line_is_read_too(world):
+    old_install(world)
+    world.journal = f"x {legacy.OLD_PACKAGE}.stop stop: done in 0.8 s, clean\n"
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    st = json.loads(apply.state_path(world.home).read_text())
+    assert st["stop"]["said"] == "done in 0.8 s, clean"
+
+
+def test_a_previous_git_install_from_before_the_rename_is_refused(world):
+    apply.write_json(apply.previous_path(world.home),
+                     {"kind": "git", "commits": {legacy.COMPAT_SERVER: "3" * 40},
+                      "version": "0.5.0"})
+    assert world.helper(to="previous").run_all() == "cancelled"
+    assert "older layout" in json.loads(apply.state_path(world.home).read_text())["reason"]
+
+
+def test_following_the_helper_imports_nothing_on_the_way():
+    """``kranto update`` follows the helper from the tool's environment while the helper replaces
+    it, and deletes it when the shape changes (the rehearsal on a copy found the follower
+    failing on a lazy import): ``launch.running``, which it calls every two seconds, imports
+    nothing; ``tail_update`` imports only at its first line, before the helper starts."""
+    import ast
+    import inspect
+    import textwrap
+
+    from kranto import launcher
+
+    def imports(fn):
+        tree = ast.parse(textwrap.dedent(inspect.getsource(fn)))
+        return [n for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
+
+    assert imports(launch.running) == []
+    tail = ast.parse(textwrap.dedent(inspect.getsource(launcher.tail_update))).body[0]
+    first = [n for n in tail.body if isinstance(n, (ast.Import, ast.ImportFrom))]
+    assert len(imports(launcher.tail_update)) == len(first)          # none further in
+
+
+def test_every_command_the_helper_runs_names_this_install_in_both_spellings(world):
+    """A version from before the rename reads only the old variable names: without them, its
+    `up` on the way back took the default unit and home (another install's, on the rehearsal's
+    machine)."""
+    seen = []
+    real = world.run
+
+    def run(cmd, env=None, timeout=None):
+        if cmd[0].startswith(str(world.bin)):
+            seen.append(env)
+        return real(cmd, env=env, timeout=timeout)
+
+    old_install(world)
+    old = legacy.ENV_PREFIXES[0]
+    world.run = run
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    assert world.helper(to="previous").run_all() == "done"
+    assert seen and all(e[old + "HOME"] == str(world.home) and e["KRANTO_HOME"] == str(world.home)
+                        and e[old + "UNIT"] == legacy.UNIT == e["KRANTO_UNIT"] for e in seen)
+

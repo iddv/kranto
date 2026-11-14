@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """The release notes: the line's opening (``--kind``), an optional opening section (--intro: a
-milestone's "What 0.4.0 is"), the pull requests merged in the server and the page since the
-previous release, then the pins, the install lines and how to verify the wheels.
+milestone's "What 0.4.0 is"), the pull requests merged since the previous release, then the
+pins, the install lines and how to verify the wheels (by ``--shape``: the one wheel, or the
+crossing's three).
 
 ``--kind`` (decide.py's,):
 
@@ -17,9 +18,9 @@ previous release, then the pins, the install lines and how to verify the wheels.
 The previous release is ``--previous TAG``'s (decide.py's ``previous``: the previous nightly
 for a nightly, the previous stable otherwise), looked up by its tag; with none, the last
 ``FIRST_DAYS`` days. Pull requests come from ``gh pr list --search merged:>TS``, so ``gh`` must
-be logged in (or ``GH_TOKEN`` set) for both repos.
+be logged in (or ``GH_TOKEN`` set) for the repository.
 
-``--commits FILE`` appends the cut's commit list (``guards.py log --markdown``: each repo's
+``--commits FILE`` appends the cut's commit list (``guards.py log --markdown``:
 ``git log --oneline <previous>..<tag>``). A held release's line (``HELD_LINE``) is replaced by
 ``gate.py`` when the release goes to stable.
 
@@ -29,9 +30,9 @@ footer naming the tool, or the tool vendor's noreply address (``ATTRIBUTION``). 
 only names a tool ("Claude Code harness: ...") is a title, not attribution, and passes.
 
     notes.py --tag v0.7.0-dev12 --version 0.7.0.dev12 --kind nightly|promotion|fix
-             [--previous TAG] [--from-tag vX.Y.0-devN] [--stable-defaults FILE]
-             [--repo iddv/kranto] [--brb-repo iddv/kranto] [--since ISO] [--until ISO]
-             [--brb-until ISO] [--intro FILE] [--commits FILE] --out notes.md
+             [--shape final|compat] [--previous TAG] [--from-tag vX.Y.0-devN]
+             [--stable-defaults FILE] [--repo OWNER/NAME] [--since ISO] [--until ISO]
+             [--intro FILE] [--commits FILE] --out notes.md
 
 Standard library plus ``gh``.
 """
@@ -46,6 +47,9 @@ import subprocess
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import names  # noqa: E402
 
 FIRST_DAYS = 7
 # gate.py finds this line by its start and replaces it when it releases the build to stable
@@ -81,23 +85,38 @@ def pr_lines(prs: list[dict]) -> list[str]:
     return [f"- {' '.join(str(p['title']).split())} (#{p['number']})" for p in rows]
 
 
-def install_lines(version: str, tag: str, repo: str) -> list[str]:
+def install_lines(version: str, tag: str, repo: str, shape: str = "final") -> list[str]:
+    product = names.product()
+    if shape == "compat":
+        return [f"This release is the crossing: it updates an install made before the rename "
+                f"(its own `{product.COMMAND} update` or the old command's) and installs both "
+                f"commands. A new install takes the next release: `sh install.sh` refuses this "
+                "one."]
     wheel = wheel_name(version)
+    d = product.DIST
     return [
         "```",
         f"gh release download {tag} -R {repo} -p '*.whl' -p SHA256SUMS -p manifest.json \\",
-        f"  -D kranto-{version}",
-        f"cd kranto-{version} && sha256sum -c SHA256SUMS",
-        f'uv tool install --force --python 3.12 "kranto[connections,notify,mcp] @ ./{wheel}"',
-        "kranto up",
+        f"  -D {d}-{version}",
+        f"cd {d}-{version} && sha256sum -c SHA256SUMS",
+        f'uv tool install --force --python 3.12 "{d}[connections,notify,mcp] @ ./{wheel}"',
+        f"{product.COMMAND} up",
         "```",
-        "Or, on an installation that already runs: `kranto update`.",
+        f"Or, on an installation that already runs: `{product.COMMAND} update`.",
     ]
 
 
 def wheel_name(version: str) -> str:
     """The release's one wheel."""
-    return f"kranto-{version}-py3-none-any.whl"
+    return f"{names.product().DIST}-{version}-py3-none-any.whl"
+
+
+def pins_line(version: str, tag: str, shape: str = "final") -> str:
+    if shape == "compat":
+        dists = ", ".join(f"`{d} {version}`" for d in names.legacy().COMPAT_DISTS)
+        return (f"- Three wheels under the names an install made before the rename updates "
+                f"with, {dists}; the repository is tagged `{tag}`.")
+    return f"- One wheel, `{names.product().DIST} {version}`; the repository is tagged `{tag}`."
 
 
 def opening(kind: str, tag: str, from_tag: str = "") -> list[str]:
@@ -137,12 +156,11 @@ def sdk_version() -> str | None:
         return None
 
 
-def render(version: str, tag: str, repo: str, brb_repo: str, afk_prs: list[dict],
-           brb_prs: list[dict], since: str, first: bool = False, intro: str = "",
-           commits: str = "", kind: str = "", from_tag: str = "",
-           big: list[dict] | None = None, off: list[dict] | None = None,
-           sdk: str | None = None) -> str:
-    out = [f"Kranto {version}.", ""]
+def render(version: str, tag: str, repo: str, prs: list[dict], since: str,
+           first: bool = False, intro: str = "", commits: str = "", kind: str = "",
+           from_tag: str = "", big: list[dict] | None = None, off: list[dict] | None = None,
+           sdk: str | None = None, shape: str = "final") -> str:
+    out = [f"{names.product().NAME} {version}.", ""]
     out += opening(kind, tag, from_tag)
     if kind == "promotion":
         out += big_section(big or [], off or [])
@@ -150,23 +168,21 @@ def render(version: str, tag: str, repo: str, brb_repo: str, afk_prs: list[dict]
         out += [intro.strip(), "", "## Changes", ""]
     out.append(f"Changes merged since {since[:10]}"
                + (" (the first release: the last week's changes)" if first else "") + ".")
-    # one repository: the two lists (kept apart by the callers until the cut is reworked) as one
-    prs = sorted([*afk_prs, *brb_prs], key=lambda p: (p.get("mergedAt") or "", p.get("number", 0)))
     out += ["", "## Merged", ""]
     out += pr_lines(prs) or ["- No changes."]
     if commits.strip():
         out += ["", commits.strip()]
-    out += ["", "## Pins", "",
-            f"- One wheel, `kranto {version}`; the repository is tagged `{tag}`."]
+    out += ["", "## Pins", "", pins_line(version, tag, shape)]
     if sdk:                               # what a cub author pins their tests to
         out.append(f"- Cub authors: this release's SDK is `bears-cub-sdk {sdk}`: `pip install "
                    f"\"bears-cub-sdk @ git+https://github.com/{repo}.git@{tag}#subdirectory=sdk\"`.")
     out += ["", "## Install", ""]
-    out += install_lines(version, tag, repo)
+    out += install_lines(version, tag, repo, shape)
     out += ["", "## Verify", "",
             "`SHA256SUMS` lists each wheel's SHA-256; `sha256sum -c SHA256SUMS` checks them. "
-            "`manifest.json` names the wheel, its hash and size, and the commit it was built "
-            "from. `kranto update` checks both before it installs anything.", ""]
+            "`manifest.json` names the wheels, their hashes and sizes, and the commit they were "
+            f"built from. `{names.product().COMMAND} update` checks both before it installs "
+            "anything.", ""]
     return "\n".join(out)
 
 
@@ -229,11 +245,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--from-tag", default="", help="a promotion's nightly build")
     p.add_argument("--stable-defaults", type=Path,
                    help="kranto settings stable-defaults --json of the build (a promotion)")
-    p.add_argument("--repo", default="iddv/kranto")
-    p.add_argument("--brb-repo", default="iddv/kranto")
+    p.add_argument("--repo", default="", help="OWNER/NAME (default: public.toml's repo)")
+    p.add_argument("--shape", default="final", choices=("final", "compat"))
     p.add_argument("--since", help="ISO time (default: the previous release's published_at)")
-    p.add_argument("--until", help="ISO time of the the server commit being cut")
-    p.add_argument("--brb-until", help="ISO time of the the page commit being cut")
+    p.add_argument("--until", help="ISO time of the commit being cut")
     p.add_argument("--intro", type=Path, help="Markdown that opens the notes (a milestone's "
                                               "'What X.Y is'), before the changes")
     p.add_argument("--commits", type=Path, help="the cut's commit list (guards.py log "
@@ -243,6 +258,7 @@ def main(argv: list[str] | None = None) -> int:
                         "offered it until gate.py offer removes it")
     p.add_argument("--out", required=True, type=Path)
     args = p.parse_args(argv)
+    args.repo = args.repo or names.repo()
     try:
         first = False
         since = args.since
@@ -260,19 +276,17 @@ def main(argv: list[str] | None = None) -> int:
         big: list[dict] = []
         off: list[dict] = []
         if args.kind == "promotion":
-            for r in (args.repo, args.brb_repo):
-                with contextlib.suppress(NotesError):     # before the label exists: none
-                    big += merged_since(r, since, None, label="big")
+            with contextlib.suppress(NotesError):     # before the label exists: none
+                big += merged_since(args.repo, since, None, label="big")
             if args.stable_defaults and args.stable_defaults.is_file():
                 rows = json.loads(args.stable_defaults.read_text() or "[]")
                 off = [s for s in rows if isinstance(s, dict) and "key" in s] \
                     if isinstance(rows, list) else []
-        text = render(args.version, args.tag, args.repo, args.brb_repo,
+        text = render(args.version, args.tag, args.repo,
                       merged_since(args.repo, since, args.until, base),
-                      merged_since(args.brb_repo, since, args.brb_until, base),
                       since, first, args.intro.read_text() if args.intro else "",
                       args.commits.read_text() if args.commits else "", args.kind,
-                      args.from_tag, big, off, sdk_version())
+                      args.from_tag, big, off, sdk_version(), args.shape)
         if args.checking:
             text = checking(text, args.tag)
     except NotesError as exc:

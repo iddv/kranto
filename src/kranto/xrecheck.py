@@ -6,7 +6,8 @@ kept 30 days by default (``retention.by_kind.x``); once every ``x.recheck_days``
 X about at most ``x.recheck_max`` kept posts (the ones idea cards cite first, then the newest)
 with ``GET /2/tweets?ids=``, 100 a request, and removes each one X answers "Not Found" or
 withheld for, through the recorded purge with no rollup; and any observation can be removed at
-once by hand (``remove_post``: Remove this post, ``afk sources forget``), which is how a
+once by hand (``remove_post``: Remove this post, ``python -m kranto sources forget``), which is how
+a
 deletion request is honoured.
 
 Every post X returns is a read ($0.005, counted in ``api_spend``); the job does nothing while

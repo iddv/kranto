@@ -16,11 +16,10 @@ from kranto import config as config_mod
 from kranto.update import apply, check, sources
 from kranto.update.backup import backup, lower_counts, prune, table_counts
 
-INSTALLED = {"version": "0.1.0", "versions": {"kranto": "0.1.0",
-                                              "kranto.page": "0.1.0"},
+INSTALLED = {"version": "0.1.0", "versions": {"kranto": "0.1.0"},
              "channel": "main", "env": "/x",
-             "spec": {"kind": "git", "commits": {"kranto": "a" * 40, "kranto.page": "b" * 40},
-                      "extras": "connections,notify"}}
+             "spec": {"kind": "git", "commits": {"kranto": "a" * 40},
+                      "extras": "connections,notify", "shape": "final", "tool": "kranto"}}
 
 
 def rel(tag, prerelease=False, draft=False, body="- One\n- Two\n"):
@@ -35,10 +34,12 @@ RELEASES = [rel("v0.3.0-dev2", prerelease=True), rel("v0.3.0-dev1", prerelease=T
             rel("v0.3.0", draft=True), rel("nightly")]
 
 
-def write_set(dest: Path, version: str, tamper: str | None = None) -> None:
+def write_set(dest: Path, version: str, tamper: str | None = None,
+              shape: str = "final") -> None:
+    """A release's set: the one wheel (``final``) or the three old ones (``compat``)."""
     dest.mkdir(parents=True, exist_ok=True)
     sums, wheels = [], []
-    for n in apply.NAMES:
+    for n in apply.SHAPES[shape]:
         w = dest / f"{n}-{version}-py3-none-any.whl"
         w.write_bytes(f"{n} {version}".encode())
         digest = hashlib.sha256(w.read_bytes()).hexdigest()
@@ -48,8 +49,8 @@ def write_set(dest: Path, version: str, tamper: str | None = None) -> None:
         (dest / f"{tamper}-{version}-py3-none-any.whl").write_bytes(b"not what was signed")
     (dest / "SHA256SUMS").write_text("\n".join(sums) + "\n")
     (dest / "manifest.json").write_text(json.dumps(
-        {"version": version, "pins": {"kranto": version, "kranto.page": version},
-         "wheels": wheels}))
+        {"version": version, "shape": 2 if shape == "final" else 1,
+         "pins": apply.pins_for(shape, version), "wheels": wheels}))
 
 
 class FakeGh:
@@ -158,7 +159,7 @@ def test_check_records_the_release_and_stages_a_verified_set(home):
     assert check.available(cache) == "0.2.0"
     staged = Path(cache["staged"]["dir"])
     assert staged == home / "update" / "releases" / "v0.2.0" and staged.is_dir()
-    assert set(apply.verify_set(staged, "0.2.0")) == set(apply.NAMES)
+    assert set(apply.verify_set(staged, "0.2.0")) == {"kranto"}
     assert json.loads(apply.cache_path(home).read_text())["staged"]["version"] == "0.2.0"
     assert "0.2.0 available since 2026-10-11, staged" in check.status_line(home)
     # a second check does not download again
@@ -203,9 +204,9 @@ def test_download_off_records_without_staging(home):
 
 
 def test_a_tampered_set_is_deleted_and_reported(home):
-    cache = check.run_check(home, ucfg(), source=gh_source(FakeGh(tamper="kranto.page")))
+    cache = check.run_check(home, ucfg(), source=gh_source(FakeGh(tamper="kranto")))
     assert cache["staged"] is None
-    assert "kranto.page-0.2.0-py3-none-any.whl" in cache["stage_error"]
+    assert "kranto-0.2.0-py3-none-any.whl" in cache["stage_error"]
     assert not (home / "update" / "releases" / "v0.2.0").exists()
     assert not list((home / "update" / "releases").glob("*.partial"))
     assert "not staged" in check.status_line(home)
@@ -421,11 +422,11 @@ def test_gh_failing_for_another_reason_still_says_why(home):
 
 def test_main_channel_compares_commits(home):
     def run(cmd, env=None, timeout=None):
-        sha = {"repos/iddv/kranto/commits/main": "a" * 40}[cmd[2]]
+        sha = {"repos/iddv/kranto/commits/main": "c" * 40}[cmd[2]]
         return subprocess.CompletedProcess(cmd, 0, sha + "\n", "")
 
     cache = check.run_check(home, ucfg(channel="main"), source=sources.GitMain(run=run))
-    assert check.available(cache) == "main@aaaaaaa/aaaaaaa"
+    assert check.available(cache) == "main@ccccccc"
     assert not cache.get("staged")
 
 
@@ -484,30 +485,103 @@ def _dist(sp: Path, name: str, version: str, url: dict | None):
 
 def test_installed_from_git_and_from_wheels(tmp_path):
     git = tmp_path / "git" / "lib" / "python3.12" / "site-packages"
-    for n, sha in (("kranto", "1" * 40), ("kranto.page", "2" * 40)):
-        _dist(git, n, "0.1.0", {"url": "https://github.com/octo-owner/x",
-                                "vcs_info": {"vcs": "git", "commit_id": sha}})
+    _dist(git, "kranto", "0.1.0", {"url": "https://github.com/octo-owner/x",
+                                   "vcs_info": {"vcs": "git", "commit_id": "1" * 40}})
     got = apply.installed(tmp_path / "git")
     assert got["channel"] == "main" and got["version"] == "0.1.0"
-    assert got["spec"] == {"kind": "git", "commits": {"kranto": "1" * 40,
-                                                      "kranto.page": "2" * 40},
-                           "extras": "connections,notify"}
+    assert got["spec"] == {"kind": "git", "commits": {"kranto": "1" * 40},
+                           "extras": "connections,notify", "shape": "final", "tool": "kranto"}
     whl = tmp_path / "whl" / "lib" / "python3.12" / "site-packages"
-    for n in apply.NAMES:
-        _dist(whl, n, "0.2.0rc1",
-              {"url": f"file:///h/update/releases/v0.2.0-rc1/{n}-0.2.0rc1-py3-none-any.whl",
-               "archive_info": {}})
+    _dist(whl, "kranto", "0.2.0rc1",
+          {"url": "file:///h/update/releases/v0.2.0-rc1/kranto-0.2.0rc1-py3-none-any.whl",
+           "archive_info": {}})
     got = apply.installed(tmp_path / "whl")
     assert got["channel"] == "nightly"                   # an old rc was a build from main too
     assert got["spec"] == {"kind": "wheels", "dir": "/h/update/releases/v0.2.0-rc1",
-                           "version": "0.2.0rc1"}
+                           "version": "0.2.0rc1", "shape": "final", "tool": "kranto"}
     dev = tmp_path / "dev" / "lib" / "python3.12" / "site-packages"
-    for n in apply.NAMES:
-        _dist(dev, n, "0.7.0.dev12",
-              {"url": f"file:///h/update/releases/v0.7.0-dev12/{n}-0.7.0.dev12-py3-none-any.whl",
-               "archive_info": {}})
+    _dist(dev, "kranto", "0.7.0.dev12",
+          {"url": "file:///h/update/releases/v0.7.0-dev12/kranto-0.7.0.dev12-py3-none-any.whl",
+           "archive_info": {}})
     got = apply.installed(tmp_path / "dev")
     assert got["channel"] == "nightly" and got["version"] == "0.7.0.dev12"
+
+
+def test_an_install_made_before_the_rename_reads_as_the_compat_shape(tmp_path):
+    """The old helper's three distributions in the old tool: the code's version is the
+    server's distribution's, and the spec reinstalls them as that tool."""
+    from kranto import legacy
+
+    env = tmp_path / legacy.TOOL
+    sp = env / "lib" / "python3.12" / "site-packages"
+    for n in legacy.COMPAT_DISTS:
+        _dist(sp, n, "0.6.0.dev18",
+              {"url": f"file:///h/update/releases/v0.6.0-dev18/{n}-0.6.0.dev18-py3-none-any.whl",
+               "archive_info": {}})
+    (env / "uv-receipt.toml").write_text(
+        f'[tool]\nrequirements = [{{ name = "{legacy.COMPAT_META}", extras = ["mcp"] }}]\n')
+    got = apply.installed(env)
+    assert got["version"] == "0.6.0.dev18" and got["channel"] == "nightly"
+    assert got["spec"] == {"kind": "wheels", "dir": "/h/update/releases/v0.6.0-dev18",
+                           "version": "0.6.0.dev18", "shape": "compat", "tool": legacy.TOOL,
+                           "kranto_extras": ["mcp"]}
+    assert apply.tool_env_of(tmp_path) == env
+    (tmp_path / "kranto").mkdir()
+    assert apply.tool_env_of(tmp_path) == tmp_path / "kranto"
+    # an old install from git (two repositories) is not one the helper can reinstall
+    old_git = tmp_path / "oldgit" / "lib" / "python3.12" / "site-packages"
+    for n in legacy.COMPAT_DISTS:
+        _dist(old_git, n, "0.6.0", {"url": "https://github.com/octo-owner/x",
+                                    "vcs_info": {"vcs": "git", "commit_id": "3" * 40}})
+    assert apply.installed(tmp_path / "oldgit")["spec"]["kind"] == "local"
+
+
+def test_a_set_is_exactly_one_shape(tmp_path):
+    from kranto import legacy
+
+    write_set(tmp_path / "final", "0.7.0.dev2")
+    assert set(apply.verify_set(tmp_path / "final", "0.7.0.dev2")) == {"kranto"}
+    write_set(tmp_path / "compat", "0.7.0.dev1", shape="compat")
+    found = apply.verify_set(tmp_path / "compat", "0.7.0.dev1")
+    assert set(found) == set(legacy.COMPAT_DISTS) and apply.shape_of(found) == "compat"
+    m = json.loads((tmp_path / "compat" / "manifest.json").read_text())
+    assert m["pins"] == {legacy.COMPAT_SERVER: "0.7.0.dev1", legacy.COMPAT_PAGE: "0.7.0.dev1"}
+    # both shapes in one set, a shape the manifest does not claim, a missing old wheel
+    mixed = tmp_path / "mixed"
+    write_set(mixed, "0.7.0.dev3", shape="compat")
+    write_set(mixed, "0.7.0.dev3")
+    with pytest.raises(apply.SetError, match="must be the one kranto wheel or exactly"):
+        apply.verify_set(mixed, "0.7.0.dev3")
+    m = json.loads((tmp_path / "final" / "manifest.json").read_text())
+    (tmp_path / "final" / "manifest.json").write_text(json.dumps({**m, "shape": 1}))
+    with pytest.raises(apply.SetError, match="says shape 1"):
+        apply.verify_set(tmp_path / "final", "0.7.0.dev2")
+    (tmp_path / "compat" / f"{legacy.COMPAT_PAGE}-0.7.0.dev1-py3-none-any.whl").unlink()
+    with pytest.raises(apply.SetError, match="found"):
+        apply.verify_set(tmp_path / "compat", "0.7.0.dev1")
+    # a stray wheel by any other name is refused, as before
+    write_set(tmp_path / "stray", "0.7.0.dev4")
+    (tmp_path / "stray" / "other-0.7.0.dev4-py3-none-any.whl").write_bytes(b"x")
+    with pytest.raises(apply.SetError, match="unexpected wheels"):
+        apply.verify_set(tmp_path / "stray", "0.7.0.dev4")
+
+
+def test_the_install_line_of_each_shape(tmp_path):
+    from kranto import legacy
+
+    write_set(tmp_path / "f", "0.7.0.dev2")
+    found = apply.verify_set(tmp_path / "f", "0.7.0.dev2")
+    args = apply.install_args(found, ["mcp"])
+    assert args == [f"kranto[connections,mcp,notify] @ {found['kranto'].resolve().as_uri()}"]
+    write_set(tmp_path / "c", "0.7.0.dev1", shape="compat")
+    found = apply.verify_set(tmp_path / "c", "0.7.0.dev1")
+    meta, server, page = legacy.COMPAT_DISTS
+    # the old helper's own line, the extras the old meta-package has kept (no others)
+    args = apply.install_args(found, ["connections", "mcp", "notify"])
+    assert args[:6] == ["--with-executables-from", f"{server},{page}", "--with",
+                        str(found[server]), "--with", str(found[page])]
+    assert args[6] == f"{meta}[mcp] @ {found[meta].resolve().as_uri()}"
+    assert apply.install_args(found)[-1] == str(found[meta])
 
 
 # -- kranto backup ------------------------------------------------------------------------------

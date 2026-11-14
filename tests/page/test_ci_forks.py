@@ -32,6 +32,17 @@ def test_no_workflow_hands_a_secret_to_a_pull_request():
         assert not re.search(r"[$][{][{]\s*secrets[.]", text), f.name
 
 
+REQUIRED = {"test", "fast", "slow", "browser", "frontend", "lint", "gitleaks", "sandbox"}
+
+
 def test_the_required_jobs_are_the_eight():
+    """ci.yml's jobs: the eight a merge requires (guards.py's REQUIRED), and ``install`` (the
+    release installed as a stranger installs it), not required yet."""
+    import importlib.util
     names = {name for wf, name, _ in jobs() if wf == "ci.yml"}
-    assert names == {"test", "fast", "slow", "browser", "frontend", "lint", "gitleaks", "sandbox"}
+    assert names == REQUIRED | {"install"}
+    path = WORKFLOWS.parents[1] / "scripts" / "release" / "guards.py"
+    spec = importlib.util.spec_from_file_location("ci_forks_guards", path)
+    guards = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(guards)
+    assert set(guards.REQUIRED) == REQUIRED

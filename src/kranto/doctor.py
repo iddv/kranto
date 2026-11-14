@@ -1,4 +1,4 @@
-"""``afk doctor``: check that an instance can actually run, before it spends."""
+"""``python -m kranto doctor``: check that an instance can actually run, before it spends."""
 
 from __future__ import annotations
 
@@ -147,7 +147,8 @@ def _claude_code(cfg: Config, store: Store) -> list[Check]:
 
 def provider_line(cfg: Config) -> Check:
     """Which provider serves the tiers: what the metered client sends with
-    (``providers.in_use``, the same words as Settings › Watching and ``afk provider show``)."""
+    (``providers.in_use``, the same words as Settings › Watching and ``python -m kranto provider
+    show``)."""
     from .providers import LABELS, in_use
     use = in_use(cfg.llm)
     names = cfg.llm.providers_in_use()

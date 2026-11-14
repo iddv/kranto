@@ -136,6 +136,7 @@ def outside_servers(harness: str, config: str, environ=None, cwd: Path | None = 
     except (OSError, ValueError, AttributeError):
         return []
     names.discard("kranto")
+    names.discard(legacy.MCP_SERVER)      # Kranto too: the entry added before the rename
     return sorted(n[:60] for n in names)
 
 

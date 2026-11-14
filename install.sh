@@ -7,7 +7,8 @@
 # 2. A GitHub login for the download, while the repositories are private: your logged-in gh
 #    when there is one, else GitHub's device flow with kranto' OAuth App (a code you type at
 #    github.com/login/device). Public: no login at all.
-# 3. The release's three wheels and SHA256SUMS, every hash checked before anything installs.
+# 3. The release's one wheel (kranto's) and SHA256SUMS, every hash checked before anything
+#    installs. A release without a kranto wheel is refused in one line.
 # 4. uv tool install, as kranto update installs a release.
 # 5. exec kranto setup, which keeps the device flow's login as kranto' own GitHub connection
 #    (--github-token-file; the file is removed once read), so you sign in once.
@@ -179,7 +180,10 @@ elif cmd == "verify":                     # every wheel listed in SHA256SUMS, ev
         if h and name:
             sums[name.lstrip("*")] = h
     wheels = sorted(p.name for p in dest.glob("*.whl"))
-    if len(wheels) != 1 or wheels[0].split("-", 1)[0] != "kranto":
+    if not any(w.split("-", 1)[0] == "kranto" for w in wheels):
+        sys.exit("this release has no kranto wheel (it only updates an install made before the "
+                 "rename); install a newer release: sh install.sh --version <a later tag>")
+    if len(wheels) != 1:
         sys.exit(f"the release must hold exactly one wheel, kranto's; found {wheels}")
     for n in wheels:
         h = hashlib.sha256((dest / n).read_bytes()).hexdigest()
@@ -222,7 +226,7 @@ else
     say "then run:"
   fi
   say "  gh auth login"
-  say "and accept the invitations at https://github.com/$REPO/invitations (and kranto.page's), then"
+  say "and accept the invitation at https://github.com/$REPO/invitations, then"
   say "run 'sh install.sh' again."
   exit 1
 fi

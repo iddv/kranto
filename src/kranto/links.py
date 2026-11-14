@@ -18,7 +18,7 @@ KRANTO = "/#/"
 
 
 def kranto_mounted(cfg) -> bool:
-    """Whether ``afk serve`` mounts Kranto UI for this config: ``brb.enabled`` and
+    """Whether ``python -m kranto serve`` mounts Kranto UI for this config: ``brb.enabled`` and
     the page importable. Used where no server is at hand (delivery after a job)."""
     return bool(cfg.brb.enabled) and importlib.util.find_spec("kranto.page") is not None
 

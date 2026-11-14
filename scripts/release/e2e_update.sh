@@ -1,35 +1,75 @@
 #!/usr/bin/env bash
 # The update's end-to-end test (section 11): a real release, a scratch instance,
 # a rollback, a forced failure and the interrupt path, on this machine's own user manager,
-# beside the real kranto.service and never touching it.
+# beside the real install and never touching it.
 #
 #   E2E_DIR=~/somewhere scripts/release/e2e_update.sh STEP
 #
 # STEP, in order: live (record the real service), setup, install, check, update, rollback,
 # fail, interrupt, teardown, live (again: compare). Each prints its evidence.
 #
-# The scratch instance: $KRANTO_UNIT (kranto-test.service) on 127.0.0.1:$PORT (8766), its home a
-# copy of $SRC_HOME without .env, data/secrets, *.jsonl, backups/ or telemetry/ (the database
-# through SQLite's backup API), its usage reports off, a fresh loop home whose loop.yaml builds
-# in a scratch task folder with maintenance and publishing off, its own uv tool dir and bin dir. No model is called: every
-# the server job is off, the API key's variable is one nobody sets, nothing is sent to build,
-# and the one "build" (interrupt) is a sleeper run by build.command.
+# The scratch instance: $KRANTO_UNIT (kranto-test.service; never a real install's unit) on
+# 127.0.0.1:$PORT (8766), its own uv tool dir and bin dir ($UV_TOOL_DIR, $UV_TOOL_BIN_DIR, under
+# E2E_DIR unless set). Its home: an empty one (E2E_DIR/kb), or with HOME_COPY=<a home> a copy
+# made by scripts/preview/copy_live.py's rules (no .env, no data/secrets, the databases through
+# SQLite's backup API, its folders rewritten to the copy's; LOOP_COPY=<a loop home> copies that
+# too). Either way its usage reports are off, a fresh loop.yaml builds in a scratch task folder
+# with maintenance and publishing off. No model is called: every server job is off, the API
+# key's variable is one nobody sets, nothing is sent to build, and the one "build" (interrupt)
+# is a sleeper run by build.command.
+#
+# install with FROM_TAG=vX.Y.Z installs that release's wheels from $PREV_REPO (default
+# public.toml's repo): the final shape (one wheel) as install.sh does, the old shape (three
+# wheels, a release made before the rename or the crossing) as the old update helper does. An
+# old release reads the old names of KRANTO_UNIT and KRANTO_HOME: they are set too.
 set -euo pipefail
 
 : "${E2E_DIR:?set E2E_DIR to a scratch folder}"
+HERE="$(cd "$(dirname "$0")" && pwd)"
 PORT="${PORT:-8766}"
-SRC_HOME="${SRC_HOME:-$HOME/kranto-kb}"
 CHANNEL="${CHANNEL:-rc}"
 TO_ARGS=()                     # TO=v0.2.0-rc2: update to that tag instead of what is offered
 [ -n "${TO:-}" ] && TO_ARGS=(--to "$TO")
-SPEC="${MAIN_SPEC:-git+https://github.com/iddv/kranto}"
+REPO="${REPO:-$(python3 "$HERE/names.py" repo)}"
+PREV_REPO="${PREV_REPO:-$REPO}"
+SPEC="${MAIN_SPEC:-git+https://github.com/$REPO}"
+DIST_NAME="$(python3 "$HERE/names.py" dist)"
+ALIAS="$(python3 "$HERE/names.py" alias)"
+mapfile -t COMPAT < <(python3 "$HERE/names.py" compat)        # meta, server, page
+mapfile -t UNITS < <(python3 "$HERE/names.py" units)
+mapfile -t CONFIG_DIRS < <(python3 "$HERE/names.py" config-dirs)
+mapfile -t HOME_FILES < <(python3 "$HERE/names.py" home-files)
+mapfile -t DB_FILES < <(python3 "$HERE/names.py" db-files)
 export KRANTO_UNIT="${KRANTO_UNIT:-kranto-test.service}"
+for u in "${UNITS[@]}"; do
+  [ "$KRANTO_UNIT" != "$u" ] || {
+    echo "e2e: KRANTO_UNIT=$KRANTO_UNIT is a real install's unit; name a scratch one" >&2; exit 2; }
+done
 NAME="${KRANTO_UNIT%.service}"
-export KRANTO_HOME="$E2E_DIR/kb"
-export UV_TOOL_DIR="$E2E_DIR/uv-tools" UV_TOOL_BIN_DIR="$E2E_DIR/bin"
-KRANTO="$UV_TOOL_BIN_DIR/kranto"
-PY="$UV_TOOL_DIR/kranto/bin/python"
-LOOP="$KRANTO_HOME/loop"
+if [ -n "${HOME_COPY:-}" ]; then
+  export KRANTO_HOME="$E2E_DIR/copy/home"
+  LOOP="$E2E_DIR/copy/loop" TASKS="$E2E_DIR/copy/tasks"
+else
+  export KRANTO_HOME="$E2E_DIR/kb"
+  LOOP="$KRANTO_HOME/loop" TASKS="$E2E_DIR/tasks"
+fi
+export UV_TOOL_DIR="${UV_TOOL_DIR:-$E2E_DIR/uv-tools}" UV_TOOL_BIN_DIR="${UV_TOOL_BIN_DIR:-$E2E_DIR/bin}"
+# an install made before the rename reads the old names of the unit's and the home's variables
+for var in KRANTO_UNIT KRANTO_HOME; do
+  while read -r old; do [ -n "$old" ] && export "$old=${!var}"; done \
+    < <(python3 "$HERE/names.py" old-env "$var")
+done
+# the command: the product's when the scratch tool has it, else its old name (an old release)
+kr() {
+  if [ -x "$UV_TOOL_BIN_DIR/$DIST_NAME" ]; then "$UV_TOOL_BIN_DIR/$DIST_NAME" "$@"
+  else "$UV_TOOL_BIN_DIR/$ALIAS" "$@"; fi
+}
+# the python of the tool the command lives in
+tool_py() {
+  local exe="$UV_TOOL_BIN_DIR/$DIST_NAME"
+  [ -x "$exe" ] || exe="$UV_TOOL_BIN_DIR/$ALIAS"
+  echo "$(dirname "$(readlink -f "$exe")")/python"
+}
 say() { printf '\n== %s\n' "$*"; }
 api() { curl -sf "http://127.0.0.1:$PORT$1"; }
 listen() { ss -ltnH "( sport = :$1 )" || true; }
@@ -39,33 +79,39 @@ live)
   say "the real service (must not change)"
   mkdir -p "$E2E_DIR"
   {
-    echo "kranto.service: $(systemctl --user is-active kranto.service || true)"
-    echo "MainPID: $(systemctl --user show -p MainPID --value kranto.service)"
-    echo "pointer: $(cat "$HOME/.config/kranto/home" 2>/dev/null || echo none)"
-    echo "8765: $(listen 8765)"
-    echo "unit sha: $(sha256sum "$HOME/.config/systemd/user/kranto.service" | cut -c1-16)"
+    for u in "${UNITS[@]}"; do
+      echo "$u: $(systemctl --user is-active "$u" || true)"
+      echo "MainPID: $(systemctl --user show -p MainPID --value "$u")"
+      echo "unit sha: $(sha256sum "$HOME/.config/systemd/user/$u" 2>/dev/null | cut -c1-16)"
+    done
+    for d in "${CONFIG_DIRS[@]}"; do
+      echo "pointer $d: $(cat "$HOME/.config/$d/home" 2>/dev/null || echo none)"
+    done
   } | tee "$E2E_DIR/live-$(date -u +%H%M%S).txt"
   ;;
 
 setup)
-  say "scratch home from $SRC_HOME"
-  mkdir -p "$E2E_DIR" "$LOOP" "$E2E_DIR/tasks"
-  rsync -a --exclude .env --exclude 'data/secrets' --exclude '*.jsonl' --exclude 'backups/' \
-    --exclude 'update/' --exclude 'data/*.db' --exclude 'data/*.db-*' --exclude '*.lock' \
-    --exclude 'telemetry/' \
-    "$SRC_HOME/" "$KRANTO_HOME/"
-  python3 - "$SRC_HOME/data/kranto.db" "$KRANTO_HOME/data/kranto.db" <<'PY'
-import sqlite3, sys
-s = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True); d = sqlite3.connect(sys.argv[2])
-s.backup(d); print("kranto.db copy:", d.execute("pragma integrity_check").fetchone()[0])
-d.close(); s.close()
-PY
-  python3 - "$KRANTO_HOME" "$LOOP" "$E2E_DIR/tasks" "$PORT" "$CHANNEL" <<'PY'
-import re, sys, yaml
+  mkdir -p "$E2E_DIR" "$LOOP" "$TASKS"
+  if [ -n "${HOME_COPY:-}" ]; then
+    say "scratch home: a copy of $HOME_COPY (scripts/preview/copy_live.py's rules)"
+    src_loop="${LOOP_COPY:-$E2E_DIR/empty-loop}"
+    mkdir -p "$E2E_DIR/empty-loop"
+    "${COPY_PY:-python3}" "$HERE/../preview/copy_live.py" --src-home "$HOME_COPY" \
+      --src-loop "$src_loop" --src-tasks "$E2E_DIR/empty-tasks" --root "$E2E_DIR/copy" \
+      --port "$PORT"
+  else
+    say "scratch home: empty ($KRANTO_HOME)"
+    mkdir -p "$KRANTO_HOME"
+  fi
+  python3 - "$KRANTO_HOME" "$LOOP" "$TASKS" "$PORT" "$CHANNEL" "${HOME_FILES[@]}" <<'PY'
+import sys, yaml
 from pathlib import Path
 home, loop, tasks, port, channel = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5]
-cfg = next(p for p in (home / "kranto.yaml", home / "kranto.yaml") if p.exists())
-data = yaml.safe_load(cfg.read_text()) or {}
+names = sys.argv[6:]
+# the home's settings file (any of its names); an empty home gets the product's (install renames
+# it for a release made before the rename, which reads only the old names)
+cfg = next((home / n for n in names if (home / n).exists()), home / names[0])
+data = (yaml.safe_load(cfg.read_text()) if cfg.exists() else None) or {}
 # the model key is read from an environment variable nobody sets, so no call can be paid for
 unset_var = "_".join(("KRANTO", "E2E", "UNSET"))
 data.setdefault("llm", {})["api_" + "key_env"] = unset_var
@@ -78,7 +124,7 @@ data["brb"] = {"enabled": True, "loop_home": str(loop), "root": tasks}
 data["update"] = {"channel": channel, "check_every_hours": 24, "download": True, "auto": "off"}
 # the copy never reports as the home it came from (telemetry/, its install id, is not copied)
 data["telemetry"] = {"mode": "off"}
-cfg.write_text("# e2e scratch copy\n" + yaml.safe_dump(data, sort_keys=False))
+cfg.write_text("# e2e scratch home\n" + yaml.safe_dump(data, sort_keys=False))
 (loop / "loop.yaml").write_text(yaml.safe_dump({
     "tasks_dir": tasks, "concurrency": 1, "intake": {"auto": {"mode": "manual"}},
     "kranto": {"url": f"http://127.0.0.1:{port}"},
@@ -87,88 +133,111 @@ cfg.write_text("# e2e scratch copy\n" + yaml.safe_dump(data, sort_keys=False))
     "build": {"harness": "fake"}}, sort_keys=False))
 print("wrote", cfg, "and", loop / "loop.yaml")
 PY
-  ls -la "$KRANTO_HOME" "$KRANTO_HOME/data"
+  ls -la "$KRANTO_HOME"
   ;;
 
 install)
   mkdir -p "$E2E_DIR"
   if [ -n "${FROM_TAG:-}" ]; then
-    # FROM_TAG=v0.3.56: that release's wheels, as the setup guide installs them. A kranto built
-    # from git has no web page since the page's (the release builds it), so the scratch
-    # instance the update starts from is a release.
-    say "install $FROM_TAG from its release's wheels into the scratch tool dir, then kranto up on $PORT"
+    # FROM_TAG=v0.3.56: that release's wheels, installed the way its own installs are. A build
+    # from git has no web page (the release builds it), so the scratch instance the update
+    # starts from is a release.
+    say "install $FROM_TAG from $PREV_REPO's release into the scratch tool dir, then up on $PORT"
     rel="$E2E_DIR/from-$FROM_TAG"
-    gh release download "$FROM_TAG" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "$rel" --clobber
+    gh release download "$FROM_TAG" -R "$PREV_REPO" -p '*.whl' -p SHA256SUMS -D "$rel" --clobber
     (cd "$rel" && sha256sum -c SHA256SUMS)
-    uv tool install --force --python 3.12 --with-executables-from kranto,kranto.page \
-      --with "$rel"/kranto-*.whl --with "$rel"/kranto.page-*.whl "$rel"/kranto-*.whl 2>&1 | tail -n 5
+    if compgen -G "$rel/$DIST_NAME-*.whl" > /dev/null; then          # the final shape
+      whl="$(ls "$rel/$DIST_NAME"-*.whl)"
+      uv tool install --force --python 3.12 \
+        "$DIST_NAME[connections,notify] @ file://$whl" 2>&1 | tail -n 5
+    else                                                              # the old shape
+      # a release made before the rename reads its settings file by an old name only; every
+      # later one reads the old names too
+      if [ -f "$KRANTO_HOME/${HOME_FILES[0]}" ] && [ ! -e "$KRANTO_HOME/${HOME_FILES[1]}" ]; then
+        mv "$KRANTO_HOME/${HOME_FILES[0]}" "$KRANTO_HOME/${HOME_FILES[1]}"
+      fi
+      uv tool install --force --python 3.12 \
+        --with-executables-from "${COMPAT[1]},${COMPAT[2]}" \
+        --with "$rel/${COMPAT[1]}"-*.whl --with "$rel/${COMPAT[2]}"-*.whl \
+        "$rel/${COMPAT[0]}"-*.whl 2>&1 | tail -n 5
+    fi
   else
-  say "install main from git into the scratch tool dir, then kranto up on $PORT"
-  # MAIN_REF=v0.2.0-rc1: main as it was at that tag in both repos. The meta-package depends on
-  # both by git URL with no ref, so the pins go in an overrides file (as the helper does).
-  at="${MAIN_REF:+@$MAIN_REF}"
-  printf '%s\n' "kranto[connections,notify] @ git+https://github.com/iddv/kranto$at" \
-    "kranto.page @ git+https://github.com/iddv/kranto$at" > "$E2E_DIR/main-overrides.txt"
-  uv tool install --force --python 3.12 --with-executables-from kranto,kranto.page \
-    --overrides "$E2E_DIR/main-overrides.txt" \
-    "kranto @ $SPEC$at#subdirectory=packages/kranto" 2>&1 | tail -n 5
+    say "install main from git into the scratch tool dir, then up on $PORT"
+    # MAIN_REF=v0.7.0-dev2: main as it was at that tag
+    at="${MAIN_REF:+@$MAIN_REF}"
+    uv tool install --force --python 3.12 \
+      "$DIST_NAME[connections,notify] @ $SPEC$at" 2>&1 | tail -n 5
   fi
-  "$KRANTO" --version
-  "$PY" - "$KRANTO_HOME" <<'PY'
-import sys
+  kr --version
+  # the library marked set up (the welcome is not what is being checked), with the package the
+  # installed release has: the product's, or the server's old name
+  "$(tool_py)" - "$KRANTO_HOME" "$DIST_NAME" "${COMPAT[1]}" "${DB_FILES[@]}" <<'PY'
+import importlib, sys
 from pathlib import Path
-from kranto.store import Store
-s = Store.open(Path(sys.argv[1]) / "data" / "kranto.db"); s.set_setting("setup.done", "e2e"); s.close()
+home, pkgs, dbs = Path(sys.argv[1]), sys.argv[2:4], sys.argv[4:]
+for i, pkg in enumerate(pkgs):
+    try:
+        Store = importlib.import_module(pkg + ".store").Store
+        break
+    except ImportError:
+        continue
+else:
+    sys.exit(f"neither {pkgs} has a store")
+data = home / "data"
+db = next((data / n for n in dbs if (data / n).exists()), data / dbs[i])
+s = Store.open(db); s.set_setting("setup.done", "e2e"); s.close()
+print("set up:", db)
 PY
-  "$KRANTO" up --port "$PORT" --no-browser
+  kr up --port "$PORT" --no-browser
   systemctl --user cat "$KRANTO_UNIT" | grep -E '^(Environment|ExecStart)'
   listen "$PORT"
-  api /api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print("status", d["version"], d["update"])'
+  api /api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print("status", d["version"], d.get("update"))'
   ;;
 
 check)
-  say "kranto update --check (exit 10: an update is available)"
-  set +e; "$KRANTO" update --check; code=$?; set -e
+  say "update --check (exit 10: an update is available)"
+  set +e; kr update --check; code=$?; set -e
   echo "exit $code"
   ls -la "$KRANTO_HOME/update/releases/"*/
   (cd "$KRANTO_HOME"/update/releases/v*/ && sha256sum -c SHA256SUMS)
   ;;
 
 update)
-  say "kranto update --yes"
+  say "update --yes"
   t0=$(date +%s)
-  set +e; "$KRANTO" update "${TO_ARGS[@]}" --yes; code=$?; set -e
+  set +e; kr update "${TO_ARGS[@]}" --yes; code=$?; set -e
   echo "exit $code after $(( $(date +%s) - t0 )) s"
-  "$KRANTO" --version
+  kr --version
   journalctl --user -u "$NAME-update" --no-pager -o cat | grep -E 'state ' || true
   cat "$KRANTO_HOME/update/previous.json"
   for b in "$KRANTO_HOME"/backups/update-*/; do echo "$b"; ls "$b"; done
   api /api/update | python3 -c 'import json,sys; d=json.load(sys.stdin); print("apply", d["apply"]["state"], "installed", d["installed"]["version"])'
-  "$KRANTO" status || true
+  kr status || true
   ;;
 
 rollback)
-  say "kranto update --rollback --yes"
-  set +e; "$KRANTO" update --rollback --yes; code=$?; set -e
+  say "update --rollback --yes"
+  set +e; kr update --rollback --yes; code=$?; set -e
   echo "exit $code"
-  "$KRANTO" --version
-  "$KRANTO" doctor 2>/dev/null | grep -E 'migrations' || true
+  kr --version
+  kr doctor 2>/dev/null | grep -E 'migrations' || true
   api /api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print("status", d["version"], "lane", d["lanes"].get("loop", {}).get("state"))'
   ;;
 
 fail)
-  say "KRANTO_UPDATE_FAIL=verify kranto update --yes"
-  set +e; KRANTO_UPDATE_FAIL=verify "$KRANTO" update "${TO_ARGS[@]}" --yes; code=$?; set -e
+  say "KRANTO_UPDATE_FAIL=verify update --yes"
+  set +e; KRANTO_UPDATE_FAIL=verify kr update "${TO_ARGS[@]}" --yes; code=$?; set -e
   echo "exit $code (3: rolled back)"
-  "$KRANTO" --version
-  "$KRANTO" status | grep -E '^update' || true
+  kr --version
+  kr status | grep -E '^update' || true
   api /api/update | python3 -c 'import json,sys; d=json.load(sys.stdin); a=d["apply"]; print("apply", a["state"], a.get("reason"))'
   systemctl --user is-active "$KRANTO_UNIT"
   ;;
 
 interrupt)
   say "a running build: update waits, cancel lets go, --when now stops it and resumes it"
-  "$PY" - "$LOOP" "$E2E_DIR/tasks" "$PY" <<'PY'
+  PY="$(tool_py)"
+  "$PY" - "$LOOP" "$TASKS" "$PY" <<'PY'
 import sys, yaml
 from pathlib import Path
 from kranto.page.loop.ledger import Ledger
@@ -188,7 +257,7 @@ PY
     [ "$n" -ge 1 ] && break; sleep 2
   done
   echo "builds running: $n"; pgrep -af "$PY -c import time" || true
-  "$KRANTO" update "${TO_ARGS[@]}" --yes > "$E2E_DIR/interrupt-wait.log" 2>&1 &
+  kr update "${TO_ARGS[@]}" --yes > "$E2E_DIR/interrupt-wait.log" 2>&1 &
   upd=$!
   for _ in $(seq 1 30); do
     st=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("state"))' "$KRANTO_HOME/update/state.json" 2>/dev/null || true)
@@ -196,14 +265,14 @@ PY
   done
   sleep 6
   python3 -c 'import json,sys; s=json.load(open(sys.argv[1])); print("state", s["state"], "|", s.get("detail"))' "$KRANTO_HOME/update/state.json"
-  "$KRANTO" update --cancel
-  wait $upd || echo "kranto update exit $? (5: cancelled)"
+  kr update --cancel
+  wait $upd || echo "update exit $? (5: cancelled)"
   cat "$E2E_DIR/interrupt-wait.log"
   api /api/status | python3 -c 'import json,sys; print("hold after cancel:", json.load(sys.stdin)["hold"])'
   say "--when now"
-  set +e; "$KRANTO" update "${TO_ARGS[@]}" --when now --yes; code=$?; set -e
+  set +e; kr update "${TO_ARGS[@]}" --when now --yes; code=$?; set -e
   echo "exit $code"
-  "$KRANTO" --version
+  kr --version
   for _ in $(seq 1 45); do
     n=$(api /brb/api/header | python3 -c 'import json,sys; print(json.load(sys.stdin)["running"])' || echo 0)
     [ "$n" -ge 1 ] && break; sleep 2
@@ -226,14 +295,14 @@ PY
 
 teardown)
   say "teardown"
-  pkill -f "$PY -c import time" || true
+  pkill -f "$UV_TOOL_DIR/.*-c import time" || true
   systemctl --user disable --now "$KRANTO_UNIT" || true
   rm -f "$HOME/.config/systemd/user/$KRANTO_UNIT"
   rm -rf "$HOME/.config/systemd/user/$KRANTO_UNIT.d"
   systemctl --user daemon-reload
   systemctl --user reset-failed "$KRANTO_UNIT" "$NAME-update" 2>/dev/null || true
-  rm -f "$HOME/.config/kranto/home.$NAME"
-  rm -rf "$UV_TOOL_DIR" "$UV_TOOL_BIN_DIR" "$KRANTO_HOME" "$E2E_DIR/tasks"
+  for d in "${CONFIG_DIRS[@]}"; do rm -f "$HOME/.config/$d/home.$NAME"; done
+  rm -rf "$UV_TOOL_DIR" "$UV_TOOL_BIN_DIR" "$KRANTO_HOME" "$TASKS" "$E2E_DIR/copy"
   listen "$PORT"
   echo "scratch removed; left: $(ls "$E2E_DIR")"
   ;;

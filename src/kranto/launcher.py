@@ -17,10 +17,11 @@ Commands:
 
 - ``up``: make the home if there is none, install and start ``kranto.service`` (a systemd
   user unit) where systemd is usable, else serve in the foreground; open the browser;
-- ``serve``: ``afk serve`` with the scheduler on (what the unit runs); ``--no-scheduler``
+- ``serve``: ``python -m kranto serve`` with the scheduler on (what the unit runs);
+``--no-scheduler``
   stays for cron users;
 - ``down``, ``status``, ``logs``: the unit, a one-screen status, its journal;
-- ``doctor``: ``afk doctor`` plus the prerequisites nobody can install for you (the
+- ``doctor``: ``python -m kranto doctor`` plus the prerequisites nobody can install for you (the
   Claude Code CLI and its login, ``gh`` and its login, ``bwrap``), the unit's PATH, whether
   the console is ready, pending migrations;
 - ``adopt``: switch an existing installation (``~/kranto-kb``, ``~/kranto-loop``,
@@ -54,6 +55,7 @@ from pathlib import Path
 from . import config as config_mod
 from . import legacy, memory, paths, product
 from .config import KRANTO_CONFIG_FILENAME, KRANTO_HOME_ENV, ConfigError
+from .update.apply import tool_env_of
 
 DEFAULT_PORT = 8765
 DEFAULT_UNIT = paths.DEFAULT_UNIT
@@ -158,6 +160,17 @@ def pointer_path(user_home: Path) -> Path:
     return paths.pointer_path(user_home, UNIT)
 
 
+def host_unit(host: Host) -> str:
+    """The unit this install runs as on ``host``: ``UNIT`` when ``$KRANTO_UNIT`` names another;
+    else an install made before the rename keeps its old unit (``legacy.UNIT``) when only that
+    one is installed here, so no ``kranto.service`` is ever made beside it."""
+    if UNIT != DEFAULT_UNIT:
+        return UNIT
+    if not (host.unit_dir / DEFAULT_UNIT).exists() and (host.unit_dir / legacy.UNIT).exists():
+        return legacy.UNIT
+    return DEFAULT_UNIT
+
+
 def private_config_dir(user_home: Path) -> Path:
     """``~/.config/kranto``, made (or tightened) to 0700: it holds the tokens, the GitHub App's
     key and the GitHub connection, and is documented as never printed."""
@@ -189,7 +202,8 @@ def kranto_home(explicit: str | None = None, host: Host | None = None) -> Path:
     """``--home``, else ``$KRANTO_HOME``, else the home recorded by ``kranto up`` or ``kranto
     adopt`` (or the installed unit's), else ``~/.kranto``."""
     return paths.kranto_home(explicit, user_home=host.home if host is not None else None,
-                            units=host.unit_dir if host is not None else None, unit=UNIT)
+                            units=host.unit_dir if host is not None else None,
+                            unit=host_unit(host) if host is not None else UNIT)
 
 
 def tilde(path: Path, home: Path) -> str:
@@ -426,6 +440,9 @@ def _h(path: Path, user_home: Path) -> str:
     return "%h" if str(rel) == "." else f"%h/{rel}"
 
 
+UNIT_DESCRIPTION = f"{product.NAME}: news in, ideas out, posts when you say"
+
+
 def render_unit(home: Path, exe: Path, port: int, user_home: Path) -> str:
     """``kranto.service`` (PLAN.md section 1.2). ``KillMode=process``: stopping the unit ends
     the server, which ends its own children; detached builds keep running and the next start
@@ -439,11 +456,11 @@ def render_unit(home: Path, exe: Path, port: int, user_home: Path) -> str:
     port_arg = f" --port {port}" if port != DEFAULT_PORT else ""
     extra = "".join(f"Environment={k}={os.environ[k]}\n" for k in UNIT_PASS_ENV
                     if os.environ.get(k))
-    if UNIT != DEFAULT_UNIT:
+    if not legacy.is_default_unit(UNIT):
         extra += f"Environment=KRANTO_UNIT={UNIT}\n"
     return f"""\
 [Unit]
-Description=Kranto: news in, ideas out, posts when you say
+Description={UNIT_DESCRIPTION}
 After=network-online.target
 
 [Service]
@@ -558,10 +575,28 @@ def _open_browser(url: str, no_browser: bool) -> None:
         print(f"open {url}")
 
 
+def keep_old_unit(path: Path) -> bool:
+    """An install made before the rename keeps its unit file as it is: only the
+    ``Description=`` line is rewritten to the new name; ``ExecStart``, every ``Environment``
+    (``adopt_env`` reads the old variables) and the drop-ins stay byte for byte. True when it
+    changed."""
+    text = path.read_bytes()
+    new = re.sub(rb"(?m)^Description=[^\r\n]*", b"Description=" + UNIT_DESCRIPTION.encode(),
+                 text, count=1)
+    if new != text:
+        path.write_bytes(new)
+    return new != text
+
+
 def install_unit(host: Host, text: str) -> tuple[Path, bool]:
-    """Write ``kranto.service``; True when it changed."""
+    """Write ``kranto.service``; True when it changed. On an install made before the rename,
+    its old unit (the old name, or any unit whose text the old version wrote:
+    ``legacy.is_old_unit``) is kept (``keep_old_unit``) and no new one is written beside it."""
     host.unit_dir.mkdir(parents=True, exist_ok=True)
-    path = host.unit_dir / UNIT
+    path = host.unit_dir / host_unit(host)
+    if path.exists() and (path.name == legacy.UNIT
+                          or legacy.is_old_unit(path.read_text(errors="replace"))):
+        return path, keep_old_unit(path)
     old = path.read_text() if path.exists() else None
     if old != text:
         path.write_text(text)
@@ -590,13 +625,14 @@ def cmd_up(args, host: Host) -> int:
     why_not = "--foreground" if args.foreground else host.systemd()
     if why_not is None:
         unit, changed = install_unit(host, render_unit(home, kranto_exe(host), port, host.home))
-        active = host.sh("systemctl", "--user", "is-active", UNIT).stdout.strip() == "active"
+        name = unit.name
+        active = host.sh("systemctl", "--user", "is-active", name).stdout.strip() == "active"
         if not active and port_in_use(port):
             raise KrantoError(f"port {port} is already in use (kranto.service? then run "
                              "'kranto adopt'); or choose another with --port")
         print(f"  {'wrote' if changed else 'kept'} {unit}")
-        for cmd in (["daemon-reload"], ["enable", "--now", UNIT]) + \
-                ((["restart", UNIT],) if changed and active else ()):
+        for cmd in (["daemon-reload"], ["enable", "--now", name]) + \
+                ((["restart", name],) if changed and active else ()):
             r = host.sh("systemctl", "--user", *cmd, timeout=120)
             if r.returncode != 0:
                 raise KrantoError(f"systemctl --user {' '.join(cmd)} failed: "
@@ -605,7 +641,7 @@ def cmd_up(args, host: Host) -> int:
         if linger.returncode != 0:
             print("  note: loginctl enable-linger failed; Kranto stops when you log out")
         if not _wait_up(host, port, 90):
-            print(f"kranto.service started but http://127.0.0.1:{port}/ is not answering yet; "
+            print(f"{name} started but http://127.0.0.1:{port}/ is not answering yet; "
                   "see 'kranto logs'")
             return 1
         print(f"Kranto is running: http://127.0.0.1:{port}/  ('kranto status', 'kranto logs')")
@@ -632,12 +668,13 @@ def cmd_down(args, host: Host) -> int:
         print(f"Kranto is not managed by systemd here ({why_not}); stop 'kranto serve' with "
               "Ctrl-C")
         return 1
-    r = host.sh("systemctl", "--user", "stop", UNIT, timeout=120)
+    unit = host_unit(host)
+    r = host.sh("systemctl", "--user", "stop", unit, timeout=120)
     if r.returncode != 0:
         print((r.stderr or r.stdout).strip())
         return 1
     if getattr(args, "disable", False):
-        r = host.sh("systemctl", "--user", "disable", UNIT, timeout=120)
+        r = host.sh("systemctl", "--user", "disable", unit, timeout=120)
         if r.returncode != 0:
             print((r.stderr or r.stdout).strip())
             return 1
@@ -667,8 +704,8 @@ def install_paths(home: Path, host: Host) -> list[tuple[str, Path]]:
     tool_dir = Path(os.environ.get("UV_TOOL_DIR") or host.home / ".local" / "share" / "uv" /
                     "tools")
     out += [("config", pointer_path(host.home).parent),
-            ("service", host.unit_dir / UNIT),
-            ("program", tool_dir / "kranto"),
+            ("service", host.unit_dir / host_unit(host)),
+            ("program", tool_env_of(tool_dir)),
             ("commands", Path(os.environ.get("UV_TOOL_BIN_DIR") or host.home / ".local" / "bin")),
             ("cache", host.home / ".cache" / "kranto")]
     return out
@@ -796,8 +833,9 @@ def cmd_uninstall(args, host: Host) -> int:
     why_not = host.systemd()
     removed = []
     if why_not is None:
-        host.sh("systemctl", "--user", "disable", "--now", UNIT, timeout=120)
-        for p in (host.unit_dir / UNIT, host.unit_dir / f"{UNIT}.d"):
+        unit = host_unit(host)
+        host.sh("systemctl", "--user", "disable", "--now", unit, timeout=120)
+        for p in (host.unit_dir / unit, host.unit_dir / f"{unit}.d"):
             if p.is_dir():
                 shutil.rmtree(p)
                 removed.append(str(p))
@@ -847,7 +885,7 @@ def cmd_logs(args, host: Host) -> int:
     if why_not:
         print(f"no journal for Kranto here ({why_not}); 'kranto serve' logs to its terminal")
         return 1
-    cmd = ["journalctl", "--user", "-u", UNIT, "-n", str(args.lines)]
+    cmd = ["journalctl", "--user", "-u", host_unit(host), "-n", str(args.lines)]
     if not args.no_follow:
         cmd.append("-f")
     with contextlib.suppress(KeyboardInterrupt):
@@ -978,9 +1016,10 @@ def status_lines(home: Path, host: Host) -> tuple[list[str], bool]:
     if why_not:
         lines.append(f"service    not managed by systemd here: {why_not}")
     else:
-        active = host.sh("systemctl", "--user", "is-active", UNIT).stdout.strip() or "unknown"
-        enabled = host.sh("systemctl", "--user", "is-enabled", UNIT).stdout.strip() or "unknown"
-        lines.append(f"service    {UNIT}: {active}, {enabled}")
+        unit = host_unit(host)
+        active = host.sh("systemctl", "--user", "is-active", unit).stdout.strip() or "unknown"
+        enabled = host.sh("systemctl", "--user", "is-enabled", unit).stdout.strip() or "unknown"
+        lines.append(f"service    {unit}: {active}, {enabled}")
         old = host.sh("systemctl", "--user", "is-active", OLD_UNIT).stdout.strip()
         if old == "active":
             lines.append(f"           {OLD_UNIT} is also active: run 'kranto adopt' to retire it")
@@ -1136,11 +1175,8 @@ def _env_names(pairs) -> dict[str, str]:
 
 
 def _service_unit(host: Host) -> str:
-    """The unit ``service_env`` reads: ``UNIT``; the old install's unit (``legacy.UNIT``) when no
-    unit was named and only that one is installed here."""
-    if UNIT != DEFAULT_UNIT or (host.unit_dir / UNIT).exists():
-        return UNIT
-    return legacy.UNIT if (host.unit_dir / legacy.UNIT).exists() else UNIT
+    """The unit ``service_env`` reads (``host_unit``)."""
+    return host_unit(host)
 
 
 def service_env(host: Host) -> tuple[dict[str, str], str]:
@@ -1207,9 +1243,7 @@ def claude_store(host: Host) -> Path:
     format are pinned by a test in each repository."""
     if os.environ.get("KRANTO_CLAUDE_DIR"):
         return Path(os.environ["KRANTO_CLAUDE_DIR"]).expanduser()
-    unit = os.environ.get("KRANTO_UNIT") or "kranto.service"
-    name = "claude" if unit == "kranto.service" else "claude." + unit.removesuffix(".service")
-    return host.home / ".config" / "kranto" / name
+    return legacy.unit_store("claude", user_home=host.home)
 
 
 def keep_claude_login(host: Host, token: str, how: str = "setup") -> Path:
@@ -1271,7 +1305,7 @@ def prerequisite_checks(home: Path, host: Host) -> list[Check]:
     Commands are looked up on the unit's PATH when a unit is installed, since that is the
     PATH the console runs with."""
     out: list[Check] = []
-    unit = host.unit_dir / UNIT
+    unit = host.unit_dir / host_unit(host)
     path = None
     if unit.exists():
         env = unit_env(unit.read_text(), host.home)
@@ -1285,7 +1319,7 @@ def prerequisite_checks(home: Path, host: Host) -> list[Check]:
         else:
             out.append(Check(OK, "unit PATH", path))
     else:
-        out.append(Check(OK, "unit", f"no {UNIT} installed (kranto up installs it; checking "
+        out.append(Check(OK, "unit", f"no {unit.name} installed (kranto up installs it; checking "
                                      "this shell's PATH)"))
 
     def which(name):
@@ -1411,11 +1445,12 @@ def service_checks(host: Host) -> list[Check]:
         return []
     out = []
     old = host.sh("systemctl", "--user", "is-active", OLD_UNIT).stdout.strip()
-    new = host.sh("systemctl", "--user", "is-active", UNIT).stdout.strip()
+    unit = host_unit(host)
+    new = host.sh("systemctl", "--user", "is-active", unit).stdout.strip()
     if old == "active" and new == "active":
-        out.append(Check(FAIL, "service", f"both {OLD_UNIT} and {UNIT} are active"))
+        out.append(Check(FAIL, "service", f"both {OLD_UNIT} and {unit} are active"))
     elif new == "active":
-        out.append(Check(OK, "service", f"{UNIT} active"))
+        out.append(Check(OK, "service", f"{unit} active"))
     elif old == "active":
         out.append(Check(WARN, "service", f"{OLD_UNIT} is still the running service; "
                                           "'kranto adopt' switches to kranto.service"))
@@ -2196,7 +2231,7 @@ def cmd_backup(args, host: Host) -> int:
         else home / "backups" / f"manual-{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}"
     )
     try:
-        out = backup(dest, home, unit=UNIT, user_home=host.home, versions=versions())
+        out = backup(dest, home, unit=host_unit(host), user_home=host.home, versions=versions())
     except RuntimeError as exc:
         raise KrantoError(str(exc)) from exc
     print(f"backed up {home} to {out['dir']}")
@@ -2398,7 +2433,7 @@ def cmd_update(args, host: Host) -> int:
             to,
             when=args.when,
             port=port,
-            unit=UNIT,
+            unit=host_unit(host),
             keep=ucfg.keep_backups,
             ignore_pids=(os.getpid(),),
         )
@@ -2793,7 +2828,35 @@ def _help_developer(argv: Sequence[str] | None, host: Host | None) -> bool:
         return False
 
 
+ALIAS_STAMP = "alias-notice"       # in the config folder: the day the old command last said so
+
+
+def alias_notice(argv0: str | None = None, *, tty: bool | None = None,
+                 user_home: Path | None = None, now: float | None = None) -> bool:
+    """Run as the command's name from before the rename (``legacy.COMMAND``, the same program)
+    on a terminal: say once a day that it is now this one (``legacy.alias_notice``, on stderr;
+    a stamp in the config folder). Silent in scripts and pipes. True when it spoke."""
+    argv0 = sys.argv[0] if argv0 is None else argv0
+    if Path(argv0 or "").name != legacy.COMMAND:
+        return False
+    if not (sys.stderr.isatty() if tty is None else tty):
+        return False
+    folder = legacy.config_dir(Path(user_home or Path.home()))
+    stamp = folder / ALIAS_STAMP
+    today = time.strftime("%Y-%m-%d", time.localtime(now))
+    with contextlib.suppress(OSError):
+        if stamp.read_text().strip() == today:
+            return False
+    print(legacy.alias_notice(), file=sys.stderr)
+    with contextlib.suppress(OSError):
+        folder.mkdir(mode=0o700, parents=True, exist_ok=True)
+        stamp.write_text(today + "\n")
+    return True
+
+
 def main(argv: Sequence[str] | None = None, host: Host | None = None) -> int:
+    if argv is None:
+        alias_notice(user_home=host.home if host is not None else None)
     args = build_parser(developer=_help_developer(argv, host)).parse_args(argv)
     if host is None:  # Kranto's own gh (--fetch-gh), for this run and its children
         from .ghfetch import bin_dir

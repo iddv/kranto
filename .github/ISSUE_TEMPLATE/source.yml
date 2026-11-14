@@ -1,10 +1,11 @@
 name: Source request
-description: A kind of source the server should be able to watch
+description: A kind of source Kranto should be able to read
 labels: [source]
 body:
   - type: markdown
     attributes:
-      value: See "Adding a source kind" in CONTRIBUTING.md for what an adapter needs. A source is only added if its terms allow automated reading.
+      value: |
+        See "Adding a source kind" in CONTRIBUTING.md for what an adapter needs. A source is only added if its terms allow automated reading. **This issue is public: paste no keys or tokens.**
   - type: input
     id: source
     attributes:

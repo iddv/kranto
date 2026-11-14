@@ -27,6 +27,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from kranto import legacy
+
 ALLOWED_TOOLS = frozenset({"StructuredOutput"})
 TAIL = 500
 
@@ -54,8 +56,9 @@ def command(*, system: str, model: str, schema: dict | None = None) -> list[str]
 
 def _hidden(home: Path, kranto_home: Path | None) -> list[Path]:
     """What a sandboxed call cannot see: Kranto's tokens and GitHub logins, ssh keys, Kranto
-    home's .env and secrets."""
-    out = [home / ".config" / "kranto", home / ".config" / "gh", home / ".ssh"]
+    home's .env and secrets. Both config folders: an install made before the rename keeps its
+    tokens in the old one."""
+    out = [*legacy.config_dirs(home), home / ".config" / "gh", home / ".ssh"]
     if kranto_home is not None:
         out += [kranto_home / ".env", kranto_home / "data" / "secrets"]
     return out

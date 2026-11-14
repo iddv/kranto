@@ -1,4 +1,4 @@
-"""``afk provider replay``: 6's measurement, run by whoever has an Anthropic key.
+"""``python -m kranto provider replay``: 6's measurement, run by whoever has an Anthropic key.
 
 The newest recorded screens and judges of this library (whatever served them) are asked
 again, exactly as recorded, through the Claude API in three variants:

@@ -45,7 +45,7 @@ time passed. What it does:
 Every promotion and every ``known``/``withdraw`` is logged, one JSON line each, in
 ``$XDG_STATE_HOME/kranto-release/gate.jsonl``.
 
-Settings: ``REPO`` (iddv/kranto), ``BRB_REPO`` (iddv/kranto), ``KRANTO_GATE_HOME`` (the
+Settings: ``REPO`` (public.toml's repo: the one repository), ``KRANTO_GATE_HOME`` (the
 owner's kranto home, ~/kranto-kb), ``KRANTO_BIN`` (Kranto), ``GATE_CLICKHOUSE``
 (the telemetry store's ClickHouse HTTP address, set by the gate's unit; unset or ``off``: not
 read),
@@ -81,6 +81,13 @@ SCHEMA = 1
 
 class GateError(Exception):
     pass
+
+
+def _repo() -> str:
+    """public.toml's repo (scripts/release/names.py)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import names
+    return names.repo()
 
 
 def vkey(tag_or_version: str | None) -> tuple:
@@ -130,8 +137,8 @@ def run(cmd: list[str], timeout: float = 120, env: dict | None = None,
 
 
 class GitHub:
-    def __init__(self, repo: str, brb_repo: str = "iddv/kranto", run=run):
-        self.repo, self.brb_repo, self.run = repo, brb_repo, run
+    def __init__(self, repo: str, run=run):
+        self.repo, self.run = repo, run
 
     def _gh(self, *args: str) -> str:
         r = self.run(["gh", *args])
@@ -551,10 +558,7 @@ class Gate:
         since = (stable_rel or {}).get("published_at") or "1970-01-01T00:00:00Z"
         until = rel.get("published_at")
         prs, big = {}, []
-        # one repository: the second slug is read only when it names another one
-        pairs = [(self.gh.repo, "kranto")] + (
-            [(self.gh.brb_repo, "kranto.page")] if self.gh.brb_repo != self.gh.repo else [])
-        for repo, name in pairs:
+        for repo, name in [(self.gh.repo, "kranto")]:          # the one repository
             try:
                 rows = self.gh.merged(repo, since)
             except GateError:
@@ -836,8 +840,7 @@ def main(argv: list[str] | None = None) -> int:
         if a.cmd == "hours":
             print("0")            # retired: nothing is held for hours
             return 0
-        gh = GitHub(os.environ.get("REPO", "iddv/kranto"),
-                    os.environ.get("BRB_REPO", "iddv/kranto"))
+        gh = GitHub(os.environ.get("REPO") or _repo())
         if a.cmd == "known":
             return mark_known(state_dir(), a.signature, a.reason)
         if a.cmd == "withdraw":

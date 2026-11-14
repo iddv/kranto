@@ -3,7 +3,8 @@ OpenRouter key given in ``kranto setup``, then an Anthropic key in the browser's
 The watcher used the Claude API, but Settings › Models still said OpenRouter: it showed
 ``llm.base_url``, which is the OpenAI-style endpoint's and stays OpenRouter's. The replay
 below does exactly that sequence, against a fake OpenRouter and a fake Claude API, and checks
-Settings › Models and Keys, ``kranto doctor`` and ``afk provider show`` against ``llm.py``'s
+Settings › Models and Keys, ``kranto doctor`` and ``python -m kranto provider show`` against
+``llm.py``'s
 client and the ledger's provider column."""
 
 from __future__ import annotations

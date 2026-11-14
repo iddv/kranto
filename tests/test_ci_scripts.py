@@ -134,16 +134,16 @@ def _repo(path: Path) -> Path:
 
 
 def test_a_release_is_cut_only_from_green_commits(tmp_path):
-    afk, brb = _repo(tmp_path / "afk"), _repo(tmp_path / "brb")
+    src = _repo(tmp_path / "src")
     asked = []
 
     def green(repo, sha):
         asked.append(repo)
-        return (repo != "o/brb", "red: slow (failure)" if repo == "o/brb" else "green")
-    with pytest.raises(decide.DecideError, match=r"kranto.page at \w+ is not green \(red: slow"):
-        decide.decide(afk, brb, green=green, repos=("o/afk", "o/brb"))
-    assert asked == ["o/afk", "o/brb"]
-    out = decide.decide(afk, brb, green=lambda r, s: (True, "green"), repos=("o/afk", "o/brb"))
+        return (False, "red: slow (failure)")
+    with pytest.raises(decide.DecideError, match=r"o/r at \w+ is not green \(red: slow"):
+        decide.decide(src, green=green, repo="o/r")
+    assert asked == ["o/r"]
+    out = decide.decide(src, green=lambda r, s: (True, "green"), repo="o/r")
     assert out["release"] and out["checked"]
 
 
@@ -162,33 +162,33 @@ def _tag(tag: str, *repos: Path) -> None:
 
 
 def test_rc_check_only_when_the_release_touches_what_it_checks(tmp_path):
-    afk, brb = _repo(tmp_path / "afk"), _repo(tmp_path / "brb")
-    _tag("v0.3.71", afk, brb)
+    src = _repo(tmp_path / "src")
+    _tag("v0.7.71", src)
     # pages and typed reads: no rc_check, the cut's smoke is the check
-    _change(brb, "src/kranto/page/ui/web/src/pages/projects/Projects.svelte")
-    _change(afk, "src/kranto/web/types.py")
-    out = decide.decide(afk, brb)
-    assert out["tag"] == "v0.4.0-dev1" and out["rc_check"] == {"required": False, "why": []}
-    _tag("v0.4.0-dev1", afk, brb)
+    _change(src, "src/kranto/page/ui/web/src/pages/projects/Projects.svelte")
+    _change(src, "src/kranto/web/types.py")
+    out = decide.decide(src)
+    assert out["tag"] == "v0.8.0-dev1" and out["rc_check"] == {"required": False, "why": []}
+    _tag("v0.8.0-dev1", src)
     # a migration in the server's store and the loop ledger's: rc_check on the published build,
     # one cut (no rc tag first)
-    _change(afk, "src/kranto/store.py")
-    _change(brb, "src/kranto/page/loop/ledger.py", "src/kranto/page/ideas/editor.py")
-    out = decide.decide(afk, brb)
-    assert out["tag"] == "v0.4.0-dev2" and out["previous"] == "v0.4.0-dev1"
-    assert out["rc_check"]["why"] == ["kranto: src/kranto/store.py",
-                                      "kranto.page: src/kranto/page/loop/ledger.py"]
-    _tag("v0.4.0-dev2", afk, brb)
-    # the owner's promotion of dev2: always checked, cut from the tag's commits
-    out = decide.decide(afk, brb, from_tag="v0.4.0-dev2")
-    assert (out["tag"], out["previous"], out["kind"]) == ("v0.4.0", "v0.3.71", "promotion")
+    _change(src, "src/kranto/store.py")
+    _change(src, "src/kranto/page/loop/ledger.py", "src/kranto/page/ideas/editor.py")
+    out = decide.decide(src)
+    assert out["tag"] == "v0.8.0-dev2" and out["previous"] == "v0.8.0-dev1"
+    assert out["rc_check"]["why"] == ["src/kranto/page/loop/ledger.py", "src/kranto/store.py"]
+    assert out["since"] == 2
+    _tag("v0.8.0-dev2", src)
+    # the owner's promotion of dev2: always checked, cut from the tag's commit
+    out = decide.decide(src, from_tag="v0.8.0-dev2")
+    assert (out["tag"], out["previous"], out["kind"]) == ("v0.8.0", "v0.7.71", "promotion")
     assert out["rc_check"]["required"] and out["held"]
 
 
-def test_decide_needs_both_repos_for_the_gate(tmp_path):
-    afk, brb = _repo(tmp_path / "afk"), _repo(tmp_path / "brb")
+def test_decide_takes_one_checkout(tmp_path):
+    src = _repo(tmp_path / "src")
     with pytest.raises(SystemExit):
-        decide.main(["--afk", str(afk), "--brb", str(brb), "--repo", "o/afk"])
+        decide.main(["--afk", str(src), "--brb", str(src)])
 
 
 # -- audit_merges.py -----------------------------------------------------------------------------

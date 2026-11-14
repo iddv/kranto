@@ -1,13 +1,15 @@
 # Responsible use
 
-This page says what the server is for, what it does to avoid collecting
+This page says what Kranto is for, what it does to avoid collecting
 personal data, how long it keeps what it reads, and what is left to the
 person running it. It describes the code as it is; it is not a legal
-promise, and it does not make any use of the server compliant on its own.
+promise, and it does not make any use of Kranto compliant on its own.
+[docs/accounts.md](docs/accounts.md) lists each provider and what to check in
+its terms.
 
-## What the server is for
+## What Kranto is for
 
-the server is a personal app that anyone can run from source. It watches public
+Kranto is a personal app that anyone can run from source. It watches public
 sources (feeds, Hacker News, and similar) for topics the person running it
 chooses, keeps short model-written observations about what it reads, and
 organises them into trends. It is meant to keep trends, not people: it is not
@@ -16,7 +18,7 @@ used as one.
 
 ## Respect each source's terms
 
-Every source has its own terms, and they apply to you when the server fetches
+Every source has its own terms, and they apply to you when Kranto fetches
 from it on your behalf. Read them before you add a source.
 
 **Reddit.** Reddit's
@@ -25,7 +27,7 @@ requires Reddit's prior approval of any app that reads Reddit data through its
 API. This project ships no Reddit key and seeks no approval of its own, and
 runs no service. **With your own app** (you request access from Reddit in your own
 name, register the app, and paste its client id, secret and refresh token under
-Settings › Accounts › Reddit), the server's Reddit adapter
+Settings › Accounts › Reddit), Kranto's Reddit adapter
 (`src/kranto/sources/reddit.py`) reads your subreddits through Reddit's API as
 you: new posts, their scores and comment counts, the top comments of the most
 scored few, one request a second, with a user agent that names the app, its version
@@ -45,7 +47,7 @@ example packs in `examples/packs/` contain no Reddit sources.
 
 **Lobsters.** Lobsters publishes its feeds to the public, but its robots.txt
 signals `ai-input=no, ai-train=no` for bots other than named search engines.
-the server shows what it reads to a model, so the catalog leaves Lobsters out. A
+Kranto shows what it reads to a model, so the catalog leaves Lobsters out. A
 feed URL you add by hand is your decision.
 
 **arXiv.** An arXiv search reads the export API, paced to one request every three
@@ -58,12 +60,12 @@ content. A publication added from the catalog is kept 30 days, not the default
 feed item is thin. Posts you pay for are not read: there is no per-subscriber
 feed.
 
-**Stack Exchange.** Content is CC BY-SA. the server keeps a link to each post and
+**Stack Exchange.** Content is CC BY-SA. Kranto keeps a link to each post and
 never its author; if you publish anything built from it, attribute it as the
 licence asks.
 
 **Looking before judging.** For each item that passes the
-topic filter and a first screen (`look.enabled`, on by default), the server fetches its Hacker News
+topic filter and a first screen (`look.enabled`, on by default), Kranto fetches its Hacker News
 thread through the Algolia API, the page it links to, the pages linked from
 the item, that page and its comments, and GitHub repositories they name,
 through GitHub's public API. A few requests per item, capped per item (two
@@ -74,12 +76,11 @@ scrubbed like every item's before a model sees it, and is kept only in the
 model call that read it, which expires with the item.
 
 Requests identify themselves with the user agent
-`kranto/0.1 (+https://github.com/iddv/kranto)`.
+`kranto/<version> (+https://github.com/iddv/kranto)`.
 
 ## Connected accounts
 
-Some sources read with your own account (Settings › Sources › Accounts; or
-`/connections` on the server's own pages): Mastodon (your home timeline and lists),
+Some sources read with your own account (Settings › Accounts): Mastodon (your home timeline and lists),
 Bluesky (your home timeline, and search, which Bluesky serves only to a
 signed-in account), GitHub (releases of the repositories you star), YouTube
 (your subscriptions), Product Hunt (launches by topic), Stack Exchange (an app
@@ -96,21 +97,21 @@ own developer app; see X below).
   permissions (a classic token whose scopes go beyond `read:user` is refused;
   a fine-grained token's permissions cannot be read back, so the page says what
   to choose); the device flow asks for `read:user`. Product Hunt: a developer
-  token, whose default scope is `public`. the server never posts, likes, stars,
+  token, whose default scope is `public`. Kranto never posts, likes, stars,
   follows, subscribes or changes anything on a site. It reads only what your
   account can already see, never keeps author fields (channel names and makers
   included), and scrubs what it reads like every other item.
 - **Bluesky's app password** is the fallback for a server without loopback
   OAuth. It is used once to start a session and never stored; only the session
-  is kept. An app password is not limited by scopes: the server only calls the
+  is kept. An app password is not limited by scopes: Kranto only calls the
   read endpoints above, but OAuth is the read-only way. An account password, or
   an app password allowed to read direct messages, is refused and its session
   ended.
 - **Sign-ins.** Browser sign-ins use the authorization code flow with PKCE
   (S256) and a single-use state that expires in ten minutes, with a loopback
   callback (`http://localhost:8765/connections/<provider>/callback` or the
-  `127.0.0.1` form; Bluesky only `127.0.0.1`). Mastodon: the server registers
-  itself on your instance. Bluesky: the server is a loopback client (nothing
+  `127.0.0.1` form; Bluesky only `127.0.0.1`). Mastodon: Kranto registers
+  itself on your instance. Bluesky: Kranto is a loopback client (nothing
   registered), uses pushed authorization requests, and binds the token to a
   key of its own with DPoP. YouTube: your own Google Cloud project's Desktop
   client, whose id and secret you paste and which are kept like a token.
@@ -129,10 +130,10 @@ own developer app; see X below).
   directory `0700`. Never in `kranto.yaml`, the library database, an export, a
   bundle, a log line, an event or a page. A copy of `data/` on another machine
   cannot decrypt them. This protects against copies and backups, not against root
-  on the machine. `afk doctor` checks the modes and that the file decrypts.
+  on the machine. `kranto doctor` checks the modes and that the file decrypts.
 - **Disconnect** revokes the token at the site where the site has a revoke
   endpoint (Mastodon, Bluesky, Google), then deletes it here. GitHub tokens,
-  Product Hunt tokens and Stack Exchange keys cannot be revoked by the server:
+  Product Hunt tokens and Stack Exchange keys cannot be revoked by Kranto:
   Disconnect deletes them here and the page names where to delete them on the
   site. A token the site refuses marks its sources "Needs login"; nothing fails
   silently.
@@ -145,7 +146,7 @@ own developer app; see X below).
 
 ## X
 
-X is off until you connect it (Settings › Sources › Accounts › X), and it is
+X is off until you connect it (Settings › Accounts › X), and it is
 read only through the official X API with **your own** developer account and
 app, so its terms bind you as the developer: the Developer Agreement (last
 updated 2026-04-27), the Developer Policy and the Display Requirements.
@@ -175,11 +176,11 @@ updated 2026-04-27), the Developer Policy and the Display Requirements.
   X's: deletions within 24 hours of a request. Once a week Kranto asks X about
   up to 100 kept posts (the ones idea cards cite first) and removes each one X
   no longer has, through the recorded purge, with no rollup made from it.
-  **Remove this post** (`POST /api/observations/<id>/remove`, or `afk sources
-  forget <post URL>`) removes one at once: that is how a deletion request you
+  **Remove this post** (`POST /api/observations/<id>/remove`, or `python -m kranto.cli
+  sources forget <post URL>`) removes one at once: that is how a deletion request you
   receive is honoured. Its `items_seen` row stays, so it is never read again.
 - **Nothing is displayed to anyone else or redistributed.** Kranto shows one
-  person their own notes; a bundle (`afk export bundle`) leaves an X post's text
+  person their own notes; a bundle (`python -m kranto.cli export bundle`) leaves an X post's text
   out and keeps the URL and Kranto's summary.
 - **X through Grok** (off until `XAI_API_KEY` is set): for a person with an xAI key and
   no X developer app, xAI's `x_search` tool searches X once a day and lists the posts it
@@ -239,9 +240,9 @@ Observations are a working set, not a permanent archive.
 - Each observation is kept for its retention age: 90 days by default
   (`retention.default_days` in `kranto.yaml`), overridable per source kind
   (`retention.by_kind`, for example `{reddit: 30}`) and per source
-  (`afk sources retention ID DAYS`; `default` removes the override). `0` keeps
+  (`python -m kranto.cli sources retention ID DAYS`; `default` removes the override). `0` keeps
   observations forever; setting it is your choice and your responsibility.
-- Past that age, compaction (`afk compact`, and a daily job under `afk serve`,
+- Past that age, compaction (`python -m kranto.cli compact`, and a daily job of the service,
   set by `retention.every_hours`) clusters each week's expired observations
   into rollups: a name, a short summary, keywords, source mix and up to five
   links. It then removes the observations and the model calls that hold their
@@ -265,15 +266,15 @@ when").
 
 ## What you are responsible for
 
-- **Your use.** Which sources you watch, what you do with what the server
+- **Your use.** Which sources you watch, what you do with what Kranto
   writes, and whether that is allowed where you are.
 - **Your keys and spend.** Model calls go to the provider you configure
-  (OpenRouter by default), under your key and within the monthly budget you
+  under your key and within the monthly budget you
   set (`budget.monthly_usd`). The text of each item that reaches the judge is
   sent to that provider after scrubbing.
 - **Your jurisdiction.** Data protection and copyright law differ by country.
-  the server does not decide what is lawful for you.
+  Kranto does not decide what is lawful for you.
 - **Not republishing third-party text.** Observations, excerpts, exports
-  (`afk export`) and bundles hold text derived from other people's writing.
+  (`python -m kranto.cli export`) and bundles hold text derived from other people's writing.
   Keep them for your own use; do not publish a library, an export or a bundle
   without checking the terms of every source in it.

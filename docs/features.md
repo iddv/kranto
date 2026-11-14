@@ -33,8 +33,8 @@ other people write, are in [cubs.md](cubs.md).
 | `settings` | keys with rules, `sensitive`, `per_topic` | its own `kranto.yaml` section, checked at load; `POST /api/f/<id>/settings`; sensitive keys need the page and the confirm; `by_hand` keys are never written by Kranto |
 | `permissions` | the closed list below | what its context can do |
 | `events` | `publishes`, `subscribes` (with `min_trust` and an optional handler) | the bus's kind registry (one publisher per kind); delivery with cursors |
-| `ui` | `nav`, `pages`, `today_rows`, `cards` (declarative), and the seven generic surfaces below | the page draws it (the page's `src/features/`, or the core's generic cub page) |
-| `spend`, `telemetry`, `prompts`, `grades`, `docs`, `cli` | its purposes and caps, counters, prompts (editable in Settings › Prompts), grade targets and their chips, words, `afk <id> …` | Spend, the allow-list, the prompt registry and lock, the one grades table, the glossary, the command line |
+| `ui` | `nav`, `pages`, `today_rows`, `cards` (declarative), and the seven generic surfaces below | the page draws it (the web UI's `src/features/`, or the core's generic cub page) |
+| `spend`, `telemetry`, `prompts`, `grades`, `docs`, `cli` | its purposes and caps, counters, prompts (editable in Settings › Prompts), grade targets and their chips, words, `python -m kranto.cli <id> …` | Spend, the allow-list, the prompt registry and lock, the one grades table, the glossary, the command line |
 
 ## The seven generic surfaces
 
@@ -120,7 +120,7 @@ because of one by itself. A subscriber reads with `ctx.take(kind)` and moves its
 The core's own kinds: `job.finished`, `settings.changed`, `grade.given`, `spend.capped`,
 `ticket.filed`, `ticket.resolved`.
 
-## High-trust actions: tickets
+## High-trust actions: asks (`ctx.ticket`)
 
 Posting and sending (and, later, booking) belong to the core. A feature files a
 ticket with typed fields and its provenance; the ticket waits for the owner; the owner's approval
@@ -180,5 +180,5 @@ asked; the toot cub is yours to add.
    `kranto.features.FEATURES`.
 2. Its tables in a numbered migration in `store.py` (pre-assigned numbers, add-only).
 3. Its prompt files in `src/kranto/prompts/` and a line in `prompts.lock.json`.
-4. Its page in the page's `ui/web/src/features/<id>/`.
-5. `afk features <id>` prints the manifest as the core sees it.
+4. Its page in the web UI's `src/kranto/page/ui/web/src/features/<id>/`.
+5. `python -m kranto.cli features <id>` prints the manifest as the core sees it.

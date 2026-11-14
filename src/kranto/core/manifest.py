@@ -405,7 +405,8 @@ class Feature:
     docs: Docs = Docs()
     # what the owner may grade (the core's one grades table): target -> its "why" chips
     grades: dict[str, tuple[tuple[str, str], ...]] = field(default_factory=dict)
-    # its commands: ``cli(subparsers)`` adds ``afk <id> ...`` (code, not part of the data form)
+    # its commands: ``cli(subparsers)`` adds ``python -m kranto <id> ...`` (code, not part of the
+    # data form)
     cli: Callable | None = None
     # ``guard(ctx, key, value)``: a feature's own rule on a settings write; raises ValueError
     guard: Callable | None = None

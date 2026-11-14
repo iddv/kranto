@@ -321,7 +321,7 @@ class GitMain:
             if r.returncode != 0:
                 raise SourceError(redact(gh_error(f"gh api {repo}: {r.stderr or ''}")))
             commits[name] = r.stdout.strip()
-        short = commits["kranto"][:7] + "/" + commits["kranto.page"][:7]
+        short = "/".join(c[:7] for c in commits.values())
         return Release(version=f"main@{short}", tag="main", commits=commits), None
 
     def download(self, release: Release, dest: Path) -> None:

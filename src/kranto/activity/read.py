@@ -5,7 +5,7 @@
 
 - **running**: the runs in progress in this process (their words as of now, before the writer's
   next batch), and any other process's whose ``started`` has no end and whose process lives
-  (``afk run`` beside the server);
+  (``python -m kranto run`` beside the server);
 - **waiting**: runs that stopped for the owner whose subject still waits (a cub's update
   not yet confirmed);
 - **next**: each scheduled kind that is on, soonest first, with its last run and whether it
