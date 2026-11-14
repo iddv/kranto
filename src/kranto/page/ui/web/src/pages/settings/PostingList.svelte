@@ -17,7 +17,7 @@
   import { ui } from "../../lib/shell.svelte";
   import { openDialog } from "../../ui/dialog.svelte";
   import { NEWSLETTER_API, nlLine, nlSt, type Newsletter } from "./newsletter";
-  import { POSTING_API, savePosting, siteLine, type Posting, type PostingSite } from "./posting";
+  import { POSTING_API, savePosting, siteLine, waitingLine, type Posting, type PostingSite } from "./posting";
   import AddSiteDialog from "./AddSiteDialog.svelte";
 
   let { view }: { view: View } = $props();
@@ -45,6 +45,7 @@
     {#if !s.account && s.connection}<a class="btn sm" data-act="post-connect" href={href("settings/connections/" + s.connection)}>Connect</a>{/if}
   {:else if s.can_direct}
     <label class="inline small"><input type="checkbox" data-act="post-direct" data-site={s.id} checked={s.direct} onchange={(e) => savePosting(e.currentTarget, { direct: { [s.id]: e.currentTarget.checked } }, e.currentTarget.checked ? (s.account ? `Kranto posts to ${s.name} after your yes.` : `Connect ${s.name} (posting) so Kranto can post there.`) : `${s.name}: Open only.`)} /> Post directly</label>
+    {#if waitingLine(s)}{" "}<span class="small c-amber" data-act="post-direct-waiting">{waitingLine(s)}</span>{/if}
     {#if s.direct && !s.account && s.connection}{" "}<a class="small" data-act="post-connect" href={href("settings/connections/" + s.connection)}>Connect</a>{/if}
   {/if}
 {/snippet}

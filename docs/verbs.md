@@ -44,7 +44,7 @@ Each verb has a **kind**, and for each kind you choose what an assistant does:
 | Reads | a preview, a check | Do it |
 | Changes you can undo | add or edit a topic, approve a source, pause, save a setting | Do it |
 | Spending | a scout, Run now, Card it now, a cap | Do it (the cost is said first) |
-| What leaves Kranto | usage reports, installing a cub, an audience | Ask me in the UI |
+| What leaves Kranto | usage reports, installing a cub, an audience, new words for a waiting post | Ask me in the UI |
 | What cannot be undone | archive, remove, roll back, disconnect | Ask me in the UI |
 | Keys, tokens and logins | a provider key, a token, an account's credentials | Never (locked) |
 
@@ -53,6 +53,8 @@ the run in Activity. **Ask me in the UI** runs nothing: the action is *prepared*
 fields, and waits on its page and in Needs you for 24 hours until you click it (the page's own
 dialog) or dismiss it; the assistant is told that nothing has happened. **Never** refuses and
 names the setting. A verb can differ from its kind (`verbs: {topic.add: ask}`).
+
+A few fields wait for you whatever their kind says: `prose.voice`'s `voice`, `disclosure`, `always_add` and `always_remove` (they put words in every later post) are prepared, not done, when an assistant sends them, unless you chose for `prose.voice` itself. An action an assistant prepared and you approved keeps who asked for it: an edited draft says "edited by your assistant".
 
 An action is prepared only when its action would take it: its fields are checked as the route
 checks them (their type, their choices, their limits, a field of several the route needs, the

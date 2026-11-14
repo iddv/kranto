@@ -127,6 +127,11 @@ class Verb:
     subject_field: str | None = None
     # fields of which the press needs at least one ("send keep_days or max_rows")
     one_of: tuple[str, ...] = ()
+    # fields that, sent by an assistant, make the call wait for the owner's press whatever the
+    # kind's setting says (``prose.voice``: the voice card, the always-list, the disclosure
+    # lines put words in every later post); the owner's own choice for the verb still holds
+    ask_fields: tuple[str, ...] = ()
+    ask_why: str = ""
 
     def needs_id(self) -> bool:
         if self.subjects:
@@ -323,11 +328,14 @@ CORE: tuple[Verb, ...] = (
                                    "absent")),
          page="#/post", cost="about $0.03 (one model call; short posts: one a site, and the "
                              "blog post first when it is connected)"),
-    Verb("post.edit", "Save", "Save the owner's own words for a waiting draft ("
-         "): title and body (a long post), or parts (a short post or a thread, each its "
-         "text), or drop (an extra to remove). The edit is filed as the next draft of the same "
-         "series and waits on Post as before; the original draft stays under Earlier drafts. "
-         "Nothing is sent.", "reversible", "POST", "/api/post/d/{id:int}/edit",
+    # outward: new words for a post that will leave Kranto under the owner's name, so an
+    # assistant's edit waits for the owner's press by default; the draft and its ask say who
+    # edited it (``web.post_api.edited_words``)
+    Verb("post.edit", "Save", "Save new words for a waiting draft: title and body (a long "
+         "post), or parts (a short post or a thread, each its text), or drop (an extra to "
+         "remove). The edit is filed as the next draft of the same series and waits on Post as "
+         "before; the original draft stays under Earlier drafts, and the draft says who edited "
+         "it. Nothing is sent.", "outward", "POST", "/api/post/d/{id:int}/edit",
          subject="draft",
          fields=(F("title", "line", "the draft's title or subject"),
                  F("body", "text", "the draft's words, as markdown"),
@@ -349,7 +357,9 @@ CORE: tuple[Verb, ...] = (
          "(samples_add [{text, site}], samples_remove [ids]), the never, keep and always lists "
          "(never_add, never_remove, …), the switches (length, register, opinions, emoji, "
          "hashtags, links, grade), the checker's strictness and rules_off, guides per site, "
-         "disclosure per site, or take (whether Write a post asks what they think).",
+         "disclosure per site, or take (whether Write a post asks what they think). An assistant's "
+         "change to the voice card, the always-list or a disclosure line waits for the owner's "
+         "approval.",
          "reversible", "POST", "/api/prose/voice",
          fields=(F("voice", "text", "the voice card, in plain words (at most 2,000 characters)"),
                  F("switches", "object", "length, register, opinions, emoji, hashtags, links, "
@@ -368,6 +378,9 @@ CORE: tuple[Verb, ...] = (
                  F("always_remove", "list", "entries to take off the always-list"),
                  F("samples_add", "list", "[{text, site}]: things the owner wrote"),
                  F("samples_remove", "list", "sample ids")),
+         ask_fields=("voice", "disclosure", "always_add", "always_remove"),
+         ask_why="Kranto's default for your voice card, your always-list and your disclosure "
+                 "lines: they shape every later post, so an assistant's change waits for you",
          page="#/settings/posting"),
     Verb("prose.learn", "Learn", "Learn from the owner's edits: give a draft and the text they "
          "sent to get proposals for the never-list, the keep-list and the voice card; or answer "
@@ -910,8 +923,10 @@ def ladder_setting(cfg) -> dict[str, dict[str, str]]:
     return {"kinds": dict(raw.get("kinds") or {}), "verbs": dict(raw.get("verbs") or {})}
 
 
-def choice_for(cfg, verb: Verb) -> Choice:
-    """The ladder's answer for a caller that is not the owner pressing."""
+def choice_for(cfg, verb: Verb, fields: dict[str, Any] | None = None) -> Choice:
+    """The ladder's answer for a caller that is not the owner pressing. ``fields``: the call's
+    own (a field of ``verb.ask_fields`` among them makes Kranto's answer "ask", unless the
+    owner chose for the verb itself)."""
     if verb.ladder in LOCKS:
         c, why = LOCKS[verb.ladder]
         return Choice(c, True, why)
@@ -923,6 +938,10 @@ def choice_for(cfg, verb: Verb) -> Choice:
     by_verb = s["verbs"].get(verb.kind)
     if by_verb in CHOICES:
         return Choice(str(by_verb), False, f"your setting for {verb.title} ({verb.kind})")
+    if fields and verb.ask_fields and any(fields.get(f) is not None for f in verb.ask_fields):
+        if s["kinds"].get(verb.ladder) == "never":
+            return Choice("never", False, f"your setting for {KIND_WORDS[verb.ladder].lower()}")
+        return Choice("ask", False, verb.ask_why or "Kranto's default for this change")
     by_kind = s["kinds"].get(verb.ladder)
     if by_kind in CHOICES:
         return Choice(str(by_kind), False,
@@ -1015,6 +1034,27 @@ def acting(by: str | None) -> Iterator[None]:
         _ACTING.reset(token)
 
 
+_ASKED: contextvars.ContextVar[str | None] = contextvars.ContextVar("kranto_verb_asked",
+                                                                   default=None)
+
+
+def asked_by() -> str | None:
+    """While the owner presses an action an assistant prepared: who prepared it
+    (``mcp:claude-code``); None otherwise. The press is the owner's; the words or the change
+    are the assistant's, and a route that records authorship (``post.edit``) says so."""
+    return _ASKED.get()
+
+
+@contextlib.contextmanager
+def asked(by: str | None) -> Iterator[None]:
+    """``with verbs.asked("mcp:codex"):`` around the owner's press of a prepared action."""
+    token = _ASKED.set(by if by and by.partition(":")[0] not in OWNER_DOORS else None)
+    try:
+        yield
+    finally:
+        _ASKED.reset(token)
+
+
 def table_view(cfg) -> list[dict[str, Any]]:
     """Every verb with the ladder's answer for an assistant (``GET /api/verbs``)."""
     out = []
@@ -1027,6 +1067,6 @@ def table_view(cfg) -> list[dict[str, Any]]:
 
 __all__ = ["CHOICES", "CORE", "DEFAULTS", "DOORS", "LADDER_KINDS", "LOCKS", "RETIRED_KINDS",
            "ROUTE_ALLOW",
-           "Choice", "Field", "Verb", "acting", "acting_by", "all_verbs", "by_of", "by_words",
-           "check_ladder", "choice_for", "door_of", "feature_verbs", "fill", "get",
-           "ladder_setting", "routes_of", "table_view"]
+           "Choice", "Field", "Verb", "acting", "acting_by", "all_verbs", "asked", "asked_by",
+           "by_of", "by_words", "check_ladder", "choice_for", "door_of", "feature_verbs", "fill",
+           "get", "ladder_setting", "routes_of", "table_view"]

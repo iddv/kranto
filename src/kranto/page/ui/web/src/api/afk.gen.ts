@@ -2600,6 +2600,7 @@ export interface PostSheet {
   cannot_edit: string | null;
   limit: PostLimit | null;
   edited: boolean;
+  edited_words: string | null;
   edited_from: number | null;
   original_draft: number;
   parts?: PostCounted[];
@@ -2628,6 +2629,7 @@ export interface PostingSite {
   limit: number;
   unit: string;
   disclose: boolean;
+  waiting_direct: number;
 }
 
 /** A site Kranto does not offer, with why, and what would make it possible. */

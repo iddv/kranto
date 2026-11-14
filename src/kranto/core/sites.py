@@ -237,10 +237,10 @@ def fit(site: Site, text: str, limit: int) -> tuple[str, bool]:
 TAG = re.compile(r"(?<![\w#])#(\w{2,40})")
 
 
-def clean(site: Site, text: str, allowed: set[str]) -> tuple[str, list[str]]:
-    """The model's words with what the site cannot carry taken off: any address that is not
-    one of ``allowed`` (the post's link and the sources), and tags past the site's count.
-    ``(text, removed)``, ``removed`` in words for the draft's facts."""
+def scrub(text: str, allowed: set[str]) -> tuple[str, list[str]]:
+    """``text`` with every address that is not one of ``allowed`` taken off: the link filter a
+    post's words and its disclosure line both go through. ``(text, removed)``, ``removed`` in
+    words."""
     removed: list[str] = []
 
     def link(m: re.Match[str]) -> str:
@@ -251,6 +251,15 @@ def clean(site: Site, text: str, allowed: set[str]) -> tuple[str, list[str]]:
         removed.append(f"an address that is not one of the sources ({urlsplit(url).hostname})")
         return tail
     out = URL.sub(link, text)
+    out = re.sub(r"[ \t]+\n", "\n", re.sub(r"[ \t]{2,}", " ", out)).strip()
+    return out, removed
+
+
+def clean(site: Site, text: str, allowed: set[str]) -> tuple[str, list[str]]:
+    """The model's words with what the site cannot carry taken off: any address that is not
+    one of ``allowed`` (the post's link and the sources: ``scrub``), and tags past the site's
+    count. ``(text, removed)``, ``removed`` in words for the draft's facts."""
+    out, removed = scrub(text, allowed)
     tags = TAG.findall(out)
     if len(tags) > site.hashtags:
         keep = set(tags[:site.hashtags])
