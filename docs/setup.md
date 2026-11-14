@@ -317,12 +317,14 @@ instead (`afk provider xai --key-stdin`, then **X / Twitter › Search through G
 source; xAI bills $5 per 1,000 posts Grok reads, plus the model's tokens).
 
 A post writer can run on its own model, apart from the models that watch your sources
-(`docs/prose.md`, "The writer's model"). For a GPT model, paste an OpenAI key with
-`kranto provider openai --key-stdin` (it is tested, spending nothing, and kept as
-`OPENAI_API_KEY` in the home's `.env` only when it works), then set the writer's model, for
-example `{"writer_model": {"blog": {"provider": "openai", "model": "<a model id>"}}}` with the
-verb `prose.voice`. The key is used for that writer only, never for watching; no writer model is
-chosen for you.
+(`docs/prose.md`, "The writer's model"). On **Settings › Posting › How you write**, under **Who
+writes**, choose a writer's provider and type the model's name, then Save. For a GPT model,
+paste an OpenAI key there and choose **Save and test** (or `kranto provider openai --key-stdin`
+from the command line): it goes to Kranto once, is tested, spending nothing, and is kept as
+`OPENAI_API_KEY` in the home's `.env` (0600) only when it works; the page never shows it again
+and no log holds it. The verb `prose.voice` (`{"writer_model": {"blog": {"provider": "openai",
+"model": "<a model id>"}}}`) does the same as the page's choice. The key is used for a writer
+only, never for watching; no writer model is chosen for you.
 
 ## 8. Ready (person)
 

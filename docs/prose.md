@@ -21,7 +21,7 @@ detectors, and nothing here claims it does.
 | **Guides per site** | which guides each site's writer follows (the floor always) | `prose.profile` |
 | **Disclosure** | per site, off by default; a ready line: "Drafted with Kranto from my notes; edited and sent by me." | `prose.profile` |
 | **Your angle** | one sentence on Write a post: why this interests you. Type your own, or pick one of the three Kranto proposes: where it leads (in five or ten years), a bet (a number or a name, and why) and a scene (the item in one real situation). Each goes past the item's own claim. It drives the post: its first sentence, its stance, what it leaves out | sent with the write (`angle`; `take` is its old name) |
-| **The writer's model** | per writer (blog, toot, newsletter, social), apart from the models that watch your sources; unset, the reason tier's model writes. A writer may also be on OpenAI's own API with a key you paste (`kranto provider openai --key-stdin`, kept as `OPENAI_API_KEY` in the home's `.env`); it is never the watcher's. No default is chosen | `prose.profile` (`writers`) |
+| **The writer's model** | per writer (blog, toot, newsletter, social), apart from the models that watch your sources; unset, the reason tier's model writes. A writer may also be on OpenAI's own API with a key you paste (How you write's **Save and test**, or `kranto provider openai --key-stdin`; kept as `OPENAI_API_KEY` in the home's `.env`, never shown again); it is never the watcher's. Chosen on How you write's **Who writes**. No default is chosen | `prose.profile` (`writers`) |
 
 You, or your own Claude Code, may edit the files under `<home>/prose/` by hand; kranto reads them
 fresh for every post.
@@ -111,9 +111,10 @@ must stay unflagged at both strictness levels.
 
 | Method and path | Body | Answer |
 |---|---|---|
-| `GET /api/prose` | | `voice`, `switches`, `switch_choices`, `switch_words`, `strictness`, `rules` (`[{id, group, words, fix, on}]`), `guides` (`[{name, title, from: kranto or yours, always}]`), `sites` (`[{site, guides, default, limits, disclosure}]`), `writers` (`{blog: blog, newsletter: newsletter, toot: mastodon}`), `writer_models` (writer → `{provider, model}`, or null: the reason tier's), `disclosure_line`, `take`, `never`, `keep`, `always`, `samples` (`[{id, site, words, start}]`), `rhythm` (`{mean, sd, dashes_per_100}` or null), `proposals` (open), `migrated`, `home` |
+| `GET /api/prose` | | `voice`, `switches`, `switch_choices`, `switch_words`, `strictness`, `rules` (`[{id, group, words, fix, on}]`), `guides` (`[{name, title, from: kranto or yours, always}]`), `sites` (`[{site, guides, default, limits, disclosure}]`), `writers` (`{blog: blog, newsletter: newsletter, toot: mastodon}`), `writer_models` (writer → `{provider, model}`, or null: the reason tier's), `writer_providers`, `writer_key` (`{set}`: never the key), `disclosure_line`, `disclosure_default` (a short post's line where none is set), `take`, `never`, `keep`, `always`, `samples` (`[{id, site, words, start}]`), `rhythm` (`{mean, sd, dashes_per_100}` or null), `proposals` (open), `migrated`, `home` |
 | `POST /api/prose/check` (verb `prose.check`, read) | `{text, site?, kind?, take?, limits?, strictness?}` | `{score, verdict, flags, counts, grade, words, strictness, site, kind}`; each flag `{start, end, text, rule, words, fix, group, strength, scope}`: `start`/`end` are character offsets for the underline; `scope: text` is about the whole piece (no underline) |
 | `POST /api/prose/revise` (no verb: nothing is stored) | `{text, flags?, site?, kind?, take?, limits?}` | `{text, flags, score, verdict, rounds, changed: [{start, end, before, after}], say}`: the draft's **Fix**; the page saves the text through the draft's edit |
+| `POST /api/prose/writer-key` (verb `prose.writer_key`, credential, the page only) | `{key}` | `{ok, detail, set, say}`: tested with `GET /v1/models` (nothing spent) and kept only when it works; never the key, which no log holds |
 | `POST /api/prose/voice` (verb `prose.voice`, reversible) | any of `voice`, `switches`, `strictness`, `rules_off`, `guides` (site → names, or null), `disclosure` (site → line, `""` off), `take`, `writer_model` (writer → `{provider, model}`, or null), `never_add`/`never_remove`, `keep_add`/`keep_remove`, `always_add`/`always_remove`, `samples_add` (`[{text, site}]`), `samples_remove` (ids) | `{ok, changed, say}`; a 400 says what is wrong |
 | `POST /api/prose/voice/draft` (no verb: nothing is stored) | `{samples?: [text]}` (else your saved samples) | `{voice, say}`: one model call drafts a voice card for you to read and edit; save it with `prose.voice` |
 | `POST /api/prose/learn` (verb `prose.learn`, reversible) | `{draft, sent}` | `{proposals, say}`: proposals from what you changed (kept open) |
@@ -160,17 +161,18 @@ three = prose.angles({"title": title, "facts": facts}, p, complete=my_call, site
 
 (`check` and `revise` still name the person's words `take`: pass the angle there.)
 
-In a cub (the SDK's `ctx.prose`, granted with the model; `bears-cub-sdk` 1.3.0):
+In a cub (the SDK's `ctx.prose`, granted with the model; `bears-cub-sdk` 1.4.0):
 
 ```python
 composed = ctx.prose.compose({"angle": angle, "title": title, "facts": facts},
                              site="mastodon", kind="short", task="Write one Mastodon post.",
                              limits={"max_chars": 480})
 reply = ctx.model.complete(purpose="toot_caption", tier="reason", messages=composed["messages"])
-got = ctx.prose.check(text, site="mastodon", kind="short", take=angle)
+sources = f"{title}\n{facts}"     # what it was written from: salt.person flags anyone else
+got = ctx.prose.check(text, site="mastodon", kind="short", take=angle, sources=sources)
 if got["flags"]:
     text = ctx.prose.revise(text, got["flags"], purpose="toot_caption", tier="reason",
-                            site="mastodon", kind="short", take=angle)["text"]
+                            site="mastodon", kind="short", take=angle, sources=sources)["text"]
 ```
 
 `compose` also answers `angle` (the one used, or null for a plain summary), `take` (whether the

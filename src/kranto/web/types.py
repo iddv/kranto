@@ -2573,6 +2573,8 @@ class PostingSite(TypedDict):
     limit: int
     unit: str
     disclose: bool
+    # the words this site's posts end with when disclose is on (the person's own, or the default)
+    disclosure_words: NotRequired[str]
     # what the sent posts' numbers support, in words ("Best hour so far: 09:00, from 16 posts");
     # empty until there are at least 8 posts on each side of a comparison
     learned: NotRequired[list[str]]

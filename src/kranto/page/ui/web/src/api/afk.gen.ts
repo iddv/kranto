@@ -2649,6 +2649,7 @@ export interface PostingSite {
   limit: number;
   unit: string;
   disclose: boolean;
+  disclosure_words?: string;
   learned?: string[];
 }
 
