@@ -322,9 +322,10 @@ writes**, choose a writer's provider and type the model's name, then Save. For a
 paste an OpenAI key there and choose **Save and test** (or `kranto provider openai --key-stdin`
 from the command line): it goes to Kranto once, is tested, spending nothing, and is kept as
 `OPENAI_API_KEY` in the home's `.env` (0600) only when it works; the page never shows it again
-and no log holds it. The verb `prose.voice` (`{"writer_model": {"blog": {"provider": "openai",
-"model": "<a model id>"}}}`) does the same as the page's choice. The key is used for a writer
-only, never for watching; no writer model is chosen for you.
+and no log holds it. The page's choice is `POST /api/prose/voice` with `{"writer_model": {"blog":
+{"provider": "openai", "model": "<a model id>"}}}`; the verb `prose.voice` does not take it, so an
+assistant cannot choose a writer's model. The key is used for a writer only, never for watching;
+no writer model is chosen for you.
 
 ## 8. Ready (person)
 
