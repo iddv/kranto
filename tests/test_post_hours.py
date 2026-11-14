@@ -289,3 +289,18 @@ def test_readers_of_the_ticket_states_see_a_held_ask_as_waiting(store, tmp_path,
     assert [t["id"] for t in asks.latest(store, FILER)] == [tid]
     assert tickets.expire_due(store, now=NOW + timedelta(days=30)) == 0
     assert iso(NOW)  # the clock the hold used
+
+
+def test_no_door_may_edit_a_scheduled_draft_so_its_time_never_carries_other_words(store, tmp_path,
+                                                                                  sent):
+    """``post.edit`` runs from any door (an assistant's too): a scheduled draft is refused, so a
+    time the person chose never goes with words they did not say yes to."""
+    rt = _rt(store, tmp_path)
+    d, tid = _ask(store)
+    _schedule(store, tid, rt)
+    for door in ("ui", "cli"):
+        with pytest.raises(post_api.WriteError, match="cancel its time first"):
+            post_api.edit_draft(rt, d["id"], {"parts": [{"text": "Other words."}]}, door)
+    assert hours.held_of(store, tid) is not None
+    hours.tick(store, rt, now=AT_NINE)
+    assert sent == [tid]
