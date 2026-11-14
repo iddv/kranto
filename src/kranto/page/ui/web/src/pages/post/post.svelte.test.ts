@@ -6,7 +6,8 @@ import type { Facts } from "../../lib/app";
 import { ui } from "../../lib/shell.svelte";
 import { answering, count, draw, settle, stub, where } from "../testing.svelte";
 import PostPage from "./PostPage.svelte";
-import { accountHref, accountWords, connectedCount, draftFact, failedAbout, failedTitle, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
+import { accountHref, accountWords, connectedCount, draftFact, dueLine, failedAbout, failedTitle, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
+import { outcomeLine, whenOf } from "../../features/ask";
 import { mount, unmount } from "svelte";
 import AboutWhatDialog from "../../features/post/AboutWhatDialog.svelte";
 import { aboutKey, aboutLine, WEEK } from "../../features/post/post";
@@ -139,5 +140,71 @@ describe("Post with short posts", () => {
     expect(sitesWords(short)).toBe("Bluesky ✓ · Mastodon · X · Threads");
     expect(draftFact(draft(1))).toBe("Monday's issue");
     expect(whereLine({ ...POST, sites: { line: "X opens in the site.", ticked: 1 } })).toBe("X opens in the site. Blog: not set. Newsletter: not set.");
+  });
+
+  // SOC-10: "I choose Send Tuesday 09:00. The row moves to Scheduled with Cancel."
+  it("lists a post said yes to at an hour under Scheduled, with Cancel and its hour", async () => {
+    const held = draft(30, { cub: "social", kind: "short", word: "short posts", site: "bluesky", site_word: "Bluesky", title: "Kiosks", fact: "from #143",
+      due: "2026-11-17T09:00:00Z", due_words: "Tuesday 17 Nov, 09:00" });
+    const { target, done } = await page({ ...POST, drafts: [], scheduled: [held] });
+    const g = target.querySelector("[aria-labelledby=post-scheduled]")!;
+    expect(titles(target, "post-scheduled")).toEqual(["Kiosks"]);
+    expect(g.querySelector(".c-meta")?.textContent).toBe("Goes Tuesday 17 Nov, 09:00 · Bluesky");
+    expect([...g.querySelectorAll(".btn")].map((x) => x.textContent)).toEqual(["Cancel"]);
+    expect(g.querySelectorAll(".btn.primary").length).toBe(0);
+    done();
+    const none = await page(POST);
+    expect(none.target.querySelector("[aria-labelledby=post-scheduled]")).toBeNull();   // only when something is
+    none.done();
+    expect(dueLine({ due_words: null, site_word: "Mastodon" })).toBe("Scheduled · Mastodon");
+  });
+
+  it("says a missed hour on the draft's row, so it is asked again", async () => {
+    const missed = draft(31, { cub: "social", kind: "short", site: "bluesky", site_word: "Bluesky", missed: "Its hour passed while Kranto was stopped (Tuesday 17 Nov, 09:00): post it now or choose a new time." });
+    const { target, done } = await page({ ...POST, drafts: [missed] });
+    expect(target.querySelector("[aria-labelledby=post-drafts] .c-meta")?.textContent).toContain("Its hour passed while Kranto was stopped");
+    done();
+  });
+
+  // SOC-9: "A post sent yesterday shows its replies, reposts and likes. LinkedIn's shows its
+  // address and says LinkedIn gives no numbers."
+  it("shows a sent post's numbers, and once which sites give none", async () => {
+    const sky = draft(40, { cub: "social", kind: "short", site: "bluesky", site_word: "Bluesky", note: "posted: https://bsky.app/profile/a/post/x", link: "https://bsky.app/profile/a/post/x", ticket: null,
+      reach: { replies: 4, reposts: 9, likes: 31, quotes: null, views: null, read_at: "2026-11-14T06:00:00Z", words: "4 replies, 9 reposts, 31 likes" } });
+    const li = draft(41, { cub: "social", kind: "short", site: "linkedin", site_word: "LinkedIn", note: "posted: https://www.linkedin.com/feed/update/urn:li:share:1/", link: "https://www.linkedin.com/feed/update/urn:li:share:1/", ticket: null, reach: null });
+    const foot = "No numbers from LinkedIn: LinkedIn gives its numbers only to approved partners.";
+    const { target, done } = await page({ ...POST, sent: [sky, li], reach_foot: foot });
+    const metas = [...target.querySelectorAll("[aria-labelledby=post-sent] .c-meta")].map((x) => x.textContent);
+    expect(metas[0]).toBe("Posted to Bluesky · posted: https://bsky.app/profile/a/post/x · 4 replies, 9 reposts, 31 likes");
+    expect(metas[1]).not.toMatch(/likes/);
+    expect(target.querySelectorAll("#post-reach-foot").length).toBe(1);
+    expect(target.querySelector("#post-reach-foot")?.textContent).toBe(foot);
+    done();
+    expect(sentLine(draft(42, { note: "Sent on 3 Nov" }))).toBe("Sent on 3 Nov");
+  });
+
+  it("reads Schedule's time on the person's own clock for a post Kranto holds", () => {
+    expect(whenOf("2026-11-17T09:00")).toBe("2026-11-17T09:00Z");
+    const local = whenOf("2026-11-17T09:00", "local");
+    expect(local).toBe(new Date("2026-11-17T09:00").toISOString().slice(0, 16) + "Z");
+    expect(whenOf("tomorrow", "local")).toBeNull();
+    expect(outcomeLine("scheduled", "Goes Tuesday 17 Nov, 09:00.")).toEqual({ text: "Scheduled. Goes Tuesday 17 Nov, 09:00.", tone: "green" });
+  });
+
+  it("still fits its budget with a write waiting, one scheduled and two sent with numbers", async () => {
+    const short = draft(20, { cub: "social", kind: "short", word: "short posts", site: "bluesky", site_word: "Bluesky", title: "Kiosks lose batteries", fact: "from #143",
+      sites: [{ id: 20, site: "bluesky", word: "Bluesky", state: "waiting" }, { id: 21, site: "mastodon", word: "Mastodon", state: "waiting" }, { id: 22, site: "x", word: "X", state: "waiting" }, { id: 23, site: "threads", word: "Threads", state: "waiting" }] });
+    const held = draft(30, { cub: "social", kind: "short", site: "mastodon", site_word: "Mastodon", title: "Robot ID codes", due_words: "Tuesday 17 Nov, 09:00" });
+    const sky = draft(40, { cub: "social", kind: "short", site: "bluesky", site_word: "Bluesky", title: "Usage canaries", note: "posted: https://bsky.app/profile/a/post/x", ticket: null,
+      reach: { replies: 4, reposts: 9, likes: 31, quotes: null, views: null, read_at: "2026-11-14T06:00:00Z", words: "4 replies, 9 reposts, 31 likes" } });
+    const li = draft(41, { cub: "social", kind: "short", site: "linkedin", site_word: "LinkedIn", title: "Local labelling", note: "posted: https://www.linkedin.com/feed/update/urn:li:share:1/", ticket: null });
+    const { target, done } = await page({ ...POST, drafts: [short], scheduled: [held], sent: [sky, li], earlier: [],
+      reach_foot: "No numbers from LinkedIn: LinkedIn gives its numbers only to approved partners.",
+      sites: { line: "Bluesky, Mastodon, X and Threads open in the site, with the draft filled in. Kranto posts to Bluesky and Mastodon after your yes.", ticked: 4 } });
+    const c = count(target, "post, a write waiting, one scheduled, two sent with numbers");
+    expect(c.words, JSON.stringify(c)).toBeLessThanOrEqual(173);
+    expect(c.controls, JSON.stringify(c)).toBeLessThanOrEqual(12);
+    expect(c.primaries, JSON.stringify(c)).toBeLessThanOrEqual(2);
+    done();
   });
 });

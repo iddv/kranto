@@ -1292,6 +1292,10 @@ def server_jobs(rt, *, update_job: bool = False, port: int | None = None) -> lis
     # every cub's update looked for daily; a safe one applied by itself (step 5)
     from .core.cubs import updates as cub_updates
     jobs.append(Job(cub_updates.KIND, 24, lambda: cub_updates.run(rt)))
+    # the numbers of the posts Kranto sent, read once a day (and LinkedIn's token reminder):
+    # no model, a few requests to the sites the person posted to; nothing on the preview
+    from .social import reach
+    jobs.append(Job(reach.KIND, 24, lambda: reach.run(rt)))
     return jobs
 
 
@@ -1308,10 +1312,14 @@ def cmd_serve(args) -> int:
         from .core import registry as features
         jobs = server_jobs(rt, update_job=getattr(args, "update_job", False),
                            port=args.port)
+        # a post the person said yes to at an hour goes then, on its own lane, so a long job
+        # never makes it late (``kranto.social.hours``)
+        from .social.hours import HoursLane
         scheduler = Scheduler(rt.store, jobs,
                               ticks=[lambda: features.deliver(rt), memory.Watch().check,
                                      lambda: _idle_embedder(rt)],
-                              job_source=lambda: rt.cubs.jobs() if rt.cubs else [])
+                              job_source=lambda: rt.cubs.jobs() if rt.cubs else [],
+                              lanes=[HoursLane(rt)])
     from .web.app import LOOPBACK_HOSTS
 
     allowed = set(LOOPBACK_HOSTS) | {h.strip("[]").lower() for h in args.allow_host or []}

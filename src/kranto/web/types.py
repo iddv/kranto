@@ -2400,7 +2400,7 @@ class PostAccount(TypedDict):
 
 class PostSibling(TypedDict):
     """One site of a write's short posts: its newest draft, the site, its name and where the
-    draft stands (``waiting``, ``sent``, ``earlier``)."""
+    draft stands (``waiting``, ``scheduled``, ``sent``, ``earlier``)."""
     id: int
     site: str
     word: str
@@ -2444,6 +2444,25 @@ class PostDraft(TypedDict):
     write: NotRequired[str | None]
     way: NotRequired[Literal["open", "direct"]]
     sites: NotRequired[list[PostSibling]]
+    # its hour (``kranto.social.hours``): ``due`` (UTC) and ``due_words`` (the person's own
+    # time) while scheduled; ``missed`` the words when its hour passed while Kranto was stopped
+    due: NotRequired[str | None]
+    due_words: NotRequired[str | None]
+    missed: NotRequired[str | None]
+    # a sent post's numbers, as its site last gave them (``kranto.social.reach``), or None
+    reach: NotRequired["PostReach | None"]
+
+
+class PostReach(TypedDict):
+    """A sent post's numbers, its newest reading: each count None where the site gives none;
+    ``words`` the row's line ("4 replies, 9 reposts, 31 likes"), ``read_at`` when it was read."""
+    replies: int | None
+    reposts: int | None
+    likes: int | None
+    quotes: int | None
+    views: int | None
+    read_at: str
+    words: str
 
 
 # A Write a post that wrote no draft: ``about`` and ``as`` as it was asked (Try again
@@ -2454,16 +2473,19 @@ PostFailed = TypedDict("PostFailed", {
 
 
 class Post(TypedDict):
-    """``GET /api/post``: the drafts waiting (a draft's ask has no time limit), sent and
-    earlier, newest first, the three accounts, and the writes that failed in the last week
-    and were not dismissed (``failed``)."""
+    """``GET /api/post``: the drafts waiting (a draft's ask has no time limit), scheduled
+    (soonest first), sent and earlier, newest first, the three accounts, and the writes that
+    failed in the last week and were not dismissed (``failed``)."""
     line: str
     drafts: list[PostDraft]
+    scheduled: NotRequired[list[PostDraft]]
     sent: list[PostDraft]
     earlier: list[PostDraft]
     accounts: list[PostAccount]
     sites: PostSitesLine
     failed: list[PostFailed]
+    # the Sent group's foot, said once: the sites whose numbers Kranto cannot read, or None
+    reach_foot: NotRequired[str | None]
 
 
 class PostPart(TypedDict):
@@ -2551,6 +2573,9 @@ class PostingSite(TypedDict):
     limit: int
     unit: str
     disclose: bool
+    # what the sent posts' numbers support, in words ("Best hour so far: 09:00, from 16 posts");
+    # empty until there are at least 8 posts on each side of a comparison
+    learned: NotRequired[list[str]]
 
 
 class PostingGone(TypedDict):

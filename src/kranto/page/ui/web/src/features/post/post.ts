@@ -23,6 +23,8 @@ export interface PostDraft {
   // a short post's own: its site, the write it belongs to, how it goes
   site?: string; site_word?: string; group?: string | null; way?: "open" | "direct";
   sites?: PostSibling[];
+  // its hour, while scheduled (the person's own time), or the words of a missed one
+  due?: string | null; due_words?: string | null; missed?: string | null;
 }
 /** one site of a write's short posts: its newest draft and where it stands */
 export interface PostSibling { id: number; site: string; word: string; state: string }
@@ -38,7 +40,7 @@ export interface PostPart { text: string; used?: number }
 /** what else goes with the words (SOCIAL's `extras`): a muted line each; `drop` offers Remove */
 export interface PostExtra { key: string; words: string; drop?: boolean }
 export interface PostSheet extends PostDraft {
-  group: "waiting" | "sent" | "earlier";
+  group: "waiting" | "scheduled" | "sent" | "earlier";
   markdown: string;
   filename: string;
   words: number;

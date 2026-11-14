@@ -102,7 +102,8 @@ sent in LinkedIn's own format, so a "#" or a bracket reads as written and a tag 
 
 **Threads (posting)**, for Post directly (about ten minutes, once). At
 `developers.facebook.com/apps` choose Create app with the use case "Access the Threads API",
-name it Kranto. Under Use cases, Customize beside Threads, add `threads_content_publish`. Under
+name it Kranto. Under Use cases, Customize beside Threads, add `threads_content_publish` and
+`threads_manage_insights` (the second lets Kranto read how your posts did). Under
 App roles, Roles, Add people, add your own Threads account as a Threads tester, and accept the
 invitation in Threads (Settings, Account, Website permissions, Invites). Under User token
 generator choose Generate access token, allow, copy it, and paste it on Settings › Posting,
@@ -110,13 +111,56 @@ Threads (posting). Kranto refreshes it while you use it (60 days at a time). The
 development mode, for you only. A thread is not written for Threads: a reply needs one more
 permission.
 
+## Send at an hour
+
+A post Kranto posts directly (Bluesky, Mastodon, Threads, LinkedIn) can go at an hour you
+choose: in its dialog choose **Schedule**, pick the day and time (your own clock), and say yes.
+
+- **Nothing goes without that yes.** Kranto keeps your yes for those words and that time; the
+  draft moves to **Scheduled** on Post ("Goes Monday 16 Nov, 09:00 · Bluesky").
+- **Move or cancel it until then.** Cancel on its row (or its page) and nothing is sent: the
+  draft waits on Post again. Change the time from its page (the same dialog). To change its
+  words, cancel first: an edited draft is a new draft and needs a new yes.
+- **At the hour, Kranto posts it**, exactly as if you had pressed then. It checks once more that
+  the draft and its words are the ones you said yes to.
+- **If Kranto was stopped at the hour** (the machine was off or asleep) and starts more than ten
+  minutes later, it does **not** post late. The draft waits on Post with "Its hour passed while
+  Kranto was stopped", Needs you says so, and you post it now or choose a new time.
+- A restart keeps the schedule. The preview never posts, and refuses a schedule.
+
+I posted it (Open) is always now: you post it in the site yourself.
+
+## What each site gives back
+
+Once a day for two weeks after a post Kranto sent, then once a week until it is two months old,
+Kranto reads its numbers and shows them on Sent ("Posted to Bluesky · 4 replies, 9 reposts, 31
+likes"). Never the text of anyone's reply: counts only. Read live on 14 November 2026:
+
+| Site | What Kranto reads | With what |
+|---|---|---|
+| Bluesky | replies, reposts, likes, quotes (`app.bsky.feed.getPosts`) | Bluesky's public read, no sign-in |
+| Mastodon | replies, boosts, favourites, and quotes from Mastodon 4.5 (`GET /api/v1/statuses/:id`) | your posting connection |
+| Threads | views, likes, replies, reposts, quotes (media insights) | your token, with `threads_manage_insights` |
+| LinkedIn | nothing | LinkedIn gives a member's numbers only to approved partners |
+| X | nothing | X charges for each read, and Kranto never posts to X itself |
+
+Sent says once, at its foot, which sites gave no numbers. **What was learned**
+(`GET /api/post/learned`): with at least 8 posts on each side of a comparison, Settings ›
+Posting says what the numbers support under the site (the better hour, one post or a thread, a
+link card or none); with fewer, it says nothing rather than guess.
+
+**LinkedIn's 60 days.** An app like Kranto cannot renew a LinkedIn token. A week before the day
+it runs out, Needs you says "LinkedIn needs a new token by 12 January (5 minutes)".
+
 ## What is stored
 
 | Stored | What | Readers |
 |---|---|---|
 | `settings` key `post.sites` | the sites ticked, Post directly per site, your Mastodon server, the disclosure per site | `core.sites.choices`, `post_api.posting_read`/`posting_write`; a missing key or one stored as null reads as none |
 | `cub_drafts` of the filer `social` | one row a site: `site`, `group` (one write), `parts`, `text`, `link`, `extras`, `prose`, `language`, `card` (Bluesky posted directly) | Post's read (`_short_row`, `short_sheet`, `siblings`), the edit, the asks below |
-| `cub_tickets` kinds `post.open` (I posted it), `post.bluesky`, `post.linkedin`, `post.threads`; `post.mastodon` as before | each waits until you answer it; confirmed on the page only; refused on the preview before anything is written | `core.tickets`, `core.asks`, Post |
+| `cub_tickets` kinds `post.open` (I posted it), `post.bluesky`, `post.linkedin`, `post.threads`; `post.mastodon` as before | each waits until you answer it; confirmed on the page only; refused on the preview before anything is written. A held ask stays `needs_confirm` until its hour: no new state | `core.tickets`, `core.asks`, Post |
+| `post_due` (migration 44) | your yes for an hour: `held`, then `cancelled`, `missed`, `void` or `pressed`, one row a change, never edited; `fields_hash` binds it to the words you read | `social.hours` (the lane, Cancel), `post_api` (`_group`, `_hour_of`), `tickets.press_held` |
+| `post_reach` (migration 44) | a sent post's first row (`note` `sent`: the site's own ids, the post's shape), then one row a reading (each count null where the site gives none) | `social.reach` (`posts`, `due`, `newest`, `learned`), `post_api._reach_of` |
 
 ## Routes
 
@@ -126,9 +170,23 @@ permission.
 | `POST /api/post/angles` `{about, as}` | the three proposed angles |
 | `GET /api/post/d/{id}` | a short post's page: `parts` (each counted), `limit`, `extras`, `siblings`, `open`, `open_off`, `direct` |
 | `POST /api/post/d/{id}/posted` | I posted it (the page only; never the preview; no request leaves Kranto) |
+| `POST /api/tickets/{id}/confirm` `{confirm: true, when}` | a direct send now (`when: "now"`) or at a UTC time ahead: held, not sent |
+| `POST /api/post/d/{id}/cancel` | a scheduled post's Cancel (the page; nothing is sent; the draft waits) |
+| `GET /api/post/learned` | per site, what the sent posts' numbers support (at least 8 posts a side) |
 | `GET`/`POST /api/post/sites` | Settings › Posting's sites and your choices |
 
-## Sources (read 2026-11-13)
+## Sources (read 2026-11-13; reach on 2026-11-14)
+
+- Reach, read 2026-11-14: Bluesky's `app.bsky.feed.getPosts` and its `postView`
+  (<https://github.com/bluesky-social/bsky>, `lexicons/app/bsky/feed/`; an `at://` address must
+  carry the DID); Mastodon's status and its counts (<https://docs.joinmastodon.org/methods/statuses/>,
+  <https://docs.joinmastodon.org/entities/Status/>, `quotes_count` from 4.5.0); Threads' insights
+  (<https://developers.facebook.com/docs/threads/insights>); LinkedIn's member post analytics
+  (<https://learn.microsoft.com/en-us/linkedin/marketing/community-management/members/post-statistics>:
+  the Community Management API, for vetted organisations) and its tokens' 60 days with no
+  refresh for a self-serve app
+  (<https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow>);
+  X's pricing (<https://docs.x.com/x-api/getting-started/pricing>).
 
 - Bluesky's compose link: <https://docs.bsky.app/docs/advanced-guides/intent-links>; posts,
   facets and link cards: <https://docs.bsky.app/docs/advanced-guides/posts>.

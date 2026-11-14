@@ -2,6 +2,8 @@
 // the P1): the drafts that wait (a draft's ask has no time limit), what was sent, the three
 // accounts, and the earlier drafts. Plain data and words, so the tests read them without a page.
 import { href, matchRoute } from "../../lib/router";
+import { afkDropPrefix } from "../../lib/app/data";
+import { app } from "../../lib/shell.svelte";
 import type { Post, PostAccount, PostDraft, PostFailed } from "../../api/afk.gen";
 import type { About } from "../../features/post/post";
 
@@ -21,7 +23,23 @@ export const hasSheet = (): boolean => !!matchRoute(["post", "d", "1"]);
  * says where it went first ("Posted to Bluesky · posted by you") */
 export function sentLine(d: PostDraft): string {
   const said = d.note || d.said || "Sent";
-  return d.site_word ? `Posted to ${d.site_word} · ${said}` : said;
+  const line = d.site_word ? `Posted to ${d.site_word} · ${said}` : said;
+  // its numbers, where its site gives them: "· 4 replies, 9 reposts, 31 likes"
+  return d.reach && d.reach.words ? `${line} · ${d.reach.words}` : line;
+}
+/** a scheduled post's line: "Monday 16 Nov, 09:00 · Bluesky" (the person's own time) */
+export function dueLine(d: Pick<PostDraft, "due_words" | "site_word">): string {
+  return [d.due_words ? `Goes ${d.due_words}` : "Scheduled", d.site_word || ""].filter(Boolean).join(" · ");
+}
+/** Cancel a scheduled post: nothing is sent, and the draft waits on Post again */
+export function cancelHour(btn: HTMLElement | null, id: number): void {
+  const L = app();
+  if (!L) return;
+  void L.act(btn, () => L.api(`/api/post/d/${id}/cancel`, {}), (r) => {
+    afkDropPrefix("/api/post");
+    L.afkDrop();
+    L.say((r as { say?: string } | null)?.say || "Cancelled: nothing is sent.");
+  });
 }
 /** a write's short posts as plain words, a tick on those sent: "Bluesky ✓ · Mastodon · X" */
 export function sitesWords(d: Pick<PostDraft, "sites">): string {

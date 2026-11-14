@@ -1,0 +1,25 @@
+{
+  "_source": "Hand-written from each site's documented shapes, read 2026-11-14. Bluesky: app.bsky.feed.getPosts and its postView (the lexicons in github.com/bluesky-social/bsky, lexicons/app/bsky/feed/getPosts.json and defs.json; the createRecord answer from com.atproto.repo.createRecord). Mastodon: docs.joinmastodon.org/methods/statuses (GET /api/v1/statuses/:id) and entities/Status (quotes_count from 4.5.0). Threads: developers.facebook.com/docs/threads/insights (media insights; values[0].value and total_value.value) and the Graph API error object. Not yet a recorded real answer.",
+  "bluesky_posts": {"posts": [
+    {"uri": "at://did:plc:abcdefghijklmnopqrstuvwx/app.bsky.feed.post/3kexample1",
+     "cid": "bafyreiexamplecid1", "author": {"did": "did:plc:abcdefghijklmnopqrstuvwx", "handle": "alex.example.com"},
+     "record": {"$type": "app.bsky.feed.post", "text": "Words.", "createdAt": "2026-11-13T09:00:00.000Z"},
+     "replyCount": 4, "repostCount": 9, "likeCount": 31, "quoteCount": 1, "bookmarkCount": 2,
+     "indexedAt": "2026-11-13T09:00:01.000Z", "labels": []}
+  ]},
+  "mastodon_status": {"id": "103270115826048975",
+    "uri": "https://mastodon.example/users/alex/statuses/103270115826048975",
+    "url": "https://mastodon.example/@alex/103270115826048975",
+    "replies_count": 5, "reblogs_count": 6, "favourites_count": 11, "quotes_count": 2},
+  "mastodon_status_before_4_5": {"id": "103270115826048975",
+    "url": "https://mastodon.example/@alex/103270115826048975",
+    "replies_count": 1, "reblogs_count": 0, "favourites_count": 3},
+  "threads_insights": {"data": [
+    {"name": "views", "period": "lifetime", "total_value": {"value": 820}, "title": "Views", "id": "1234567/insights/views/lifetime"},
+    {"name": "likes", "period": "lifetime", "values": [{"value": 100}], "title": "Likes", "id": "1234567/insights/likes/lifetime"},
+    {"name": "replies", "period": "lifetime", "values": [{"value": 10}], "title": "Replies", "id": "1234567/insights/replies/lifetime"},
+    {"name": "reposts", "period": "lifetime", "values": [{"value": 3}], "title": "Reposts", "id": "1234567/insights/reposts/lifetime"},
+    {"name": "quotes", "period": "lifetime", "values": [{"value": 0}], "title": "Quotes", "id": "1234567/insights/quotes/lifetime"}
+  ]},
+  "threads_no_permission": {"error": {"message": "(#10) Application does not have permission for this action", "type": "OAuthException", "code": 10, "fbtrace_id": "Afaketrace3"}}
+}
