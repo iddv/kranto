@@ -10,11 +10,10 @@ from __future__ import annotations
 
 import json
 import re
-from pathlib import Path
 
 import pytest
 
-from kranto.features.post.evals import export, outline, readpage, round2, writers
+from kranto.features.post.evals import export, fixture, outline, readpage, round2, writers
 from kranto.prose import check
 from kranto.prose.checker import (
     ANNOUNCED,
@@ -25,7 +24,7 @@ from kranto.prose.checker import (
     invented_first_person,
 )
 
-REC = json.loads((Path(writers.__file__).parent / "recorded2.json").read_text("utf-8"))
+REC = json.loads(fixture("recorded2.json").read_text("utf-8"))
 DRAFTS = [(iid, r["site"], kind, d) for iid, r in REC["items"].items()
           for kind, d in r["drafts"].items()]
 IDS = [f"{iid}-{kind}" for iid, _, kind, _ in DRAFTS]

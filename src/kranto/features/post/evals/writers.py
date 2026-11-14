@@ -14,7 +14,6 @@ import json
 import re
 from dataclasses import replace
 from functools import cache
-from pathlib import Path
 
 from bears_cub import fence
 
@@ -209,4 +208,6 @@ def text_of(site: str, answer: dict | str) -> str:
 
 
 def items() -> list[dict]:
-    return json.loads((Path(__file__).parent / "items.json").read_text(encoding="utf-8"))["items"]
+    from . import fixture
+
+    return json.loads(fixture("items.json").read_text(encoding="utf-8"))["items"]

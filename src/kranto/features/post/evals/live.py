@@ -6,7 +6,8 @@ For each item and site: today's old prompt, then the new writer (compose, the ca
 revise of only the flagged spans), then a blind pairwise judgement of the two texts in a
 random order. Every call goes through the home's metered client (``llm_calls``), and the run
 stops before the next call once the cost (or, on a plan, the list-price estimate) reaches the
-budget. It writes ``recorded.json`` beside this file (or ``--out``) and prints the scorecard.
+budget. It writes ``recorded.json`` in the checkout's fixtures (or ``--out``) and prints the
+scorecard.
 """
 
 from __future__ import annotations
@@ -20,9 +21,8 @@ from pathlib import Path
 
 from ....prose import check, revise
 from ....prose.reviser import fit
-from . import rubric, score, writers
+from . import FIXTURES, rubric, score, writers
 
-HERE = Path(__file__).parent
 # the judge's rubric is the owner's eight rules (P-12; ``rubric.py``): round 1's
 # preferred the cautious, complete post the owner rejected
 
@@ -134,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--budget", type=float, default=3.0, help="stop at this many dollars")
     ap.add_argument("--items", type=int, default=20)
     ap.add_argument("--sites", default="blog,toot")
-    ap.add_argument("--out", default=str(HERE / "recorded.json"))
+    ap.add_argument("--out", default=str(FIXTURES / "recorded.json"))
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--kranto.page", help="a checkout of the page to import (the Claude Code "
                                        "provider's claude_print), when it is not installed")

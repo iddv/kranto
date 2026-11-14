@@ -213,8 +213,10 @@ See `NOTICE`.
 
 ## The eval
 
-`features/post/evals/` holds 20 brief items and idea cards, each written by the old writers and
-by the new, as recorded answers. `pytest tests/test_prose_eval.py` replays them in CI with no
+`features/post/evals/` is the eval's code; its 20 brief items and idea cards, each written by the
+old writers and by the new, as recorded answers, and the owner's reads are test fixtures in
+`tests/fixtures/post_evals/` (not in the package: the eval runs from a checkout). `pytest
+tests/test_prose_eval.py` replays them in CI with no
 model: the checker's scores, the rhythm against a voice card, and the share of invented
 first-person claims (which must be 0). `python -m kranto.features.post.evals.live` runs it
 live by hand, under a cost cap, and adds a blind pairwise judgement.

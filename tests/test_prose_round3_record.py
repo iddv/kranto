@@ -6,15 +6,14 @@ owner's second read included. Nothing here calls a model."""
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
-from kranto.features.post.evals import round3, writers
+from kranto.features.post.evals import fixture, round3, writers
 from kranto.prose import check
 from kranto.prose.angles import KINDS, problems, stock
 
-REC = json.loads((Path(round3.__file__).parent / "recorded3.json").read_text(encoding="utf-8"))
+REC = json.loads(fixture("recorded3.json").read_text(encoding="utf-8"))
 ITEMS = {it["id"]: it for it in writers.items()}
 DRAFTS = [(iid, r["site"], kind, d) for iid, r in REC["items"].items()
           for kind, d in r["drafts"].items()]

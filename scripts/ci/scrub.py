@@ -46,7 +46,7 @@ ALLOW: dict[str, dict[str, str]] = {
         "prompts.lock.json": "hashes of the prompts, kept with them",
         "docs/design/TENETS.md": "read by the prompts, kept byte for byte",
         "tests/fixtures/evals/**": "recorded with the prompts' exact bytes, kept with them",
-        "src/kranto/features/post/evals/owner_read_2.json": "three outside writers' drafts kept "
+        "tests/fixtures/post_evals/owner_read_2.json": "three outside writers' drafts kept "
         "verbatim, as a reader judged them (they use the verb \"bears on\")",
         "tests/test_public_tree.py": "tests for this scanner",
         "scripts/ci/scrub.py": "this scanner",
