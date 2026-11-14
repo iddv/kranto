@@ -923,6 +923,13 @@ def ladder_setting(cfg) -> dict[str, dict[str, str]]:
     return {"kinds": dict(raw.get("kinds") or {}), "verbs": dict(raw.get("verbs") or {})}
 
 
+def kind_words(kind: str) -> str:
+    """A ladder kind's words inside a sentence: "what leaves Kranto", "changes you can undo" (the
+    first letter lowered, the product's name kept as it is written)."""
+    w = KIND_WORDS.get(kind, kind)
+    return w[:1].lower() + w[1:]
+
+
 def choice_for(cfg, verb: Verb, fields: dict[str, Any] | None = None) -> Choice:
     """The ladder's answer for a caller that is not the owner pressing. ``fields``: the call's
     own (a field of ``verb.ask_fields`` among them makes Kranto's answer "ask", unless the
@@ -940,14 +947,14 @@ def choice_for(cfg, verb: Verb, fields: dict[str, Any] | None = None) -> Choice:
         return Choice(str(by_verb), False, f"your setting for {verb.title} ({verb.kind})")
     if fields and verb.ask_fields and any(fields.get(f) is not None for f in verb.ask_fields):
         if s["kinds"].get(verb.ladder) == "never":
-            return Choice("never", False, f"your setting for {KIND_WORDS[verb.ladder].lower()}")
+            return Choice("never", False, f"your setting for {kind_words(verb.ladder)}")
         return Choice("ask", False, verb.ask_why or "Kranto's default for this change")
     by_kind = s["kinds"].get(verb.ladder)
     if by_kind in CHOICES:
         return Choice(str(by_kind), False,
-                      f"your setting for {KIND_WORDS[verb.ladder].lower()}")
+                      f"your setting for {kind_words(verb.ladder)}")
     return Choice(DEFAULTS[verb.ladder], False,
-                  f"Kranto's default for {KIND_WORDS[verb.ladder].lower()}")
+                  f"Kranto's default for {kind_words(verb.ladder)}")
 
 
 def check_ladder(raw: Any, lookup: bool = True) -> dict[str, dict[str, str]]:
@@ -1069,4 +1076,4 @@ __all__ = ["CHOICES", "CORE", "DEFAULTS", "DOORS", "LADDER_KINDS", "LOCKS", "RET
            "ROUTE_ALLOW",
            "Choice", "Field", "Verb", "acting", "acting_by", "all_verbs", "asked", "asked_by",
            "by_of", "by_words", "check_ladder", "choice_for", "door_of", "feature_verbs", "fill",
-           "get", "ladder_setting", "routes_of", "table_view"]
+           "get", "kind_words", "ladder_setting", "routes_of", "table_view"]
