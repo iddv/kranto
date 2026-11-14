@@ -1733,16 +1733,17 @@ _MIGRATIONS: list[tuple[int, str]] = [
     # one waiting ask at a time they chose (``held``), and what became of it, one row a change,
     # never edited: moved (a newer ``held`` row), ``cancelled``, ``missed`` (its hour passed
     # while Kranto was stopped: the ask waits again for a new yes), ``void`` (the ask was
-    # answered, edited or declined before the hour), ``pressed`` (Kranto pressed it at its
-    # hour). The newest row of a ticket says where it stands. ``fields_hash`` binds the yes to
-    # the words the person read. ``post_reach``: one row a reading of a sent post's numbers
-    # (each nullable: a site that does not give one stores null); ``shape`` is the post's
-    # shape (site, parts, card, length, weekday and hour sent) for what was learned.
+    # answered, edited or declined before the hour), ``spent`` (Kranto sent it at its hour:
+    # the yes is used up whatever the site answered). The newest row of a ticket says where it
+    # stands. ``fields_hash`` binds the yes to the words the person read. ``post_reach``: one
+    # row a reading of a sent post's numbers (each nullable: a site that does not give one
+    # stores null); ``shape`` is the post's shape (site, parts, card, length, weekday and hour
+    # sent) for what was learned.
     (44, """
     CREATE TABLE post_due (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         ticket_id INTEGER NOT NULL,
-        state TEXT NOT NULL CHECK (state IN ('held', 'cancelled', 'missed', 'void', 'pressed')),
+        state TEXT NOT NULL CHECK (state IN ('held', 'cancelled', 'missed', 'void', 'spent')),
         due_at TEXT NOT NULL,
         fields_hash TEXT NOT NULL,
         door TEXT,

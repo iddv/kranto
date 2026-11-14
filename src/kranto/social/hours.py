@@ -1,7 +1,5 @@
 """Send at an hour: a post the person said yes to goes at the time they chose.
 
-The design (SOCIAL-DESIGN §3.7, X-7) and the owner's brief of 14 November:
-
 - **Nothing goes without the yes.** The confirm dialog's Schedule records the person's yes for
   one waiting ask, for the words they read (the ask's ``fields_hash``) and the time they chose
   (``post_due``, state ``held``). The ask itself stays open (``needs_confirm``): no ask is left
@@ -34,7 +32,7 @@ from ..store import Store, iso, utcnow
 
 log = logging.getLogger("kranto.social.hours")
 
-HELD, CANCELLED, MISSED, VOID, PRESSED = "held", "cancelled", "missed", "void", "pressed"
+HELD, CANCELLED, MISSED, VOID, SPENT = "held", "cancelled", "missed", "void", "spent"
 TICK_SECONDS = 30.0
 # Pressed later than this after its hour, a post was missed rather than late: the lane ticks
 # every 30 seconds, so only a stopped Kranto (or a machine asleep) is this late.
@@ -174,7 +172,7 @@ def missed_of(store: Store, ticket_id: int | None) -> dict[str, Any] | None:
 
 
 def tick(store: Store, context: Any = None, now: datetime | None = None) -> list[dict[str, Any]]:
-    """Press every hold whose hour has come, once: ``pressed`` and the ask's outcome; ``void``
+    """Press every hold whose hour has come, once: ``spent`` and the ask's outcome; ``void``
     when the ask was answered or changed; ``missed`` when the hour is more than ``LATE`` past.
     Nothing on the preview. Returns what happened, one entry a hold."""
     from .. import preview
@@ -203,7 +201,7 @@ def tick(store: Store, context: Any = None, now: datetime | None = None) -> list
             continue
         # the hold is spent before the press, so a press that dies half-way is never pressed
         # again by the next tick (Kranto never retries a send by itself)
-        _write(store, tid, PRESSED, due_at=h["due_at"], fields_hash=h["fields_hash"],
+        _write(store, tid, SPENT, due_at=h["due_at"], fields_hash=h["fields_hash"],
                door="core", now=now)
         try:
             got = tickets.press_held(store, tid, context=context, now=now, yes=h)

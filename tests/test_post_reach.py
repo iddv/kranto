@@ -195,7 +195,8 @@ def test_linkedins_token_is_reminded_a_week_before_once(store):
 
 @pytest.mark.parametrize("raw", [None, "", "not json", "[]", '{"ids": null}'])
 def test_a_shape_stored_otherwise_reads_as_none(store, raw):
-    """A reader of ``post_reach.shape`` never assumes its shape (RCA 2026-10-23)."""
+    """A reader of ``post_reach.shape`` never assumes its shape: null, empty, not JSON, a
+    list, or a key stored as null all read as an object."""
     store.insert("post_reach", {"ticket_id": 1, "site": "bluesky", "read_at": iso(SENT_AT),
                                 "shape": raw if raw is not None else "{}", "note": reach.SENT,
                                 "created_at": iso(SENT_AT)})

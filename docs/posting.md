@@ -121,7 +121,7 @@ choose: in its dialog choose **Schedule**, pick the day and time (your own clock
 - **Move or cancel it until then.** Cancel on its row (or its page) and nothing is sent: the
   draft waits on Post again. Change the time from its page (the same dialog). To change its
   words, cancel first: an edited draft is a new draft and needs a new yes.
-- **At the hour, Kranto posts it**, exactly as if you had pressed then. It checks once more that
+- **At the hour, Kranto posts it**, exactly as if you had said yes then. It checks once more that
   the draft and its words are the ones you said yes to.
 - **If Kranto was stopped at the hour** (the machine was off or asleep) and starts more than ten
   minutes later, it does **not** post late. The draft waits on Post with "Its hour passed while
@@ -159,7 +159,7 @@ it runs out, Needs you says "LinkedIn needs a new token by 12 January (5 minutes
 | `settings` key `post.sites` | the sites ticked, Post directly per site, your Mastodon server, the disclosure per site | `core.sites.choices`, `post_api.posting_read`/`posting_write`; a missing key or one stored as null reads as none |
 | `cub_drafts` of the filer `social` | one row a site: `site`, `group` (one write), `parts`, `text`, `link`, `extras`, `prose`, `language`, `card` (Bluesky posted directly) | Post's read (`_short_row`, `short_sheet`, `siblings`), the edit, the asks below |
 | `cub_tickets` kinds `post.open` (I posted it), `post.bluesky`, `post.linkedin`, `post.threads`; `post.mastodon` as before | each waits until you answer it; confirmed on the page only; refused on the preview before anything is written. A held ask stays `needs_confirm` until its hour: no new state | `core.tickets`, `core.asks`, Post |
-| `post_due` (migration 44) | your yes for an hour: `held`, then `cancelled`, `missed`, `void` or `pressed`, one row a change, never edited; `fields_hash` binds it to the words you read | `social.hours` (the lane, Cancel), `post_api` (`_group`, `_hour_of`), `tickets.press_held` |
+| `post_due` (migration 44) | your yes for an hour: `held`, then `cancelled`, `missed`, `void` or `spent`, one row a change, never edited; `fields_hash` binds it to the words you read | `social.hours` (the lane, Cancel), `post_api` (`_group`, `_hour_of`), `tickets.press_held` |
 | `post_reach` (migration 44) | a sent post's first row (`note` `sent`: the site's own ids, the post's shape), then one row a reading (each count null where the site gives none) | `social.reach` (`posts`, `due`, `newest`, `learned`), `post_api._reach_of` |
 
 ## Routes

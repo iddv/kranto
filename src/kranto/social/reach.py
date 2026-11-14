@@ -1,7 +1,7 @@
 """Reach: what a post Kranto sent drew, read back once a day, and what was learned from it.
 
-SOCIAL-DESIGN §3.8, X-9. Read live from each site's documents on 14 November 2026
-(``docs/posting.md``, "What each site gives back"):
+Read live from each site's documents on 14 November 2026 (``docs/posting.md``, "What each
+site gives back"):
 
 - **Bluesky**: ``app.bsky.feed.getPosts`` on the public AppView, no sign-in, up to 25 posts a
   call: ``replyCount``, ``repostCount``, ``likeCount``, ``quoteCount``. It takes the post's
@@ -17,7 +17,7 @@ SOCIAL-DESIGN §3.8, X-9. Read live from each site's documents on 14 November 20
   each read (and Kranto never posts to X): their rows carry the address and no numbers, and the
   Sent group says why once (``NO_NUMBERS``).
 
-Never the text of anyone's reply (X-9): counts only.
+Never the text of anyone's reply: counts only.
 
 **When:** the daily job ``post.reach`` reads each post once a day for its first 14 days, then
 once a week until it is 60 days old. **The preview never reads** (the job does nothing there).
@@ -88,15 +88,20 @@ def sent(store: Any, ticket_id: int, site: str, ids: dict[str, Any], content: di
                                     "shape": json.dumps(shape, sort_keys=True), "note": SENT,
                                     "created_at": iso(now)})
     except Exception:  # noqa: BLE001 - the post went out; its reach row is not worth a failure
-        log.exception("could not keep the shape of a sent post (ticket %s)", ticket_id)
+        log.exception("could not keep the shape of a sent post (ask %s)", ticket_id)
 
 
 def _shape(raw: Any) -> dict[str, Any]:
+    """A stored shape as an object, whatever was stored (null, not JSON, a list: ``{}``); its
+    ``ids`` as an object too."""
+    from ..stored.cubs import PostReachShape
     try:
-        v = json.loads(raw) if isinstance(raw, str) else raw
-    except ValueError:
+        v = dict(PostReachShape.load(raw).extra)
+    except (TypeError, ValueError):
         return {}
-    return v if isinstance(v, dict) else {}
+    if not isinstance(v.get("ids"), dict):
+        v["ids"] = {}
+    return v
 
 
 # -- what is due -------------------------------------------------------------------------------
