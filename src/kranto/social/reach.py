@@ -34,7 +34,6 @@ against none. Fewer, and it says how many more it needs; never invented lore.
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import datetime, timedelta
 from typing import Any
@@ -84,8 +83,9 @@ def sent(store: Any, ticket_id: int, site: str, ids: dict[str, Any], content: di
                  "length": len(str(content.get("text") or "")),
                  "weekday": when.strftime("%A"), "hour": when.hour,
                  "angle": angle if isinstance(angle, str) else None}
+        from ..stored.cubs import PostReachShape
         store.insert("post_reach", {"ticket_id": int(ticket_id), "site": site, "read_at": iso(now),
-                                    "shape": json.dumps(shape, sort_keys=True), "note": SENT,
+                                    "shape": PostReachShape.write(shape), "note": SENT,
                                     "created_at": iso(now)})
     except Exception:  # noqa: BLE001 - the post went out; its reach row is not worth a failure
         log.exception("could not keep the shape of a sent post (ask %s)", ticket_id)
