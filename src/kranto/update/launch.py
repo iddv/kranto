@@ -1,7 +1,8 @@
 """Start the update helper outside the environment it replaces (section 4.1).
 
-``launch`` copies ``apply.py`` (standard library only) to ``<home>/update/apply.py`` and runs
-it on the system Python as a transient user unit:
+``launch`` copies ``apply.py`` (standard library only) to ``<home>/update/apply.py``, with the
+two name modules it reads (``product.py``, ``legacy.py``) beside it, and runs it on the system
+Python as a transient user unit:
 
     systemd-run --user --unit=kranto-update --collect --description="kranto update to 0.2.0"
       --setenv=KRANTO_HOME=<home> --setenv=KRANTO_UNIT=kranto.service --setenv=PATH=<PATH> ...
@@ -18,10 +19,18 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import time
 from collections.abc import Callable
 from pathlib import Path
 
+# imported here, never inside a function: ``kranto update`` follows the helper from the tool's
+# environment while the helper replaces it (and, crossing to the other shape, deletes it)
+from .. import legacy
+from ..proc import running as _proc_running
 from .apply import FINAL, cancel_path, helper_unit, read_json, state_path, update_dir, write_json
+
+# what the helper's copy needs beside it: it imports these two when it is not in the package
+HELPER_FILES = ("apply.py", "../product.py", "../legacy.py")
 
 PASS_ENV = ("HOME", "PATH", "UV_TOOL_DIR", "UV_TOOL_BIN_DIR", "KRANTO_UPDATE_FAIL",
             "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS")
@@ -69,23 +78,21 @@ def running(home: Path) -> bool:
         return False
     pid = st.get("pid")
     if pid:
-        from ..proc import running as _running
-        return _running(pid, st.get("start"))
+        return _proc_running(pid, st.get("start"))
     try:   # launched, the helper not started yet: give it two minutes
-        import time
-
         return time.time() - state_path(home).stat().st_mtime < 120
     except OSError:
         return False
 
 
 def launch(home: Path, to: str, *, when: str = "after-build", port: int = 8765,
-           unit: str = "kranto.service", keep: int = 3, ignore_pids: tuple[int, ...] = (),
+           unit: str | None = None, keep: int = 3, ignore_pids: tuple[int, ...] = (),
            env: dict | None = None, run: Callable = _run,
            which: Callable = shutil.which) -> dict:
     """Start the helper; returns {"unit", "to", "when"}. Raises LaunchError."""
     home = Path(home)
     env = dict(os.environ if env is None else env)
+    unit = unit or legacy.unit_name(env)
     from .. import preview
     if preview.enabled(home, env):
         raise LaunchError("this is the preview: it is never updated (kranto-preview refresh "
@@ -104,7 +111,10 @@ def launch(home: Path, to: str, *, when: str = "after-build", port: int = 8765,
     d.mkdir(parents=True, exist_ok=True)
     os.chmod(d, 0o700)
     helper = d / "apply.py"
-    shutil.copy2(Path(__file__).with_name("apply.py"), helper)
+    here = Path(__file__).parent
+    for rel in HELPER_FILES:
+        src = (here / rel).resolve()
+        shutil.copy2(src, d / src.name)
     cancel_path(home).unlink(missing_ok=True)
     python = system_python(which)
     cmd = ["systemd-run", "--user", f"--unit={name}", "--collect",

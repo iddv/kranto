@@ -197,7 +197,8 @@ def end_terminals() -> list[str]:
 def detached_jobs() -> list[int] | None:
     """the page's detached jobs (whatever it starts in a session of its own: reapers, and on
     a the page from before the cut its builds), which a stop leaves running; [] without
-    the page (``afk serve`` starts none); None when the page cannot say (one from before
+    the page (``python -m kranto serve`` starts none); None when the page cannot say (one from
+    before
     STOP): then every child leading a session of its own is kept."""
     import importlib.util
 

@@ -13,7 +13,7 @@ Measured on 2026-10-20 (a 12-core machine):
 | The server with the embedding model loaded | about 0.8 GB |
 | A first read of a new topic (8 sources, 40 items each) | peaks at about 1.2 GB |
 | A read of 130 sources, or the map of 10,000 observations | peaks at about 1.4 GB |
-| A build | the build's own processes (Claude Code, the project's tests) on top |
+| The console | Claude Code's own processes on top |
 
 The embedding model (nomic-embed-text-v1.5, 0.5 GB on disk) is most of the server's memory.
 Before 0.4.11 a first read could take several GB (it embedded 40 texts in one model run and
@@ -25,14 +25,14 @@ kept that memory): see [the decision log](design/DECISIONS.md) and `src/kranto/e
 
 | Setting | Default | What it does |
 |---|---|---|
-| `MemoryHigh` | three quarters of `MemoryMax` | above it the kernel reclaims Kranto's memory and slows kranto down; nothing is killed |
-| `MemoryMax` | the smaller of 4 GiB and half the machine's memory | the kernel's OOM killer ends the biggest process in Kranto's group (the server, or a build), never another program |
-| `OOMPolicy=continue` | | a build ended for memory does not stop the server; a server ended for it is started again 15 s later |
+| `MemoryHigh` | three quarters of `MemoryMax` | above it the kernel reclaims Kranto's memory and slows Kranto down; nothing is killed |
+| `MemoryMax` | the smaller of 4 GiB and half the machine's memory | the kernel's OOM killer ends the biggest process in Kranto's group (the server, or the console), never another program |
+| `OOMPolicy=continue` | | a console ended for memory does not stop the server; a server ended for it is started again 15 s later |
 
-The caps cover the server and everything it starts, builds included.
+The caps cover the server and everything it starts, the console included.
 
 Where Kranto runs without the service (`kranto up --foreground`, a machine whose systemd user
-manager is not running for the service) and for `afk run`, the command puts itself in a
+manager is not running for the service) and for the watcher's own `python -m kranto.cli run`, the command puts itself in a
 `systemd-run --user --scope` with the same caps when the machine has a user systemd. It says
 so on its first line. `KRANTO_NO_SCOPE=1` runs it without. Without systemd (macOS, a
 container), there is no cap; the warning below still works.
@@ -40,7 +40,7 @@ container), there is no cap; the warning below still works.
 ## When it is high
 
 Past 80% of the lowest cap, the server writes one line to its log
-(`kranto logs`: `memory: kranto uses 2.7 GB of its 3.0 GB MemoryHigh ...`) and Settings ›
+(`kranto logs`: `memory: Kranto uses 2.7 GB of its 3.0 GB MemoryHigh ...`) and Settings ›
 System shows a warning; one more line says when it is back under. `/api/health` carries the
 figures under `memory`.
 

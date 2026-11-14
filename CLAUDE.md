@@ -16,7 +16,8 @@ rules the code depends on; `docs/README.md` lists every page.
 - Every model call goes through the metered client.
 - The page reads the server's library through its JSON API, never its database; the server uses
   the page only through `kranto.page.host_api`.
-- The console stays in its sandbox (`src/kranto/page/box/`).
+- Open in Claude Code's sessions stay in their sandbox (`src/kranto/page/box/`). The console runs
+  as the user, unsandboxed; `docs/threat-model.md` says so, and must stay true.
 - `docs/design/TENETS.md` (copied in `src/kranto/prompts/`) is sent to the model in every intern
   call: change it only on purpose.
 - The product's name and every name computed from it live in `src/kranto/product.py` (and

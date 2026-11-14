@@ -13,9 +13,9 @@
   "version": "explain-006d413c"
  },
  "judge": {
-  "version": "judge-0373eea6",
-  "evaluated": "2026-10-18",
-  "scorecard": "scorecards/2026-10-18-watching-v1-claude-haiku-5-5-baseline-0.3.88.md"
+  "version": "judge-eb7416df",
+  "evaluated": "2026-11-13",
+  "scorecard": "scorecards/2026-11-13-watching-v1-claude-haiku-5-5-rename-words.md"
  },
  "name": {
   "evaluated": "skipped: locked when the lock began; no eval stage measures cluster names yet",
@@ -30,8 +30,8 @@
   "evaluated": "skipped: the radar's block left with the radar (A2, \u00a73.1 cut 2, 2026-11-13): block 6 and its one rule removed, nothing added; the article's checks, citations and the planted instruction are code and tested; no article eval set yet"
  },
  "resolve": {
-  "version": "resolve-25351701",
-  "evaluated": "skipped: live search's second look at failed lines: one added placeholder; measured by SD's resolve_check, not a scorecard"
+  "version": "resolve-53454013",
+  "evaluated": "skipped: the product's name in its first line only; measured by resolve_check, not a scorecard"
  },
  "rollup": {
   "evaluated": "skipped: locked when the lock began; no eval stage measures compaction",
@@ -42,13 +42,13 @@
   "evaluated": "skipped: live search grounding: the eval set's free replay has no search results to render it with; measured instead by the real runs on a copy of live (.REPORT.md); its first scorecard is kranto eval discovery"
  },
  "screen": {
-  "version": "screen-f0e11eac",
-  "evaluated": "2026-10-18",
-  "scorecard": "scorecards/2026-10-18-watching-v1-claude-haiku-5-5-baseline-0.3.88.md"
+  "version": "screen-d66d7e2e",
+  "evaluated": "2026-11-13",
+  "scorecard": "scorecards/2026-11-13-watching-v1-claude-haiku-5-5-rename-words.md"
  },
  "screen_batch": {
-  "evaluated": "skipped: locked when the lock began; short posts are not in set v1",
-  "version": "screen_batch-26ea036c"
+  "version": "screen_batch-adaa276a",
+  "evaluated": "skipped: the product's name in its first lines only, the same words as screen's (evaluated: scorecards/2026-11-13-watching-v1-claude-haiku-5-5-rename-words.md); short posts are not in the set"
  },
  "verify": {
   "evaluated": "skipped: locked when the lock began; its first scorecard is kranto eval ideas",

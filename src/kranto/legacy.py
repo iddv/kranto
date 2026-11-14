@@ -12,9 +12,24 @@ import os
 from pathlib import Path
 from typing import Any
 
-from . import product
+try:
+    from . import product
+except ImportError:      # the update helper's copy under <home>/update/, beside product.py
+    import product  # type: ignore[no-redef]
 
 _OLD = "be" + "ars"   # written in two parts so a search for the old name finds it here only
+
+COMMAND = _OLD                                         # the alias command, kept until 1.0
+COMMANDS = (_OLD, "afk", "brb")                        # executables an old tool put on PATH
+TOOL = _OLD                                            # the uv tool an old install lives in
+# A release in the old shape (K0: the one release that crosses an old install over): three
+# wheels, the real code under its old distribution name, an empty one the old helper still
+# asks for, and the meta-package that carries the commands.
+COMPAT_META = _OLD
+COMPAT_SERVER = f"{_OLD}afk"
+COMPAT_PAGE = f"{_OLD}brb"
+COMPAT_DISTS = (COMPAT_META, COMPAT_SERVER, COMPAT_PAGE)
+OLD_PACKAGE = f"{_OLD}afk"   # the server's import package before the rename (its loggers' names)
 
 ENV_PREFIXES = (_OLD.upper() + "_", _OLD.upper() + "BRB_", _OLD.upper() + "AFK_")
 # variables that were named after one half of the old pair, and the name each has now
@@ -120,16 +135,89 @@ def db_file(data_dir: Path) -> Path:
 
 
 def config_dir(user_home: Path) -> Path:
-    """``~/.config/kranto``, or the old folder when only it exists (it is never moved)."""
+    """``~/.config/kranto``, or the old folder on an install made before the rename (it is never
+    moved). The new folder counts only once it holds an install's own home pointer: a stray or
+    half-made ``~/.config/kranto`` (a scratch instance's pointer, a folder made by hand) must not
+    pull an old install away from its tokens and logins."""
     base = Path(user_home) / ".config"
     new, old = base / product.CONFIG_DIR, base / CONFIG_DIR
-    return old if old.is_dir() and not new.exists() else new
+    return old if old.is_dir() and not (new / "home").is_file() else new
 
 
 def config_dirs(user_home: Path | str = "~") -> tuple[Path, Path]:
     """Both folders, for the checks that must guard either (secrets, the sandbox's hides)."""
     base = Path(user_home) / ".config"
     return base / product.CONFIG_DIR, base / CONFIG_DIR
+
+
+def unit_dir(environ: os._Environ[str] | dict[str, str] | None = None,
+             user_home: Path | str | None = None) -> Path:
+    """The user's systemd unit folder (``$XDG_CONFIG_HOME/systemd/user``)."""
+    env = os.environ if environ is None else environ
+    home = Path(user_home or env.get("HOME") or Path.home())
+    xdg = env.get("XDG_CONFIG_HOME")
+    return (Path(xdg) if xdg else home / ".config") / "systemd" / "user"
+
+
+def unit_name(environ: os._Environ[str] | dict[str, str] | None = None,
+              user_home: Path | str | None = None) -> str:
+    """The unit this install runs as: ``$KRANTO_UNIT`` (or its old name), else the old unit
+    when only it is installed (an install made before the rename, whose unit names nothing),
+    else ``kranto.service``. What an update restarts, and whose stores the doors read."""
+    env = os.environ if environ is None else environ
+    named = env.get(product.ENV_PREFIX + "UNIT") or env.get(ENV_PREFIXES[0] + "UNIT")
+    if named:
+        return named
+    d = unit_dir(env, user_home)
+    if (d / UNIT).exists() and not (d / product.UNIT).exists():
+        return UNIT
+    return product.UNIT
+
+
+def is_default_unit(unit: str) -> bool:
+    """The install's own unit, new name or old: its stores have no suffix."""
+    return unit in (product.UNIT, UNIT)
+
+
+def unit_store(kind: str, environ: os._Environ[str] | dict[str, str] | None = None,
+               user_home: Path | str | None = None) -> Path:
+    """A per-unit folder under the config folder (``tokens``, ``claude``, ``home``): the plain
+    name for the install's own unit, ``<kind>.<unit>`` for another (a scratch instance). The
+    config folder is the old one when only it exists (``config_dir``)."""
+    env = os.environ if environ is None else environ
+    home = Path(user_home or env.get("HOME") or Path.home())
+    unit = unit_name(env, home)
+    name = kind if is_default_unit(unit) else f"{kind}.{unit.removesuffix('.service')}"
+    return config_dir(home) / name
+
+
+def is_old_unit(text: str) -> bool:
+    """Whether a unit file was written before the rename, whatever its name (``bears.service``,
+    or a unit named by the old variable): its ``ExecStart`` runs the old command, or it sets an
+    old variable. Such a unit is kept as it is (only its ``Description=`` changes), so the
+    version before the rename can still start from it after a rollback."""
+    for line in text.splitlines():
+        key, _, value = line.strip().partition("=")
+        if key == "ExecStart" and value.split() and Path(value.split()[0]).name == COMMAND:
+            return True
+        if key == "Environment" and new_env_name(value.strip().strip('"').split("=", 1)[0]):
+            return True
+    return False
+
+
+def mcp_server_for(invoked: str | None) -> str:
+    """The MCP server's name for the command it was started as: the old command serves the old
+    names (``<old>_status``), so a client added long ago and its allow-lists keep matching."""
+    return MCP_SERVER if invoked and Path(invoked).name == COMMAND else product.MCP_SERVER
+
+
+# Claude Code's names for the tools, by server: the plugin's hooks accept both
+MCP_ALLOW_PREFIXES = tuple(f"mcp__{s}__{s}_" for s in (product.MCP_SERVER, MCP_SERVER))
+
+
+def alias_notice() -> str:
+    """What the old command says on a terminal, once a day."""
+    return f"{_OLD} is now {product.COMMAND}; both commands work."
 
 
 def live_homes() -> tuple[str, ...]:

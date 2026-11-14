@@ -146,7 +146,8 @@ def test_refresh_rotates_the_pair_and_the_old_refresh_token_is_dead(x):
 
 
 def test_two_processes_refreshing_at_once_spend_the_token_once(store, tmp_path, machine_id):
-    """``afk serve`` and a cron ``afk run``: two registries on one vault, each with its own
+    """``python -m kranto serve`` and a cron ``python -m kranto run``: two registries on one vault,
+    each with its own
     file descriptor, refresh the same expired token at the same moment."""
     fake = FakeX()
     serve = conns_for(store, tmp_path, fake, machine_id)

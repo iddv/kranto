@@ -1,9 +1,9 @@
 # Verbs: everything you can do, for every caller
 
-Every change you can make on a page (add a topic, approve a source, pause a cub, save a
+Every change you can make on a page (add a topic, approve a source, write a post, save a
 setting) is a **verb** in one table, `src/kranto/core/verbs.py`. The page actions its routes
 as it always has. Everyone else (the console in Kranto, your own Claude Code or Codex over
-`kranto mcp`, a named agent, a script) runs the same verbs through one door:
+`kranto mcp`, a script with its own token) runs the same verbs through one door:
 
 ```
 GET  /api/verbs                       every verb: its words, fields, doors, ladder kind, page
@@ -56,11 +56,10 @@ names the setting. A verb can differ from its kind (`verbs: {topic.add: ask}`).
 
 An action is prepared only when its action would take it: its fields are checked as the route
 checks them (their type, their choices, their limits, a field of several the route needs, the
-route's own rules: a preset's name, a grade), a feature that is off says so,
-and a build loop's action whose build is not in the state it needs says why now. A refusal is
+route's own rules: a preset's name, a grade), and a feature that is off says so. A refusal is
 in words for every caller, never a status or a response body, and an assistant's refused verb
-is in Activity (an assistant's action, skipped, with why). The functional suite
-(the page `tests/functional/`) prepares and actions every verb to keep this true.
+is in Activity (an assistant's action, skipped, with why). `tests/test_verbs.py`
+and `tests/test_parity.py` keep this true.
 
 Three things are locks, not settings: a key, a token or a login is made and pasted by you; a
 house confirm (a cub going live, the cubs' master

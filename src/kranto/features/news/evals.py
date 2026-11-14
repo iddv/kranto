@@ -1,6 +1,7 @@
 """News's eval, in EV's style: code metrics over briefs, free to run.
 
-``scorecard(briefs)`` reads stored briefs (``afk news eval``) or a frozen set of them (the tests'
+``scorecard(briefs)`` reads stored briefs (``python -m kranto news eval``) or a frozen set of them
+(the tests'
 fixtures; a set cut from live once there are 30 briefs,) and reports:
 
 - citation validity: the share of the model's items kept for their citations, and the bad

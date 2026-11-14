@@ -249,8 +249,7 @@ def make_job(home: Path, store, every_hours: float, *, port: int | None = None,
     """The scheduler's ``update`` job: a check that records a ``runs`` row (ok, or skipped
     with the reason when the check failed); with ``auto: idle``, then the update itself
     when nothing stands in the way (``idle_blockers``)."""
-    import os
-
+    from .. import legacy
     from ..scheduler import Job
     from ..store import utcnow
     from .launch import LaunchError, launch
@@ -271,7 +270,7 @@ def make_job(home: Path, store, every_hours: float, *, port: int | None = None,
                 if not blockers:
                     try:
                         launch(home, cache["staged"]["tag"], when="after-build", port=port,
-                               unit=unit or os.environ.get("KRANTO_UNIT") or "kranto.service",
+                               unit=unit or legacy.unit_name(),
                                keep=ucfg.keep_backups)
                     except LaunchError as exc:
                         summary["auto"] = f"not launched: {exc}"

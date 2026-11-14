@@ -96,8 +96,11 @@ def test_the_key_is_never_kept_by_the_page():
     assert 'const WATCH_KEY = "kranto.watch.topic";' in JS
     assert 'export const SEEN_KEY = "kranto.activity.seen";' in JS
     assert 'const DRAFT_KEY = "kranto.feedback.draft";' in JS
-    assert 'const THEME_KEY = "kranto.theme";' in JS
-    assert 'const LOOK_KEY = "kranto.look";' in JS and 'const LOOK_CUSTOM_KEY = "kranto.look.custom";' in JS
+    # the appearance's keys are the product's name and the key (lib/legacy.ts, which also reads a
+    # browser's keys from before the rename once)
+    assert 'const THEME_KEY = newKey("theme");' in JS
+    assert 'const LOOK_KEY = newKey("look");' in JS and 'const LOOK_CUSTOM_KEY = newKey("look.custom");' in JS
+    assert "export const newKey = (name: BrowserKey): string => `${COMMAND}.${name}`;" in JS
 
 
 # Pause says Paused only when both halves are (STATUS.md: hostForm only checked that the request

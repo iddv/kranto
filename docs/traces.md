@@ -1,6 +1,6 @@
-# Agent traces
+# Traces
 
-What Kranto's agents do is Claude Code sessions, tool calls and model calls. An agent trace shows
+What Kranto does is Claude Code sessions, tool calls and model calls. A trace shows
 them the way an observability tool shows a request, not as a log file: a tree of sessions,
 turns and tool calls with their inputs, outputs, timings and tokens, the conversation as a
 chat, each edit as a diff, and the step that failed marked. A trace grows live while its run
@@ -8,7 +8,7 @@ runs.
 
 Kranto keeps nothing new to make a trace: it reads the files a session already writes, where
 they are (each session's transcript, the server's record of a run's model calls). The only thing
-it writes is a cache, `~/kranto-loop/trace.db`: the trace list and the text the search reads,
+it writes is a cache, `trace.db` in the home's `loop/` folder (`~/.kranto/loop/` by default): the trace list and the text the search reads,
 beside your other Kranto files, made again whenever it is missing.
 
 ## What has a trace
@@ -21,8 +21,8 @@ beside your other Kranto files, made again whenever it is missing.
   never their payload. A run that made no model calls says so, and its summary is in the run's
   Overview.
 
-The builds' and maintenance fixes' traces left with the build factory; their files stay on
-disk, unread.
+Traces of builds and maintenance fixes left Kranto with those features; their files stay on
+disk, unread ([archive.md](archive.md)).
 
 ## Where to open one
 
@@ -73,7 +73,7 @@ terminal.
 
 ## The command line
 
-`kranto trace` (or `brb trace`):
+`kranto trace`:
 
 ```
 kranto trace list [--since 7d] [--state error]
@@ -95,7 +95,7 @@ kranto trace export session:<id> --otlp http://127.0.0.1:4318 [--content]
 
 ## Settings
 
-In `~/kranto-loop/loop.yaml` (the page's settings file):
+In `loop.yaml`, the page's settings file (`~/.kranto/loop/loop.yaml` by default):
 
 | Key | Default | What it decides |
 |---|---|---|

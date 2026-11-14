@@ -8,7 +8,8 @@ endpoint) and ``claude_code`` (the user's Claude Code login, an explicit choice 
 ``LLMClient`` asks for.
 
 ``detect``, ``test`` and ``choose`` are what the setup wizard (``kranto setup``), the web
-Welcome and Settings › Watching (``GET/POST /api/setup/provider``) and ``afk provider`` call; none
+Welcome and Settings › Watching (``GET/POST /api/setup/provider``) and ``python -m kranto
+provider`` call; none
 of them returns, logs or stores a key.
 """
 
@@ -107,7 +108,8 @@ def models_for(provider: str, llm: LLMConfig) -> dict:
 
 def in_use(llm: LLMConfig) -> dict:
     """What the metered client (``llm.py``) sends with, from the same ``LLMConfig`` it is
-    built from: Settings › Watching, ``kranto doctor`` and ``afk provider show`` all say
+    built from: Settings › Watching, ``kranto doctor`` and ``python -m kranto provider show`` all
+    say
     this and nothing else (``llm.base_url`` is only the OpenAI-style endpoint's, kept when
     another provider is chosen)::
 

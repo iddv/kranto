@@ -393,7 +393,7 @@ def test_afk_sources_describe_prints_the_table_and_approves_nothing(tmp_path, ca
     assert cli.main(["-w", str(kb), "sources", "describe", "-"], runtime_factory=factory) == 0
     out = capsys.readouterr().out
     assert "valid" in out and "«https://ex.com/good»" in out and "not_found" in out
-    assert "afk sources approve 1 2 3" in out
+    assert "python -m kranto sources approve 1 2 3" in out
     assert cli.main(["-w", str(kb), "sources", "list", "--status", "approved"]) == 0
     assert capsys.readouterr().out == ""
     # the issue's wording works too, from a file

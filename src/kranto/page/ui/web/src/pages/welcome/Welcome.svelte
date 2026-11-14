@@ -35,7 +35,7 @@
   {#if !host}
     <NeedHost what="Setup" verb="needs" />
   {:else}
-    <div class="welcome-head narrow"><img src={pageUrl("static/brand/icon-192.png")} alt="" width="120" height="120" /><p class="crumb steps-line">{"Welcome · "}{#each steps as [k, w], i (k)}{i ? " · " : ""}{#if i === at}<strong>{`Step ${i + 1} of ${steps.length}: ${w}`}</strong>{:else}<a href={"#/welcome" + (k ? "/" + k : "")}>{w}{#if stepDone(i, setup)}<Icon name="check" cls="done" />{/if}</a>{/if}{/each}</p></div>
+    <div class="welcome-head narrow"><p class="crumb steps-line">{"Welcome · "}{#each steps as [k, w], i (k)}{i ? " · " : ""}{#if i === at}<strong>{`Step ${i + 1} of ${steps.length}: ${w}`}</strong>{:else}<a href={"#/welcome" + (k ? "/" + k : "")}>{w}{#if stepDone(i, setup)}<Icon name="check" cls="done" />{/if}</a>{/if}{/each}</p></div>
     {#if key === "topics"}<AddTopic {view} mode="welcome" />{:else if key === "finish"}<FinishStep {view} />{:else if key === "voice"}<HowYouWrite {view} />{:else}<KeysStep {view} />{/if}
   {/if}
 </div>
