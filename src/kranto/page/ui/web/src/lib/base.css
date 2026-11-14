@@ -594,6 +594,10 @@ details.fold > summary { padding: 8px 16px; cursor: pointer; color: var(--muted)
 /* a phone: the number cell goes with the aside; the end cell takes the width
    its verb needs, as everywhere */
 @container (max-width: 400px) { .row.lr { --numw: 0px; --asidew: 0px; } .lr .c-num, .lr .c-aside { visibility: hidden; } }
+/* the first hour's rows (a topic's page and the home): a row's time keeps its whole width ("29 Oct
+   06:47" and "at 18:…" were cut in the rows' 40 px age column, at 1400 as on a phone) */
+.grp.start .row.lr { grid-template-columns: var(--tickw, 0px) var(--stw, 14px) 0px minmax(0, 1fr) 0px max-content 0px; }
+.grp.start .lr .c-age { overflow: visible; min-width: max-content; }
 @media (max-width: 500px) { .radios { display: flex; flex-direction: column; gap: 4px; margin-left: 0 !important; } }
 /* a pane's parts (WORKSPACE.md 1.6): kind line, title, lede, actions, then sections */
 .pane-in { padding: 16px 0 8px; }
@@ -756,6 +760,9 @@ input.vnote { flex: 1 1 220px; min-width: 0; max-width: 420px; }
   .lr .c-main .c-meta { display: none; }
   .lr .c-main .stw { margin-left: 6px; }   /* the state's word stays beside the title (UP #10) */
   .lr .r-title { white-space: normal; display: inline; }
+  /* the first hour's rows (a topic's page and the home): the words on a second line under the title */
+  .grp.start .lr .c-main { display: flex; flex-direction: column; -webkit-line-clamp: unset; line-clamp: unset; }
+  .grp.start .lr .c-main .c-meta { display: block; white-space: normal; overflow: visible; }
   .grp .more { padding-left: 16px; }
   #dscroll { padding: 0 12px 32px; }
   .dh { position: static; margin: 0; padding: 8px 0; } .pane-in > .dh:first-child { margin-top: 0; }

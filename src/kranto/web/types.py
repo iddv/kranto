@@ -2305,9 +2305,11 @@ class HomeNext(TypedDict):
 
 
 class HomeQuiet(TypedDict):
+    """The home's quiet line; ``reading``: a read runs now (absent from an older server)."""
     topics: NotRequired[int]
     sources: NotRequired[int]
     read_at: NotRequired[str | None]
+    reading: NotRequired[bool]
     next: NotRequired[HomeNext | None]
     error: NotRequired[str]
     error_id: NotRequired[str]
