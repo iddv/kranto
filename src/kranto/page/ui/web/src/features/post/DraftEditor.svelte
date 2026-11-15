@@ -58,7 +58,7 @@
     {/each}
   {/if}
   {#each s.extras || [] as x (x.key)}<p class="muted small de-extra">{x.words}{#if x.drop}{" "}<button type="button" class="linkish small" onclick={(e) => void save(e.currentTarget, { drop: x.key })}>Remove</button>{/if}</p>{/each}
-  <ProseFlags {text} {site} id="draft-edit-flags" fix={(t, say) => { if (long) body = t; else if (parts[0]) parts[0].text = t; said = say; }} />
+  <ProseFlags {text} {site} parts={long ? null : parts.map((p) => p.text)} id="draft-edit-flags" fix={(t, say) => { if (long) body = t; else if (parts[0]) parts[0].text = t; said = say; }} />
   {#if said}<p class="muted small" id="draft-edit-said">{said} Save keeps it; Cancel leaves the draft as it was.</p>{/if}
   <p class="acts de-foot"><button type="button" class="btn sm" id="draft-cancel" onclick={close}>Cancel</button><button type="submit" class="btn sm primary" id="draft-save" disabled={over || empty}>Save</button></p>
   <p class="muted small">Saved, your version waits on Post in its place; the original stays under Earlier drafts.</p>

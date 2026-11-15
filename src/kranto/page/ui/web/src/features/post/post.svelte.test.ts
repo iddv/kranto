@@ -257,6 +257,17 @@ describe("editing a draft", () => {
     done();
   });
 
+  it("a flag's words and its fix are spaced: “names a person · aim the wit…”", async () => {
+    stub().api.mockImplementation(async (path: string) => path === "/api/prose/check" ? { score: 80, verdict: "1 thing reads like AI: fix them",
+      flags: [{ start: 0, end: 5, text: "Intro", rule: "salt.person", words: "names a person the sources don't name", fix: "aim the wit at the thing", scope: "span" }] } : {});
+    answering({ [sheetPath(5)]: sheet({ edit: { title: "x", body: "Intro. delve" } }) });
+    const { target, done } = show(DraftSheet, { id: 5 });
+    await settle();
+    await settle();
+    expect(target.querySelector("#draft-flags .pf-fixes li")?.textContent).toBe("Intro · names a person the sources don't name · aim the wit at the thing");
+    done();
+  });
+
   it("a short post is one box with its count, red past the limit, and Save waits", async () => {
     stub().api.mockImplementation(async (path: string) => path === "/api/prose/check" ? { ...CHECK, flags: [], verdict: "Reads natural" } : {});
     answering({ [sheetPath(7)]: sheet({ id: 7, kind: "mastodon", word: "short post", can_edit: true, edit: { title: null, parts: [{ text: "A toot." }] }, limit: { max: 10, unit: "characters" } }) });
@@ -345,6 +356,19 @@ describe("a short post's draft page", () => {
     target.querySelector<HTMLButtonElement>("#draft-posted-no")!.click();
     flushSync();
     expect(target.querySelector("#draft-posted")).toBeNull();
+    done();
+  });
+
+  it("a thread is checked post by post: its parts go to the check, never only their sum", async () => {
+    const L = stub();
+    L.api.mockImplementation(async () => ({ flags: [], verdict: "Reads natural" }));
+    const parts = [{ text: "One post.", used: 9 }, { text: "Two posts.", used: 10 }, { text: "Three.", used: 6 }];
+    answering({ [sheetPath(22)]: short({ parts, markdown: parts.map((p) => p.text).join("\n\n") }) });
+    const { done } = show(DraftSheet, { id: 22 });
+    await settle();
+    await settle();
+    const call = L.api.mock.calls.find((c) => c[0] === "/api/prose/check");
+    expect(call?.[1]).toMatchObject({ site: "bluesky", parts: ["One post.", "Two posts.", "Three."] });
     done();
   });
 
