@@ -13,7 +13,7 @@ export const KINDWORD: Record<string, string> = { idea: "card", cluster: "theme"
 export const REVIEW_API = "/api/review/queue";
 /** about 20 s an item */
 export const reviewMinutes = (n: number): number => Math.max(1, Math.round(n * 20 / 60));
-/** the items the page grades: an older the server's build items are left out (never graded:) */
+/** the items the page grades: an older server's build items are left out (never graded:) */
 export const gradable = (xs: readonly QueueItem[]): QueueItem[] => xs.filter((x) => x.target !== "build");
 
 /** an item's title: the queue's */

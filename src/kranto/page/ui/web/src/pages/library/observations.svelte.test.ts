@@ -224,7 +224,7 @@ describe("Library › an observation", () => {
   it("lists the cards that cite it, and Explain without a synthesis", async () => {
     const L = lib();
     void L;
-    // The server's cards: #9 cites this observation, #10 another (an older the server: no cited_by,
+    // The server's cards: #9 cites this observation, #10 another (an older server: no cited_by,
     // so the cards' citations are read)
     const { cited_by: _, ...older } = O;
     void _;

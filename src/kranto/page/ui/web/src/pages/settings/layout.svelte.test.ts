@@ -37,7 +37,7 @@ describe("One layout (open-source wave 1, PR 1.4: Classic cut, D-2)", () => {
     done();
   });
 
-  it("reads an older the server's two switches as New too", () => {
+  it("reads an older server's two switches as New too", () => {
     expect(layoutOf({ ...A("new"), layout: undefined, home: true, doors: false })).toBe("new");
     expect(layoutOf(A("classic"))).toBe("new");
     expect(frameClassic(true)).toBe(false);

@@ -58,7 +58,7 @@
       app()
         ?.api("/api/search?q=" + encodeURIComponent(want))
         .then((r) => {
-          // the answer is for what was asked, whatever it echoes (an older the server echoes none)
+          // the answer is for what was asked, whatever it echoes (an older server echoes none)
           const res = (r as { results?: unknown } | null)?.results;
           if (ui.palette !== null && q.trim() === want) srv = { query: want, results: Array.isArray(res) ? res : [] };
         })

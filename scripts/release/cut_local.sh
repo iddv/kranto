@@ -189,7 +189,7 @@ if "$WORK/smoke/bin/kranto" setup --help > /dev/null 2>&1; then
   VERSION="$VERSION" DIST="$DIST" WORK="$WORK/smoke" SHAPE="$SHAPE" bash "$HERE/smoke.sh" setup
 fi
 
-# The regression corpus (docs/exam.md): with KRANTO_CORPUS set, the new the page recomputes
+# The regression corpus (docs/exam.md): with KRANTO_CORPUS set, the new page recomputes
 # every check over every stored build, with no model and no network; an unexpected change
 # stops the cut. KRANTO_CORPUS_EXPECT names the changes this release declares (a JSON list);
 # KRANTO_CORPUS_RUN=1 also runs each exam (bwrap, loopback only; minutes per entry).

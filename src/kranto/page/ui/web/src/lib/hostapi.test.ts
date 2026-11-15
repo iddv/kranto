@@ -18,7 +18,7 @@ describe("the server's API version", () => {
     expect(hostApiLine(undefined)).toBeNull();
   });
 
-  it("says one line when the numbers differ, and an older the server's none is v0", () => {
+  it("says one line when the numbers differ, and an older server's none is v0", () => {
     expect(hostApiLine({ version: "0.3.60", host_api: 2 }, 1)).toBe(
       "the server 0.3.60 answers API v2; this page expects v1: update both with kranto update.");
     expect(hostApiLine({ version: "0.3.50", budget_usd: 10 }, 1)).toBe(

@@ -32,7 +32,7 @@ export interface Arrangement {
   new_cap: number;
   cubs: CubPlace[];
   pins_max: number;
-  /** the home's widgets in order (core.home.resolve); absent from an older the server */
+  /** the home's widgets in order (core.home.resolve); absent from an older server */
   widgets?: import("./home").HomeEntry[];
   /** the person arranged the home (shell.widgets is set) */
   custom?: boolean;
@@ -40,7 +40,7 @@ export interface Arrangement {
 
 let FIRST: Arrangement | null = null; // as read at boot: the shell to draw before any read arrives
 
-/** read the arrangement before the first draw; an older the server (no /api/shell) is the tree */
+/** read the arrangement before the first draw; an older server (no /api/shell) is the tree */
 export async function loadShell(fetcher: (path: string) => Promise<unknown>): Promise<void> {
   try {
     FIRST = (await fetcher(SHELL_API)) as Arrangement;
@@ -62,7 +62,7 @@ export const shellDoors = (host: boolean): boolean => !!arrangement(host);
 /** the same, for a page as it draws (redrawn on every draw): the doors' page in either layout */
 export const doorsNow = (): boolean => ui.drawn >= 0 && shellDoors(!!app()?.host());
 /** the layout: one, New (open-source wave 1, PR 1.4). A stored `shell.layout: classic` (or an
- * older the server's two switches off) reads as New; the server keeps what the file says. */
+ * older server's two switches off) reads as New; the server keeps what the file says. */
 export function layoutOf(_a: Arrangement | null): Layout {
   return "new";
 }

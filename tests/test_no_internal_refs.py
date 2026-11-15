@@ -114,7 +114,8 @@ def test_the_tree_holds_none_of_the_builders_own_words():
 # server"/"the page" starting a sentence in lower case (after a sentence's end, at a paragraph or
 # a docstring's start, or as a comment's first words)
 _X = r"(?:server|page)"
-DOUBLED = re.compile(rf"\b(?:[Aa]n?|[Tt]his|[Tt]he|[Yy]our|[Ee]very|[Ee]ach) the {_X}\b")
+DOUBLED = re.compile(rf"\b(?:[Aa]n?|[Tt]his|[Tt]he|[Yy]our|[Ee]very|[Ee]ach|[Oo]lder|[Nn]ewer"
+                     rf"|[Oo]ld|[Nn]ew) the {_X}\b")
 _END = r"(?<!\be\.g)(?<!\bi\.e)(?<!\betc)(?<!\bvs)(?<![\w/`]\.\w)[.!?]"
 _MARK = r"(?:(?://|#|\*|--)[ \t]*)?"
 STARTS = [

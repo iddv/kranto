@@ -28,7 +28,7 @@ def install(monkeypatch, api: types.ModuleType | None = None, **names) -> types.
 
 
 def drop(monkeypatch, *names: str) -> None:
-    """An older the page: this test's stand-in no longer has ``names``."""
+    """An older page: this test's stand-in no longer has ``names``."""
     api = install(monkeypatch)
     for n in names:
         if hasattr(api, n):

@@ -53,7 +53,7 @@ describe("a prepared item", () => {
   it("says itself in one line, its button in the action's own words, never its body", () => {
     expect(lineOf(ISSUE)).toBe("File a Kranto issue: Needs you doesn't update live when an assistant prepares something");
     expect(buttonOf(ISSUE)).toBe("File issue");
-    expect(buttonOf(P({ title: "Add a topic" }))).toBe("Add topic");      // from an older the server
+    expect(buttonOf(P({ title: "Add a topic" }))).toBe("Add topic");      // from an older server
     expect(lineOf(P())).toBe("Usage reports: off");
     expect(lineOf(P({ title: "Archive", fields: {}, subject_kind: "topic", subject_id: "1" }))).toBe("Archive: topic #1");
     expect(keyFields(ISSUE)).toEqual([["labels", "feature"], ["area", "ui"], ["where", "a new issue on iddv/kranto"]]);

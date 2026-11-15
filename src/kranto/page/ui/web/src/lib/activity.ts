@@ -21,7 +21,7 @@ export type Indicator = {
   title: string;
 };
 
-/** the header facts the two lane words used, for before the read arrives (or an older the server) */
+/** the header facts the two lane words used, for before the read arrives (or an older server) */
 export interface LaneFacts {
   paused: boolean;
   /** The server's running job ("ingest") and its words, its next read */

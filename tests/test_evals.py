@@ -284,7 +284,7 @@ def test_kranto_eval_is_a_kranto_command(tmp_path, monkeypatch, capsys):
 
 
 def test_kranto_eval_has_no_build_benchmark(monkeypatch, capsys):
-    """CUT: the build benchmark left with builds; an old the page's group is never asked."""
+    """CUT: the build benchmark left with builds; an old page's group is never asked."""
     from . import brbfake
 
     def add_eval_group(sub):

@@ -500,7 +500,7 @@ def test_the_review_queue_answers_its_keys(browser, page_base):
     """Review moved into components keeps its keys (QUEUE_KEYS): with the server's queue
     answered in the page (its status, the queue, the why chips, the grades' posts), 1 grades the
     current card and selects the next row, a puts a why chip on the card just graded, 0 skips the
-    next card (back next week), the pane says Done., k comes back to it. A build an older the server
+    next card (back next week), the pane says Done., k comes back to it. A build an older server
     still sends is dropped (no grade on builds). The posts are the server's /api/feedback,
     answered here; nothing reaches a server."""
     page = browser.new_page(viewport={"width": 1360, "height": 900})
@@ -772,7 +772,7 @@ LAYOUT = r"""() => {
 
 
 def _week(n=20):
-    """a review queue of a busy week: n cards, and a build an older the server still sends, which
+    """a review queue of a busy week: n cards, and a build an older server still sends, which
     the page drops (no grade on builds)"""
     return {"week": "2026-W42", "items": [
         {"target": "idea", "id": 100 + i, "slot": "card", "topic": "AI developer tooling",

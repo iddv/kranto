@@ -1158,7 +1158,7 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
                                  rt.cubs, scheduler)
 
     def kranto_page(route):
-        """An old the server page address Kranto UI has as a hash route (UI-v4.md 2.3):
+        """An old server page address Kranto UI has as a hash route (UI-v4.md 2.3):
         while the page is mounted it answers 302 to it, with its query kept; without it,
         the install notice (D5). ``route`` is the hash route, or a function of the request
         that returns it."""

@@ -80,7 +80,7 @@ export const todayRead = (host: unknown) => (host ? read<Today>(TODAY_API, 60000
 /** the review queue's size: the doors' count and Needs you's row */
 export function reviewCount(host: unknown): number {
   if (!host) return 0;
-  // never a build: a build is not graded, whatever an older the server sends
+  // never a build: a build is not graded, whatever an older server sends
   return read<Queue>(REVIEW_API, 60000).data?.items.filter((x) => x.target !== "build").length || 0;
 }
 /** the rows of Needs you, the idea cards each counted */

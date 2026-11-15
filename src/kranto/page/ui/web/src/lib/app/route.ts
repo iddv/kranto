@@ -506,7 +506,7 @@ export async function boot(): Promise<boolean> {
   await Promise.all([loadHost(), loadWho()]);
   if (host()) {
     await loadShell(api); // which shell draws, before the first draw (shell.home)
-    // first run: a fresh install lands on #/welcome (an older the server has no /api/setup)
+    // first run: a fresh install lands on #/welcome (an older server has no /api/setup)
     let setup: { needs_setup?: boolean; done?: boolean } | null = null;
     try {
       setup = (await api("/api/setup")) as { needs_setup?: boolean; done?: boolean };

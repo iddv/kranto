@@ -78,7 +78,7 @@ class Brb:
     def call_with_headers(self, method: str, path: str, query: str = "", body: Any = None,
                           identity: dict | None = None) -> tuple[int, str, bytes, dict]:
         """``call``, plus the headers the page asks the host to add (``handle_with_headers``:
-        its versioned static files may be cached for good). An older the page gives none."""
+        its versioned static files may be cached for good). An older page gives none."""
         fn = getattr(self.api, "handle_with_headers", None)
         if fn is None:
             return (*self.call(method, path, query, body, identity), {})

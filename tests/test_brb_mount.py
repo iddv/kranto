@@ -104,7 +104,7 @@ def test_mounted_routes_to_handle(rt, fake_api):
 def test_versioned_static_files_are_cached_for_good_and_gzipped(rt, fake_api):
     """The page's handle_with_headers marks its static/v<version>/ files immutable (S-3b):
     the mount passes that on and gzips them for a client that accepts it; every other
-    answer keeps no-store, and an older the page (no handle_with_headers) changes nothing."""
+    answer keeps no-store, and an older page (no handle_with_headers) changes nothing."""
     import gzip
     big = b"export const x = 1;\n" * 400
 

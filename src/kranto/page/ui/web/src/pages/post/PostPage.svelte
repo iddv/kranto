@@ -29,7 +29,7 @@
     void view.tick;
     return host ? read<Post>(POST_API, 15000) : null;
   });
-  // every list read as a list, whatever shape came (an older the server, a fake): never a crash
+  // every list read as a list, whatever shape came (an older server, a fake): never a crash
   const d = $derived.by((): Post | null => {
     const x = r?.data as Partial<Post> | undefined | null;
     if (!x) return null;

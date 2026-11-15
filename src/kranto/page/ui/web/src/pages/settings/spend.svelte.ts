@@ -30,7 +30,7 @@ export const SPEND_PURPOSE: Record<string, string> = {
  * their raw names */
 const RETIRED_PURPOSE = /^(invest|radar)(_|$)/;
 /** Spend's other purposes as the page words them: a known one by its words, the retired ones as
- * one row, any other by its name in plain words (an older or newer the server's) */
+ * one row, any other by its name in plain words (an older or newer server's) */
 export function otherRows(xs: TopicSpend["other"]): { purpose: string; word: string; usd: number; calls: number }[] {
   const out: { purpose: string; word: string; usd: number; calls: number }[] = [];
   let gone: { purpose: string; word: string; usd: number; calls: number } | null = null;

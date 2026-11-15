@@ -60,7 +60,7 @@ export function cardFor(id: string): CardX | null {
 setCardLookup(cardFor);
 /** the cards that cite an observation: those the server names (``cited_by.ideas`` of
  * /api/observations/<id>, its ``idea_citations``: CON L2), else the cards whose citations and
- * evidence name it (an older the server); null until the cards are read */
+ * evidence name it (an older server); null until the cards are read */
 export function citedBy(oid: number | string, ids?: number[] | null): CardX[] | null {
   const ci = app()?.host() ? cardIdeas() : null;
   if (!ci) return null;
