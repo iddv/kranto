@@ -61,6 +61,24 @@ OWNER_READS = ("/brb/api/traces", "/brb/api/trace", "/api/runs", "/api/browser/c
 COOKIE_MAX_AGE = 400 * 86400     # the longest browsers keep a cookie
 SIGNIN_HINT = ("run 'kranto open' on the machine Kranto runs on and open the link it prints, "
                "or paste its code into the page")
+# a browser's refusal, in the words a stranger reads (no token, no Bearer: those are a script's)
+BROWSER_SIGNED_OUT = ("This browser is not signed in: run `kranto open` on the machine Kranto "
+                      "runs on, and open the link it prints or paste its code into the page.")
+BROWSER_STALE = ("This browser is not signed in any more (its sign-in was renewed): run "
+                 "`kranto open` on the machine Kranto runs on, and open the link it prints or "
+                 "paste its code into the page.")
+
+
+def _signed_out_words(request: Request, why: str | None, what: str = "") -> str:
+    """Why a request with no current sign-in was refused: a browser (no ``Authorization``
+    header) is told in a stranger's words; a script that sent a bearer token gets the
+    technical reason and how agents sign in."""
+    if (request.headers.get("authorization") or "")[:7].lower() != "bearer ":
+        words = BROWSER_STALE if why and "cookie" in why else BROWSER_SIGNED_OUT
+        return f"{what} {words}".strip() if what else words
+    lead = f"not signed in: {why}."
+    return (f"{lead} {what} Scripts and agents send 'Authorization: Bearer' with their own "
+            "token (kranto token add agent:<name>).").replace("  ", " ")
 
 
 def _json(status: int, error: str) -> JSONResponse:
@@ -114,9 +132,7 @@ class Auth:
             if not self.require:
                 return None                      # api.require_token: false, the old way
             log.warning("refused %s %s: %s", request.method, path, why)
-            return _json(401, f"not signed in: {why}. In a browser, {SIGNIN_HINT}. Scripts "
-                              "and agents send 'Authorization: Bearer' with their own token "
-                              "(kranto token add agent:<name>).")
+            return _json(401, _signed_out_words(request, why))
         self.last_used[ident["origin"]] = time.time()
         if str(ident.get("origin") or "").startswith(BROWSER_PREFIX):
             if path in BROWSER_PATHS and request.method == "POST":
@@ -163,8 +179,7 @@ class Auth:
             if not self.require:
                 return None
             log.warning("refused %s %s: %s", request.method, request.url.path, why)
-            return _json(401, f"not signed in: {why}. {what} is read signed in: in a "
-                              f"browser, {SIGNIN_HINT}.")
+            return _json(401, _signed_out_words(request, why, f"{what} is read signed in."))
         self.last_used[ident["origin"]] = time.time()
         if not is_owner(ident):
             log.warning("refused %s %s: an %s token reads no trace", request.method,

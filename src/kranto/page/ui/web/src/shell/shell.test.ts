@@ -324,6 +324,35 @@ describe("the list's head", () => {
     unmount(app);
   });
 
+  // a signed-out browser that moved on (or pressed Set up into Welcome) lost the line, and its
+  // saves failed in token words with nothing saying why
+  it("keeps the sign-in line, with its code box, on every page a signed-out browser opens", () => {
+    connect({ signIn: vi.fn(async () => {}) } as never);
+    document.body.classList.add("doors");
+    history.replaceState(null, "", "#/hello");
+    ui.facts = facts({ head: { paused: null, signin: true, flash: null } });
+    ui.drawn = 1;
+    const { target, app } = draw(ListHead);
+    expect(target.querySelector("#signin #signin-code")).not.toBeNull();
+    for (const page of ["#/welcome", "#/news", "#/settings/posting"]) {
+      history.replaceState(null, "", page);
+      ui.drawn += 1;
+      flushSync();
+      expect(target.querySelector("#signin")?.textContent).toContain("Not signed in");
+      expect(target.querySelector("#signin-code")).not.toBeNull();
+    }
+    // ✕ puts it away on this page only
+    (target.querySelector("#signin-x") as HTMLButtonElement).click();
+    flushSync();
+    expect(target.querySelector("#signin")).toBeNull();
+    history.replaceState(null, "", "#/post");
+    ui.drawn += 1;
+    flushSync();
+    expect(target.querySelector("#signin")).not.toBeNull();
+    unmount(app);
+    document.body.classList.remove("doors");
+  });
+
   it("says paused, not signed in and the flash with its Undo", () => {
     const run = vi.fn();
     const signIn = vi.fn(async () => {});

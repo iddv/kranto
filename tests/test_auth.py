@@ -91,6 +91,24 @@ def test_a_write_without_a_token_is_refused(rt, fake_api, caplog):
     assert "refused POST /pause: it carries no kranto token" in caplog.text
 
 
+def test_a_browsers_refused_save_says_how_to_sign_in_without_token_words(rt, fake_api):
+    """A signed-out browser's save failed with "it carries no kranto token … 'Authorization:
+    Bearer' …": a stranger in a browser is told what to do, a script keeps the technical words."""
+    app = create_app(rt, port=8765)
+    with bare(app) as web:
+        said = web.post("/pause", data={"reason": "x"}).json()["error"]
+        assert said.startswith("This browser is not signed in: run `kranto open` on the machine "
+                               "Kranto runs on")
+        assert "token" not in said.lower() and "bearer" not in said.lower()
+        web.cookies.set(tokens.cookie_name(8765), "0" * 43)
+        stale = web.post("/pause", data={"reason": "x"}).json()["error"]
+        web.cookies.clear()
+        assert "kranto open" in stale and "token" not in stale.lower()
+        script = web.post("/pause", data={"reason": "x"},
+                          headers={"authorization": "Bearer " + "0" * 43}).json()["error"]
+        assert "Authorization: Bearer" in script
+
+
 def test_a_trace_is_read_by_the_owner_only(rt, fake_api, caplog):
     """A build's agent trace holds file contents and prompts (the page D-4): its GET needs
     the owner's token or cookie, and the page is told who reads; every other read stays open."""

@@ -13,7 +13,9 @@ Every click, MCP tool and agent request carries a token. Kranto acts as that tok
 whatever the request claims, and a request without one is refused.
 
 This browser signs in once with the link `kranto open` prints on the machine Kranto runs on (it
-expires in 10 minutes); its code also works in the sign-in box at the top of the list.
+expires in 10 minutes); its code also works in the sign-in box at the top of the list. Until it
+is signed in, every page it opens says "Not signed in: this browser can look, not act" with that
+box (✕ puts the line away for that page), and a press it makes is refused in those words.
 Fetching the page itself hands out nothing. Agents never use the sign-in box: each sends its
 own token (`kranto token add agent:<name>`, or Settings › Privacy & access › Add an agent).
 

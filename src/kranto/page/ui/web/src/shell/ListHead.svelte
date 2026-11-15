@@ -15,20 +15,19 @@
   const hd = $derived(ui.facts?.head);
   // the app reads /api/status and draws; the facts are new after every draw
   const apiLine = $derived.by(() => (ui.facts ? hostApiLine(app()?.host?.() as Record<string, unknown> | null) : null));
-  // with the doors on, the sign-in line is said once: on the first page this tab opened, until
-  // dismissed (HIG Alerts: a nonintrusive label, not a banner on every page). The
-  // page stores nothing, so a new tab says it again; a refused press says so in its own flash.
+  // the sign-in line is on every page a signed-out browser opens, Welcome's too (it was said on
+  // the first page only, so a stranger who moved on, or pressed Set up, met saves refused in
+  // token words and no line saying why). With the doors on, ✕ puts it away for the page it is
+  // on; the next page says it again.
   const doors = $derived(ui.drawn >= 0 && document.body.classList.contains("doors"));
-  let first: string | null = null; // the first page drawn, after its redirects
-  let dismissed = $state(false);
+  let dismissedOn = $state<string | null>(null);
+  const here = (): string => location.hash.split("?")[0] || ""; // a sheet opened on it is the same page
   const gone = $derived.by(() => {
     if (ui.drawn < 0 || !ui.facts) return false;
-    const page = location.hash.split("?")[0] || ""; // a sheet opened on it is the same page
-    first ??= page;
-    return dismissed || page !== first;
+    return dismissedOn !== null && dismissedOn === here();
   });
   function dismiss(): void {
-    dismissed = true;
+    dismissedOn = here();
   }
   let code = $state("");
   let input = $state<HTMLInputElement>();
