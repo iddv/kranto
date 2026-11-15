@@ -419,7 +419,7 @@ CORE: tuple[Verb, ...] = (
                  F("value", "line", "the rating or label", True), NOTE),
          page="#/ideas"),   # a card's grade shows on Ideas (16: the old Learning page)
     Verb("today.seen", "Mark seen", "Mark what Today showed as seen.", "reversible", "POST",
-         "/api/seen", fields=(F("at", "line", "up to when (an ISO time)"),), page="#/today"),
+         "/api/seen", fields=(F("at", "line", "up to when (an ISO time)"),), page="#/home"),
     # -- Kranto as a whole
     # --------------------------------------------------------------------------
     Verb("kranto.pause", "Pause", "Pause Kranto: no model spend and nothing new starts until "
@@ -495,7 +495,7 @@ CORE: tuple[Verb, ...] = (
          "reversible", "POST", "/api/setup/search/callers",
          fields=(F("callers", "object", "on or off per caller"),
                  F("recent_weeks", "int", "how recent")),
-         page="#/settings/tools"),
+         page="#/settings/watching?sel=esearch"),
     # consent is the owner's (TEL, 2026-10-27): an assistant may prepare the choice, never
     # make it, under every ladder setting; turning it off is telemetry.off, done directly
     Verb("settings.telemetry", "Save", "Whether Kranto sends its usage reports (what is in them "
@@ -520,7 +520,7 @@ CORE: tuple[Verb, ...] = (
          page="#/settings/keys"),
     Verb("setup.search", "Save", "Choose the live search provider and keep its key (pasted by "
          "you).", "credential", "POST", "/api/setup/search", doors=PAGE_ONLY,
-         page="#/settings/tools"),
+         page="#/settings/watching?sel=esearch"),
     Verb("prose.writer_key", "Save and test", "Keep the OpenAI key a post writer's own model "
          "uses (pasted by you; a writer's only, never the watcher's): tested, then kept as the "
          "command line keeps it, never shown again.", "credential", "POST",
@@ -632,7 +632,7 @@ CORE: tuple[Verb, ...] = (
     Verb("cubs.settings", "Save", "The cubs' switches and limits (cubs.enabled, a cub's "
          "limits).", "reversible", "POST", "/api/cubs/settings", click="house", lock="ask",
          fields=(F("key", "line", "the setting", True), F("value", "object", "its value")),
-         page="#/settings/capabilities"),
+         page="#/settings"),
     # -- features (News, the cubs) ----------------------------------------------------------------
     Verb("feature.setting", "Save", "One of a feature's settings (News, a cub's); some are "
          "confirmed on the page only.", "reversible", "POST",
@@ -651,11 +651,11 @@ CORE: tuple[Verb, ...] = (
          "reversible", "POST", "/api/tickets/{id}/again", subject="ticket", doors=PAGE_ONLY,
          page="#/needs"),
     Verb("newsletter.check", "Check", "Check the newsletter platform you connected.", "read",
-         "POST", "/api/newsletter/check", page="#/settings/publishing"),
+         "POST", "/api/newsletter/check", page="#/settings/posting?sel=enl"),
     Verb("newsletter.audience", "Choose audience", "Which audience on the platform the "
          "newsletter sends to.", "outward", "POST", "/api/newsletter/audience", click="confirm",
          doors=PAGE_ONLY,                 # the route's: "made on the Accounts page only" (PAR)
-         fields=(F("name", "line", "the audience", True),), page="#/settings/publishing"),
+         fields=(F("name", "line", "the audience", True),), page="#/settings/posting?sel=enl"),
     # -- the assistant's own ladder: the owner's only ----------------------------------------------
     Verb("assistant.ladder", "Save", "What an assistant may do by itself: per kind of action "
          "and per verb (the locks cannot be turned).", "credential", "POST",
@@ -666,7 +666,7 @@ CORE: tuple[Verb, ...] = (
          "or Codex: their own commands, shown first, outside Kranto's folder.", "outward",
          "POST", "/api/assistant/global", lock="ask",
          fields=(F("harness", "enum", "claude or codex", True, choices=("claude", "codex")),),
-         page="#/settings/assistant?sel=outside"),
+         page="#/settings/assistant?sel=eoutside"),
 )
 # fmt: on
 
@@ -786,12 +786,23 @@ def feature_verbs() -> tuple[Verb, ...]:
                 asks=words, ask_why=WORDS_WHY if words else "",
                 path="/api/f/{feature}/act/{action}", subject=subject, fields=fields,
                 doors=PAGE_ONLY if house else EVERYONE, click=a.click,
-                page=f"#/{fid}" if fid in OWN_PAGES and not _is_cub(f) else f"#/cub/{fid}",
+                page=_feature_page(f, fid),
                 mark="",
                 lock="ask" if house else None, body="fields",
                 fixed=(("feature", fid), ("action", name)),
                 subject_field=SUBJECT_FIELDS.get(subject)))
     return tuple(out)
+
+
+def _feature_page(feature, fid: str) -> str:
+    """Where a feature's action shows: its own page (News), Post for a feature that writes posts
+    (the blog cub: its drafts wait on Post; "#/cub/blog" only redirected there), else its cub
+    page."""
+    if fid in OWN_PAGES and not _is_cub(feature):
+        return f"#/{fid}"
+    if getattr(getattr(feature, "ui", None), "kind", None) == "post":
+        return "#/post"
+    return f"#/cub/{fid}"
 
 
 def _is_cub(feature) -> bool:

@@ -70,5 +70,5 @@ def test_an_assistant_asked_for_it_only_prepares_the_press(app, monkeypatch, tmp
                      json={"fields": {"harness": "claude"}, "client": "claude"})
     assert r.status_code == 200, r.text
     out = r.json()
-    assert out["prepared"] and not out["ok"] and out["page"] == "#/settings/assistant?sel=outside"
+    assert out["prepared"] and not out["ok"] and out["page"] == "#/settings/assistant?sel=eoutside"
     assert ran == []                                          # nothing ran for the assistant

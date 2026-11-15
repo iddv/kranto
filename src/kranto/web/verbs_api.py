@@ -654,9 +654,10 @@ class VerbsAPI:
             status, answer = await self._perform(verb, sid, fields, identity, by=by, skind=skind)
             return self._answer(verb, status, answer, sid, fields, by, skind)
         if door == "mcp" and verb.ladder != "read" and await run_in_threadpool(self._reads_only):
-            raise VerbError("kranto mcp reads only here (mcp.actions: false, Settings › "
-                            "Building): your own assistant may read, not act", 403,
-                            refusal="reads_only", page="#/settings/building", choice="never",
+            raise VerbError("kranto mcp reads only here (mcp.actions: false in your settings, "
+                            "said on Settings › Privacy & access): your own assistant may read, "
+                            "not act", 403,
+                            refusal="reads_only", page="#/settings/privacy", choice="never",
                             locked=False)
         choice = verbs.choice_for(self.rt.cfg, verb, fields)
         if choice.choice == "never":
