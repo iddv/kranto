@@ -190,13 +190,19 @@ describe("the one thing, on the home and on Needs you", () => {
     [PREPARED_API]: { prepared }, [featurePath("newsletter", "rows")]: { rows: HOME().rows.needs_you.newsletter.data },
     [IDEAS_API]: { ideas: [] }, "api/term": { enabled: false, sessions: [] }, [UPD_API]: { candidate: null }, [DISPATCH_API]: { ideas: [] },
   });
+  /** the app, stubbed with what Needs you calls of it too (its keys, its signature) */
+  function needsApp() {
+    const L = stub({ host });
+    Object.assign(L, { pageKey: vi.fn(), sigOf: (n: Element) => n.className + "|" + (n.textContent || "") });
+    facts();
+    return L;
+  }
   async function both(prepared: unknown[]): Promise<[string | null, string | null]> {
     const a = await home(HOME(), READS(prepared));
     const onHome = a.target.querySelector("#next h2")?.textContent ?? null;
     a.done();
     answers(HOME(), READS(prepared));
-    stub({ host });
-    facts();
+    needsApp();
     const b = await draw(NeedsPage, where("needs"));
     await settle();
     await settle();
@@ -214,8 +220,7 @@ describe("the one thing, on the home and on Needs you", () => {
 
   it("gives a prepared item Dismiss beside its yes on Needs you, named by its subject, and Dismiss puts it away", async () => {
     answers(HOME(), READS([prep("p-new", 1, "Padel"), prep("p-old", 30, "Lab tools")]));
-    const L = stub({ host });
-    facts();
+    const L = needsApp();
     const page = await draw(NeedsPage, where("needs"));
     await settle();
     await settle();
