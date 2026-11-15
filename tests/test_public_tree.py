@@ -95,6 +95,7 @@ LEAKS = [
     ("plan-ref", {"docs/a.md": "As in " + "\u00a7" + "4 above.\n"}),
     ("plan-ref", {"docs/a.md": "From R" + "CA 20" + "24-01-02.\n"}),
     ("plan-ref", {"docs/a.md": "UI" + " fi" + "x 3b landed.\n"}),
+    ("owner-site", {"src/kranto/connections/x.py": "placeholder = '" + "ueyw" + "95bi'\n"}),
     ("attribution", {"docs/a.md": "Co-" + "Authored-By: a bot\n"}),
     ("attribution", {"docs/a.md": "Gener" + "ated with a tool.\n"}),
     ("big-file", {"data/blob.bin": b"\x00" * 1_000_001}),

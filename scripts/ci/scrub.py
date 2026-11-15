@@ -68,6 +68,7 @@ ALLOW: dict[str, dict[str, str]] = {
         "src/kranto/legacy.py": "an old install's default loop folder, still read where it is",
     },
     "plan-ref": {},
+    "owner-site": {},
     "attribution": {
         "scripts/ci/no_attribution.py": "the check's own patterns",
         "scripts/release/notes.py": "release notes drop these lines: the patterns that find them",
@@ -216,6 +217,10 @@ _PLAN_PATTERNS = [
     r"\b[A-Z]{2,}[0-9]*" + " fi" + r"x \d+[a-z]?\b",
 ]
 
+# the owner's own site's identifiers, which once stood in the tree as an example (a Sanity
+# project id): refused anywhere, built from pieces so this file does not hold them whole
+_OWNER_SITE = ["ueyw" + "95bi"]
+
 _ATTRIBUTION = ["Co-" + "Authored-By:", "Gener" + "ated with", "noreply" + "@" + "anthropic"]
 _ATTRIBUTION_RX = r"\b(?:" + "|".join(re.escape(a) for a in _ATTRIBUTION) + ")"
 
@@ -247,6 +252,7 @@ RULES: list[Rule] = [
         re.compile("|".join(re.escape(n) for n in _PRIVATE_REPOS), re.I),
     ),
     Rule("plan-ref", re.compile("|".join(_PLAN_PATTERNS))),
+    Rule("owner-site", re.compile("|".join(re.escape(n) for n in _OWNER_SITE), re.I)),
     Rule(
         "attribution",
         re.compile(_ATTRIBUTION_RX, re.I),
