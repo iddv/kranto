@@ -133,7 +133,7 @@ export function plainOf(p: Prepared): { title: string; subject: string; hide: st
  * sends them, an item still available, and a verb the page does not say in its own words */
 export const usesChanges = (p: Prepared): boolean => Array.isArray(p.changes) && !gone(p) && !plainOf(p);
 
-/** the server's one sentence for the change, without its full stop, when it gave one (servers
+/** The server's one sentence for the change, without its full stop, when it gave one (servers
  * with ``changes``); null before */
 function sentenceOf(p: Prepared): string | null {
   if (!usesChanges(p)) return null;
@@ -188,7 +188,7 @@ const FACTORY_REPOS: Record<string, string> = { kranto: "iddv/kranto", watcher: 
 export function keyFields(p: Prepared): [string, string][] {
   const f = p.fields || {};
   const out: [string, string][] = [];
-  // the server's plain list of every change (a nested field a line per entry: Salt, a
+  // The server's plain list of every change (a nested field a line per entry: Salt, a
   // disclosure line), so the dialog never leaves a bundled field out
   // (the verbs said in the page's own words, plainOf's, keep their own short list)
   if (usesChanges(p)) {

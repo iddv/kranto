@@ -796,7 +796,7 @@ def _write_result(c: Client, answer: dict, _sleep=None, _clock=None) -> dict:
     failed)."""
     import time
     sleep, clock = _sleep or time.sleep, _clock or time.monotonic
-    job = answer.get("job") if isinstance(answer.get("job"), dict) else {}
+    job: dict = answer["job"] if isinstance(answer.get("job"), dict) else {}
     key = str(job.get("key") or "")
     _, as_, about = (key.split(":", 2) + ["", ""])[:3] if key.startswith("post:") else ("", "", "")
     if c.afk_get is None or not about:

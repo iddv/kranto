@@ -242,8 +242,8 @@ def summary(kind: str, title: str, fields: dict[str, Any] | None,
         return _join(parts) + "."
     rows = changes(kind, f)
     short = [f"{r['label']}: {r['value']}" for r in rows if not r["long"]][:3]
-    what = f"{title}" + (f": {subject}" if subject else "")
-    return what + (f" ({'; '.join(short)})" if short else "") + "."
+    head = f"{title}" + (f": {subject}" if subject else "")
+    return head + (f" ({'; '.join(short)})" if short else "") + "."
 
 
 __all__ = ["changes", "summary"]

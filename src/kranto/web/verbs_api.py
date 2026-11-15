@@ -495,8 +495,8 @@ class VerbsAPI:
                 sid = d.get("subject_id")
                 about = d["subject_name"] or (str(sid) if isinstance(sid, str | int) and
                                               not isinstance(sid, bool) else None)
-                d["changes"] = changes_mod.changes(kind, d["fields"])
-                d["says"] = changes_mod.summary(kind, v.title, d["fields"], about)
+                d["changes"] = changes_mod.changes(str(kind), d["fields"])
+                d["says"] = changes_mod.summary(str(kind), v.title, d["fields"], about)
             d["uuid"] = d.pop("prepared_uuid")
             out.append(d)
         return out
