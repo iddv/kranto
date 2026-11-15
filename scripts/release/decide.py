@@ -198,7 +198,7 @@ def gh_green(repo: str, sha: str) -> tuple[bool, str]:
     return code == checks.GREEN, why
 
 
-# the page's web UI is built by Vite at release (build.sh); the machine cutting needs this Node.
+# The page's web UI is built by Vite at release (build.sh); the machine cutting needs this Node.
 NODE_FLOOR = (22, 12)
 
 

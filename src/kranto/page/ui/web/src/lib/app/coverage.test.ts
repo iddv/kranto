@@ -48,7 +48,7 @@ async function open(hash: string): Promise<void> {
   }
 }
 
-describe("UXA's coverage matrix", () => {
+describe("the coverage matrix", () => {
   it("names every part of the inventory, each row once", () => {
     const ids = ROWS.map((r) => r.id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -61,7 +61,7 @@ describe("UXA's coverage matrix", () => {
 });
 
 for (const layout of LAYOUTS) {
-  describe(`UXA's coverage matrix in the ${layout} layout`, () => {
+  describe(`the coverage matrix in the ${layout} layout`, () => {
     beforeAll(async () => {
       localStorage.removeItem("kranto.watch.topic"); // #/topics lands on Watch's Topics until a topic is opened (WT)
       await frame({ hash: "#/needs", reads: { ...READS, "/api/shell": { ...SHELL, layout } } });

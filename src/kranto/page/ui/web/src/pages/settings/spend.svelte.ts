@@ -4,7 +4,7 @@
 // one click (S11). All of it is the server's.
 export const TOPICS = "/api/spend/topics";
 export const WATCH = "/api/settings/spend";
-/** the server's Settings › Watching › Reading (UP #3): how often sources are read, deep dives on */
+/** The server's Settings › Watching › Reading (UP #3): how often sources are read, deep dives on */
 export const READING = "/api/settings/reading";
 export interface Reading {
   every_hours: number;

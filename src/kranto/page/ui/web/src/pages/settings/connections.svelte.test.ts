@@ -12,7 +12,7 @@ const prov = (key: string, o: Partial<Provider> = {}): Provider => ({
   key, name: key[0]!.toUpperCase() + key.slice(1), state: "available", flow: "browser", blurb: `Reads ${key}.`, steps: ["One", "Two"], scopes: ["read"],
   reads: "your feed", sources: ["Home"], never: "Never posts.", revoke_at: "the site's settings", expiry: "until revoked", ...o,
 });
-// the server's /api/connections (Connections is generated from its web/types.py)
+// The server's /api/connections (Connections is generated from its web/types.py)
 const D: Connections = {
   accounts: [{ id: 4, provider: "mastodon", provider_name: "Mastodon", instance: "example.social", account: "@me@example.social", state: "connected", note: null, scopes: ["read"],
     sources: [{ id: 9, label: "Home timeline" }], connected_at: "2026-09-01T10:00:00Z", state_at: "2026-09-01T10:00:00Z", last_used_at: NOW, last_test: null },

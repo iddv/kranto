@@ -1,4 +1,4 @@
-"""the server's runs as traces: ``afk:<run_uuid>``, the analyst's cards,
+"""The server's runs as traces: ``afk:<run_uuid>``, the analyst's cards,
 explains and deep dives, News's briefs and a cub's runs. Read through
 the server's own API (``GET /api/runs/<uuid>``, the owner's only), never its database file.
 

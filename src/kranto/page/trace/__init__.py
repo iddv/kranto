@@ -1,7 +1,7 @@
 """Agent traces: Kranto's own runs, shown as a tree of spans.
 
 A console or Open in Claude Code session keeps Claude Code's own transcript in its folder
-(``<loop home>/term/<tid>/``); a the server run (a Watching run, a cub's) is read through
+(``<loop home>/term/<tid>/``); a server run (a Watching run, a cub's) is read through
 the server's API; a research run kept its stream-json file. This package **reads those where they
 are** and makes one trace per run: run › session › turn › tool call, sub-agents nested, model
 calls as leaves, events as moments. Nothing is copied; the index (``index.py``) is a rebuildable

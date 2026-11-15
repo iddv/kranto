@@ -2,7 +2,7 @@
   // What a cub asks you, one line each (SEND): the draft's title, where it stands ("ready", "needs a
   // newsletter account", "practice: nothing is sent") and the action's own button, which opens its
   // dialog (AskDialog; a draft offered again is asked for again by that click). The top of the
-  // cub's page, and Cubs › Approvals with every cub's (cub: null). the server's GET /api/asks says
+  // cub's page, and Cubs › Approvals with every cub's (cub: null). The server's GET /api/asks says
   // them: an ask that ran out of time with a newer draft since, or one already answered, is gone.
   import { read } from "../../lib/reads.svelte";
   import { ago, dt } from "../../lib/format";

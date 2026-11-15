@@ -189,7 +189,7 @@ def in_window(window: str, now: datetime) -> bool:
 
 
 def _term_running(record: Path) -> bool:
-    """Whether a the page Open in Claude Code session's record says it is running."""
+    """Whether a version of the page Open in Claude Code session's record says it is running."""
     try:
         return json.loads(record.read_text()).get("state") == "running"
     except (OSError, ValueError, AttributeError):

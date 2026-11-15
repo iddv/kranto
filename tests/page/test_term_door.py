@@ -17,7 +17,7 @@ from .term_common import Screen, canary, make_repo, make_term, needs_bwrap, run
 
 
 class Verbs:
-    """the server's verbs' door stand-in (``term.afk.call``): what the owner's Confirm ran."""
+    """The server's verbs' door stand-in (``term.afk.call``): what the owner's Confirm ran."""
 
     def __init__(self):
         self.calls = []

@@ -1,7 +1,7 @@
 # How Kranto writes your posts: the prose engine
 
-Every post Kranto drafts (a blog post, a newsletter's opening, a Mastodon post, and each site
-SOCIAL adds) is written through one engine, `kranto.prose`. It puts your voice and Kranto's rules
+Every post Kranto drafts (a blog post, a newsletter's opening, a Mastodon post, and each
+short post for the sites you tick) is written through one engine, `kranto.prose`. It puts your voice and Kranto's rules
 into the prompt, checks the draft for the shapes that make machine-written text tiring to read,
 and rewrites only the lines that need it. It writes for readers. It does not try to get past AI
 detectors, and nothing here claims it does.
@@ -132,7 +132,7 @@ must stay unflagged at both strictness levels.
 | `GET /api/prose` | | `voice`, `switches`, `switch_choices`, `switch_words`, `strictness`, `rules` (`[{id, group, words, fix, on}]`), `guides` (`[{name, title, from: kranto or yours, always}]`), `sites` (`[{site, guides, default, limits, disclosure}]`), `writers` (`{blog: blog, newsletter: newsletter, toot: mastodon}`), `writer_models` (writer → `{provider, model}`, or null: the reason tier's), `disclosure_line`, `take`, `never`, `keep`, `always`, `samples` (`[{id, site, words, start}]`), `rhythm` (`{mean, sd, dashes_per_100}` or null), `proposals` (open), `migrated`, `home` |
 | `POST /api/prose/check` (verb `prose.check`, read) | `{text, sources?, site?, kind?, take?, limits?, strictness?}` | `{score, verdict, flags, counts, grade, words, strictness, site, kind}`; each flag `{start, end, text, rule, words, fix, group, strength, scope}`: `start`/`end` are character offsets for the underline; `scope: text` is about the whole piece (no underline) |
 | `POST /api/prose/revise` (no verb: nothing is stored) | `{text, flags?, site?, kind?, take?, limits?}` | `{text, flags, score, verdict, rounds, changed: [{start, end, before, after}], say}`: the draft's **Fix**; the page saves the text through the draft's edit |
-| `POST /api/prose/voice` (verb `prose.voice`, reversible; from an assistant, a change to `voice`, `disclosure`, `always_add` or `always_remove` waits for your approval whatever the ladder says for changes you can undo, unless you chose otherwise for `prose.voice` itself; a web address in a `disclosure` line is taken off, and the answer says so) | any of `voice`, `switches`, `strictness`, `rules_off`, `guides` (site → names, or null), `disclosure` (site → line, `""` off), `take`, `writer_model` (writer → `{provider, model}`, or null), `never_add`/`never_remove`, `keep_add`/`keep_remove`, `always_add`/`always_remove`, `samples_add` (`[{text, site}]`), `samples_remove` (ids) | `{ok, changed, say}`; a 400 says what is wrong |
+| `POST /api/prose/voice` (verb `prose.voice`, reversible; from an assistant, a change to `voice`, `disclosure`, `always_add` or `always_remove` waits for your approval whatever the ladder says for changes you can undo, unless you chose otherwise for `prose.voice` itself; a web address in a `disclosure` line is taken off, and the answer says so) | any of `voice`, `switches`, `strictness`, `rules_off`, `guides` (site → names, or null), `disclosure` (site → line, `""` off), `take`, `writer_model` (writer → `{provider, model}`, or null; the route only, with the command line's token: the verb does not take it), `never_add`/`never_remove`, `keep_add`/`keep_remove`, `always_add`/`always_remove`, `samples_add` (`[{text, site}]`), `samples_remove` (ids) | `{ok, changed, say}`; a 400 says what is wrong |
 | `POST /api/prose/voice/draft` (no verb: nothing is stored) | `{samples?: [text]}` (else your saved samples) | `{voice, say}`: one model call drafts a voice card for you to read and edit; save it with `prose.voice` |
 | `POST /api/prose/learn` (verb `prose.learn`, reversible) | `{draft, sent}` | `{proposals, say}`: proposals from what you changed (kept open) |
 | | `{proposal, answer: yes or no}` | `{ok, say, proposal, answer}`: a yes applies it; a no is remembered |
@@ -197,7 +197,7 @@ cub's own purpose, tier, hourly window and cap. When the owner set a model for K
 toot or newsletter writer, that writer's model calls (its writing and its revise) go to it,
 through the same metered client. The methods are in [cub-protocol.md](cub-protocol.md).
 
-**For SOCIAL's site variants**: "before writing" is `compose(material,
+**For the short posts' site variants**: "before writing" is `compose(material,
 site=<site>, kind=short|thread|long|note, language=, limits=<the registry's limits>,
 features=<the site's playbook and advanced-feature rules>)`; the playbook comes after the
 profile in the system message and wins only on what the site can carry. "After writing" is

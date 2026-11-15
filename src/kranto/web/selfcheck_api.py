@@ -30,7 +30,7 @@ EXCLUDED = {
     "/api/setup/provider": "runs claude to read its login",
     PATHS: "this list",
 }
-# the page's server's reads when its the page gives no list of its own (before 0.5.23, or one
+# The page's server's reads when its the page gives no list of its own (before 0.5.23, or one
 # whose list failed): only reads that stay after the cut (the builds', loop's and projects'
 # reads left with them)
 BRB_FALLBACK = ("/api/header", "/api/activity")

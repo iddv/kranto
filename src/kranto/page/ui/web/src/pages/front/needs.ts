@@ -72,7 +72,7 @@ export function updateOffer(u: UpdateSummary | null | undefined): "bad" | "offer
 export const msgMark = (m: Pick<Message, "kind">): [string, string, string] =>
   m.kind === "alarm" ? ["warn", "red", "Alarm"] : m.kind === "strike" ? ["check", "blue", "Strike"] : ["dot", "grey", m.kind[0]!.toUpperCase() + m.kind.slice(1)];
 
-/** the server's status (/api/status) as Needs you reads it: its topics, its sources, its
+/** The server's status (/api/status) as Needs you reads it: its topics, its sources, its
  * observations, its runs and the update on offer */
 export type Host = Pick<Status, "topics" | "sources" | "observations" | "runs" | "update"> & Partial<Pick<Status, "ingest_progress">>;
 /** /api/today, read once a minute (the doors' counts and the status bar read it too) */

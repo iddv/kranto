@@ -155,7 +155,7 @@
   <nav id="nav" aria-label="Sections"><Nav /></nav>
   <Splitter col="nav" />
   <main id="list" aria-label="List">
-    <!-- the page's head (shell/PageHead.svelte) is the column's first child: lib/app/route.ts -->
+    <!-- The page's head (shell/PageHead.svelte) is the column's first child: lib/app/route.ts -->
     <ListHead />
     <div id="rows" tabindex="-1"><p class="empty">Loading…</p></div>
   </main>

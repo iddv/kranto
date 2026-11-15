@@ -21,7 +21,7 @@ import time
 from ....scrub import scrub
 from ....sources.base import SourceError
 from ... import sites
-from .base import BrokerContext, connection_of, outcome_of, press_draft
+from .base import BrokerContext, connection_of, draft_of, outcome_of, press_draft
 from .social import parts_of
 
 SERVICE = "threads"
@@ -134,6 +134,12 @@ class ThreadsAdapter:
     def readback(self, kind: str, fields: dict, store) -> list[tuple[str, str]]:
         conn = connection_of(store, self.provider)
         site = sites.SITES[SERVICE]
-        return [("Account", conn["account"] if conn else "Threads (posting) is not connected"),
-                ("Text", fields["text"]),
-                ("Characters", f"{sites.count(site, fields['text'])} of {site.limit}")]
+        lines = [("Account", conn["account"] if conn else "Threads (posting) is not connected"),
+                 ("Text", fields["text"]),
+                 ("Characters", f"{sites.count(site, fields['text'])} of {site.limit}")]
+        # the link the send attaches (``link_attachment``, as ``perform`` reads it)
+        d = draft_of(store, fields["draft_ref"]) or {"content": {}}
+        link = d["content"].get("link")
+        if isinstance(link, str) and link.startswith("https://"):
+            lines.append(("Link", link))
+        return lines

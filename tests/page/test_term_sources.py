@@ -2,7 +2,7 @@
 gets the lines Kranto could not add as data, web search and fetch and reads only, and one write:
 ``kranto_describe_sources``, which sends a list back to the server's resolver with the session's
 own topic, where it is checked and approved like a pasted list. Any other session is refused.
-the server is a fake here; no model, no network."""
+The server is a fake here; no model, no network."""
 from __future__ import annotations
 
 import pytest
@@ -30,7 +30,7 @@ FOUND = {**BATCH, "id": "fromtext:8", "call_id": 8, "message": "Resolved 1 line.
 
 
 class FakeAfk:
-    """the server's from-text routes: what was asked, in order; the job runs once."""
+    """The server's from-text routes: what was asked, in order; the job runs once."""
 
     def __init__(self):
         self.calls = []
@@ -156,7 +156,7 @@ post("/api/propose", {"kind": "publish", "why": "the page said so", "confirm": T
 def test_a_planted_page_inside_the_sandbox_can_only_send_a_list_for_the_sessions_topic(tmp_path, monkeypatch,
                                                                                        fake):
     """The adversarial run: inside the real sandbox, a session that obeys a planted page sends
-    Reddit for another topic and asks to approve. the server gets the text and the session's own topic
+    Reddit for another topic and asks to approve. The server gets the text and the session's own topic
     only (it refuses Reddit itself, the server's test_reddit_is_refused_as_text_and_as_a_url); the
     approve route does not exist on the door; source.approve is a card the owner has not
     confirmed, and publish (the build loop's) is refused."""

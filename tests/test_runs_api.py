@@ -1,4 +1,4 @@
-"""the server's runs for the page's agent traces: a run with its model calls (request and
+"""The server's runs for the page's agent traces: a run with its model calls (request and
 response where retention kept them, said when it did not), a cub's host calls (the op, never a
 payload) and its events; the owner's only, as a trace's reads are."""
 

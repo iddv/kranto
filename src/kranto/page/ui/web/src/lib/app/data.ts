@@ -21,7 +21,7 @@ let WHO: { origin: string | null; require_token?: boolean } | null = null; // GE
 
 /** the first read is done (boot): the page draws */
 export const loaded = (): boolean => LOADED;
-/** the server's status, as last read */
+/** The server's status, as last read */
 export const host = (): Status | null => HOST || null;
 /** the cub shop is off on this host (cubs.developer unset; PR 1.2): Cubs shows your installed cubs
  * and their approvals, no Available, Made by Kranto or adding a cub. Before the switch: shown. */
@@ -64,7 +64,7 @@ export async function loadWho(): Promise<void> {
   }
 }
 export const signedOut = (): boolean => !!(WHO && WHO.require_token && !WHO.origin);
-/** the server's plain forms (pause, resume, run, grade). Asks for JSON: pause and resume answer
+/** The server's plain forms (pause, resume, run, grade). Asks for JSON: pause and resume answer
  * {ok, error}, with 502 when only one half changed; the others still answer with a redirect, so
  * a success there only means the request was taken and the caller checks the state it wanted
  * (togglePause reads both halves back). Returns the message the redirect carries (?msg=), if any. */
@@ -205,7 +205,7 @@ async function doPause(btn: HTMLElement | null, pausing: boolean, undo = false):
   });
 }
 
-/** the server's cached reads under these paths, marked stale but kept: the next draw reads them
+/** The server's cached reads under these paths, marked stale but kept: the next draw reads them
  * again and shows the old ones meanwhile, so a list never blanks to "Loading…" */
 export function afkStale(...prefixes: string[]): void {
   prefixes.forEach(staleReads);
@@ -214,7 +214,7 @@ export function afkStale(...prefixes: string[]): void {
 export function afkDrop(): void {
   dropReads("/");
 }
-/** the server's cached reads under this path dropped, to be read again */
+/** The server's cached reads under this path dropped, to be read again */
 export function afkDropPrefix(p: string): void {
   dropReads(p);
 }

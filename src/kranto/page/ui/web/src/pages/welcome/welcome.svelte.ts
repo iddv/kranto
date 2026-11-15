@@ -84,7 +84,7 @@ interface Job {
   error?: string | null;
   result?: unknown;
 }
-/** the server's model-backed work runs in the background (no request waits on a model): the press
+/** The server's model-backed work runs in the background (no request waits on a model): the press
  * answers with {job}; this polls it every 1.5 s, saying how long it has run ("Scouting… (20 s)"),
  * and returns its result once done. An answer without a job is the result itself. */
 export async function afkJob<T>(L: App, r: unknown, poll: string, label: string, say: (w: string) => void, wait = 1500): Promise<T> {

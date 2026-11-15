@@ -14,7 +14,7 @@ The order, all inside one budget measured from the signal:
 2. open requests get ``HTTP_GRACE_S`` (uvicorn's graceful shutdown), then are cancelled;
 3. the cub host ends its processes and their ``kranto-cub-*`` scopes (``CUBS_S`` at most);
 4. the scheduler's job and each lane's tick get what is left, less ``CHILDREN_S``;
-5. the server's own children are ended (``end_children``): SIGTERM, SIGKILL what is left after
+5. The server's own children are ended (``end_children``): SIGTERM, SIGKILL what is left after
    their grace. Detached jobs (builds, fixes, pre-push checks: the page's ``detached_jobs``)
    are left running, as before: the next start adopts them;
 6. the process exits. Whatever still runs then is cut off and resumes after the start: a job
@@ -180,7 +180,7 @@ def _name(pid: int) -> str | None:
 
 
 def end_terminals() -> list[str]:
-    """the page's open Claude Code sessions, each ended with "restart" written on its record
+    """The page's open Claude Code sessions, each ended with "restart" written on its record
     before its program is signalled; [] without the page, or with one from before it said so
     (its next start then marks them, as before)."""
     import importlib.util
@@ -195,8 +195,8 @@ def end_terminals() -> list[str]:
 
 
 def detached_jobs() -> list[int] | None:
-    """the page's detached jobs (whatever it starts in a session of its own: reapers, and on
-    a the page from before the cut its builds), which a stop leaves running; [] without
+    """The page's detached jobs (whatever it starts in a session of its own: reapers, and on
+    a version of the page from before the cut its builds), which a stop leaves running; [] without
     the page (``python -m kranto serve`` starts none); None when the page cannot say (one from
     before
     STOP): then every child leading a session of its own is kept."""

@@ -81,7 +81,7 @@ def test_the_servers_children_end_and_its_detached_jobs_are_left(family):
 
 
 def test_with_the_jobs_unknown_every_session_leader_is_kept(family):
-    # a the page that cannot say which children are its detached jobs: keep every child that
+    # a page version that cannot say which children are its detached jobs: keep every child that
     # leads a session of its own (each detached job does), end the rest
     root, kid = family
     ended = {p["pid"] for p in stopping.end_children(grace_s=1.0, keep=None, root=root)}
@@ -94,7 +94,7 @@ def test_pages_detached_jobs_are_what_is_kept():
     pytest.importorskip("kranto.page.host_api")
     from kranto.page import host_api
     if "detached_jobs" not in getattr(host_api, "_NAMES", {}):
-        pytest.skip("a the page from before STOP")
+        pytest.skip("a version of the page from before STOP")
     from kranto.page import proc as bproc
     job = bproc.spawn_detached(["sleep", "300"])
     try:
@@ -182,7 +182,7 @@ def test_the_terminals_end_with_their_reason_before_the_children_are_signalled(m
     monkeypatch.setattr(stop, "end_children", lambda grace_s: order.append("children") or [])
     assert stopping.stop_server(stop, None, None) == []
     assert order == ["terminals", "children"]
-    monkeypatch.setattr(stopping, "end_terminals", lambda: 1 / 0)    # a the page that raises
+    monkeypatch.setattr(stopping, "end_terminals", lambda: 1 / 0)    # a page version that raises
     stop2 = stopping.Stop(hard_exit_s=None, own_children=False)
     monkeypatch.setattr(stop2, "end_children", lambda grace_s: order.append("children") or [])
     stopping.stop_server(stop2, None, None)
@@ -193,7 +193,7 @@ def test_pages_terminals_are_asked_to_end_with_restart(monkeypatch):
     pytest.importorskip("kranto.page.host_api")
     from kranto.page import host_api
     if "term_shutdown" not in getattr(host_api, "_NAMES", {}):
-        pytest.skip("a the page from before its terminals said why they ended")
+        pytest.skip("a version of the page from before its terminals said why they ended")
     from kranto.page.ui import api
     asked = []
     monkeypatch.setattr(api, "stop_terms", lambda reason: asked.append(reason) or ["t1"])

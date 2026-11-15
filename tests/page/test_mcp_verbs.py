@@ -1,6 +1,6 @@
 """kranto mcp generated from the verb registry (rule 4).
 
-the server serves the one registry (``GET /api/verbs``: its own verbs, the features' and cubs'
+The server serves the one registry (``GET /api/verbs``: its own verbs, the features' and cubs'
 actions) and the one door (``POST /api/verbs/<kind>``, where the owner's ladder decides). So the
 tool list is the table: one tool per verb the client's door may run, plus the reads and four
 generic tools, and a verb's call goes to that door with the client's own name for Activity,

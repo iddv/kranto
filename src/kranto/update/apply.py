@@ -875,7 +875,7 @@ class Helper:
                     f"{busy['fixes']} fix{'es' if busy['fixes'] != 1 else ''}"
                     if busy.get("fixes") else "") if x))
             main = self.main_pid()
-            # the server's own children go down with its unit at the stop (and the stop's guard
+            # The server's own children go down with its unit at the stop (and the stop's guard
             # still waits for every process from the tool): the console's Claude Code runs
             # `kranto mcp` from the tool, and waiting for it held every update while the console
             # was open (live, 2026-10-27)

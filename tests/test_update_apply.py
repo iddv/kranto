@@ -469,7 +469,7 @@ def test_a_version_that_breaks_on_this_installs_data_rolls_back(world):
     log = Path(st["log"]).read_text()
     assert "self-check: 40 of 41 reads in 9.0 s, 1 past the budget" in log
     assert "FAIL GET /api/topics/7: 500 (error 1a2b3c4d)" in log
-    # the page's summary says it broke, and the error Send this error files; the server it put
+    # The page's summary says it broke, and the error Send this error files; the server it put
     # back reports it once to the error reports (if the person chose to send; ERR, B1)
     from kranto.telemetry import errors
     from kranto.update import check

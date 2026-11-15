@@ -138,7 +138,7 @@ class TraceDetail(TraceSummary):
     cursor: str
     running: bool
     note: str | None
-    line: str | None              # a the server run's plain head line, else None
+    line: str | None              # a server run's plain head line, else None
     stop: TraceStop | None        # its Stop while it runs (``api/activity/stop``), else None
 
 
@@ -358,7 +358,7 @@ class IncidentKind(TypedDict):
 
 class ActivityIncident(TypedDict):
     """A blocking incident: a provider's model key refused, from its first
-    failure, folding every kind it stops; the verb renews the key. the server 0.6.0.dev5+."""
+    failure, folding every kind it stops; the verb renews the key. The server 0.6.0.dev5+."""
     id: str
     provider: str
     name: str
@@ -382,9 +382,9 @@ class ActivityIncident(TypedDict):
     # whether it raises the band (the owner, 2026-10-28: the band is for Kranto itself):
     # Kranto's own (a refused model key, ``auth:``; Kranto's core, ``core:``) is the band's; a
     # feature's or a cub's (a cub stopped) is one Needs you row only. Absent
-    # from a the server before it: decided by the id's class (lib/activity.ts isBand)
+    # from a server before it: decided by the id's class (lib/activity.ts isBand)
     band: NotRequired[bool]
-    # the server 0.6.0.dev15+: the owner may put any incident away (POST
+    # The server 0.6.0.dev15+: the owner may put any incident away (POST
     # api/activity/dismiss {incident}); what makes it go, in words; the failed runs that hold it
     # (a later good call to the provider or a passing key test clears it). Absent from an older
     # the server: no Dismiss, no words, no runs (each reader says nothing)
@@ -429,7 +429,7 @@ class Activity(TypedDict):
     recent: list[ActivityRun]
     folded: list[ActivityFold]
     failing: list[ActivityFail]
-    # empty from a the server before the incidents
+    # empty from a server before the incidents
     incidents: list[ActivityIncident]
     counts: ActivityCounts
     quiet: str | None
@@ -437,7 +437,7 @@ class Activity(TypedDict):
     paused: bool
     afk_error: str | None
     now: str | None
-    # the status bar's word and why (the server's health.py,); None from a the server before it
+    # the status bar's word and why (the server's health.py,); None from a server before it
     health: NotRequired[ActivityHealth | None]
 
 

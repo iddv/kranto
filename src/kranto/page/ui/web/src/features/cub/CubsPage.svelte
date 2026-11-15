@@ -53,7 +53,7 @@
     return H ? read<{ asks: AskRow[] }>(ASKS_API, 15000) : null;
   });
   const open = $derived((asked?.data?.asks || []).filter((t) => cubs.some((c) => c.id === t.cub)));
-  // the installed cubs' own lines (a the server without the cub runtime answers 404: no banner, no tags)
+  // the installed cubs' own lines (a server without the cub runtime answers 404: no banner, no tags)
   const lines = $derived.by(() => {
     void view.tick;
     return H ? read<CubsList>(CUBS_API, 20000).data || null : null;

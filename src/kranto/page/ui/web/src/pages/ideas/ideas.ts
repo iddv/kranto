@@ -1,5 +1,5 @@
 // Ideas (WORKSPACE.md 1.5, 2.2; W4): the types and the pure helpers of the list, a row, a topic's
-// card row and the card's sheet. An idea is a the server card; its topics, theme, signals
+// card row and the card's sheet. An idea is a server card; its topics, theme, signals
 // and evidence come from the server's /api/ideas (cardIdeas, shared with Needs you and a topic's
 // pages).
 import type { IdeaRank } from "../../api/afk.gen";

@@ -1,4 +1,4 @@
-// The features' slots in today's shell. the server's GET /api/features says which
+// The features' slots in today's shell. The server's GET /api/features says which
 // features there are, whether each is on and what it fills; this file draws that in the shell as
 // it is now: a navigator entry under the heading the manifest names (News under Desk) and each feature's page registered by its node. The area shell 
 // designed waits for the owner's review; when it lands, a feature becomes an area here and its
@@ -131,7 +131,7 @@ export interface FeatureRow {
       today_rows?: TodayRowDecl[];
       lists?: ListDecl[];
       forms?: FormDecl[];
-      /** the page's one primary: a form's id, or an action in its head (none: its first form) */
+      /** The page's one primary: a form's id, or an action in its head (none: its first form) */
       primary?: string | null;
     };
   };

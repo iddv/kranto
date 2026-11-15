@@ -1,6 +1,6 @@
 """The page's own server as one plain function: ``handle(method, path, query, body)``.
 
-the server's ``kranto serve`` mounts it at ``/brb/`` (``brb ui``'s own stdlib server, ``server.py``,
+The server's ``kranto serve`` mounts it at ``/brb/`` (``brb ui``'s own stdlib server, ``server.py``,
 calls it too). The function knows nothing about either server: it takes the path below its
 mount point and returns ``(status, content_type, body_bytes)``. Guards stay with the server:
 loopback only, and no cross-origin POST (both servers refuse with 403). Who is calling is the
@@ -223,7 +223,7 @@ class App:
         return self.afk("GET", f"/api/activity?run={uuid}")
 
     def activity_stop(self, body: dict) -> dict:
-        """``POST api/activity/stop {id}``: the owner's Stop, where the run can stop. the server's
+        """``POST api/activity/stop {id}``: the owner's Stop, where the run can stop. The server's
         run at its next step; a session by End."""
         rid = str(body.get("id") or "")
         src, _, rest = rid.partition(":")
@@ -235,7 +235,7 @@ class App:
         raise HttpError(404, "no such run, or it cannot be stopped")
 
     def afk(self, method: str, path: str, body: dict | None = None, owner: bool = False) -> dict:
-        """the server's API on loopback: the page never touches its files. A state-changing call
+        """The server's API on loopback: the page never touches its files. A state-changing call
         carries the server's own origin, as its guard requires, and the UI's token (OI).
         ``owner``: a read that is the owner's only (a run's model calls, for its agent trace)
         carries the token too."""

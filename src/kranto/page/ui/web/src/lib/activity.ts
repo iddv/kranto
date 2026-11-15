@@ -24,7 +24,7 @@ export type Indicator = {
 /** the header facts the two lane words used, for before the read arrives (or an older the server) */
 export interface LaneFacts {
   paused: boolean;
-  /** the server's running job ("ingest") and its words, its next read */
+  /** The server's running job ("ingest") and its words, its next read */
   afkRunning: string | null;
   reading: string | null;
   next: string | null;
@@ -54,11 +54,11 @@ const lower = (s: string): string => (s ? s[0]!.toLowerCase() + s.slice(1) : s);
 /** "Reading your sources · source 2 of 8" */
 export const runWords = (r: ActivityRun): string => [r.title, r.words].filter(Boolean).join(" · ");
 
-/** the incidents of a read (a refused model key; [] from a the server before them) */
+/** the incidents of a read (a refused model key; [] from a server before them) */
 export const incidentsOf = (a: Activity | null): ActivityIncident[] => (a && Array.isArray(a.incidents) ? a.incidents : []);
 /** whether an incident raises the band and the top bar's red: Kranto's own only (the owner,
- * 2026-10-28: "That level of alert should be limited to issues in Kranto itself"). the server says
- * it (band); from a the server before it, by the id's class: a refused key (auth:) or Kranto's core
+ * 2026-10-28: "That level of alert should be limited to issues in Kranto itself"). The server says
+ * it (band); from a server before it, by the id's class: a refused key (auth:) or Kranto's core
  * (core:). A feature's or a cub's incident (a cub stopped) is a Needs you row. */
 export const isBand = (i: ActivityIncident): boolean => (typeof i.band === "boolean" ? i.band : /^(auth|core):/.test(i.id || ""));
 /** the incidents the band says (Kranto's own) */

@@ -12,7 +12,7 @@ describe("the terminal's socket", () => {
     expect(socketUrl("c3f1a9e2", "a/b", at("http://localhost:18765/#/ideas"), "/brb/")).toBe(
       "ws://localhost:18765/brb/term/ws/c3f1a9e2?ticket=a%2Fb",
     );
-    // the page's small server alone: its prefix is /
+    // The page's small server alone: its prefix is /
     expect(socketUrl("c3f1a9e2", "t", at("https://h.example/"), "/")).toBe(
       "wss://h.example/term/ws/c3f1a9e2?ticket=t",
     );

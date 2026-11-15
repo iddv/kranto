@@ -53,7 +53,7 @@ export const PAGES: Record<string, Page> = {};
 export function register(node: string, page: Page): void {
   PAGES[node] = page;
 }
-/** the page drawn at a node: registered under the node itself, else under its route's node, whose
+/** The page drawn at a node: registered under the node itself, else under its route's node, whose
  * ":x" stands for one segment ("topics/5/evidence" is "topics/:id/evidence"; "topics/new", being
  * registered itself, is never "topics/:id") */
 export function pageFor(node: string | null | undefined, which: "list" | "pane"): PagePart | null {

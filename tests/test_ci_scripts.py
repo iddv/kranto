@@ -96,7 +96,7 @@ def test_wait_times_out():
     assert code == checks.TIMED_OUT and "pending: slow" in why
 
 
-# the page run 38937485289 (2026-10-16 17:09): fast, lint and gitleaks waited six minutes for a
+# The page run 38937485289 (2026-10-16 17:09): fast, lint and gitleaks waited six minutes for a
 # runner and were cancelled without one; slow was cancelled after it had started
 NEVER_STARTED = [
     {"name": "browser", "status": "completed", "conclusion": "success",
@@ -341,9 +341,9 @@ def test_jobs_no_runner_took_are_rerun_without_spending_the_one_rerun(fake_gh, t
 
 
 def test_a_merge_never_waits_for_a_release(fake_gh, tmp_path, monkeypatch):
-    # the freeze is gone (finding 1): stable is cut from its rc's tag, so a fleet note
-    # announcing an rc stops nothing
-    notes = tmp_path / "home" / "work" / "MQ.NOTES.md"
+    # the freeze is gone (finding 1): stable is cut from its rc's tag, so a note announcing
+    # an rc stops nothing
+    notes = tmp_path / "home" / "work" / "notes.md"
     notes.parent.mkdir(parents=True)
     notes.write_text("- 19:01 UTC **RM rc in flight: 0.3.72**. Please merge nothing.\n")
     monkeypatch.setenv("HOME", str(tmp_path / "home"))

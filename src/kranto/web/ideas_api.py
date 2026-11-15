@@ -1,6 +1,6 @@
 """Idea cards as JSON: what Kranto UI and the console read (PLAN.md 1(d), 2.5).
 
-the page never opens the server's database (handover rule 4); it reads cards here.
+The page never opens the server's database (handover rule 4); it reads cards here.
 
 | Method and path      | Does                                                        |
 |----------------------|-------------------------------------------------------------|

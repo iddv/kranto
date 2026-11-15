@@ -1209,7 +1209,7 @@ body.doors #rows .ph h1 { font-size: 22px; font-weight: 600; }
 }
 /* Ideas' rows with a pointer that hovers: the verbs (shown on hover, focus and the chosen row) lie
    over the row's end instead of keeping an empty column, so a title takes the row's width
-   (TFIX 15, Gemini 11: titles cut at 60% with 35% of the row empty), and the reason has room */
+   (a review found titles cut at 60% with 35% of the row empty), and the reason has room */
 @media (hover: hover) {
   body.doors #rows .grp.ideas { --asidew: 120px; }
   body.doors #rows .grp.ideas .row.lr { position: relative; grid-template-columns: var(--tickw, 0px) var(--stw, 14px) var(--numw, 46px) minmax(0, 1fr) var(--asidew, 128px) 40px 0px; }
@@ -1324,3 +1324,14 @@ body.doors .loading .skel i:nth-child(2) { width: 70%; } body.doors .loading .sk
 .row.touched { box-shadow: inset 3px 0 0 var(--violet); background: var(--violet-wash); transition: background 1.5s; }
 .row .touched-by { margin-left: 8px; font-size: 12px; color: var(--violet); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .row.touched { transition: none; } }
+
+/* Settings › Posting on a phone: each site's line (what happens when you post) stays under its
+   name, the name is never broken, and the site's controls take their own line under both */
+@media (max-width: 759px) {
+  section[aria-labelledby="post-sites"] .row.lr { grid-template-columns: 0px var(--stw, 14px) 0px minmax(0, 1fr) 0px 0px 0px; row-gap: 2px; }
+  section[aria-labelledby="post-sites"] .lr .c-main { display: flex; flex-direction: column; -webkit-line-clamp: unset; }
+  section[aria-labelledby="post-sites"] .lr .r-title { white-space: nowrap; overflow-wrap: normal; word-break: keep-all; }
+  section[aria-labelledby="post-sites"] .lr .c-main .c-meta { display: block; white-space: normal; overflow: visible; }
+  section[aria-labelledby="post-sites"] .lr .c-end { grid-column: 4 / 8; grid-row: 2; justify-self: start; }
+  section[aria-labelledby="post-sites"] .lr .c-end .r-act { flex-wrap: wrap; white-space: normal; }
+}

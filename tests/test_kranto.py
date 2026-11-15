@@ -218,7 +218,7 @@ def test_unit_file(user_home):
     assert "ExecStart=%h/.local/bin/kranto serve --host 127.0.0.1\n" in text
     assert "Description=Kranto: news in, ideas out, posts when you say\n" in text
     assert "build" not in text.split("[Service]")[0] and "--no-loop" not in text
-    # the server stops within 10 s and its watchdog exits at 12 (STOP): systemd's kill at 15
+    # The server stops within 10 s and its watchdog exits at 12 (STOP): systemd's kill at 15
     for line in ("KillMode=process", "TimeoutStopSec=15", "Restart=on-failure",
                  "WantedBy=default.target", "Type=simple", "OOMPolicy=continue"):
         assert line in text.splitlines()
@@ -891,7 +891,7 @@ def test_kranto_trace_is_brb_trace_for_this_home(user_home, monkeypatch, capsys)
     host = make_host(user_home)
     assert launcher.main(["--home", str(home), "trace", "show", "build:x/1", "--errors"], host) == 0
     assert calls[0][:3] == ("show", "build:x/1", True) and calls[0][3]
-    brbfake.drop(monkeypatch, "add_trace_group")  # a the page without traces
+    brbfake.drop(monkeypatch, "add_trace_group")  # a version of the page without traces
     assert launcher.main(["--home", str(home), "trace", "show", "build:x/1"], host) == 2
     assert "update Kranto" in capsys.readouterr().err
 

@@ -18,7 +18,7 @@ export const CLUSTERS_API = "/api/clusters";
 /** the map, asked for only once there is one: /api/clusters answers 200 before the first map
  * (no snapshot, with the progress), so a fresh install's page never asks /api/map for the 404
  * that means "not yet", an error in the console (QA B20). Before the first map: an error read
- * ("no map yet"), as the 404 was; a the server whose clusters cannot be read: /api/map as before */
+ * ("no map yet"), as the 404 was; a server whose clusters cannot be read: /api/map as before */
 export function mapRead(): Read<Map> {
   const cl = read<{ snapshot: unknown }>(CLUSTERS_API, 60000);
   if (cl.data && !cl.data.snapshot) return { data: null, error: "no map yet", at: cl.at, loading: false };

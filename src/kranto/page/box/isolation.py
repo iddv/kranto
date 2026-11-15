@@ -2,7 +2,7 @@
 
 Where bubblewrap works, the code sees only its work dir, the system and the base Python
 install read-only (not the venv), an empty private /tmp and no network unless asked, so it
-cannot reach the den, the the page package or anything else of the user's.
+cannot reach the den, the page package or anything else of the user's.
 ``isolation()`` reports which level the machine has. Without bubblewrap, such code does not
 run (``require_sandbox``) unless the owner sets ``$KRANTO_ALLOW_UNSANDBOXED=1``; then it runs
 in a network namespace only, or on the host.

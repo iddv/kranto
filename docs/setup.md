@@ -296,9 +296,18 @@ A post writer can run on its own model, apart from the models that watch your so
 (`docs/prose.md`, "The writer's model"). For a GPT model, paste an OpenAI key with
 `kranto provider openai --key-stdin` (it is tested, spending nothing, and kept as
 `OPENAI_API_KEY` in the home's `.env` only when it works), then set the writer's model, for
-example `{"writer_model": {"blog": {"provider": "openai", "model": "<a model id>"}}}` with the
-verb `prose.voice`. The key is used for that writer only, never for watching; no writer model is
-chosen for you.
+example `{"writer_model": {"blog": {"provider": "openai", "model": "<a model id>"}}}`, by
+posting it to `/api/prose/voice` with the command line's own token (the `cli.token` file in
+the tokens folder `kranto paths` names):
+
+    curl -s -X POST http://127.0.0.1:8765/api/prose/voice \
+      -H "Authorization: Bearer $(cat <tokens folder>/cli.token)" \
+      -H 'Content-Type: application/json' \
+      -d '{"writer_model": {"blog": {"provider": "openai", "model": "<a model id>"}}}'
+
+Today that is the only way: the verb `prose.voice` (and so your assistant) does not take
+`writer_model`, and Settings has no control for it yet. The key is used for that writer only,
+never for watching; no writer model is chosen for you.
 
 ## 8. Ready (person)
 

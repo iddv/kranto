@@ -60,7 +60,7 @@
     void view.tick;
     return arrangement(H);
   });
-  // the server's one read of the home
+  // The server's one read of the home
   // read more often during the first hour, while the read moves
   let firstHour = false;
   const hr = $derived.by(() => {

@@ -85,7 +85,7 @@ function classicTree(r: Route): NavFacts {
     for (const [to, w] of d.items) item(to, w, { n: n[to]?.[0] ?? null, tone: n[to]?.[1] || "" });
   }
   if (H) {
-    // the Cubs row with what they ask you, then each cub's page (the operator's note)
+    // the Cubs row with what they ask you, then each cub's page (the owner's note)
     out.push({ head: "Cubs", to: "cubs", n: open || null, tone: "wait" } as NavRow);
     for (const c of cubs) item("cub/" + c.id, c.title, { n: c.open || null, tone: "wait" });
     item("cubs/approvals", "Approvals", { n: open || null, tone: "wait" });
@@ -208,11 +208,11 @@ export function navTree(r: Route): NavFacts {
 }
 
 /* The status bar's service line (WORKSPACE.md 1.7; StatusBar.svelte draws it): the service in one
-   word and a few cells. The word and why are the server's (health.py, HLTH: `ingest.health` on
+   word and a few cells. The word and why are the server's (health.py: `ingest.health` on
    /api/today), worked out once on the server so the page, the phone and the console say the same:
    Paused (watching paused, or the watcher's provider paused until a time), Degraded (no ingest
    yet, the last failed or had problems, more than one judge call in five failed) or Healthy. A
-   pause clicked here shows at once, before the next read. With a the server older than HLTH the rule
+   pause clicked here shows at once, before the next read. With a server older than the health read the rule
    is worked out here, as before. */
 const PAUSED = { icon: "paused", colour: "amber", text: "Paused" }, DEGRADED = { icon: "warn", colour: "amber", text: "Degraded" },
   HEALTHY = { icon: "check", colour: "green", text: "Healthy" },

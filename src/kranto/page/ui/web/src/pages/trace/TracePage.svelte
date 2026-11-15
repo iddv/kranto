@@ -226,7 +226,7 @@
     return true;
   }
 
-  // the page's keys (lib/keys.json's Trace group)
+  // The page's keys (lib/keys.json's Trace group)
   $effect(() => {
     void view.tick;
     const L = app();

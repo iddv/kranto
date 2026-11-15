@@ -19,12 +19,12 @@ export const topicSt = (s: string | null | undefined): [string, string, string] 
 
 /** a topic's pages by their node (topics/<id>/<page>): [the page's part, its name]. Under the
  * doors a topic's pages are Watch's (#/watch/topic/<id>, …/sources, …/evidence, …/map: WT); the
- * old tree (a the server with no doors) lists them as the topic's children, Map aside */
+ * old tree (a server with no doors) lists them as the topic's children, Map aside */
 export const TPAGES: [string, string][] = [["", "Overview"], ["evidence", "Evidence"], ["themes", "Themes"], ["ideas", "Ideas"], ["sources", "Sources"], ["map", "Map"]];
-/** the page a route opens (Overview for one it does not know, as the old page did) */
+/** The page a route opens (Overview for one it does not know, as the old page did) */
 export const subOf = (part: string | undefined): string => (TPAGES.some((p) => p[0] === (part || "")) ? part || "" : "");
 export const pageName = (sub: string): string => (TPAGES.find((p) => p[0] === sub) || TPAGES[0] as [string, string])[1];
-/** the server's answer for a topic it does not have */
+/** The server's answer for a topic it does not have */
 export const noTopic = (error: string | null | undefined): boolean => !!error && /no such topic|not found/i.test(error);
 
 /** the Overview's themes: rising first, then the most new arrivals; three */

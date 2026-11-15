@@ -54,7 +54,7 @@ def doc(name: str, text) -> str:
 @dataclass
 class Client:
     """``get(path, query) -> (status, json or text)``, ``post(path, body) -> (status, json)``;
-    paths under the the page mount (``/api/kranto``). ``afk_get`` and ``afk_post``: the server's
+    paths under the page mount (``/api/kranto``). ``afk_get`` and ``afk_post``: the server's
     own API (the library search, the verbs), None when Kranto is not hosting. ``who``: the
     client's own name for itself (MCP's ``clientInfo.name``, or the console's harness): words
     for Activity's "by Codex (outside)", never authority."""
@@ -182,7 +182,7 @@ def kranto_needs_you(c: Client) -> dict:
 
 
 def _cards(c: Client) -> list[dict]:
-    """the server's idea cards in the owner's order (``GET /api/ideas``, H1): what Ideas
+    """The server's idea cards in the owner's order (``GET /api/ideas``, H1): what Ideas
     lists, never the build loop's snapshot."""
     if c.afk_get is None:
         raise ToolError("ideas are the server's cards: Kranto is not hosting this API")
@@ -340,7 +340,7 @@ def card_ref(ref: str) -> int | None:
 
 
 def post_failures(c: Client, about: str | None = None) -> list[dict]:
-    """the server's Write a post jobs that wrote no draft (``GET /api/post``'s ``failed``), as
+    """The server's Write a post jobs that wrote no draft (``GET /api/post``'s ``failed``), as
     outcomes: the job a press started can fail after the press itself was taken (5: a
     failed post read as "Every recent action happened")."""
     if c.afk_get is None:
@@ -554,7 +554,7 @@ MAX_READ_CHARS = 60_000
 
 
 def fetch_verbs(c: Client) -> list[dict] | None:
-    """the server's verb table, or None when this Kranto has none (or is not hosting)."""
+    """The server's verb table, or None when this Kranto has none (or is not hosting)."""
     if c.afk_get is None:
         return None
     try:
@@ -746,7 +746,7 @@ def kranto_read(c: Client, path: str, query: dict | None = None) -> dict:
 
 
 def page_reads() -> list[dict]:
-    """the page's own GET routes, under /brb."""
+    """The page's own GET routes, under /brb."""
     from ..ui.routes import ROUTES
     return [{"path": "/brb" + pattern, "says": ""} for method, pattern, _ in ROUTES
             if method == "GET" and isinstance(pattern, str) and pattern.startswith("/api/")]
@@ -904,7 +904,7 @@ def unix_client(sock: str, token: str, timeout: float = 30.0) -> Client:
         except ValueError:
             return status, text
 
-    # the server's reads go through the door too (term.door.AFK_READS, GET only); there is no
+    # The server's reads go through the door too (term.door.AFK_READS, GET only); there is no
     # afk_post: a session's only writes are its proposals and its list
     return Client(get=lambda p, q=None: call("GET", p, q),
                   post=lambda p, b: call("POST", p, body=b),

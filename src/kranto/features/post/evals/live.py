@@ -136,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--sites", default="blog,toot")
     ap.add_argument("--out", default=str(HERE / "recorded.json"))
     ap.add_argument("--seed", type=int, default=13)
-    ap.add_argument("--kranto.page", help="a the page checkout to import (the Claude Code "
+    ap.add_argument("--kranto.page", help="a checkout of the page to import (the Claude Code "
                                        "provider's claude_print), when it is not installed")
     ap.add_argument("--follow", help="update this recording instead of starting afresh: the "
                                      "old writer's recorded answers are kept (its prompt is "

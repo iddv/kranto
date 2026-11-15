@@ -392,7 +392,7 @@ terminal) looks now. `cubs.auto_update: false` in `kranto.yaml` makes every upda
 Post (`#/post`, the fourth door) is where what Kranto writes for you waits: **Drafts waiting**,
 one line a draft (newsletter, blog post or short posts; its title; one fact, like "Monday's
 issue"; for short posts the sites as words, "Bluesky ✓ · Mastodon · X", ✓ on those posted; its
-age; **Open**); **Sent**, one line a post with where it went; **Where posts go**, one line with
+age; **View**, its page: Open is the word for opening the site); **Sent**, one line a post with where it went; **Where posts go**, one line with
 **Sites** (Settings › Posting); and **Earlier drafts**, folded (an issue a newer one replaced, one
 you declined), each still openable. A draft waits until you have seen it: it leaves Drafts waiting
 only when it is sent, declined, or replaced by the next one of its series. **Open** shows the

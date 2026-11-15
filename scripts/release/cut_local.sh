@@ -25,7 +25,7 @@
 # cut prints the rc_check.sh line to run on the published build before the owner's install
 # takes a nightly, or before a held release is released. Such a nightly is published unoffered
 #: its notes open with "**Do not install:** being checked", so no install is
-# offered it; rc_check.sh checks it by tag, the operator re-reads MQ.NOTES.md, and
+# offered it; rc_check.sh checks it by tag, the maintainer checks no one asked to hold it, and
 # gate.py offer TAG (only after rc_check passed on it) removes the line. The rc tags
 # (--prerelease rcN) are retired: every candidate is checked on itself.
 #
@@ -274,7 +274,7 @@ case "$KIND" in
   nightly)
     if [ "$RC_CHECK" = 1 ]; then
       echo "nightly: $TAG touches what rc_check checks: it is published unoffered (its notes" \
-           "open with Do not install). Check it, re-read MQ.NOTES.md, then offer it:"
+           "open with Do not install). Check it, make sure no one asked to hold it, then offer it:"
       echo "  $check_line"
       echo "  scripts/release/gate.py offer $TAG"
     fi

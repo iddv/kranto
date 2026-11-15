@@ -1,4 +1,4 @@
-"""the page: the build side of Kranto."""
+"""The page: the build side of Kranto."""
 try:                                     # the installed distribution's (set from the tag)
     from importlib.metadata import PackageNotFoundError
     from importlib.metadata import version as _version

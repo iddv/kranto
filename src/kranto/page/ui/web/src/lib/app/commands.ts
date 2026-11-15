@@ -162,7 +162,7 @@ export function palItems(q: string, srv: { query: string; results: unknown[] } |
   // an answer without results (an older the server, a fake one) finds nothing, never breaks the list
   const found = (srv && srv.query === q.trim() && Array.isArray(srv.results) ? srv.results : []) as { kind: string; id: number; title: string; detail: string; score?: number }[];
   for (const x of found) {
-    // the server's search arrives later: it ranks half a step under a match of the page's own, so
+    // The server's search arrives later: it ranks half a step under a match of the page's own, so
     // the groups already shown do not jump
     if (x.kind === "observation") add({ g: "Evidence", title: x.title, detail: `#${x.id} · ${x.detail}`, go: obsHref(x.id) }, Math.max(1, palScore(q, x.title)) - 0.5 + (x.score || 0) / 10);
     else if (x.kind === "source") add({ g: "Sources", title: x.title, detail: x.detail, go: "#/settings/sources/" + x.id }, Math.max(1, palScore(q, x.title)) - 0.5);

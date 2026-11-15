@@ -3,7 +3,7 @@
 "✦ Claude Code" chip was fixed at the bar's right edge, over Feedback, the gear and the theme
 toggle, in both layouts and both themes: measured here as every visible control's box in
 ``#top`` against every other's, at 1400 × 900 and 390 × 844, New and Classic, light and dark.
-the server is answered in the page (test_browser_buttons' HostAfk). Needs the built UI (CI's
+The server is answered in the page (test_browser_buttons' HostAfk). Needs the built UI (CI's
 browser job)."""
 import json
 import re

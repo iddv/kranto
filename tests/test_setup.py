@@ -336,7 +336,7 @@ def test_a_yaml_value_written_as_a_block_is_replaced_whole():
 
 
 def _fake_loop_settings(monkeypatch):
-    """the page's settings writer, as a fake: records what it would write."""
+    """The page's settings writer, as a fake: records what it would write."""
     written = []
     brbfake.install(monkeypatch, write_setting=lambda path, keys, value:
                     written.append((str(path), keys, value)))

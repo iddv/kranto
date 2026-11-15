@@ -22,7 +22,7 @@ export interface CubPlace {
 }
 export type Layout = "new" | "classic";
 export interface Arrangement {
-  /** the frame (shell.layout); a the server of 0.5.8 or older answers home and doors instead */
+  /** the frame (shell.layout); a server of 0.5.8 or older answers home and doors instead */
   layout?: Layout;
   home?: boolean;
   doors?: boolean;

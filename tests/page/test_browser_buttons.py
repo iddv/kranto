@@ -5,7 +5,7 @@ at 1400 px and on a 390 px phone, with the first row of each list pressed open (
 pages the owner named: the newsletter's page with a ticket waiting, Activity with a Fix row. A
 shown button whose scrollWidth is over its clientWidth fails.
 
-the server is answered in the page: PageAfk's topics and setup, and the newsletter cub from
+The server is answered in the page: PageAfk's topics and setup, and the newsletter cub from
 ``tests/page/fixtures/host_cubs.json`` (their feature rows are the server's own manifests;
 every word of data is made up). The activity read is answered as test_browser_activity does.
 Needs the built UI (CI's browser job)."""
@@ -42,7 +42,7 @@ CUT = r"""() => [...document.querySelectorAll('button, a.btn, [role=button]')]
 
 
 class HostAfk(PageAfk):
-    """PageAfk, and a the server with the newsletter cub installed (shell.layout: ``layout``)."""
+    """PageAfk, and a server with the newsletter cub installed (shell.layout: ``layout``)."""
 
     def __init__(self, layout: str, **kw):
         super().__init__(**kw)
@@ -116,7 +116,7 @@ def test_the_named_pages_draw_what_the_owner_saw(browser, page_base):
     page.goto(f"{page_base}/#/cub/newsletter?list=issues")
     until(page, "document.querySelector('#rows li.row')", 15)
     assert page.locator("#rows [data-act=ask-open]").first.inner_text() == "Send"   # its own verb (SEND)
-    # the page's one head (STD) says its last update among its facts, and the staged one is
+    # The page's one head (STD) says its last update among its facts, and the staged one is
     # in its ⋯; this file ran in no CI job until so it still read the old page
     until(page, "document.body.innerText.includes('updated to 1.2.0 by itself, 2026-10-23')", 15)
     page.locator("#page-head .verbs .btn.more").click()

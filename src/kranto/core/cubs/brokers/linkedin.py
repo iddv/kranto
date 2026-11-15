@@ -133,5 +133,7 @@ class LinkedInAdapter:
                  ("Characters", f"{sites.count(site, fields['text'])} of {site.limit}")]
         card = d["content"].get("card")
         if isinstance(card, dict) and card.get("url"):
+            # the address the article card attaches, beside its title
             lines.append(("Link card", str(card.get("title") or card["url"])))
+            lines.append(("Link", str(card["url"])))
         return lines

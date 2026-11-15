@@ -1,4 +1,4 @@
-// One bad row never takes a page down: a read's rows that the server could
+// One bad row never takes a page down: a read's rows that server could
 // not read are taken out of its lists as it arrives and listed under the page's head, "Couldn't read
 // this source · Energy Feed · error 1a2b3c4d" with Send this error; a failed answer that carries an
 // error's id says the version and the id, and Send this error opens Feedback with the report shown.

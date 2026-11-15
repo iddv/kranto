@@ -1,6 +1,6 @@
 <script lang="ts">
   // The why chips of one grade, in the popover that whyPop() opens (after a grade, and on why ▾):
-  // the server's chips, each with its letter (a–f press it), pressed while the grade carries it; a
+  // The server's chips, each with its letter (a–f press it), pressed while the grade carries it; a
   // press keeps or takes off its chip. + note asks for a few words kept with the grade.
   import { chipsOf, gkey, gradeOf, noteDialog, toggleChip, WHYCUR, type GradeOpts } from "./grades.svelte";
   import { app } from "../lib/shell.svelte";

@@ -49,7 +49,7 @@ export interface KeyState {
   typing: boolean;
   /** "g" after a g was pressed, else null */
   chord: string | null;
-  /** the page has rows to move over */
+  /** The page has rows to move over */
   rows: boolean;
   /** one of them is focused (enter acts) */
   focused: boolean;

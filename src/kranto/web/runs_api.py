@@ -1,4 +1,4 @@
-"""the server's runs as the material of an agent trace (the page): the
+"""The server's runs as the material of an agent trace (the page): the
 analyst's, News's, the radar's and the cubs' runs, read by the page's trace reader through
 this API, never through the database file.
 
@@ -11,7 +11,7 @@ this API, never through the database file.
 |                      | (kind and subject, never a payload)                                     |
 
 A run's calls carry prompts and answers, so both reads are the owner's only (the guard's
-``OWNER_READS``, as a trace's are). the page redacts on read; nothing here is sent anywhere.
+``OWNER_READS``, as a trace's are). The page redacts on read; nothing here is sent anywhere.
 No model call; nothing is written."""
 from __future__ import annotations
 

@@ -3,7 +3,7 @@
 // feed is down (two errors within 30 s, or busy: the ninth stream says so and ends) the page reads
 // every 5 s, as it did before and tries the feed again after 30 s. A read every 60 s runs
 // whatever happens, so a missed event never leaves a page stale. A new version on the feed's
-// host event means Kranto was updated: the page reloads. the server's status and who this browser
+// host event means Kranto was updated: the page reloads. The server's status and who this browser
 // is are read every 60 s.
 import { pageUrl } from "./base";
 import type { App } from "./app";

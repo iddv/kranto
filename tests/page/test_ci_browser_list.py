@@ -32,5 +32,5 @@ def test_a_skip_for_a_missing_import_is_told_apart():
     assert import_skip(("t.py", 6, "Skipped: could not import 'mcp': No module named 'mcp'"))
     assert import_skip(("t.py", 6, "Skipped: the web UI is not built")) is None
     assert import_skip("Skipped: could not import 'x'")
-    # the server, the other repository, is the one exception, by name and with its reason
+    # The server, the other repository, is the one exception, by name and with its reason
     assert import_skip(("t.py", 1, "Skipped: could not import 'kranto.paths': no")) is None

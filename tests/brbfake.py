@@ -1,7 +1,7 @@
-"""the page as Kranto sees it, without the page: a stand-in ``kranto.page.host_api``. Kranto imports
+"""The page as Kranto sees it, without the page: a stand-in ``kranto.page.host_api``. Kranto imports
 the page through that one module (the page's S-12), so a test puts only the names it
 needs there; a name it leaves out is missing, and ``from kranto.page.host_api import it`` raises
-ImportError, as it does with a the page that has no such part."""
+ImportError, as it does with a version of the page that has no such part."""
 from __future__ import annotations
 
 import sys

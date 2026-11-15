@@ -374,7 +374,7 @@ class VerbsAPI:
                                        for k, (c, w) in verbs.LOCKS.items()}})
 
     def reads(self) -> list[dict]:
-        """the server's reads an assistant may make, as the page makes them: every ``GET
+        """The server's reads an assistant may make, as the page makes them: every ``GET
         /api/...`` with the first line of what it answers (not the owner's own: a run's trace,
         the tokens; not the post-update self-check's)."""
         from .auth import Auth
@@ -529,7 +529,7 @@ class VerbsAPI:
         verb = verbs.get(row["verb"])
         if verb is None:
             return _error("this verb is no longer in Kranto", 410)
-        # the page's dialog read the press back and the owner pressed it: that is the confirm a
+        # The page's dialog read the press back and the owner pressed it: that is the confirm a
         # route asks for (PAR: a sensitive setting, prepared, was then refused "needs the
         # confirm dialog's answer")
         # the press is the owner's; what is pressed is the asker's (a route that records who

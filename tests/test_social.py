@@ -601,3 +601,13 @@ def test_readers_take_a_draft_from_before_and_keys_stored_as_null(store, tmp_pat
     s = post_api.draft_sheet(rt, unknown["id"])
     assert s["site_word"] == "later-site" and s["open"] is None
 
+
+
+def test_where_posts_go_names_as_opening_only_the_sites_with_an_open(store, tmp_path):
+    set_blob(store, PostingSites.SETTING, PostingSites(sites=["bluesky", "linkedin"],
+                                                       direct={}))
+    line = post_api.sites_line(store)["line"]
+    assert line == ("Bluesky opens in the site, with the draft filled in. Kranto posts to "
+                    "LinkedIn after your yes.")
+    set_blob(store, PostingSites.SETTING, PostingSites(sites=["linkedin"], direct={}))
+    assert post_api.sites_line(store)["line"] == "Kranto posts to LinkedIn after your yes."

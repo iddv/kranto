@@ -9,7 +9,7 @@ the field's readers and shows each handles it. This prints them:
                                                 the readers of one key: the lines that name it
 
 Two lists. **Through the contract**: the files that import the column's contract family (the
-module in the package's ``stored/``, or a the server feature's ``stored.py``, that declares
+module in the package's ``stored/``, or a server feature's ``stored.py``, that declares
 ``COLUMN = (table, column)``) and name the contract, a subclass of it, or a type it nests (a
 ``Card``'s ``Evidence``); when the type's field changes (``float`` to ``float | None``), mypy's
 strict modules and the stored-shape lint fail on each reader that does not handle it, so CI red

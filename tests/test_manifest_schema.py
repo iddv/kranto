@@ -174,7 +174,7 @@ REFUSALS = [
      "advanced"),
     (_mut("id", "appearance"), "a page of Settings"),
     (_mut("id", "features"), "reserved word"),
-    # the page's keys
+    # The page's keys
     (lambda m: m["ui"]["lists"][0]["groups"][0].update(tone="loud"), "is one of"),
     (lambda m: m["ui"]["lists"][0].update(empty="x" * 161), "at most 160 characters"),
     (lambda m: m["ui"]["cards"]["issue"].update(open="page"), "open: page needs body"),

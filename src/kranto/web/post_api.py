@@ -322,11 +322,15 @@ def sites_line(store) -> dict[str, Any]:
     if not ch:
         return {"line": "No sites chosen for short posts yet.", "ticked": 0}
     direct = [c.site.name for c in ch if c.direct]
-    opened = [c.site.name for c in ch]
-    line = f"{_and(opened)} open in the site, with the draft filled in."
+    # only a site with an Open opens (LinkedIn has none: it is posted directly or not at all)
+    opened = [c.site.name for c in ch if "open" in c.site.ways()]
+    parts = []
+    if opened:
+        verb = "opens" if len(opened) == 1 else "open"
+        parts.append(f"{_and(opened)} {verb} in the site, with the draft filled in.")
     if direct:
-        line += f" Kranto posts to {_and(direct)} after your yes."
-    return {"line": line, "ticked": len(ch)}
+        parts.append(f"Kranto posts to {_and(direct)} after your yes.")
+    return {"line": " ".join(parts), "ticked": len(ch)}
 
 
 def _and(names: list[str]) -> str:

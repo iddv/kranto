@@ -1,4 +1,4 @@
-"""the page's usage counters: its part of the allow-list is
+"""The page's usage counters: its part of the allow-list is
 nodes.json's pages and the origins; with no sink nothing is recorded. The registry's action and
 build lines left with the factory (CUT)."""
 import json

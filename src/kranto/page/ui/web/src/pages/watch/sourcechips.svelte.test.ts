@@ -7,7 +7,7 @@ import { topicList, topicWords } from "../settings/sources.svelte";
 import { TOPICS_API, topicApi } from "../topics/topics";
 import Sources from "./Sources.svelte";
 
-// the server's /api/topics (yours, the broad lane) and ?kind=project, trimmed to what the chips read
+// The server's /api/topics (yours, the broad lane) and ?kind=project, trimmed to what the chips read
 const T = (id: number, name: string, sources: number, kind = "user") => ({ id, name, kind, sources, status: "active" });
 const MINE = { topics: [T(13, "Robotics", 19), T(2, "Local-first", 6)], archived: [], broad: [{ id: 9 }, { id: 10 }], all: { sources: 130 } };
 const PROJ = { topics: [T(40, "Plotkeeper (project)", 3, "project")], archived: [], broad: [], all: { sources: 130 } };

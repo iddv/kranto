@@ -54,7 +54,7 @@ def test_the_key_map_covers_the_sheet():
 
 
 def test_the_page_is_the_build_and_the_key_map_only_decides():
-    """the page is the build's one module (after theme.js, which sets the theme before
+    """The page is the build's one module (after theme.js, which sets the theme before
     the first paint); keys.js and main.js are gone; keys.ts decides and never acts."""
     assert '<script src="static/theme.js">' in HTML and HTML.count("<script") == 1
     assert "keys.js" not in HTML and "main.js" not in HTML

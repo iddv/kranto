@@ -66,7 +66,7 @@ def browser():
 
 @pytest.fixture
 def page_base(tmp_path):
-    """the page server on loopback, with an empty home: the page's own routes (the console, the
+    """The page server on loopback, with an empty home: the page's own routes (the console, the
     trace, activity); the server is answered in each test's page"""
     (tmp_path / "tasks").mkdir()
     (tmp_path / "loop").mkdir()
@@ -209,7 +209,7 @@ def bear_card(n: int, title: str, state: str = "waiting", **o) -> dict:
 
 
 class PageAfk:
-    """the server's JSON, answered in the page: a first run's setup (the key, Finish), the topics
+    """The server's JSON, answered in the page: a first run's setup (the key, Finish), the topics
     with their scout and their pages, the sources, the inbox's read (/api/today), a topic's new rows
     by signal, the idea cards. Every write is kept in ``writes``; nothing reaches a server."""
 

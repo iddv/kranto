@@ -8,7 +8,7 @@ each a list of [label, value] rows; its last line names the call that reads it.
 
 ``sel`` names the object as a row's ``data-sel`` does: ``b<build key>``, ``prep:<uuid>`` (an
 assistant's prepared item), ``ask:<id>`` (a cub's ask), ``i<idea id>`` or ``card:<n>``,
-``s<source id>``. the server's objects are read through its JSON API, never its database. Every
+``s<source id>``. The server's objects are read through its JSON API, never its database. Every
 stored value is read for what it is (a missing key, a null, a list or a dict): a record never
 fails on a shape it did not expect, it says less.
 """

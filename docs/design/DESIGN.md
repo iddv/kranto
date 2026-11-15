@@ -1,6 +1,6 @@
 # DESIGN — the server
 
-*the server (Kranto AFK): an open-source re-implementation of Parallax. The package is `kranto`, the command is `afk`. Interns are called Kranto in user-facing text; the code keeps the plain word "intern" where it describes the role.*
+*The server (Kranto AFK): an open-source re-implementation of Parallax. The package is `kranto`, the command is `afk`. Interns are called Kranto in user-facing text; the code keeps the plain word "intern" where it describes the role.*
 *Status: the original plan (September 2026), kept as written; the server has been built and has moved on since, so where this page and the code or [OPERATING.md](../OPERATING.md) disagree, they win. Section 2's principles still hold. Parallax, the earlier experiment, is not public.*
 
 ---

@@ -1,6 +1,6 @@
 // Settings › Watching › Live search: which backend answers the callers that
 // ask what exists, what is new or what is prior art; each caller's switch; how many weeks
-// "recent" is. the server's /api/setup/search says it (SearchSetup, generated from its web/types.py);
+// "recent" is. The server's /api/setup/search says it (SearchSetup, generated from its web/types.py);
 // POST /api/setup/search tests a choice and keeps it only when the test passes (a key goes into
 // the workspace's .env, never a page or your settings); POST /api/setup/search/callers writes the
 // switches and the weeks. A key is a password field read once at the press, as KeyField's is.

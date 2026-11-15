@@ -1,5 +1,5 @@
 // Settings › System › Updates: the version, what is on offer, automatic updates,
-// the channel, the last updates. the server's /api/update holds the cache, the settings, the
+// the channel, the last updates. The server's /api/update holds the cache, the settings, the
 // history and what is busy; Restart to update asks Kranto's helper, which backs up, installs,
 // restarts and checks itself, rolling back on its own. The header's pill and Needs you's row use
 // the app's updApply/updRollback for the presses.

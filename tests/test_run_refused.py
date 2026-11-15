@@ -1,4 +1,4 @@
-"""A run Kranto did not start never answers "done" (the operator's item, from the owner's
+"""A run Kranto did not start never answers "done" (from the owner's
 console on 0.6.0.dev4, 2026-10-27 18:47 UTC): asked to rerun ingest, ideas, the newsletter and
 toot at once, Kranto ran ingest and refused the other three ("A job is already running"), but
 the verb's reply said done for all four, because the route answered every press with a
@@ -54,7 +54,7 @@ def test_the_console_asking_four_runs_hears_one_started_and_three_refused(rt):  
             assert "one job at a time" in text
     finally:
         gate.set()
-    # the page's own run button: the same answer, in JSON (a fresh Kranto: closing the client
+    # The page's own run button: the same answer, in JSON (a fresh Kranto: closing the client
     # above stopped its scheduler, and "Kranto is stopping" is what it would say)
     gate = threading.Event()
     sched = Scheduler(rt.store, jobs[:1] + [Job("ideas", 24, lambda: None)])
