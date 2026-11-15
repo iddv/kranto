@@ -211,7 +211,7 @@ describe("a story's page", () => {
     const { target, done } = await draw(StoryPage, where("news/i/12/0"));
     await settle();
     expect(target.querySelector("h1")?.textContent).toBe("A humanoid ships");
-    expect(target.querySelector(".lsub")?.textContent).toContain("closed-loop controllers");
+    expect(target.querySelector("#story-summary")?.textContent).toContain("closed-loop controllers");
     expect(target.textContent).toMatch(/Story 1 of 2 · 5 sources · 3 min read · written/);
     expect(target.querySelector("#story-write")?.textContent).toContain("Write a post");
     expect(target.querySelectorAll(".btn.primary").length).toBeLessThanOrEqual(1);
@@ -233,6 +233,8 @@ describe("a story's page", () => {
     const { target, done } = await draw(StoryPage, where("news/i/12/1"));
     await settle();
     expect(target.querySelector("#story-full")?.textContent).toBe("Write the full story");
+    // the summary the brief shows stays on the story's own page
+    expect(target.querySelector("#story-summary")?.textContent).toBe("Something else happened.");
     expect(target.querySelector("#story-idea-from")).toBeNull();
     expect(target.querySelector("#story-no-idea")?.textContent).toBe("An idea needs this story on the map: after tonight's map.");
     done();

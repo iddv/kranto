@@ -100,9 +100,13 @@
   <Page head={{ title: "A story", crumb: [{ to: "news", w: "Today" }] }}>{#snippet body()}<Empty text={`The brief of ${crumbDay} has no story ${n + 1}.`} link={{ href: "#/news", w: "Today ›" }} />{/snippet}</Page>
 {:else}
   <Page head={{ title: x.headline, label: x.headline, crumb: [{ to: href("news", { topic: String(b.topic_id) }).slice(2), w: name }, { to: href("news", { s: storyKey(b.id, n) }).slice(2), w: crumbDay }],
-      facts, lede: a?.standfirst || x.body, gear: "settings/news",
+      facts, gear: "settings/news",
       primary: { label: "Write a post", id: "story-write", run: () => writePost({ brief: b.id, n, title: x.headline, sources: x.sources.filter((q) => q.url).length }), title: "A blog post about this story, as a draft on Post" } }}
     sections={[{ id: "why", w: "Why it matters" }, ...(first ? [{ id: "what", w: first.title }] : [{ id: "full", w: "The full story" }])]} evidenceWord={`Sources (${sources.length})`}>
+    <!-- the summary the brief showed (the standfirst when the full story has one), in the body:
+         as the head's lede it was only the title's ? with the doors on, so a story with no full
+         story read as Why it matters alone -->
+    {#snippet body()}<p class="story-summary" id="story-summary">{a?.standfirst || x.body}</p>{/snippet}
     {#snippet section(sec)}
       {#if sec.id === "why"}
         <div class="why-box" id="story-why">
@@ -140,6 +144,7 @@
 {/if}
 
 <style>
+  .story-summary { font-size: 1.05em; margin: 4px 0 12px; }
   .why-box { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; background: var(--box); }
   .why-box p { margin: 4px 0; }
   .cite { color: var(--muted); font-size: 0.7em; margin-left: 2px; }
