@@ -49,4 +49,10 @@
   .refused { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; padding: 7px 12px; border-radius: 8px; background: var(--amber-wash); font-size: 13px; }
   .grow { flex: 1; min-width: 0; }
   .prepared .grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* on a phone the line wraps under its buttons, so what it will change is read, never cut to
+     "✦ an assistant (outside…" */
+  @media (max-width: 640px) {
+    .prepared { flex-wrap: wrap; }
+    .prepared .grow { flex-basis: calc(100% - 24px); white-space: normal; overflow: visible; }
+  }
 </style>
