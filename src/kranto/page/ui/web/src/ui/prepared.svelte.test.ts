@@ -238,6 +238,16 @@ describe("a prepared change of several fields", () => {
     target.remove();
   });
 
+  it("an approved new words for a draft moves the page from the replaced draft to the new one", async () => {
+    stub({ host: {} });
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => new Response(url.endsWith("/press")
+      ? JSON.stringify({ ok: true, state: "pressed", answer: { id: 12, ref: "draft:12" } }) : "{}", { status: 200 })));
+    location.hash = "#/post/d/7";
+    expect(await actPrepared(P({ uuid: "e1", verb: "post.edit", title: "Save", subject_id: "7", page: "#/post/d/7", fields: { body: "New." } }), "approve")).toBe(true);
+    expect(location.hash).toBe("#/post/d/12");
+    vi.unstubAllGlobals();
+  });
+
   it("a long new value is drawn as its own text, not dropped", () => {
     const long = "A voice card of many words. ".repeat(10).trim();
     const p = { ...VOICE, changes: [{ label: "Voice card", value: long, long: true }, { label: "Salt", value: "salty" }] };

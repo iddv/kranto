@@ -55,6 +55,11 @@ export async function actPrepared(p: Prepared, what: "approve" | "dismiss"): Pro
     } else if (what === "approve" && job && job.state === "failed") {
       app()?.say(`${plainTitle(p)} did not work: ${job.error || "it failed"}.`, "red");
     } else app()?.say(what === "approve" ? `${plainTitle(p)}: done.` : `${plainTitle(p)}: put away; nothing happened.`, what === "approve" ? "green" : "grey");
+    // an assistant's new words for a draft are filed as the next draft: the page that showed the
+    // old one moves to it, as the owner's own Save does (it stayed on the replaced draft)
+    const moved = (r?.answer as { id?: unknown } | undefined)?.id;
+    if (what === "approve" && p.verb === "post.edit" && typeof moved === "number" && location.hash.split("?")[0] === `#/post/d/${p.subject_id}`)
+      location.hash = `#/post/d/${moved}`;
     delete refusedPrepared[p.uuid];
     ok = true;
   } catch (e) {
