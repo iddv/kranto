@@ -170,16 +170,21 @@ jobs:
   # Both sandboxes in real bubblewrap, on every pull request: the cub runtime's security test
   # plan and failure modes, and the console's box (the Claude token, credentials, the source
   # repo, push, the network and an injected README, each tested against a probe inside the
-  # session). A sandbox that cannot start is a failure here, never a skip.
+  # session). A sandbox that cannot start is a failure here, never a skip. This job always runs on
+  # GitHub's own runner, whatever RUNNER says: it needs a fresh /proc inside bubblewrap, which a
+  # hardened runner of your own may refuse.
   sandbox:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       # GitHub's Ubuntu image has no bubblewrap, and its AppArmor forbids unprivileged user
-      # namespaces by default; a runner of your own brings its own (and has no sudo).
+      # namespaces by default; a runner of your own brings its own (and has no sudo). Newer
+      # Ubuntu images also confine bubblewrap's children and unshare with profiles of their own,
+      # which refuse the user namespace the console's shell nests inside the sandbox for each
+      # command; they are unloaded on this throwaway machine.
       - name: bubblewrap (GitHub's runner only)
         if: runner.environment == 'github-hosted'
         run: |
@@ -188,9 +193,20 @@ jobs:
           if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
             sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           fi
+          for p in /etc/apparmor.d/*bwrap* /etc/apparmor.d/*unshare*; do
+            if [ -f "$p" ]; then echo "unloading $p"; sudo apparmor_parser -R "$p" || true; fi
+          done
+          sudo aa-status 2>/dev/null | grep -iE 'bwrap|unshare|userns' || echo "no such profile loaded"
+      # the session's own /proc, and the user namespace kranto-shell nests in it
       - name: can bubblewrap mount a fresh /proc here?
-        run: bwrap --unshare-all --die-with-parent --new-session --ro-bind / / --proc /proc true
+        run: >
+          bwrap --unshare-all --die-with-parent --new-session --ro-bind / / --proc /proc
+          unshare --user --map-current-user --pid --fork --mount --mount-proc true
+      # on GitHub's runner setup-uv would save its cache after the job, and it refuses
+      # UV_CACHE_DIR's relative path; this job keeps no cache
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
       - run: uv sync --locked --extra dev --extra connections --extra mcp
       - name: the cub runtime's security plan and failure modes
         run: >
