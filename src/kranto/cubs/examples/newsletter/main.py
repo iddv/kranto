@@ -49,14 +49,20 @@ def _intro(ctx, headlines: str, hint: str) -> tuple[str, dict]:
     reply = ctx.model.complete(purpose="newsletter_intro", tier="reason", max_tokens=200,
                                messages=composed["messages"])
     intro = " ".join(str(reply.get("text") or "").split())
-    got = ctx.prose.check(intro, site="newsletter", kind="intro", take="")
+    # what the intro was written from: the checker flags a person or a handle the headlines lack
+    sources = headlines.strip() or None
+    got = ctx.prose.check(intro, site="newsletter", kind="intro", take="", sources=sources)
     rounds = 0
     if intro and any(f.get("scope", "span") == "span" or f.get("rule") == "site.length"
            for f in got.get("flags") or []):
         fixed = ctx.prose.revise(intro, got["flags"], purpose="newsletter_intro", tier="reason",
-                                 site="newsletter", kind="intro", take="")
+                                 site="newsletter", kind="intro", take="", sources=sources)
         intro, rounds = " ".join(str(fixed.get("text") or intro).split()), fixed.get("rounds", 0)
         got = {**got, **{k: fixed[k] for k in ("flags", "score", "verdict") if k in fixed}}
+        if sources:
+            # revise's own last look has no sources: what is left is checked with them
+            got = ctx.prose.check(intro, site="newsletter", kind="intro", take="",
+                                  sources=sources)
     line = str(composed.get("disclosure") or "")
     if line:
         intro = f"{intro} {line}".strip()
