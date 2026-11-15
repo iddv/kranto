@@ -144,15 +144,21 @@ is one draft's sheet with its words as markdown, and `GET /api/post/d/<id>.md` d
 `<title>.md`. Both are reads: they need no account, no model and no network. A source written
 into a draft as the writer's label ("obs 12825", "exa 3") reads there as its outlet's name.
 
-Edit is `POST /api/post/d/<id>/edit` (the verb `post.edit`, a change you can undo) with
+Edit is `POST /api/post/d/<id>/edit` (the verb `post.edit`, with what leaves Kranto on the
+assistant's ladder: an assistant's edit waits for your approval in Needs you by default) with
 `{title, body}` (a long post), `{parts: [{text}]}` (a short post) or `{drop: <key>}` (an
-extra). Only a draft that waits can be edited. The owner's words are filed as the next draft of
-the same series (`content.edited`, `content.edited_from`): the old ask closes as "replaced by
+extra). Only a draft that waits can be edited. The new words are filed as the next draft of
+the same series (`content.edited`, `content.edited_from`, and `content.edited_by`: `ui` or `cli`
+for you, else the assistant's door, such as `mcp:claude-code`). The draft's page and its ask
+say who edited it: "edited by you" for the page and the command line, "edited by your assistant
+(mcp)" (or "(the console)", "(agent <name>)") for anyone else, never "by you"; a draft edited
+before Kranto recorded who says "edited". When you approve an assistant's edit, the approval is
+yours and the words stay the assistant's. The old ask closes as "replaced by
 #<ask>", a new ask waits with the new words, and the original draft stays under Earlier drafts,
 to open, copy or start again from (the sheet's `original_draft`). A short post past its limit is
 refused with the count. A send that waited for the owner's yes is withdrawn first, and the answer
 says so. The sheet carries what the editor needs: `edit`, `can_edit` and `cannot_edit`, `limit`,
-`edited`, `edited_from`, `original_draft`.
+`edited`, `edited_words`, `edited_from`, `original_draft`.
 
 Write a post is `POST /api/post/write` with `{about, as, angle?}` (the verb `post.write`): `about`
 is `card:<n>`, `brief:<id>:<item>` (the item from 1) or `week`, `as` is `blog` (the default) or

@@ -33,8 +33,8 @@ time passed. What it does:
   a failure leaves the held release held and nothing half-promoted. Kranto never cuts from
   inside the server: it writes the file and starts this unit.
 - ``promote --now --tag T --reason WHY``: release a held stable at once (``hotfix.sh --stable``
-  after rc_check, and the operator, as at the switch). Said in the notes and logged.
-- ``known SIGNATURE --reason WHY``: an error the operator has looked at; it no longer blocks.
+  after rc_check, and the maintainer, as at the switch). Said in the notes and logged.
+- ``known SIGNATURE --reason WHY``: an error the maintainer has looked at; it no longer blocks.
 - ``offer TAG``: a nightly cut_local published unoffered for its rc_check ("being checked"
   opens its notes) is offered, only when rc_check.sh passed on it here.
 - ``withdraw TAG --reason WHY``: a nightly that must not be installed (its rc_check failed):
@@ -693,7 +693,7 @@ def new_body(body: str, line: str) -> str:
 def promote(gh: GitHub, *, tag: str, now_reason: str, run=run, now=_now,
             log_to: Path | None = None, say=print, chosen: bool = False) -> int:
     """Release the held stable ``tag`` at once. 0 released (or already), 1 refused (said
-    why). ``chosen``: the owner's press (the tick), not the operator's word."""
+    why). ``chosen``: the owner's press (the tick), not the maintainer's word."""
     if not now_reason.strip():
         say("gate: --now needs --reason (it is said in the release's notes and logged)")
         return 1
@@ -714,7 +714,7 @@ def promote(gh: GitHub, *, tag: str, now_reason: str, run=run, now=_now,
         say(f"gate: {tag} is older than the latest stable {latest}; not released")
         return 1
     at = now()
-    how = now_reason.strip() if chosen else f"by the operator ({now_reason.strip()})"
+    how = now_reason.strip() if chosen else f"by the maintainer ({now_reason.strip()})"
     gh.promote(tag, new_body(gh.body(tag), promoted_line(how, at)))
     log({"at": _iso(at), "tag": tag, "repo": gh.repo, "by": getpass.getuser(),
          "how": "press" if chosen else "now", "reason": now_reason.strip()}, log_to)
@@ -850,7 +850,7 @@ def main(argv: list[str] | None = None) -> int:
         if a.cmd == "promote":
             if not a.now or not a.tag:
                 print("gate: time never promotes a release: the owner presses Promote to stable "
-                      "(gate.py tick carries it out), or the operator releases a held stable "
+                      "(gate.py tick carries it out), or the maintainer releases a held stable "
                       "with promote --now --tag T --reason WHY", file=sys.stderr)
                 return 1
             return promote(gh, tag=a.tag, now_reason=a.reason)

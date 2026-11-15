@@ -66,7 +66,7 @@ def api(monkeypatch):
     def configure(root=None, harness="claude-code", loop_home=None, builds=None):
         fake.configured_with = {"root": root, "builds": builds}
 
-    fake.configure = configure          # a the page that takes the switch
+    fake.configure = configure          # a version of the page that takes the switch
     return brbfake.install(monkeypatch, fake)
 
 
@@ -157,7 +157,7 @@ def test_doctor_has_no_build_word_while_builds_are_off(tmp_path, monkeypatch):
 
 def test_builds_on_in_the_file_still_tells_the_page_off(tmp_path, store, embedder, make_client,
                                                         api):
-    """CUT: a the page that still takes the switch is told builds are off, whatever the file
+    """CUT: a page version that still takes the switch is told builds are off, whatever the file
     says (its verbs' listing is core.verbs', until its own cut)."""
     app = _app(tmp_path, store, embedder, make_client, builds=True)
     assert api.configured_with.get("builds") is False

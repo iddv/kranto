@@ -93,7 +93,7 @@ export const stamp = (s: string | null | undefined): string => (s || "").replace
 export const readingWords = (p: { sources: number; source_index: number; source: string | null; items: number | null; item: number; kept: number }): string =>
   [`source ${p.source_index} of ${p.sources}` + (p.source ? `, ${cut(p.source, 40)}` : ""),
     p.items == null ? "fetching" : p.items ? `${p.item} of ${plural(p.items, "item")}` : "nothing new", plural(p.kept, "kept so far", "kept so far")].join(" · ");
-/** the server's memory (``/api/health`` ``memory``) in a line: "1.0 GB of 3.0 GB (the high mark; 4.0 GB at most)" */
+/** The server's memory (``/api/health`` ``memory``) in a line: "1.0 GB of 3.0 GB (the high mark; 4.0 GB at most)" */
 export const memoryWords = (m: { used_mb: number | null; high_mb: number | null; max_mb: number | null }): string => {
   const gb = (mb: number): string => (mb >= 1024 ? (mb / 1024).toFixed(1) + " GB" : mb + " MB");
   const used = m.used_mb == null ? "unknown" : gb(m.used_mb);

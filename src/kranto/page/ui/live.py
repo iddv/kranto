@@ -124,7 +124,7 @@ class Watcher:
                                  for d in _dirs(paths.LoopLayout(self.home).term))),
             # the traces a page follows: their transcripts and hook rows
             "trace": FOLLOWS.look(),
-            # the server's runs as they go: its mirror file, rewritten at each batch of marks
+            # The server's runs as they go: its mirror file, rewritten at each batch of marks
             #; stat'ed, never read
             "activity": _stat(self.afk_activity) if self.afk_activity else None,
             "verbs": _stat(self.afk_verbs) if self.afk_verbs else None,
@@ -139,7 +139,7 @@ class Watcher:
         kinds, keys = [], []
         if now["term"] != before["term"]:
             kinds.append("term")
-        # the server's runs moved: the activity read
+        # The server's runs moved: the activity read
         if now.get("activity") != before.get("activity"):
             kinds.append("activity")
         if now.get("verbs") != before.get("verbs"):

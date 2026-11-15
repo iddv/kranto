@@ -14,7 +14,7 @@ const obs = (id: number, o: Partial<Observation> = {}): Observation => ({
   durability: 0.5, opportunity: 0.5, signal: 0.2, override: false, override_reason: null, tags: [], source_url: null, source_excerpt: null, item_published_at: null,
   source_id: 14, source_label: "HN", admitted_by: "topic", created_at: NOW, llm_call_id: null, prompt_version: null, grade: null, ...o,
 });
-// the server's /api/observations (Observations is generated from its web/types.py)
+// The server's /api/observations (Observations is generated from its web/types.py)
 const page = (results: Observation[], o: Partial<Observations> = {}): Observations => ({
   total: results.length, offset: 0, cluster_label: null, seen_at: null, marker: "", since: null, new_total: results.filter((x) => x.new).length, results, ...o,
 });
@@ -146,7 +146,7 @@ describe("Library › Observations", () => {
 });
 
 describe("Library › an observation", () => {
-  // the server's /api/observations/<id> (ObservationPage is generated from its web/types.py)
+  // The server's /api/observations/<id> (ObservationPage is generated from its web/types.py)
   const O: ObservationPage = {
     ...obs(5, { title: "Sync engines compared", source_url: "https://example.org/a", source_excerpt: "an excerpt", why_it_matters: "It moves.", tags: ["crdt"],
       override: true, override_reason: "the judge was too strict", signal: 0.2 }),
@@ -224,7 +224,7 @@ describe("Library › an observation", () => {
   it("lists the cards that cite it, and Explain without a synthesis", async () => {
     const L = lib();
     void L;
-    // the server's cards: #9 cites this observation, #10 another (an older the server: no cited_by,
+    // The server's cards: #9 cites this observation, #10 another (an older server: no cited_by,
     // so the cards' citations are read)
     const { cited_by: _, ...older } = O;
     void _;

@@ -146,7 +146,7 @@ class Vault:
             nonce = base64.b64decode(envelope["nonce"])
             data = base64.b64decode(envelope["data"])
         except (OSError, ValueError, KeyError, TypeError) as exc:
-            raise VaultError(f"{self.path} is not a the server secrets file") from exc
+            raise VaultError(f"{self.path} is not a secrets file") from exc
         key = self._key(create=False)
         if key is None:
             raise VaultError(f"{self.salt_path} is missing, so {self.path} cannot be decrypted; "

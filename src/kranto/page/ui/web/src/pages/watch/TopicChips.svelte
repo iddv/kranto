@@ -11,7 +11,7 @@
   import { TOPICS_API, type Topics } from "../topics/topics";
 
   let { at = 0, topic = null, broad = false }: { at?: number; topic?: string | null; broad?: boolean } = $props();
-  // the server's, when it hosts the page (the list says so when it does not)
+  // The server's, when it hosts the page (the list says so when it does not)
   const host = $derived(!!ui.facts?.header.host);
   const mine = $derived.by(() => {
     void at;

@@ -38,7 +38,7 @@ _dir: Path | None = None
 
 
 def _afk():
-    """the server's rowsafe, when it is installed here (None in the page alone)."""
+    """The server's rowsafe, when it is installed here (None in the page alone)."""
     try:
         from kranto import rowsafe
     except ImportError:

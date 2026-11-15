@@ -190,7 +190,7 @@ def test_sigterm_ends_the_servers_children_and_leaves_its_detached_jobs(tmp_path
     pytest.importorskip("kranto.page.proc")
     from kranto.page import host_api
     if "detached_jobs" not in getattr(host_api, "_NAMES", {}):
-        pytest.skip("a the page from before STOP")
+        pytest.skip("a version of the page from before STOP")
     took, code, out, pids = _stop_in(tmp_path, "child,terminal,detached,deaf",
                                      wait=("child", "terminal", "detached", "deaf"))
     try:

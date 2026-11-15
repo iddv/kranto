@@ -145,8 +145,8 @@ def test_a_cut_releases_and_records_its_commit(tmp_path):
 
 
 def test_a_page_with_a_web_ui_needs_node_to_cut(tmp_path):
-    """the page's web UI is built at release: without Node 22.12 nothing is cut;
-    a the page without one never asks."""
+    """The page's web UI is built at release: without Node 22.12 nothing is cut;
+    a version of the page without one never asks."""
     src = _repo(tmp_path / "src")
     assert decide.decide(src, node=lambda: None)["release"]
     web = src / "src" / "kranto" / "page" / "ui" / "web"

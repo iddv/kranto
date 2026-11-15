@@ -44,7 +44,7 @@ def _files():
         if not (ROOT / base).exists():
             continue
         for p in (ROOT / base).rglob("*"):
-            # the page's installed node_modules are not the repository's
+            # The page's installed node_modules are not the repository's
             if p.is_file() and p.suffix in TEXT and "__pycache__" not in p.parts \
                     and "node_modules" not in p.parts and "app" not in p.parts:
                 yield p

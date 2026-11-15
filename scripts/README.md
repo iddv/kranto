@@ -16,6 +16,7 @@ checking a release runs, `dev/` what a maintainer runs by hand.
 | `release/compat_wheels.py` | `build.sh --shape compat` | the three old-shape wheels, from temporary copies of the tree |
 | `release/names.py` | the release scripts | the product's names, the repository and the old names, read from `product.py`, `public.toml` and `legacy.py` |
 | `release/rc_check.sh` | whoever cuts an rc | the rc on a scratch copy: a fresh install, `kranto update` from the last release, a rollback |
+| `release/rehearse_way_back.py` | whoever cuts the release that crosses an install made before the rename | that release and its way back on a scratch HOME, in a sandbox, with systemd stood in for: the old version, there and back twice, the one-wheel release, forced failures, an update killed while it installs; fails if a real unit file changed |
 | `release/fresh_install.sh`, `release/smoke.sh`, `release/e2e_update.sh` | `rc_check.sh` (and by hand, step by step) | install as a newcomer does; install and start the wheels; the update's end-to-end steps |
 | `preview/kranto-preview`, `preview/copy_live.py` | the owner, and every track after a merge into `oss` (`refresh`) | the preview: a second Kranto built from a branch on `127.0.0.1:8766`, with a read-only copy of live's data, that cannot send (`docs/preview.md`) |
 | `dev/eval_fixtures.py` | a maintainer, when the eval sets change | writes `tests/fixtures/evals` (synthetic items, no third-party text) |

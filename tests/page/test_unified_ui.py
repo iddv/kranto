@@ -116,9 +116,9 @@ def test_the_page_never_writes_html():
 
 
 def test_host_forms_report_a_half_that_did_not_change():
-    """the server's pause and resume answer JSON to a request that asks for it, with 502 and
+    """The server's pause and resume answer JSON to a request that asks for it, with 502 and
     the reason when only one half changed; hostForm reads that instead of trusting a
-    followed redirect. A notice a the server form redirects with (#/...?msg=) shows once."""
+    followed redirect. A notice a server form redirects with (#/...?msg=) shows once."""
     # pressed in lib/app/data.test.ts and lib/app/route.test.ts
     js = everything()
     assert "r.q.msg" in js and '"emsg:" + r.q.message' in js

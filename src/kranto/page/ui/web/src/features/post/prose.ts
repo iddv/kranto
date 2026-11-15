@@ -27,9 +27,10 @@ async function post<T>(path: string, body: unknown): Promise<T | null> {
   }
 }
 /** prose.check (a read): the flags and the line, or null when there is no answer */
-export const checkProse = async (text: string, site: string): Promise<ProseCheck | null> => {
+export const checkProse = async (text: string, site: string, sources: string | null = null): Promise<ProseCheck | null> => {
   if (!text.trim()) return null;
-  const got = await post<ProseCheck>("/api/prose/check", { text, site });
+  // sources: what a short post was written from; a name it uses that they lack is flagged
+  const got = await post<ProseCheck>("/api/prose/check", sources ? { text, site, sources } : { text, site });
   return got && Array.isArray(got.flags) && typeof got.verdict === "string" ? got : null;
 };
 /** Fix them: revise the flagged spans only (one model call, at most two rounds); stores nothing */

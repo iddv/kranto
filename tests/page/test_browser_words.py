@@ -7,7 +7,7 @@ walk was a walk, not a test, so nobody ran it again.
 
 Every route a person meets first: the start page, Welcome's three steps, the four doors and the
 map, Post, Settings and its seven pages, at 1400 px and on a 390 px phone. The page's own words
-(``#app`` without the console) must hold none of the words nor the nouns. the server is
+(``#app`` without the console) must hold none of the words nor the nouns. The server is
 answered in the page (``PageAfk``: no topic yet). Needs the built UI (CI's browser job)."""
 import json
 import re
@@ -36,7 +36,7 @@ OFF = """() => [...document.querySelectorAll('#app button, #app a.btn, #app inpu
   .filter((e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden')
   .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
   .map((e) => (e.innerText || e.value || e.id || '').trim().slice(0, 50))"""
-# the page's own words: #app (the console is docked beside it, outside #app)
+# The page's own words: #app (the console is docked beside it, outside #app)
 TEXT = """() => { const a = document.querySelector('#app'); return a ? a.innerText : ''; }"""
 
 

@@ -27,10 +27,9 @@ from pathlib import Path
 from ....prose import angles as propose
 from ....prose import check, revise
 from ....prose.reviser import enforce_voice, fit, tidy
-from . import export, outline, rubric, score, writers
+from . import FIXTURES, export, fixture, outline, rubric, score, writers
 from .live import Budget, Meter
 
-HERE = Path(__file__).parent
 OWNER_FIVE = {"brief-24-1": "blog", "brief-21-1": "blog", "card-158": "blog",
               "brief-19-1": "toot", "brief-20-1": "toot"}
 FIVE_MORE = {"brief-26-1": "blog", "brief-23-1": "blog", "card-160": "blog",
@@ -89,7 +88,7 @@ def mark(m: Meter, item: dict, site: str, d: dict) -> dict:
 
 def owner_check(m: Meter, rnd: random.Random) -> list[dict]:
     """The rubric judge on round 1's five posts: its pick against the owner's."""
-    read = json.loads((HERE / "owner_read_1.json").read_text(encoding="utf-8"))
+    read = json.loads(fixture("owner_read_1.json").read_text(encoding="utf-8"))
     items = {it["id"]: it for it in writers.items()}
     out = []
     for p in read["posts"]:
@@ -212,7 +211,7 @@ def summary(rec: dict) -> dict:
     the judge against the owner."""
     blog = [d["text"] for r in rec["items"].values() if r["site"] == "blog"
             for d in r["drafts"].values()]
-    r1 = json.loads((HERE / "recorded.json").read_text(encoding="utf-8"))
+    r1 = json.loads(fixture("recorded.json").read_text(encoding="utf-8"))
     r1_new = [v["blog"]["new"]["text"] for v in r1["runs"].values() if "blog" in v]
     r1_old = [v["blog"]["old"]["text"] for v in r1["runs"].values() if "blog" in v]
     marks = [d.get("mark") or {} for r in rec["items"].values() for d in r["drafts"].values()]
@@ -234,7 +233,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--items", default="", help="item ids (default: the owner's five and five "
                                                  "more)")
     ap.add_argument("--sites-of", default="", help="item:site pairs overriding the defaults")
-    ap.add_argument("--record", default=str(HERE / "recorded2.json"))
+    ap.add_argument("--record", default=str(FIXTURES / "recorded2.json"))
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--redo", default="", help="item:kind pairs whose recorded draft is written "
                                                "again from its angle (comma-separated)")
@@ -243,7 +242,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--revise-again", action="store_true",
                     help="run check, revise and the voice rule again on the record's written "
                          "drafts (no new writing call), after a fix to the engine")
-    ap.add_argument("--kranto.page", help="a the page checkout to import (the Claude Code "
+    ap.add_argument("--kranto.page", help="a checkout of the page to import (the Claude Code "
                                        "provider's claude_print), when it is not installed")
     a = ap.parse_args(argv)
     if a.kranto_page:

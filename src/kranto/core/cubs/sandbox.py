@@ -11,7 +11,7 @@ developer's own machine (the doctor says so in red). Without a systemd user mana
 container, a CI runner's system service) the memory cap is ``RLIMIT_AS`` and the pids cap is
 not enforced: ``limits_mode()`` says which, and the doctor and ``kranto status`` show it.
 
-the server does not import kranto.page, so this mirrors the rules of the page's
+The server does not import kranto.page, so this mirrors the rules of the page's
 ``harness/isolation.py`` (the base interpreter, its install root, merged-/usr symlinks)
 rather than calling it.
 """

@@ -130,7 +130,7 @@ def _compat(cfg: Config, transport: httpx.BaseTransport | None) -> list[Check]:
 
 
 def _claude_code(cfg: Config, store: Store) -> list[Check]:
-    """Claude Code's login as the watching model: installed, signed in, a the page that can run
+    """Claude Code's login as the watching model: installed, signed in, a page version that can run
     it; what this month used at list prices; and what choosing it means (the owner's D2)."""
     from . import providers
     result = providers.test("claude_code")
@@ -176,7 +176,7 @@ def ledger_line(cfg: Config, store: Store) -> Check | None:
 
 
 def watch_login(cfg: Config, service_names: set[str]) -> Check | None:
-    """Which login the console uses when an Anthropic key is about (MP D5). the page hands
+    """Which login the console uses when an Anthropic key is about (MP D5). The page hands
     every ``claude`` it starts ``CLAUDE_CODE_OAUTH_TOKEN`` if Kranto has one, else
     ``ANTHROPIC_API_KEY``: with the key and no token, the console bills the key too.
     ``service_names``: the variables Kranto's service has (names only); its ``.env`` is added."""

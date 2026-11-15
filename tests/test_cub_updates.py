@@ -49,7 +49,7 @@ def test_pressing_update_once_leaves_nothing_to_press_however_many_jobs_staged_i
     added(home, src)
     (src / "cub.yaml").write_text(manifest(version="1.2.0"))
     first, second, third = _staged_twice_more(home, monkeypatch)
-    # the page offers one of them, newest first, as before
+    # The page offers one of them, newest first, as before
     assert views.row(home, "hello")["update"]["job"] == third
     install.apply_update(home, third, "hello", door="ui")
     assert registry.latest(home.store, "hello")["version"] == "1.2.0"

@@ -135,9 +135,9 @@ def test_edits_do_not_count_against_the_cubs_daily_cap(rt):  # noqa: F811
     assert post_api.draft_sheet(rt, d["id"])["edit"]["parts"] == [{"text": "Toot 7."}]
 
 
-def test_post_edit_is_a_reversible_core_verb():
+def test_post_edit_is_an_outward_core_verb():
     v = next(v for v in verbs.CORE if v.kind == "post.edit")
-    assert v.ladder == "reversible" and v.method == "POST"
+    assert v.ladder == "outward" and v.method == "POST"
     assert v.path == "/api/post/d/{id:int}/edit" and v.subject == "draft"
     card = next(v for v in verbs.CORE if v.kind == "theme.card")
     assert {f.name for f in card.fields} == {"hint", "story"}

@@ -82,7 +82,7 @@ class FeedbackAPI:
             return JSONResponse({"target": target, "target_id": q["target_id"],
                                  "history": feedback.history(store, target, q["target_id"])})
         ids = [i.strip() for i in (q.get("ids") or "").split(",") if i.strip()][:IDS_MAX]
-        # the union with the older grades table, so a grade given on a the server page shows too
+        # the union with the older grades table, so a grade given on a server page shows too
         latest = grades.latest(store, target, ids)
         return JSONResponse({"target": target, "grades": {
             k: {"value": v["grade"], "reasons": v.get("reasons") or [],

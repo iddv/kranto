@@ -70,7 +70,7 @@ describe("a search", () => {
     expect(g("Evidence")[0]).toMatchObject({ title: "Plot charts", detail: "#5 · hn", go: "#/library/o/5" });
     expect(g("Sources")[0]).toMatchObject({ go: "#/settings/sources/3" });
     expect(items.some((i) => i.g === "Builds" || i.g === "Projects")).toBe(false);
-    // the server's half for another query is not mixed in
+    // The server's half for another query is not mixed in
     expect(palItems("plot", { query: "plo", results: srv.results }).some((i) => i.g === "Evidence")).toBe(false);
   });
 });

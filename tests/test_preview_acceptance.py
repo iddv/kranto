@@ -1,4 +1,4 @@
-"""scripts/preview/acceptance.py (the first process change; the operator's fix 16): the parts
+"""scripts/preview/acceptance.py (the first process change; a review's fix 16): the parts
 that need no browser. The script itself runs against a preview, never in the tests."""
 
 from __future__ import annotations
@@ -46,7 +46,7 @@ def test_it_plays_the_testers_items_and_the_site_name_test_catches_it():
     site's name), on the copy and, signed out, on the fresh home"""
     m = _module()
     src = SCRIPT.read_text()
-    for fn in ("tfix_lines", "tfix_fresh"):
+    for fn in ("fixes_lines", "fresh_lines"):
         assert callable(getattr(m, fn)) and f"results += {fn}(" in src, fn
     assert m.SITE.search("Post to example.com asks") and m.SITE.search("by examplecom")
     assert not m.SITE.search("Blog")

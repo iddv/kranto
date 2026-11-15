@@ -17,6 +17,14 @@ export function siteLine(s: PostingSite): string {
   return [open, `Kranto posts after your yes, ${who}`].filter(Boolean).join(" · ");
 }
 
+/** on the switch, when Post directly is off and drafts written while it was on still wait to be
+ *  posted by Kranto ("1 draft still waits to be posted by Kranto"); "" otherwise */
+export function waitingLine(s: PostingSite): string {
+  const n = s.waiting_direct ?? 0;
+  if (s.direct || n <= 0) return "";
+  return `${n} ${n === 1 ? "draft still waits" : "drafts still wait"} to be posted by Kranto`;
+}
+
 /** one change of the person's choices; the page reads Posting and Post again after it */
 export function savePosting(btn: HTMLElement | null, body: Record<string, unknown>, said?: string): void {
   const L = app();

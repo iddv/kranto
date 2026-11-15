@@ -3,7 +3,7 @@ for two days the home put a held build above the failure, the console squeezed o
 you, and the top bar said "Quiet". Here the incident is the first thing on the home and on Needs
 you, seen without scrolling and not under the console (docked, open, as live has it), at 1400 px
 and on a 390 px phone (one layout since open-source wave 1); the top bar says it in red. One problem,
-one card (the owner on 2026-10-29): the band says it, and no row of Needs you says it again. the server and
+one card (the owner on 2026-10-29): the band says it, and no row of Needs you says it again. The server and
 the activity read are answered in the page (test_browser_buttons' HostAfk); nothing is written.
 Needs the built UI (CI's browser job)."""
 import json

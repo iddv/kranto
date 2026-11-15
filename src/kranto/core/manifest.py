@@ -350,7 +350,7 @@ class UI:
     lists: tuple[UIList, ...] = ()
     forms: tuple[Form, ...] = ()
     widgets: tuple[Widget, ...] = ()
-    # the page's one primary: one of its forms' ids, or an action with place
+    # The page's one primary: one of its forms' ids, or an action with place
     # head; None: its first form
     primary: str | None = None
 

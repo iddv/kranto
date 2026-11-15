@@ -57,9 +57,11 @@ def test_the_angle_rule_asks_for_the_big_claim_and_the_speculation_as_the_person
 # -- salt ---------------------------------------------------------------------------------------
 
 
-def test_salt_is_a_switch_plain_by_default_with_more_salt_on_thin_items_on():
+def test_salt_is_a_switch_plain_by_default_with_more_salt_on_thin_items_off():
+    # off until the name rule runs in every writer; a stored "on" is kept
     assert profile_mod.SWITCH_DEFAULTS["salt"] == "plain"
-    assert profile_mod.SWITCH_DEFAULTS["salt_thin"] == "on"
+    assert profile_mod.SWITCH_DEFAULTS["salt_thin"] == "off"
+    assert profile_mod._clean_switches({"salt_thin": "on"})["salt_thin"] == "on"
     assert profile_mod.SWITCHES["salt"] == ("plain", "wry", "salty")
     assert "salt" in profile_mod.SWITCH_WORDS and "salt_thin" in profile_mod.SWITCH_WORDS
 
@@ -78,7 +80,7 @@ def test_the_salt_switch_is_saved_and_a_wrong_value_refused(rt):  # noqa: F811
 @pytest.mark.parametrize("stored", [None, "spicy", 3, ["salty"]])
 def test_a_salt_stored_in_any_other_shape_reads_as_plain(stored):
     assert profile_mod._clean_switches({"salt": stored, "salt_thin": stored})["salt"] == "plain"
-    assert profile_mod._clean_switches({"salt_thin": stored})["salt_thin"] == "on"
+    assert profile_mod._clean_switches({"salt_thin": stored})["salt_thin"] == "off"
 
 
 def test_which_of_the_ten_items_are_thin():

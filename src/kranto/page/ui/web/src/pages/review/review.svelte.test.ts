@@ -10,7 +10,7 @@ import { gradable, KINDWORD, REVIEW_API, reviewMinutes, type QueueItem } from ".
 import { Q } from "./review.svelte";
 
 const ITEMS: QueueItem[] = [
-  // an older the server may still send a build: the page drops it (a build is never graded)
+  // an older server may still send a build: the page drops it (a build is never graded)
   { target: "build", id: "i1a1b2c3d", slot: "build", topic: "Local-first" },
   { target: "idea", id: 116, slot: "card", title: "A memory daemon", line: "Repo-resident context.", facts: ["2 cited", "0 ask for it", "1 source"], topic: "Local-first" },
   { target: "idea", id: 117, slot: "card", title: "A credential broker", line: "Agents ask it for keys.", facts: ["3 cited", "1 asks for it", "2 sources"], topic: "AI tooling" },

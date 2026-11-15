@@ -73,9 +73,20 @@ export function buttonOf(p: Pick<Prepared, "button" | "title" | "available">): s
 /** who prepared it: "Claude Code" from "by Claude Code" */
 export const whoOf = (p: Pick<Prepared, "by_words">): string => String(p.by_words || "").replace(/^by /, "") || "An assistant";
 
+/** a field's words: a string, or a list of parts each {text} (post.edit's parts: the words of
+ *  a short post or a thread, one paragraph a part); null for anything else */
+function textOf(v: unknown): string | null {
+  if (typeof v === "string") return v;
+  if (Array.isArray(v) && v.length && v.every((x) => !!x && typeof x === "object" && typeof (x as { text?: unknown }).text === "string"))
+    return v.map((x) => (x as { text: string }).text).join("\n\n");
+  return null;
+}
+
 /** a field's short value, or null when it is a long text (the dialog's markdown body) */
 function shortValue(v: unknown): string | null {
   if (v === null || v === undefined || v === "") return null;
+  const words = Array.isArray(v) ? textOf(v) : null;
+  if (words !== null) return words.length > 120 || words.includes("\n") ? null : words;
   if (Array.isArray(v)) return v.map(String).join(", ");
   if (typeof v === "object") return null;
   const s = String(v);
@@ -100,6 +111,11 @@ export function plainOf(p: Prepared): { title: string; subject: string; hide: st
   }
   if (p.verb === "idea.later")
     return { title: "Later", subject: `${cardOf(p, p.subject_id)}, back in ${Number(f.days ?? 7)} days`, hide: ["days"] };
+  // an assistant's new words for a waiting draft: the words themselves are the dialog's body
+  if (p.verb === "post.edit")
+    return { title: "New words for a draft", subject: p.subject_id ? `draft #${p.subject_id}` : "a draft", hide: [] };
+  if (p.verb === "prose.voice" && typeof f.voice === "string")
+    return { title: "Change your voice card", subject: "how every later post is written", hide: [] };
   return null;
 }
 /** the item's title in the page's words ("Pass", "Write a blog post"), else the server's */
@@ -145,7 +161,7 @@ export function keyFields(p: Prepared): [string, string][] {
 
 /** the long texts (a factory issue's body): [label, markdown] */
 export function longFields(p: Prepared): [string, string][] {
-  return Object.entries(p.fields || {}).filter(([, v]) => typeof v === "string" && shortValue(v) === null && v !== "").map(([k, v]) => [k, String(v)]);
+  return Object.entries(p.fields || {}).filter(([, v]) => textOf(v) !== null && shortValue(v) === null && textOf(v) !== "").map(([k, v]) => [k, textOf(v)!]);
 }
 
 /** the toast's one line for the items waiting now: one says who prepared what; several merge */

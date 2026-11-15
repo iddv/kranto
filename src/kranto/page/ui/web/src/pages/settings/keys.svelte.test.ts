@@ -7,7 +7,7 @@ import KeysPane from "./KeysPane.svelte";
 import { KEYBASE, KEYPROV, keyWords, PROVIDER_API, providerOf, SETUP_API, type ProviderSetup, type Setup } from "./keys.svelte";
 
 const NOW = Date.parse("2026-10-16T12:00:00Z");
-// the server's /api/setup (Setup is generated from its web/types.py)
+// The server's /api/setup (Setup is generated from its web/types.py)
 const BASE = "https://openrouter.ai/api/v1";
 const S: Setup = {
   done: true, done_at: "2026-10-01T10:00:00Z", needs_setup: false,
@@ -16,7 +16,7 @@ const S: Setup = {
   build: { mode: "auto", concurrency: 1 }, topics: 1, sources: 3, scheduler: true, budget_usd: 10, cost: "About $5 to $8 a month for one topic with ten sources, on your own model key. Watching stops for the month at your cap of $10.00 (Spend).", first_brief_minutes: 5, every_hours: 3, brb: true, builds: true,
 };
 const refused = { ok: false, detail: "401", base_url: BASE, at: "2026-10-16T11:00:00Z" };
-// the server's /api/setup/provider (providers.detect): an Anthropic key found in .env
+// The server's /api/setup/provider (providers.detect): an Anthropic key found in .env
 const P: ProviderSetup = {
   current: { provider: "openai_compat", choice: "openrouter", label: "OpenRouter", endpoint: BASE, key_env: "OPENROUTER_API_KEY",
              models: { judge: "anthropic/claude-haiku-5.5", reason: "anthropic/claude-sonnet-5.5" }, tiers: { judge: "openai_compat", reason: "openai_compat" }, key_set: true },
@@ -49,9 +49,9 @@ describe("Settings › Watching", () => {
     expect(keyWords({ ...S.key, test: refused })).toEqual({ st: ["warn", "amber", "Check"], line: "OpenRouter. Set in $OPENROUTER_API_KEY, but the last key tried was refused: 401." });
     expect(keyWords({ ...S.key, test: null }).line).toBe("OpenRouter. Set in $OPENROUTER_API_KEY (in the environment or .env); not tested here.");
     expect(keyWords({ ...S.key, provider: "anthropic", choice: "anthropic", env: "ANTHROPIC_API_KEY", test: null }).line).toBe("Claude API. Set in $ANTHROPIC_API_KEY (in the environment or .env); not tested here.");
-    // the server's choice is the answer: the Claude API, though llm.base_url is still OpenRouter's
+    // The server's choice is the answer: the Claude API, though llm.base_url is still OpenRouter's
     expect(providerOf({ ...S.key, provider: "anthropic", choice: "anthropic" })).toBe("anthropic");
-    // a the server before 0.3.84 sends no choice: worked out from the provider and the URL
+    // a server before 0.3.84 sends no choice: worked out from the provider and the URL
     expect(providerOf({ ...S.key, choice: "", base_url: "http://127.0.0.1:4000/v1" })).toBe("openai_compat");
     expect(providerOf({ ...S.key, choice: "" })).toBe("openrouter");
   });

@@ -16,7 +16,7 @@ import AskDialog from "./AskDialog.svelte";
 
 const NOW = new Date().toISOString();
 afterEach(() => { ui.facts = null; dlg.now = null; ui.headOn = false; ui.head = null; });
-/** the page's head as the shell draws it: its declaration */
+/** The page's head as the shell draws it: its declaration */
 const headOf = () => ui.head!;
 const hosted = () => { ui.facts = { header: { host: { paused: false } } } as unknown as Facts; };
 
@@ -124,7 +124,7 @@ describe("a cub's page, drawn from its manifest", () => {
 });
 
 describe("the one dialog of what a cub asks (SEND)", () => {
-  // the server's GET /api/tickets/88/ask for live's issue of 27 Oct: no account, in practice
+  // The server's GET /api/tickets/88/ask for live's issue of 27 Oct: no account, in practice
   const view = (o: Record<string, unknown> = {}, ask: Record<string, unknown> = {}) => ({
     id: 88, cub: "newsletter", kind: "send.newsletter", state: "needs_confirm", said: null,
     readback: [["Draft", "draft:3, in Kranto"], ["Subject", "This week: Eka Robotics raises $150M"]], because: { briefs: [41] },
@@ -364,7 +364,7 @@ describe("an object whose id holds a colon (the newsletter's issue draft:1)", ()
 });
 
 describe("the head never holds a verb that can only fail (QA's pattern for UIBUGS B1)", () => {
-  // the server refuses an action while its feature is off (features_api: "<title> is off", 409)
+  // The server refuses an action while its feature is off (features_api: "<title> is off", 409)
   // and the page offers one with a when only while that setting is on (Action.when, the server
   // #291): for each state of the switches, every verb the head draws is one the server runs
   const gateRow = (value: boolean) => ({ key: "digest.news_theses", value, type: "bool", default: false, choices: [], lo: null, hi: null, words: "news theses", sensitive: false, by_hand: false, per_topic: false });

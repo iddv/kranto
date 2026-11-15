@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const SOURCES = import.meta.glob(["./**/*.svelte", "./**/*.ts", "./**/*.json", "!./cut.test.ts"], { query: "?raw", import: "default", eager: true }) as Record<string, string>;
 
-/** the page folders and files that left (C3) */
+/** The page folders and files that left (C3) */
 const GONE_FOLDERS = ["pages/builds", "pages/projects", "pages/repos", "pages/today"];
 const GONE_FILES = [
   "pages/ideas/IdeaBuild", "pages/ideas/IdeaNew", "pages/ideas/EditorPage", "pages/ideas/ChangesList", "pages/ideas/CapWith", "pages/ideas/scope", "pages/ideas/IdeasLoopList",

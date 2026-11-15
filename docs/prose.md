@@ -1,7 +1,7 @@
 # How Kranto writes your posts: the prose engine
 
-Every post Kranto drafts (a blog post, a newsletter's opening, a Mastodon post, and each site
-SOCIAL adds) is written through one engine, `kranto.prose`. It puts your voice and Kranto's rules
+Every post Kranto drafts (a blog post, a newsletter's opening, a Mastodon post, and each
+short post for the sites you tick) is written through one engine, `kranto.prose`. It puts your voice and Kranto's rules
 into the prompt, checks the draft for the shapes that make machine-written text tiring to read,
 and rewrites only the lines that need it. It writes for readers. It does not try to get past AI
 detectors, and nothing here claims it does.
@@ -16,7 +16,7 @@ detectors, and nothing here claims it does.
 | **Your voice card** | how you write, in plain words, at most about 250 words. Your old tone setting (`blog.tone`, `toot.tone`, `newsletter.intro`) became its first line, once | `<home>/prose/voice.md` |
 | **Your samples** | things you wrote; the 3 closest to each post (by embedding) go in as examples | `<home>/prose/samples/<id>.md` (a first line `site: mastodon` is optional) |
 | **Your lists** | **never** (words, or `/regular expressions/`), **keep** (your phrases the checker leaves alone), **always** (a sign-off) | `<home>/prose/never.txt`, `keep.txt`, `always.txt`: one a line, `#` a comment |
-| **Switches** | length (short, medium, long), register (casual, neutral, formal), opinions (only mine, or suggest one marked for you), emoji (never, sparingly), hashtags (never, the site's), links (in the post, or in the first reply), reading level (a grade, 8), salt (plain, wry or salty; plain by default) and more salt on thin items (on: a thin item, with few facts or about a product note or a small tool, goes one step saltier) | the `settings` row `prose.profile` |
+| **Switches** | length (short, medium, long), register (casual, neutral, formal), opinions (only mine, or suggest one marked for you), emoji (never, sparingly), hashtags (never, the site's), links (in the post, or in the first reply), reading level (a grade, 8), salt (plain, wry or salty; plain by default) and more salt on thin items (off by default; on: a thin item, with few facts or about a product note or a small tool, goes one step saltier; a profile saved with it on keeps it on) | the `settings` row `prose.profile` |
 | **The checker** | strictness (off, light, strict) and the rules you turned off | `prose.profile` |
 | **Guides per site** | which guides each site's writer follows (the floor always) | `prose.profile` |
 | **Disclosure** | per site, off by default; a ready line: "Drafted with Kranto from my notes; edited and sent by me." | `prose.profile` |
@@ -45,7 +45,25 @@ asked for once more, and a stock one that comes back is left out.
 **Salt** is how much wit and bite a post carries: plain, wry (understatement) or salty (a jab at
 the thing: the product, the claim, the hype). Salt is aimed at things, never at a person or a
 group, never a slur, and a salty post names no private person: the checker flags a name or a
-handle the material doesn't have (`salt.person`).
+handle the material doesn't have (`salt.person`). The short-post writer gives the checker its
+material (the card's or item's title and facts, and your angle), and keeps it on the draft so
+the draft's page checks against it too; the blog, toot and newsletter writers (cubs) do so once
+the cub SDK's `prose.check` carries it.
+
+The rule reads as a name: two or three capitalised words ("Dario Amodei"), with a middle initial,
+a lower-case particle ("Ian de Villiers") or an inner capital ("John McCarthy", "Sean O'Brien");
+one capitalised word after a title ("Dr. Patel") or beside a verb of saying ("Altman said",
+"according to Altman"); a handle ("@name"). It leaves alone a two-word term ending in a place,
+product or organisation word ("New York", "Visual Studio"), and one whose two words both stand
+capitalised in the material's title. **What it still misses:** a name in capitals or initials
+("DHH", "J. K. Rowling"), a one-word name with no title or verb of saying beside it ("blame
+Altman"), a name written in lower case, a person named by role ("their CEO"). **What it may
+still flag:** two capitalised words of an organisation or product the material does not name,
+and a one-word company beside a verb of saying ("Google said") when the material does not name
+it. A short post also loses any mention (`@name`, `@name@server`) and any site named without its
+scheme ("evil.example") that its material does not have, as it loses an address that is not the
+post's link; it never carries the link twice, and a link that would take more than half the
+site's room is refused in words.
 
 **Never invented.** A stance is fine when your angle carries it ("My bet: …"); an experience is
 not, whatever the angle ("I tried it", "at my company"). A post says "I" or "we" for anything
@@ -96,7 +114,7 @@ nothing of yours backs (`voice.invented_i`), and the writer cuts one that is lef
 | `claim.sections` | three or more sections of near-equal length |
 | `claim.skeleton` | the "What happened / Why it matters" headings |
 | `claim.restates` | nothing in the post but facts: no stance, prediction, question or reader in it |
-| `salt.person` | a person's name or a handle the post's material does not name (checked when the material is given) |
+| `salt.person` | a person's name or a handle the post's material does not name (checked when the material is given: `sources`) |
 
 The `claim.*` rules come from the owner's blind read of round 1; each has a
 fixture made from the posts he read. `claim.no_hook`, `claim.sections`, `claim.skeleton` and
@@ -112,9 +130,9 @@ must stay unflagged at both strictness levels.
 | Method and path | Body | Answer |
 |---|---|---|
 | `GET /api/prose` | | `voice`, `switches`, `switch_choices`, `switch_words`, `strictness`, `rules` (`[{id, group, words, fix, on}]`), `guides` (`[{name, title, from: kranto or yours, always}]`), `sites` (`[{site, guides, default, limits, disclosure}]`), `writers` (`{blog: blog, newsletter: newsletter, toot: mastodon}`), `writer_models` (writer → `{provider, model}`, or null: the reason tier's), `disclosure_line`, `take`, `never`, `keep`, `always`, `samples` (`[{id, site, words, start}]`), `rhythm` (`{mean, sd, dashes_per_100}` or null), `proposals` (open), `migrated`, `home` |
-| `POST /api/prose/check` (verb `prose.check`, read) | `{text, site?, kind?, take?, limits?, strictness?}` | `{score, verdict, flags, counts, grade, words, strictness, site, kind}`; each flag `{start, end, text, rule, words, fix, group, strength, scope}`: `start`/`end` are character offsets for the underline; `scope: text` is about the whole piece (no underline) |
+| `POST /api/prose/check` (verb `prose.check`, read) | `{text, sources?, site?, kind?, take?, limits?, strictness?}` | `{score, verdict, flags, counts, grade, words, strictness, site, kind}`; each flag `{start, end, text, rule, words, fix, group, strength, scope}`: `start`/`end` are character offsets for the underline; `scope: text` is about the whole piece (no underline) |
 | `POST /api/prose/revise` (no verb: nothing is stored) | `{text, flags?, site?, kind?, take?, limits?}` | `{text, flags, score, verdict, rounds, changed: [{start, end, before, after}], say}`: the draft's **Fix**; the page saves the text through the draft's edit |
-| `POST /api/prose/voice` (verb `prose.voice`, reversible) | any of `voice`, `switches`, `strictness`, `rules_off`, `guides` (site → names, or null), `disclosure` (site → line, `""` off), `take`, `writer_model` (writer → `{provider, model}`, or null), `never_add`/`never_remove`, `keep_add`/`keep_remove`, `always_add`/`always_remove`, `samples_add` (`[{text, site}]`), `samples_remove` (ids) | `{ok, changed, say}`; a 400 says what is wrong |
+| `POST /api/prose/voice` (verb `prose.voice`, reversible; from an assistant, a change to `voice`, `disclosure`, `always_add` or `always_remove` waits for your approval whatever the ladder says for changes you can undo, unless you chose otherwise for `prose.voice` itself; a web address in a `disclosure` line is taken off, and the answer says so) | any of `voice`, `switches`, `strictness`, `rules_off`, `guides` (site → names, or null), `disclosure` (site → line, `""` off), `take`, `writer_model` (writer → `{provider, model}`, or null; the route only, with the command line's token: the verb does not take it), `never_add`/`never_remove`, `keep_add`/`keep_remove`, `always_add`/`always_remove`, `samples_add` (`[{text, site}]`), `samples_remove` (ids) | `{ok, changed, say}`; a 400 says what is wrong |
 | `POST /api/prose/voice/draft` (no verb: nothing is stored) | `{samples?: [text]}` (else your saved samples) | `{voice, say}`: one model call drafts a voice card for you to read and edit; save it with `prose.voice` |
 | `POST /api/prose/learn` (verb `prose.learn`, reversible) | `{draft, sent}` | `{proposals, say}`: proposals from what you changed (kept open) |
 | | `{proposal, answer: yes or no}` | `{ok, say, proposal, answer}`: a yes applies it; a no is remembered |
@@ -179,7 +197,7 @@ cub's own purpose, tier, hourly window and cap. When the owner set a model for K
 toot or newsletter writer, that writer's model calls (its writing and its revise) go to it,
 through the same metered client. The methods are in [cub-protocol.md](cub-protocol.md).
 
-**For SOCIAL's site variants**: "before writing" is `compose(material,
+**For the short posts' site variants**: "before writing" is `compose(material,
 site=<site>, kind=short|thread|long|note, language=, limits=<the registry's limits>,
 features=<the site's playbook and advanced-feature rules>)`; the playbook comes after the
 profile in the system message and wins only on what the site can carry. "After writing" is
@@ -195,8 +213,10 @@ See `NOTICE`.
 
 ## The eval
 
-`features/post/evals/` holds 20 brief items and idea cards, each written by the old writers and
-by the new, as recorded answers. `pytest tests/test_prose_eval.py` replays them in CI with no
+`features/post/evals/` is the eval's code; its 20 brief items and idea cards, each written by the
+old writers and by the new, as recorded answers, and the owner's reads are test fixtures in
+`tests/fixtures/post_evals/` (not in the package: the eval runs from a checkout). `pytest
+tests/test_prose_eval.py` replays them in CI with no
 model: the checker's scores, the rhythm against a voice card, and the share of invented
 first-person claims (which must be 0). `python -m kranto.features.post.evals.live` runs it
 live by hand, under a cost cap, and adds a blind pairwise judgement.

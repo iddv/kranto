@@ -1,7 +1,7 @@
-// the server's model-backed work (the scout, an explanation) runs in the background: no request
+// The server's model-backed work (the scout, an explanation) runs in the background: no request
 // waits on a model (the owner's rule, 2026-10-11). The press answers with {job}; afkJob polls the
 // job every 1.5 s, saying how long it has run (wait), and returns its result once done. An answer
-// without a job (an older the server, a cached explanation) is the result itself.
+// without a job (an older server, a cached explanation) is the result itself.
 import { app } from "./shell.svelte";
 
 interface Job {

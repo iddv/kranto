@@ -1,7 +1,7 @@
 """What every trace is: a tree of spans read from somewhere, refreshed with
 what is new. ``Trace`` holds what the kinds share (the frame, the rollups, the order, the
 summary); each kind reads its own source: a console or Open in Claude Code session
-(``session.py``), a kept stream-json file (``file.py``), a the server run (``afk.py``).
+(``session.py``), a kept stream-json file (``file.py``), a server run (``afk.py``).
 
 The build loop's traces (a build's, a maintenance fix's, a loop step's) left with it; their rows
 in ``trace.db`` still list, drawn with their stored words."""

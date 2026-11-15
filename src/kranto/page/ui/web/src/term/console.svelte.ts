@@ -170,7 +170,7 @@ export const pressed = { v: false };
 /** setup is not done (boot reads /api/setup once; Start reading ends the wait): F-11 */
 export const setupWait = { v: false };
 let bootDone: () => void = () => {};
-/** boot has read /api/setup (or found no the server): the console's first place waits for it, so a
+/** boot has read /api/setup (or found no server): the console's first place waits for it, so a
  * first page never starts Claude Code before boot knows whether setup is done */
 export const booted = new Promise<void>((r) => (bootDone = r));
 export function consoleWaits(on: boolean): void {

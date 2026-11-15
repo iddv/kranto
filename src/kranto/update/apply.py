@@ -1,4 +1,4 @@
-"""The update helper's shared ground: standard library only, no the server import.
+"""The update helper's shared ground: standard library only, no server import.
 
 This module is the one piece of the updater that runs *outside* the environment it replaces
 (section 4.1): ``uv tool install --force`` rebuilds the tool's venv, and a
@@ -460,6 +460,17 @@ def cancel_path(home: Path) -> Path:
     return update_dir(home) / "cancel"
 
 
+def recover_path(home: Path) -> Path:
+    """The way back by hand, written before the install and removed when the update ends
+    (``done``, ``rolled_back``); left when it ends ``failed`` or the helper is killed."""
+    return update_dir(home) / "RECOVER.txt"
+
+
+# the first lines of a command the helper puts where the tool's commands were while a swap has
+# none, so a person who types one (or the unit that starts one) is told where the way back is
+STUB_MARK = f"{product.COMMAND}-update-stub"
+
+
 def lock_path(home: Path) -> Path:
     return update_dir(home) / "lock"
 
@@ -702,13 +713,29 @@ class Helper:
         self.env = dict(os.environ if env is None else env)
         legacy.adopt_env(self.env)            # a unit written before the rename names old ones
         self.unit = unit or legacy.unit_name(self.env)
-        self.env.update(KRANTO_HOME=str(self.home), KRANTO_UNIT=self.unit)
-        # and under the old names: a version from before the rename (a rollback to it, or the
-        # crossing's first start) reads only those, and without them it would take the default
-        # unit and home, which may be another install's (the rehearsal on a copy found it)
-        old = legacy.ENV_PREFIXES[0]
-        self.env.update({old + "HOME": str(self.home), old + "UNIT": self.unit})
         user = Path(self.env.get("HOME") or Path.home())
+        # Every command the helper runs gets this install's own variables in both spellings: a
+        # version from before the rename (a rollback to it, or the crossing's first start) reads
+        # only the old names, and without them it takes the default unit, home, loop home,
+        # tokens and Claude folders, which may be another install's (the rehearsal on a copy
+        # found it). The helper is started with a few variables only; the rest are the ones
+        # the install's unit (and its drop-ins) sets, under whichever name it set them.
+        self.from_unit = legacy.unit_vars(self.unit, self.env, user)
+        named = {product.ENV_PREFIX + "HOME", product.ENV_PREFIX + "UNIT"}
+        for name, value in self.from_unit.items():
+            self.env.setdefault(name, value)
+            new = legacy.new_env_name(name) or name
+            self.env.setdefault(new, value)
+            named.add(new)
+        self.env.update({product.ENV_PREFIX + "HOME": str(self.home),
+                         product.ENV_PREFIX + "UNIT": self.unit})
+        for new in sorted(named):
+            for old in legacy.old_names(new):
+                if new in (product.ENV_PREFIX + "HOME", product.ENV_PREFIX + "UNIT"):
+                    self.env[old] = self.env[new]
+                else:
+                    self.env.setdefault(old, self.env[new])
+        self.named = sorted(named)
         self.tool_dir = Path(self.env.get("UV_TOOL_DIR") or
                              user / ".local" / "share" / "uv" / "tools")
         self.bin_dir = Path(self.env.get("UV_TOOL_BIN_DIR") or user / ".local" / "bin")
@@ -749,6 +776,8 @@ class Helper:
         write_json(state_path(self.home), self.st)
 
     def finish(self, state: str, **kw) -> str:
+        if state != "failed":
+            recover_path(self.home).unlink(missing_ok=True)
         self.state(state, finished=_utc(), **kw)
         with open(history_path(self.home), "a") as f:
             f.write(json.dumps({k: self.st.get(k) for k in
@@ -875,7 +904,7 @@ class Helper:
                     f"{busy['fixes']} fix{'es' if busy['fixes'] != 1 else ''}"
                     if busy.get("fixes") else "") if x))
             main = self.main_pid()
-            # the server's own children go down with its unit at the stop (and the stop's guard
+            # The server's own children go down with its unit at the stop (and the stop's guard
             # still waits for every process from the tool): the console's Claude Code runs
             # `kranto mcp` from the tool, and waiting for it held every update while the console
             # was open (live, 2026-10-27)
@@ -977,9 +1006,11 @@ class Helper:
                 tool: str | None = None) -> None:
         if tool:
             self.swap_out(tool)
+            self.stub_commands()
         cmd = ["uv", "tool", "install", "--force", "--python", "3.12",
                *(["--offline"] if offline else []), *args]
         r = self.sh(*cmd, timeout=INSTALL_S)
+        self.clear_stubs()
         if tool:
             self.tool_env = self.tool_dir / tool
         if forward and "install" in self.fail:
@@ -1144,34 +1175,113 @@ class Helper:
                            detail=f"{self.old.get('version')} is running again; the data was "
                                   "not touched")
 
+    def way_back(self, spec: dict) -> tuple[list[str] | None, str, Path]:
+        """What reinstalls the version being replaced: the ``uv tool install`` arguments (None
+        when the helper cannot say: an editable or an old git install), its tool and command."""
+        tool = spec.get("tool") or TOOLS[spec.get("shape") or "final"]
+        args: list[str] | None = None
+        if spec.get("kind") == "wheels":
+            found = wheels_in(Path(spec["dir"]), self.old.get("version"))
+            if set(found) in [set(n) for n in SHAPES.values()]:
+                tool = TOOLS[shape_of(found)]
+                args = install_args(found, spec.get("kranto_extras") or ())
+            else:
+                args = [f"{spec['dir']}/*.whl"]
+        elif spec.get("kind") == "git" and (spec.get("commits") or {}).get(FINAL_DIST):
+            args = git_install_args(spec["commits"], spec.get("extras") or EXTRAS,
+                                    kranto_extras=spec.get("kranto_extras") or ())
+        command = self.bin_dir / (product.COMMAND if tool == TOOLS["final"] else legacy.COMMAND)
+        return args, tool, command
+
     def manual_lines(self, spec: dict) -> str:
         """The fallback by hand (RUNBOOK), for ``failed``: uninstall the other tool when the
         update crossed shapes, reinstall the previous one, start it."""
-        tool = spec.get("tool") or TOOLS[spec.get("shape") or "final"]
-        if spec.get("kind") == "wheels":
-            found = wheels_in(Path(spec["dir"]), self.old.get("version"))
-            ok = set(found) in [set(n) for n in SHAPES.values()]
-            if ok:
-                tool = TOOLS[shape_of(found)]
-            args = " ".join(f'"{a}"' if " " in a else a
-                            for a in install_args(found, spec.get("kranto_extras") or ())) \
-                if ok else f"{spec['dir']}/*.whl"
-        elif spec.get("kind") == "git" and (spec.get("commits") or {}).get(FINAL_DIST):
-            args = " ".join(f'"{a}"' if " " in a else a
-                            for a in git_install_args(spec["commits"],
-                                                      spec.get("extras") or EXTRAS,
-                                                      kranto_extras=spec.get("kranto_extras")
-                                                      or ()))
-        else:
-            args = "<the previous wheels or git spec>"
+        args, tool, command = self.way_back(spec)
+        said = " ".join(f'"{a}"' if " " in a else a for a in args) if args is not None \
+            else "<the previous wheels or git spec>"
         others = [t for t in sorted(set(TOOLS.values()) - {tool})
                   if (self.tool_dir / t).is_dir()]
         swap = "".join(f"uv tool uninstall {t}; " for t in others)
-        command = self.bin_dir / (product.COMMAND if tool == TOOLS["final"] else legacy.COMMAND)
         bk = f"; restore the databases from {self.backup_dir} only if the data is damaged" \
             if self.backup_dir else ""
         return (f"by hand: systemctl --user stop {self.unit}; {swap}uv tool install --force "
-                f"--python 3.12 {args}; {command} up --no-browser{bk}")
+                f"--python 3.12 {said}; {command} up --no-browser{bk}")
+
+    def recover_text(self, spec: dict, to: str) -> str:
+        """``RECOVER.txt``: the way back by hand as lines a shell runs (``sh RECOVER.txt``), with
+        this install's variables in both spellings, so the version put back finds its own home
+        and unit whichever names it reads."""
+        import shlex
+
+        q = shlex.quote
+        args, tool, command = self.way_back(spec)
+        path = recover_path(self.home)
+        before = self.old.get("version")
+        out = [f"# The update from {before} to {to} started at {self.st.get('started')} and was "
+               "cut off before it finished.",
+               f"# These lines put {before} back by hand. Run them one by one in a terminal, or "
+               f"all at once: sh {q(str(path))}",
+               "# The install does not touch the data"
+               + (f"; restore the databases from {self.backup_dir} only if they are damaged."
+                  if self.backup_dir else "."),
+               ""]
+        for k in ("UV_TOOL_DIR", "UV_TOOL_BIN_DIR"):
+            if self.env.get(k):
+                out.append(f"export {k}={q(self.env[k])}")
+        for new in self.named:
+            for name in (new, *legacy.old_names(new)):
+                if self.env.get(name):
+                    out.append(f"export {name}={q(self.env[name])}")
+        out.append(f"systemctl --user stop {q(self.unit)}")
+        for other in sorted(set(TOOLS.values()) - {tool}):
+            out.append(f"[ -d {q(str(self.tool_dir / other))} ] && uv tool uninstall {q(other)}")
+        stubs = " ".join(q(str(self.bin_dir / n)) for n in (product.COMMAND, legacy.COMMAND))
+        out.append(f'for f in {stubs}; do grep -qs {q(STUB_MARK)} "$f" && rm -f "$f"; done')
+        if args is None:
+            out.append(f"# {before} was not installed from wheels or a release: install it again "
+                       "the way you installed it, then:")
+        else:
+            out.append("uv tool install --force --python 3.12 " + " ".join(q(a) for a in args))
+        out += [f"{q(str(command))} up --no-browser", f"rm -f {q(str(path))}", ""]
+        return "\n".join(out)
+
+    def write_recover(self, spec: dict, to: str) -> None:
+        path = recover_path(self.home)
+        tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        tmp.write_text(self.recover_text(spec, to))
+        os.replace(tmp, path)
+        self.log(f"the way back by hand, if this is cut off: {path}")
+
+    def stub_commands(self) -> None:
+        """While a tool swap leaves no command (the other tool is gone, the new one not yet
+        installed), a command that says where the way back is stands in each place; the
+        install overwrites it (``--force``), and ``clear_stubs`` removes any left after."""
+        import shlex
+
+        path = recover_path(self.home)
+        if not path.exists():
+            return
+        for name in (product.COMMAND, legacy.COMMAND):
+            p = self.bin_dir / name
+            if p.exists():
+                continue
+            if p.is_symlink():
+                p.unlink()
+            said = (f"{name}: an update was cut off while it installed, so nothing is installed "
+                    f"here now. The way back by hand: {path} (run it with: sh {path})")
+            self.bin_dir.mkdir(parents=True, exist_ok=True)
+            p.write_text(f"#!/bin/sh\n# {STUB_MARK}\necho {shlex.quote(said)} >&2\nexit 1\n")
+            p.chmod(0o755)
+
+    def clear_stubs(self) -> None:
+        for name in (product.COMMAND, legacy.COMMAND):
+            p = self.bin_dir / name
+            try:
+                if p.is_file() and not p.is_symlink() and STUB_MARK in p.read_text(
+                        errors="replace")[:200]:
+                    p.unlink()
+            except OSError:
+                continue
 
     def prune(self) -> None:
         """Keep ``keep`` update backups and wheel sets, never the running or previous set."""
@@ -1230,6 +1340,7 @@ class Helper:
             return self.finish("cancelled", reason=str(exc),
                                detail="nothing was installed; Kranto was started again")
         try:
+            self.write_recover(self.old.get("spec") or {}, to)
             self.state("installing", detail=f"uv tool install {to}")
             self.install(tgt["args"], tool=tgt.get("tool"))
             self.state("starting", detail="kranto up")

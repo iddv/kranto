@@ -49,7 +49,11 @@ export interface PostSheet extends PostDraft {
   cannot_edit?: string | null;
   limit?: { max: number; unit: string } | null;
   edited?: boolean;
+  // who edited it, in words: "edited by you", "edited by your assistant (mcp)", "edited"
+  edited_words?: string | null;
   edited_from?: number | null;
+  // what a short post was written from: the draft page's check flags a name these lack
+  sources?: string | null;
   original_draft?: number;
   // SOCIAL's read fields, drawn when present: the editor uses parts, limit
   // and extras; the rest are the draft page's lines

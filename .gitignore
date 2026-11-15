@@ -234,7 +234,7 @@ data/secrets/
 *.pem
 *.key
 
-# the page
+# The page
 /build/
 /lib/
 /lib64/
@@ -245,5 +245,5 @@ data/secrets/
 /.dens/
 .bench/
 
-# the page's own lib folder is source
+# The page's own lib folder is source
 !src/kranto/page/ui/web/src/lib/

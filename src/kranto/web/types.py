@@ -2521,11 +2521,16 @@ class PostSheet(PostDraft):
     cannot_edit: str | None
     limit: PostLimit | None
     edited: bool
+    # who edited it, in words ("edited by you", "edited by your assistant (mcp)", "edited"
+    # for a draft from before Kranto recorded who); None: not edited
+    edited_words: str | None
     edited_from: int | None
     original_draft: int
     # a short post's draft page (``post_api.short_sheet``)
     parts: NotRequired[list[PostCounted]]
     extras: NotRequired[list[PostExtra]]
+    # what a short post was written from (the page's check reads it); None: from before
+    sources: NotRequired[str | None]
     siblings: NotRequired[list[PostSibling]]
     open: NotRequired[str | None]
     open_off: NotRequired[str | None]
@@ -2551,6 +2556,8 @@ class PostingSite(TypedDict):
     limit: int
     unit: str
     disclose: bool
+    # drafts that still wait to be posted by Kranto (written while Post directly was on)
+    waiting_direct: int
 
 
 class PostingGone(TypedDict):

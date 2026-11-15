@@ -201,7 +201,7 @@ export function modeWords(kind: string, live: boolean): string {
 }
 
 /** the word of a cub's ask button (its first kind's, as the server says it: "Send", "Post toot");
- * from an older the server, the kind's own verb (send.*: Send, post.*: Post), else Approve */
+ * from an older server, the kind's own verb (send.*: Send, post.*: Post), else Approve */
 export function askVerb(f: Pick<FeatureRow, "manifest">, schemas: Record<string, { button?: string }> | null | undefined): string {
   const k = (f.manifest.requests || [])[0];
   return (k && schemas?.[k]?.button) || (k?.startsWith("send.") ? "Send" : k?.startsWith("post.") ? "Post" : "Approve");

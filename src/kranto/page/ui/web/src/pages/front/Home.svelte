@@ -60,7 +60,7 @@
     void view.tick;
     return arrangement(H);
   });
-  // the server's one read of the home
+  // The server's one read of the home
   // read more often during the first hour, while the read moves
   let firstHour = false;
   const hr = $derived.by(() => {
@@ -94,7 +94,7 @@
   });
   const incs = $derived(bandOf(act)); // Kranto's own trouble: the band, never the one thing
   const nx = $derived(nextOf(needs.filter((r): r is HomeRow & { want: Want } => !!r.want).map((r) => ({ ...r, at: r.at ?? null }))));
-  // an older the server (no sentence in its home read) keeps the counts' sentence
+  // an older server (no sentence in its home read) keeps the counts' sentence
   const said = $derived(first ? `${Product} is reading ${first.topic!.name} for the first time.` : d?.sentence || (d && !d.date ? sentence(needsCount(host, uniqueRows(cubNeeds).length, cubNeeds.map((r) => r.href), act), cubNeeds.length, t ? t.new_kept : 0, 0) : ""));
 
   // While you were away, until one of its five is opened or Show today is chosen

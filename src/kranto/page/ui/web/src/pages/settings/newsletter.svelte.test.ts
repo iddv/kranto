@@ -10,7 +10,7 @@ import NewsletterPane from "./NewsletterPane.svelte";
 import { CONNECTIONS_API, type Connections } from "./connections";
 import { NEWSLETTER_API, nlLine, nlSt, type Newsletter } from "./newsletter";
 
-// the server's /api/newsletter (generated from its web/types.py). The platforms are made up: the page
+// The server's /api/newsletter (generated from its web/types.py). The platforms are made up: the page
 // names whatever the server lists, and never one of its own.
 const ALPHA = { id: "alpha", name: "Alpha", about: "An email platform.", docs: "docs/newsletter.md#alpha", can_schedule: true };
 const BETA = { id: "beta", name: "Beta", about: "A newsletter service.", docs: "docs/newsletter.md#beta", can_schedule: false };

@@ -10,14 +10,14 @@ import { answering, count, draw, settle, stub, where } from "../testing.svelte";
 import PostingList from "./PostingList.svelte";
 import AddSiteDialog from "./AddSiteDialog.svelte";
 import { NEWSLETTER_API } from "./newsletter";
-import { POSTING_API, siteLine, type Posting, type PostingSite } from "./posting";
+import { POSTING_API, siteLine, waitingLine, type Posting, type PostingSite } from "./posting";
 
 const hosted = () => { ui.facts = { header: { host: { paused: false } } } as unknown as Facts; };
 afterEach(() => { ui.facts = null; });
 const at = (): Where => ({ ...where("settings/posting", null), r: { path: ["settings", "posting"], q: {}, sel: null } });
 const site = (id: string, name: string, o: Partial<PostingSite> = {}): PostingSite => ({
   id, name, ways: ["open"], ticked: true, direct: false, can_direct: false, account: null, account_state: "not set", connection: null,
-  needs: null, instance: null, limit: 300, unit: "characters", disclose: false, ...o });
+  needs: null, instance: null, limit: 300, unit: "characters", disclose: false, waiting_direct: 0, ...o });
 const POSTING: Posting = {
   sites: [site("bluesky", "Bluesky", { ways: ["open", "direct"], can_direct: true, connection: "bluesky_post" }),
     site("mastodon", "Mastodon", { ways: ["open", "direct"], can_direct: true, connection: "mastodon_post", needs: "instance" }),
@@ -77,6 +77,13 @@ describe("Settings › Posting › Sites you post to", () => {
     expect(siteLine(site("bluesky", "Bluesky", { direct: true, account: "@me.bsky.social" }))).toBe("opens Bluesky with the draft ready · Kranto posts after your yes, as @me.bsky.social");
     expect(siteLine(site("bluesky", "Bluesky", { direct: true }))).toBe("opens Bluesky with the draft ready · Kranto posts after your yes, connect an account");
     expect(siteLine(site("mastodon", "Mastodon", { needs: "instance", instance: "mastodon.social" }))).toBe("opens Mastodon with the draft ready");
+  });
+
+  it("says on the switch when drafts written while Post directly was on still wait to be posted by Kranto", () => {
+    expect(waitingLine(site("bluesky", "Bluesky", { can_direct: true, waiting_direct: 1 }))).toBe("1 draft still waits to be posted by Kranto");
+    expect(waitingLine(site("bluesky", "Bluesky", { can_direct: true, waiting_direct: 2 }))).toBe("2 drafts still wait to be posted by Kranto");
+    expect(waitingLine(site("bluesky", "Bluesky", { can_direct: true, direct: true, waiting_direct: 1 }))).toBe("");
+    expect(waitingLine(site("bluesky", "Bluesky", { can_direct: true }))).toBe("");
   });
 
   it("Add a site lists the others with Add or Remove, the disclosure line, and what is not possible today with why", async () => {

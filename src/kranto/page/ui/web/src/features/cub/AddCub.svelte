@@ -1,6 +1,6 @@
 <script lang="ts">
   // Add a cub (the install sheet): a folder on the machine Kranto runs on, or a
-  // git URL at a tag, branch or commit. the server fetches it in the background (no request waits
+  // git URL at a tag, branch or commit. The server fetches it in the background (no request waits
   // on git) and inspects it; the sheet polls the job and, when it waits for you, draws the
   // manifest in Kranto's own words with its findings. Install (in practice) is the house confirm,
   // from this page only; nothing of the cub runs before it is pinned, and nothing it asks for is

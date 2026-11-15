@@ -147,7 +147,7 @@ describe("Cubs", () => {
     v.done();
   });
 
-  it("offers no Add without the cub runtime (a the server that answers /api/cubs with 404)", async () => {
+  it("offers no Add without the cub runtime (a server that answers /api/cubs with 404)", async () => {
     stub();
     hosted();
     drop(CUBS_API);

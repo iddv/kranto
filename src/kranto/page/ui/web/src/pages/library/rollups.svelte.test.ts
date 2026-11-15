@@ -15,7 +15,7 @@ const roll = (id: number, o: Partial<Rollup> = {}): Rollup => ({
   urls: ["https://example.org/a", "ftp://example.org/b"], embedding_model: "e", replaced_count: 12, replaced_fingerprint: "f", run_uuid: null, created_at: NOW,
   label: "Sync week " + id, ...o,
 });
-// the server's /api/rollups (Rollups is generated from its web/types.py)
+// The server's /api/rollups (Rollups is generated from its web/types.py)
 const list = (results: Rollup[], o: Partial<Rollups> = {}): Rollups => ({ rollups: 60, replaced: 700, retention_line: "90 days", results, total: 60, offset: 0, ...o });
 const hosted = () => { ui.facts = { header: { host: { paused: false } } } as unknown as Facts; };
 afterEach(() => { ui.facts = null; });

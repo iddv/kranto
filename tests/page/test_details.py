@@ -29,7 +29,7 @@ IDEA = {"id": "i01", "title": "Clinic schedules", "status": "open", "source": "k
 
 
 class FakeApp:
-    """the page's App as details.record reads it: the builds, a loop idea, the server's JSON API"""
+    """The page's App as details.record reads it: the builds, a loop idea, the server's JSON API"""
 
     def builds(self):
         return [BUILD, {"key": "other", "title": None, "status": None}]

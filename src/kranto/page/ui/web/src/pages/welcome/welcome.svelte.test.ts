@@ -9,7 +9,7 @@ import Hello from "./Hello.svelte";
 import Welcome from "./Welcome.svelte";
 import { afterTopics, stepAt, STEPS, stepDone, TOPIC } from "./welcome.svelte";
 
-// the server's /api/setup on a fresh install (Setup is generated from its web/types.py)
+// The server's /api/setup on a fresh install (Setup is generated from its web/types.py)
 const S: Setup = {
   done: false, done_at: null, needs_setup: true, key: { set: false, env: "OPENROUTER_API_KEY", base_url: "https://openrouter.ai/api/v1", provider: "openai_compat", choice: "openrouter", label: "OpenRouter", endpoint: "https://openrouter.ai/api/v1", test: null },
   logins: { claude: { ok: true, detail: "Signed in", command: "claude auth login" }, gh: { ok: false, detail: "Not signed in", command: "gh auth login" } }, builds_ok: false,
@@ -81,6 +81,33 @@ describe("first run", () => {
     expect((v.target.querySelector("#scout") as HTMLButtonElement).disabled).toBe(false);
     expect(v.target.querySelectorAll(".steps-line .i.done").length).toBe(1);
     v.done();
+  });
+
+  it("step 1 on a machine without Claude Code: the login's box says it was not found, once, and never 'Found'", async () => {
+    stubbed({ test: { detail: "Works" } });
+    hosted();
+    // The server offers the login wherever it could be chosen (offered: true), whatever is here
+    answering({ [SETUP_API]: S, "/api/setup/provider": { claude_code: { installed: false, logged_in: false, offered: true, version: null, auth_method: null, subscription: null, token_in_service: false } } });
+    const { target, done } = await draw(Welcome, at("welcome"));
+    await settle();
+    const box = target.querySelector("#way-login")?.textContent || "";
+    expect(box).not.toContain("Found on this machine");
+    expect(box.split("Not found on this machine").length - 1).toBe(1);
+    expect(box).not.toContain("not installed on this machine");
+    expect(target.querySelector("#way-login #key-save")).toBeNull();
+    done();
+  });
+
+  it("step 1 with Claude Code installed but signed out: never 'Found on this machine, signed in'", async () => {
+    stubbed({ test: { detail: "Works" } });
+    hosted();
+    answering({ [SETUP_API]: S, "/api/setup/provider": { claude_code: { installed: true, logged_in: false, offered: true, version: "2.1", auth_method: null, subscription: null, token_in_service: false } } });
+    const { target, done } = await draw(Welcome, at("welcome"));
+    await settle();
+    const box = target.querySelector("#way-login")?.textContent || "";
+    expect(box).not.toContain("Found on this machine");
+    expect(box).toContain("not signed in");
+    done();
   });
 
   it("step 1: the ways in as boxes, the login last (F-3 unanswered) and never preselected, one primary", async () => {

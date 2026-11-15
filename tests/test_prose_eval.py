@@ -10,9 +10,9 @@ from pathlib import Path
 
 import pytest
 
-from kranto.features.post.evals import score, writers
+from kranto.features.post.evals import fixture, score, writers
 
-REC = Path(writers.__file__).parent / "recorded.json"
+REC = fixture("recorded.json")
 
 
 @pytest.fixture(scope="module")
@@ -23,6 +23,21 @@ def recording() -> dict:
 @pytest.fixture(scope="module")
 def card(recording) -> dict:
     return score.scorecard(recording)
+
+
+def test_the_recordings_and_reads_are_test_fixtures_never_in_the_package():
+    """The wheel is ``src/kranto`` whole: a reader's comments, other writers' drafts and the
+    library's items must not be under it."""
+    src = Path(writers.__file__).resolve().parents[4]
+    assert src.name == "src"
+    shipped = [p for p in src.rglob("*")
+               if p.is_file() and (p.name.startswith("owner_read")
+                                   or (p.name.startswith("recorded") and p.suffix == ".json"))]
+    assert shipped == []
+    assert not list(Path(writers.__file__).parent.glob("*.json"))
+    for name in ("items.json", "owner_read_1.json", "owner_read_2.json", "recorded.json",
+                 "recorded2.json", "recorded3.json"):
+        assert fixture(name).is_file()
 
 
 def test_twenty_real_items_each_written_old_and_new_for_both_sites(recording):

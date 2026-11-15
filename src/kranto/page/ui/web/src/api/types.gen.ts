@@ -363,7 +363,7 @@ export interface IncidentKind {
   tries: number;
 }
 
-/** A blocking incident: a provider's model key refused, from its first failure, folding every kind it stops; the verb renews the key. the server 0.6.0.dev5+. */
+/** A blocking incident: a provider's model key refused, from its first failure, folding every kind it stops; the verb renews the key. The server 0.6.0.dev5+. */
 export interface ActivityIncident {
   id: string;
   provider: string;

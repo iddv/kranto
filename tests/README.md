@@ -20,6 +20,7 @@ calls a model or the network: `conftest.py` makes the home a temp dir and builds
 | `cubs` | `cubhelp`, `test_cub_*` (install, runtime, security, surfaces, rename …): small cubs that each do one thing (echo, a flooder, an escape attempt, a filer) |
 | `cub_manifests` | `test_manifest_schema` |
 | `evals` | `test_evals`, `test_eval_runs`, `test_evals_api`: a frozen eval set written by `scripts/dev/eval_fixtures.py` |
+| `post_evals` | `kranto.features.post.evals` (from a checkout), `test_prose_eval`, `test_prose_round2`, `test_prose_round3_record`, `test_prose_claims`: the prose eval's items, its recorded runs and the owner's reads (kept out of the package) |
 | `odd_install` | `test_odd_install`, `scripts/dev/odd_install.py` and `odd_walk.sh`: an install with every stored value a writer can produce (null, empty, missing), and an upgraded one |
 | `social` | `test_social`: the sites' answers in their documented shapes (Bluesky's createRecord and createSession), each file naming its page and date |
 | `x` | `fake_x`, `test_x_sources`: X API answers |

@@ -419,39 +419,92 @@ def check(text: str, site: str | None = None, profile: Profile | None = None, *,
             "strictness": level, "site": site, "kind": kind}
 
 
-# a person's name: two or three capitalised words in a row (a middle initial allowed), or a
-# handle; the first word is not one a sentence or a heading often starts with
-_NAME = re.compile(r"(?<![\w@])(?:[A-Z][a-z'’-]+\s(?:[A-Z]\.\s)?[A-Z][a-z'’-]+"
-                   r"(?:\s[A-Z][a-z'’-]+)?|@[A-Za-z0-9_]{2,30}(?:@[\w.-]+)?)")
+# a person's name. A capitalised word: "Altman", "Jean-Luc", and an inner capital ("McCarthy",
+# "DeVos", "O'Brien"). A name: two or three of them in a row, a middle initial or a lower-case
+# particle allowed between ("Dario Amodei", "John Q. Public", "Ian de Villiers", "Ludwig van
+# Beethoven"); or one word after a title ("Dr. Patel") or next to a verb of saying ("Altman
+# said", "said Altman", "according to Altman"); or a handle ("@name", "@name@server"). The first
+# word is not one a sentence or a heading often starts with.
+_W = r"[A-Z][a-z'’-]*(?:[A-Z][a-z'’-]+)*(?<=[a-z'’])"
+_PARTICLE = r"(?:de|del|della|der|den|di|da|dos|das|du|la|le|van|von|ten|ter|bin|ibn|al)"
+_NAME = re.compile(rf"(?<![\w@])(?:{_W}(?:\s(?:[A-Z]\.\s)?(?:{_PARTICLE}\s)?{_W}){{1,2}}"
+                   r"|@[A-Za-z0-9_]{2,30}(?:@[\w.-]+)?)(?![\w’'])")
+_TITLES = r"(?:Mr|Mrs|Ms|Mx|Dr|Prof|Sir|Dame|Lord|Lady|Rev|Judge|Senator|Rep)"
+_SAYING = (r"(?:said|says|told|tells|wrote|writes|argued|argues|claimed|claims|tweeted|posted|"
+           r"admitted|insisted|thinks|believes|warned|warns|joked|quipped|added|replied|noted)")
+_ONE = re.compile(rf"(?:\b{_TITLES}\.?\s+(?P<a>{_W})(?![\w’'])"
+                  rf"|(?<![\w@])(?P<b>{_W})\s+{_SAYING}\b"
+                  rf"|\b(?:{_SAYING}|[Aa]ccording\sto|asked|per)\s+(?P<c>{_W})(?![\w’']))")
 _NOT_FIRST_WORDS = """The A An This That These Those My Our Your Their His Her Its If When
 While What Why How Who Where Which And But Or So Then Now Here There Every Each Some Most Many
 Few No Not One Two Three First Next Last In On At For From With Without By Of To As After Before
 Since Until Because Although Though Even Still Yet Just Only Also More Less Both Either Neither
 I We You They He She It Is Are Was Were Be Do Does Did Has Have Had Can Could Will Would Should
 May Might Must Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March
-April May June July August September October November December"""
+April May June July August September October November December Nobody Everyone Someone Anyone
+Everybody Somebody Me Him Us Them"""
 _NOT_FIRST = frozenset(_NOT_FIRST_WORDS.split())
+# a second word that names a place, a product or an organisation, not a person ("New York",
+# "Visual Studio", "Open Source"): a two-word term ending in one is not read as a name
+_NOT_LAST_WORDS = """York Jersey Zealand Delhi Orleans Mexico Studio Code Valley Street Labs Lab
+Inc Ltd Corp Cloud Bank Times News Post Journal Review University College Institute School
+Foundation Act Store Pro Max Ultra Mini Plus Edition Kit Hub Web Search Maps Docs Drive Pay
+Source Weekly Daily Group Council Office House Court Party Union States Kingdom Republic City
+Island Islands Bay Park Square Center Centre Airlines Motors Systems Software Games Studios"""
+_NOT_LAST = frozenset(_NOT_LAST_WORDS.split())
+
+
+def _capitalised(line: str) -> set[str]:
+    return {w.lower() for w in re.findall(_W, line)}
 
 
 def people_not_in(text: str, sources: str) -> list[tuple[int, int]]:
     """Spans of ``text`` that look like a person's name or a handle and that ``sources`` does
     not contain (case-insensitive): a salty post may name the companies, products and public
-    sources its material names, and nobody else."""
+    sources its material names, and nobody else. A two-word term whose two words both stand
+    capitalised in the material's title (its first line) is the title's, not a person.
+
+    What it still misses (said so in the docs): a name in all capitals or by initials ("DHH",
+    "J. K. Rowling"), a one-word name with no title and no verb of saying beside it ("blame
+    Altman"), a name that is not capitalised, a person named only by role ("their CEO"). What
+    it may still flag: an organisation or product of two capitalised words the material does not
+    name and that does not end in a word of ``_NOT_LAST``, and a one-word company next to a verb
+    of saying ("Google said") that the sources do not name."""
     have = " ".join(sources.split()).lower()
-    out = []
+    title = _capitalised((sources.strip().splitlines() or [""])[0])
+    out: list[tuple[int, int]] = []
+
+    def keep(name: str, start: int, end: int) -> None:
+        name = re.sub(r"['’]s\Z", "", name)        # "Google DeepMind's": the name, not its 's
+        words = name.split()
+        if not name.startswith("@") and (words[0] in _NOT_FIRST or words[-1] in _NOT_FIRST):
+            return
+        if " ".join(words).lower() in have:
+            return
+        if len(words) == 2 and (words[-1] in _NOT_LAST
+                                or all(w.lower() in title for w in words)):
+            return
+        if any(s < end and start < e for s, e in out):
+            return
+        out.append((start, end))
+
     for m in _NAME.finditer(text):
         name, start = m.group(0), m.start()
         words = name.split()
-        if len(words) == 3 and (start == 0 or re.search(r"[.!?]\s+\Z", text[:start])):
+        if len(words) >= 3 and not re.fullmatch(_PARTICLE, words[1]) \
+                and (start == 0 or re.search(r"[.!?]\s+\Z", text[:start])):
             # "Somewhere Dario Amodei": a sentence's first word is not part of the name
             start += len(words[0]) + 1
             name = " ".join(words[1:])
-        first = name.split()[0]
-        if not name.startswith("@") and first in _NOT_FIRST:
-            continue
-        if " ".join(name.split()).lower() in have:
-            continue
-        out.append((start, m.end()))
+        keep(name, start, m.end())
+    for m in _ONE.finditer(text):
+        g = next(k for k in ("a", "b", "c") if m.group(k))
+        s, e = m.start(g), m.end(g)
+        if g != "a" and (re.search(r"[A-Z][\w'’-]*\s\Z", text[:s])
+                         or re.match(r"\s[A-Z]", text[e:])):
+            continue             # one word of a longer capitalised term ("Claude Code said")
+        keep(m.group(g), s, e)
+    out.sort()
     return out
 
 

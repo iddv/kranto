@@ -20,7 +20,7 @@ from .app_common import make_home
 
 SNAPSHOT = Path(__file__).parent / "fixtures" / "api_routes.json"
 
-# the page's own routes (ui/routes/__init__.py), and a sample of the factory's, which answer 404
+# The page's own routes (ui/routes/__init__.py), and a sample of the factory's, which answer 404
 # since the cut (cut 3)
 GET = [
     "/", "/index.html", "/static/theme.js", "/static/kranto.css", "/static/brand/favicon-16.png",

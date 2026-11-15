@@ -1,6 +1,6 @@
 // Settings › Privacy & access: usage reports. The mode and why, what each mode means,
 // today's report as it stands, every report sent (the exact bytes), and the notice with the
-// field list. the server's /api/settings/telemetry holds it all; POST {mode} is the one setter the
+// field list. The server's /api/settings/telemetry holds it all; POST {mode} is the one setter the
 // wizard, Welcome and this page share. Nothing is sent before the person answers; with basic or
 // detailed, one report a day goes to the controller's relay (or the endpoint the person set).
 export const PRIVACY_API = "/api/settings/telemetry";
@@ -44,7 +44,7 @@ export interface Privacy {
   summary: string;
   sent: Sent[];
   remind: boolean;
-  /** error reports (absent from a the server older than them) */
+  /** error reports (absent from a server older than them) */
   errors?: { waiting: number; sent: number; last_sent: ErrorBatch | null };
   error_batches?: ErrorBatch[];
   /** the public field page */

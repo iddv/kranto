@@ -36,7 +36,7 @@ BASE = "http://127.0.0.1:8765"
 
 
 class IdentityApi(FakeApi):
-    """the page's ``api.handle`` with ``identity``: records who the host said was calling."""
+    """The page's ``api.handle`` with ``identity``: records who the host said was calling."""
 
     def handle(self, method, path, query=None, body=None, identity=None):
         self.calls.append((method, path, query, body, identity))
@@ -226,7 +226,7 @@ def test_the_cookie_bootstrap(rt, fake_api):
                     follow_redirects=False)
         assert r.headers["location"] == "/"
         web.cookies.clear()
-        # the page's sign-in box; an expired code is refused
+        # The page's sign-in box; an expired code is refused
         r = web.post("/auth/code", json={"code": store.mint_code()})
         assert r.status_code == 200 and "httponly" in r.headers["set-cookie"].lower()
         web.cookies.clear()

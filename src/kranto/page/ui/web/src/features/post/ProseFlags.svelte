@@ -5,14 +5,14 @@
   // draft's page; the editor hosts it under its box and checks again as the owner types.
   import { checkProse, lineOf, reviseProse, spans, type ProseCheck } from "./prose";
 
-  let { text, site, fix = null, id = "prose-flags" }: { text: string; site: string; fix?: ((text: string, say: string) => void) | null; id?: string } = $props();
+  let { text, site, fix = null, id = "prose-flags", sources = null }: { text: string; site: string; fix?: ((text: string, say: string) => void) | null; id?: string; sources?: string | null } = $props();
   let got = $state<ProseCheck | null>(null);
   let fixing = $state(false);
   let timer: ReturnType<typeof setTimeout> | null = null;
   $effect(() => {
-    const t = text, s = site;
+    const t = text, s = site, src = sources;
     if (timer) clearTimeout(timer);
-    timer = setTimeout(() => void checkProse(t, s).then((c) => { if (t === text) got = c; }), fix ? 500 : 0);
+    timer = setTimeout(() => void checkProse(t, s, src).then((c) => { if (t === text) got = c; }), fix ? 500 : 0);
     return () => { if (timer) clearTimeout(timer); };
   });
   const marks = $derived(got ? spans(text, got.flags) : []);
@@ -31,7 +31,7 @@
     <p class="pf-line small"><span class={got.flags.length ? "pf-warn" : "pf-ok"}>{lineOf(got)}</span>{#if got.flags.length && fix}{" "}<button type="button" class="btn sm" id={id + "-fix"} disabled={fixing} onclick={() => void fixThem()}>{fixing ? "Fixing…" : "Fix them"}</button>{/if}</p>
     {#if got.flags.length}
       <div class="pf-text small" aria-label="The text, with what reads like AI underlined">{#each marks as m, i (i)}{#if m.f}<mark class="pf-mark" title={m.f.fix} data-rule={m.f.rule}>{m.t}</mark>{:else}{m.t}{/if}{/each}</div>
-      <ul class="pf-fixes small">{#each got.flags.filter((f) => f.scope !== "text").slice(0, 6) as f, i (i)}<li><q>{f.text.length > 60 ? f.text.slice(0, 59) + "…" : f.text}</q> · {f.fix}</li>{/each}{#each whole as f, i (i)}<li>{f.words} · {f.fix}</li>{/each}</ul>
+      <ul class="pf-fixes small">{#each got.flags.filter((f) => f.scope !== "text").slice(0, 6) as f, i (i)}<li><q>{f.text.length > 60 ? f.text.slice(0, 59) + "…" : f.text}</q> · {#if f.rule.startsWith("salt.")}{f.words} · {/if}{f.fix}</li>{/each}{#each whole as f, i (i)}<li>{f.words} · {f.fix}</li>{/each}</ul>
     {/if}
   </div>
 {/if}

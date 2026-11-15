@@ -123,7 +123,7 @@ describe("the draw", () => {
     expect(pageKeys()).not.toContain("c"); // no such card: no subject
   });
 
-  it("keeps a flash 8 s across draws, then drops it; a the server notice (?msg=) shows once", async () => {
+  it("keeps a flash 8 s across draws, then drops it; a server notice (?msg=) shows once", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     try {
       await frame({ hash: "#/needs?msg=Saved." });

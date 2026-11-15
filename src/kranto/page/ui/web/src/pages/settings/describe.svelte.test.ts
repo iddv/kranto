@@ -9,7 +9,7 @@ import { APPROVE_API, batchApi, DESCRIBE, FROMTEXT_API, preticked, type FromText
 import type { SourceRow } from "../../api/afk.gen";
 import { CATALOG_API, FORM, type Catalog } from "./sources.svelte";
 
-// the server's /api/catalog and /api/sources/from-text (generated from its web/types.py)
+// The server's /api/catalog and /api/sources/from-text (generated from its web/types.py)
 const CAT: Catalog = {
   providers: [{ key: "web", name: "Any website", presets: [{ key: "web.feed", provider: "web", provider_name: "Any website", name: "RSS or Atom feed", blurb: "Any feed URL.", access: "public",
     needs: null, available: true, reason: null, retention_days: null, fields: [{ key: "url", label: "Feed URL", hint: "", placeholder: "https://example.org/feed.xml" }] }] }],

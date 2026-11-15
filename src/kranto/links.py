@@ -47,7 +47,7 @@ class Links:
         return self._at(f"library/o/{int(obs_id)}", f"/obs/{int(obs_id)}", msg)
 
     def idea(self, idea_id: int) -> str:
-        """A the server card. Kranto UI lists cards not yet taken into the loop as
+        """A server card. Kranto UI lists cards not yet taken into the loop as
         ``card:<id>``."""
         return self._at(f"ideas/card:{int(idea_id)}", f"/ideas#idea-{int(idea_id)}")
 

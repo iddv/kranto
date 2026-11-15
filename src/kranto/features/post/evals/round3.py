@@ -32,11 +32,10 @@ from ....prose import check, revise
 from ....prose.composer import salt_of, thin
 from ....prose.profile import Profile
 from ....prose.reviser import enforce_voice, fit, tidy
-from . import export, rubric, score, writers
+from . import FIXTURES, export, fixture, rubric, score, writers
 from .live import Budget, Meter
 from .round2 import FIVE_MORE, OWNER_FIVE, SHORTEN, post_md
 
-HERE = Path(__file__).parent
 MAX_WORDS = 200            # the owner's rule 7: a blog post is 120 to 200 words
 # the thin items written salty and plain beside the default (post 8's item, and one more)
 SALT = {"card-160": "end", "card-152": "end"}
@@ -196,7 +195,7 @@ def run(m: Meter, sites_of: dict[str, str], out: Path, writer: str, rec: dict,
 def owner_marks(m: Meter) -> list[dict]:
     """The judge's marks on the owner's second read: his pick on the six he picked, and all
     three writers' drafts on the four he refused."""
-    read = json.loads((HERE / "owner_read_2.json").read_text(encoding="utf-8"))
+    read = json.loads(fixture("owner_read_2.json").read_text(encoding="utf-8"))
     items = {it["id"]: it for it in writers.items()}
     out = []
     for p in read["posts"]:
@@ -240,7 +239,7 @@ def main(argv: list[str] | None = None) -> int:
                     help="item:kind pairs written salty and plain too ('' for none)")
     ap.add_argument("--owner", action="store_true",
                     help="mark the drafts of the owner's second read")
-    ap.add_argument("--record", default=str(HERE / "recorded3.json"))
+    ap.add_argument("--record", default=str(FIXTURES / "recorded3.json"))
     ap.add_argument("--redo", default="", help="item:kind pairs to write again (comma-separated)")
     ap.add_argument("--shorten", action="store_true",
                     help="cut each recorded blog draft over 200 words (one call each)")

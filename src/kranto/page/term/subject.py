@@ -56,7 +56,7 @@ def resolve(app, s: dict) -> Subject:
 
 
 def batch_of(app, n: str) -> dict:
-    """the server's described batch ``n`` (``GET /api/sources/from-text/<n>``), done."""
+    """The server's described batch ``n`` (``GET /api/sources/from-text/<n>``), done."""
     from .afk import AfkError, afk_url, call
     if not n.isdigit():
         raise SubjectError("a described batch is named by its number")

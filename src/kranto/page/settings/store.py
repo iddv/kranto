@@ -24,7 +24,7 @@ from .. import paths
 from ..upstream import REPOS as UPSTREAM
 
 HOME_ENV = paths.LOOP_HOME_ENV
-# the server's URL from a host (the server mounting the UI passes it to ``brb loop``
+# The server's URL from a host (the server mounting the UI passes it to ``brb loop``
 # subprocesses this way): wins over ``kranto.url`` in loop.yaml.
 KRANTO_URL_ENV = "KRANTO_SERVER_URL"
 
@@ -62,7 +62,7 @@ DEFAULTS: dict = {
               "editor": {"day": "sunday", "hour": 18, "model": "claude-opus-5-5",
                          "command": None},
               "research": {"enabled": True, "model": "claude-sonnet-5-5", "max_usd": 1.5}},
-    # the server's idea cards: through its API at ``url`` (``http://127.0.0.1:8765``) when it
+    # The server's idea cards: through its API at ``url`` (``http://127.0.0.1:8765``) when it
     # is serving; ``db`` is read (read-only) only when no URL is set: the page on its own,
     # pointed at a workspace's ``<workspace>/data/kranto.db``. Neither set: no cards.
     # A host that mounts the UI passes its own URL, which wins over this one.

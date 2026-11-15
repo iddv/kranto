@@ -29,7 +29,7 @@
     void view.tick;
     return host ? read<Post>(POST_API, 15000) : null;
   });
-  // every list read as a list, whatever shape came (an older the server, a fake): never a crash
+  // every list read as a list, whatever shape came (an older server, a fake): never a crash
   const d = $derived.by((): Post | null => {
     const x = r?.data as Partial<Post> | undefined | null;
     if (!x) return null;
@@ -41,12 +41,13 @@
   const STATE: Record<string, string> = { newsletter: "✉", mastodon: "✎", blog: "✎", short: "✎" };
 </script>
 
-<!-- a draft's one verb: Open (its sheet, or its ask's dialog until the sheet's route is there) -->
+<!-- a draft's one verb: View (its sheet, or its ask's dialog until the sheet's route is there);
+     never "Open", which is the word for opening the site with the draft filled in -->
 {#snippet open(x: PostDraft, main: boolean)}
   {#if !sheet && (x.ticket != null || x.again != null)}
-    <button type="button" class={"btn sm" + (main ? " primary" : "")} data-act="post-open" onclick={(e) => openAsk({ cub: x.cub, ticket: x.ticket, again: x.again }, e.currentTarget)}>Open</button>
+    <button type="button" class={"btn sm" + (main ? " primary" : "")} data-act="post-open" onclick={(e) => openAsk({ cub: x.cub, ticket: x.ticket, again: x.again }, e.currentTarget)}>View</button>
   {:else}
-    <a class={"btn sm" + (main ? " primary" : "")} data-act="post-open" href={draftHref(x)}>Open</a>
+    <a class={"btn sm" + (main ? " primary" : "")} data-act="post-open" href={draftHref(x)}>View</a>
   {/if}
 {/snippet}
 
@@ -94,7 +95,7 @@
     {#if d.earlier.length}
       <Group id="post-earlier" title="Earlier drafts" count={String(d.earlier.length)} fold="post:earlier" start>
         {#each d.earlier as x (x.id)}
-          {#snippet end()}<a class="btn sm quiet" href={draftHref(x)}>Open</a>{/snippet}
+          {#snippet end()}<a class="btn sm quiet" href={draftHref(x)}>View</a>{/snippet}
           <Row title={x.title} meta={x.line || draftFact(x)} age={ago(dt(x.at))} {end} />
         {/each}
       </Group>

@@ -110,7 +110,7 @@ describe("the status bar", () => {
     expect(b.cells[0]).toBe("Watching paused until 2026-11-01 00:00 (spend limit set in the Claude Console reached)");
   });
 
-  it("says Healthy without the server, and that the server is not hosting the page; Paused while watching is", async () => {
+  it("says Healthy without the server, and that server is not hosting the page; Paused while watching is", async () => {
     await frame({ host: null });
     expect(facts().bar.word.text).toBe("Healthy");
     expect(facts().bar.cells).toEqual(["the server is not hosting this page"]);

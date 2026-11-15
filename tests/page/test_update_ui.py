@@ -1,5 +1,5 @@
 """Updates in Kranto UI: the header pill, one Needs you row,
-and Settings › System › Updates. the server's /api/status carries ``update``; /api/update the rest. What the
+and Settings › System › Updates. The server's /api/status carries ``update``; /api/update the rest. What the
 pill, the row and the page do is pressed in Vitest (lib/app/chrome.test.ts, lib/app/data.test.ts,
 lib/app/today.test.ts, pages/today/today.svelte.test.ts, pages/settings/updates.svelte.test.ts);
 here, what holds for their files."""

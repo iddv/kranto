@@ -52,7 +52,7 @@ describe("the features' slots", () => {
     await settle();
     expect(featureNav("Desk", true)).toEqual([{ to: "news", w: "News", n: 2 }]);
     expect(featureNav("Work", true)).toEqual([]);             // Toot is off: no entry
-    expect(featureNav("Desk", false)).toEqual([]);            // no the server, no feature
+    expect(featureNav("Desk", false)).toEqual([]);            // no server, no feature
   });
 
   it("renders a declarative card as text", () => {

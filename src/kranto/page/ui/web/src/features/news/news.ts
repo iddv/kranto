@@ -293,7 +293,7 @@ export function deepDive(btn: HTMLElement | null, bid: number, n: number, headli
 
 // -- News as one line a story -------------------------------------
 
-/** the page's own reading speed: "about a minute" is 240 words */
+/** The page's own reading speed: "about a minute" is 240 words */
 export const WPM = 240;
 /** "about a minute", "about three minutes" (the page's own words for its length) */
 export function minutesWords(words: number): string {

@@ -121,7 +121,7 @@ def test_no_string_kranto_serves_says_ticket_or_dry():
     bad = []
     for p in sorted(SRC.rglob("*.py")):
         rel = p.relative_to(SRC).as_posix()
-        # the page's strings have their own check (tests/page/test_nyu_words.py)
+        # The page's strings have their own check (tests/page/test_nyu_words.py)
         if rel in PROTOCOL or "/tests/" in f"/{rel}" or rel.startswith("page/"):
             continue
         tree = ast.parse(p.read_text())

@@ -8,7 +8,7 @@ import { HEALTH_API, pacedWord, SOURCES_API, type Health } from "./health";
 import { answerDialog, dialogShown } from "../../ui/testing";
 
 const NOW = new Date().toISOString();
-// the server's /api/health whole (Health is generated from its web/types.py)
+// The server's /api/health whole (Health is generated from its web/types.py)
 const D: Health = {
   month: "2026-10", tokens_month: { in: 1200000, out: 30000 }, spent_usd: 4, alarm: false, budget: { monthly_usd: 10, alarm_fraction: 0.8 },
   outcomes: { kept: 3, prefiltered: 12, near_duplicate: 1 }, exploration: [{ admitted_by: "topic", n: 4, mean_signal: 0.41, in_cross_source: 2 }],

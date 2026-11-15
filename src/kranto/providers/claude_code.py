@@ -58,7 +58,7 @@ def resume_time(text: str, now: datetime) -> datetime:
 
 
 def host_api():
-    """the page's host API, or None without a the page that has ``claude_print``."""
+    """The page's host API, or None without a version of the page that has ``claude_print``."""
     import importlib
     try:
         api = importlib.import_module("kranto.page.host_api")

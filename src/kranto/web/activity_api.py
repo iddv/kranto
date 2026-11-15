@@ -1,5 +1,5 @@
 """What Kranto is doing: the server's half of the activity read, the Stop
-of a run and the Dismiss of a failure. the page's ``GET api/activity`` merges this with the
+of a run and the Dismiss of a failure. The page's ``GET api/activity`` merges this with the
 loop's runs, the builds and the sessions; the page reads that, never this file.
 
 | Method and path                  | Does                                                          |

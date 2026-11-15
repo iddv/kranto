@@ -1,5 +1,5 @@
 // What is off is hidden: with cubs_developer false Cubs has Installed and
-// Approvals only. A the server from before the switches (no keys): everything as before. The pages of
+// Approvals only. A server from before the switches (no keys): everything as before. The pages of
 // what left the product (what you read in your browser) are linked nowhere, whatever a host says.
 import { afterEach, describe, expect, it } from "vitest";
 import { chromeFacts } from "./chrome";

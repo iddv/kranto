@@ -1,4 +1,4 @@
-// the server's idea cards, through one read. GET /api/ideas (the server web/ideas_api.py):
+// The server's idea cards, through one read. GET /api/ideas (the server web/ideas_api.py):
 // each card with its number, title, status, score, grade, topics [{id, name, share}] from its
 // lineage's latest cluster, citations and signals; embeddings come back as references only. A
 // card's state on Ideas is the server's own (``state``: waiting, later, posted, passed; H1); a
@@ -20,7 +20,7 @@ export function cardIdeas(): CardIdeas | null {
   return c.data ? { from: "api", list: parsed(c.data) } : null;
 }
 /** a topic's cards: the server's filtered answer, read for that topic alone (the topic's
- * pages and Ideas with ?topic= read every card and filtered here); a the server that refuses the
+ * pages and Ideas with ?topic= read every card and filtered here); a server that refuses the
  * filter gives every card and topicIdeas filters them; null until read */
 export function topicCards(tid: number | string): CardIdeas | null {
   const c = read<Answer>(topicCardsApi(tid), 30000);
@@ -60,7 +60,7 @@ export function cardFor(id: string): CardX | null {
 setCardLookup(cardFor);
 /** the cards that cite an observation: those the server names (``cited_by.ideas`` of
  * /api/observations/<id>, its ``idea_citations``: CON L2), else the cards whose citations and
- * evidence name it (an older the server); null until the cards are read */
+ * evidence name it (an older server); null until the cards are read */
 export function citedBy(oid: number | string, ids?: number[] | null): CardX[] | null {
   const ci = app()?.host() ? cardIdeas() : null;
   if (!ci) return null;

@@ -15,7 +15,7 @@ import { startApi, topicApi, type Topic, type TopicPage, type TopicSource, type 
 
 const NOW = new Date().toISOString();
 const traj = [{ at: "2026-10-01T00:00:00Z", share: 0.1, size: 10 }, { at: "2026-10-08T00:00:00Z", share: 0.12, size: 12 }];
-// the server's /api/topics (Topics is generated from its web/types.py) and one topic's page
+// The server's /api/topics (Topics is generated from its web/types.py) and one topic's page
 const topic = (id: number, o: Partial<Topic> = {}): Topic => ({
   id, name: `Topic ${id}`, description: `What topic ${id} covers.`, kind: "user", ref: null, status: "active", created_at: NOW, sources: 2, proposed: 0,
   items_per_day: 20, kept_per_day: 5, observations: 120, themes: 1, rising: 1, spend_month_usd: 0.4, tokens_month: { in: 12000, out: 3000 }, ...o,
@@ -48,7 +48,7 @@ const EV_TOP = "/api/observations?topic=1&since=last&sort=signal&limit=5";
 
 const hosted = () => { ui.facts = { header: { host: { paused: false } } } as unknown as Facts; };
 afterEach(() => { ui.facts = null; });
-// the server's cards (/api/ideas): three from Topic 1, each with its own state: 4 passed
+// The server's cards (/api/ideas): three from Topic 1, each with its own state: 4 passed
 const card = (n: number, state = "waiting") => ({ number: n, title: "Card " + n, status: "shown", score: 0.5, topics: [{ id: 1, name: "Topic 1", share: 0.5 }], citations: [], state });
 const CARDS = { "/api/ideas?embedding=ref": [card(3), card(9), card(4, "passed")] };
 // a new topic's first hour (the server's /api/topics/1/start,)

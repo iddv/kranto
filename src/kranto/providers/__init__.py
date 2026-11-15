@@ -364,7 +364,7 @@ def openai_key(root: Path | str, key: str | None = None, *, environ=None,
 
 
 def _test_claude_code(environ, run) -> KeyTest:
-    """Claude Code installed (2.1.300 or newer), signed in or given a token, and a the page
+    """Claude Code installed (2.1.300 or newer), signed in or given a token, and a page version
     that can run it as the watcher. Spends nothing (``claude --version``, ``claude auth
     status``)."""
     from .claude_code import MIN_VERSION, version_ok
@@ -379,7 +379,7 @@ def _test_claude_code(environ, run) -> KeyTest:
         return KeyTest(False, "Claude Code is not signed in: run 'claude auth login'")
     from .claude_code import host_api
     if host_api() is None:
-        return KeyTest(False, "this the page cannot run Claude Code as the watching model "
+        return KeyTest(False, "this version of Kranto cannot run Claude Code as the watching model "
                               "(update Kranto)")
     how = ", ".join(x for x in (cc["auth_method"], cc["subscription"]) if x)
     who = "Kranto's CLAUDE_CODE_OAUTH_TOKEN" if token else f"signed in ({how})" if how \

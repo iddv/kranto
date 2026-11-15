@@ -24,7 +24,7 @@ export const ABOUT: Record<Choice, string> = {
   anthropic: "An Anthropic API key, from the Claude Console. Kranto keeps the parts of its prompts that repeat cached, and is billed at Anthropic's list prices.",
   openrouter: "",
   openai_compat: "Another service that speaks OpenAI's API, with its address. The address is kept in your settings when its key passes.",
-  // the server's own sentence (providers.CLAUDE_CODE_TERMS) is shown when it says one
+  // The server's own sentence (providers.CLAUDE_CODE_TERMS) is shown when it says one
   claude_code: "Claude Code as the watching model uses your Claude plan's usage, shared with your own Claude Code; when a usage window closes, watching pauses until it reopens. Anthropic's terms describe subscription login as meant for ordinary, individual use and ask developers building products to use API keys.",
 };
 

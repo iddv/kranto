@@ -2,7 +2,7 @@
 
 **A pasted token** (what works today). The owner makes a fine-grained personal
 access token on github.com with read-only access to public repositories and no
-other permissions, and pastes it. the server makes one identity call
+other permissions, and pastes it. The server makes one identity call
 (``GET /user``) to label it. A classic token says what it may do in its
 ``X-OAuth-Scopes`` reply header; one that can do more than read is refused and
 not kept. A fine-grained token's permissions cannot be read back from the API,

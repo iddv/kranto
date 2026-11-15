@@ -2,7 +2,7 @@
 
 ``kranto`` is what the ``kranto`` distribution (``packages/kranto``) installs. A kranto home
 (``--home``, else ``$KRANTO_HOME``, else the one ``kranto up`` or ``kranto adopt`` recorded in
-``~/.config/kranto/home``, else ``~/.kranto``) is a the server workspace whose config is
+``~/.config/kranto/home``, else ``~/.kranto``) is a workspace whose config is
 ``kranto.yaml``
 with the ``brb`` section on, plus the loop's home and the task folder:
 
@@ -518,7 +518,7 @@ def cmd_serve(args, host: Host) -> int:
             raise KrantoError(why)
         preview.enter(home)
     if cfg.brb.loop_home:
-        # the page's own commands, run by the builds UI, must see the same loop home
+        # The page's own commands, run by the builds UI, must see the same loop home
         os.environ.setdefault("KRANTO_LOOP_HOME", str(Path(cfg.brb.loop_home).expanduser()))
     ns = argparse.Namespace(
         workspace=str(home), host=args.host, port=args.port or port_of(cfg),
@@ -588,6 +588,46 @@ def keep_old_unit(path: Path) -> bool:
     return new != text
 
 
+_EXEC_PREFIXES = "-@:+!"      # systemd's ExecStart= prefixes before the command
+
+
+def unit_command(path: Path, user_home: Path) -> str | None:
+    """The command a unit file starts: its last ``ExecStart=`` (drop-ins included, an empty one
+    resets it, as systemd reads them), ``%h`` expanded; None when there is no unit or none."""
+    files = [path] + sorted((path.parent / f"{path.name}.d").glob("*.conf"))
+    command = None
+    for f in files:
+        try:
+            text = f.read_text(errors="replace")
+        except OSError:
+            continue
+        for line in text.splitlines():
+            key, sep, value = line.strip().partition("=")
+            if sep and key.strip() == "ExecStart":
+                words = value.split()
+                command = words[0].lstrip(_EXEC_PREFIXES).replace("%h", str(user_home)) \
+                    if words else None
+    return command
+
+
+def unit_of_another_tool(path: Path, exe: Path, user_home: Path) -> str | None:
+    """The command of the unit at ``path`` when ``up`` with this tool (``exe``) did not write
+    it: it starts something other than this tool's own command folder's ``kranto`` (or the old
+    command beside it, which the same tool carries). None when it is this tool's, or there is
+    no unit. A checkout or a scratch tool must not take over the installed tool's unit."""
+    command = unit_command(path, user_home)
+    if command is None:
+        return None
+    ran = Path(command).expanduser()
+    if ran.name in (product.COMMAND, legacy.COMMAND):
+        try:
+            if ran.parent.resolve() == Path(exe).parent.resolve():
+                return None
+        except OSError:
+            pass
+    return command
+
+
 def install_unit(host: Host, text: str) -> tuple[Path, bool]:
     """Write ``kranto.service``; True when it changed. On an install made before the rename,
     its old unit (the old name, or any unit whose text the old version wrote:
@@ -605,6 +645,17 @@ def install_unit(host: Host, text: str) -> tuple[Path, bool]:
 
 def cmd_up(args, host: Host) -> int:
     home = kranto_home(args.home, host)
+    why_not = "--foreground" if args.foreground else host.systemd()
+    unit_path, exe, other = host.unit_dir / host_unit(host), kranto_exe(host), None
+    if why_not is None:
+        # before anything is written: a unit another tool's command runs (the installed one,
+        # while this is a checkout or a scratch tool) is not this up's to rewrite or restart
+        other = unit_of_another_tool(unit_path, exe, host.home)
+        if other and not getattr(args, "adopt", False):
+            raise KrantoError(
+                f"{unit_path.name} runs {other}, not this {product.COMMAND} ({exe}): it is left "
+                f"as it is and not restarted. Run that command's 'up' instead, or "
+                f"'{product.COMMAND} up --adopt' to make this one the unit's command.")
     existing = config_mod.config_path(home) is not None
     port = args.port or DEFAULT_PORT
     written = make_home(home, port, host.home)
@@ -622,9 +673,16 @@ def cmd_up(args, host: Host) -> int:
     if made:
         print(f"  made the {', '.join(made)} token(s) in {token_store(host).root}")
     then = "/#/welcome" if not existing else "/"
-    why_not = "--foreground" if args.foreground else host.systemd()
     if why_not is None:
-        unit, changed = install_unit(host, render_unit(home, kranto_exe(host), port, host.home))
+        text = render_unit(home, exe, port, host.home)
+        if other:          # --adopt: this tool's unit replaces the one another tool wrote
+            changed = not unit_path.exists() or unit_path.read_text(errors="replace") != text
+            unit_path.parent.mkdir(parents=True, exist_ok=True)
+            unit_path.write_text(text)
+            unit = unit_path
+            print(f"  adopted {unit_path.name}: it ran {other}")
+        else:
+            unit, changed = install_unit(host, text)
         name = unit.name
         active = host.sh("systemctl", "--user", "is-active", name).stdout.strip() == "active"
         if not active and port_in_use(port):
@@ -1238,7 +1296,7 @@ CLAUDE_LOGIN = "login.env"             # CLAUDE_CODE_OAUTH_TOKEN=… at 0600
 
 def claude_store(host: Host) -> Path:
     """Kranto's store for the Claude login token the console uses: ``$KRANTO_CLAUDE_DIR``, else
-    ``~/.config/kranto/claude`` (``claude.<unit>`` for another ``$KRANTO_UNIT``). the page's
+    ``~/.config/kranto/claude`` (``claude.<unit>`` for another ``$KRANTO_UNIT``). The page's
     ``claude_login`` reads it at each launch and pipes the token to claude; the path and the
     format are pinned by a test in each repository."""
     if os.environ.get("KRANTO_CLAUDE_DIR"):
@@ -1403,7 +1461,7 @@ def console_checks(cfg: config_mod.Config, svc: tuple[dict, str] | None = None) 
 
 
 def console_words(status: str, detail: str) -> str:
-    """the page's ``term_doctor`` line as the doctor's console line says it: "ready: …" when
+    """The page's ``term_doctor`` line as the doctor's console line says it: "ready: …" when
     it is ok, else "not ready: …" with what is missing; "Open in Claude Code" is the console,
     and where its switch lives is said without the page's file (loop.yaml)."""
     if detail.endswith("(term.enabled)"):                 # off on purpose: ok, and not ready
@@ -1425,12 +1483,13 @@ def term_check(loop_home: Path, svc: tuple[dict, str] | None = None,
     try:
         from kranto.page.host_api import term_doctor
     except ImportError:
-        return Check(WARN, "console", "not ready: this the page has no console; update Kranto")
+        return Check(WARN, "console",
+                     "not ready: this version of Kranto has no console; update Kranto")
     env, where = svc or (None, "")
     try:
         try:
             status, detail = term_doctor(loop_home, environ=env, dotenv=dotenv)
-        except TypeError:                                   # a the page before TK
+        except TypeError:                                   # a version of the page before TK
             status, detail = term_doctor(loop_home, environ=env)
     except Exception as exc:  # noqa: BLE001 - a doctor line, never a crash
         return Check(WARN, "console", f"not ready: could not check it: {exc}")
@@ -1517,7 +1576,7 @@ def mcp_check() -> Check:
     try:
         from kranto.page.host_api import mcp_available
     except ImportError:
-        return Check(OK, "mcp", "kranto mcp is not in this the page (optional)")
+        return Check(OK, "mcp", "kranto mcp is not in this version of Kranto (optional)")
     if mcp_available():
         return Check(OK, "mcp", "the MCP extra is installed: claude mcp add kranto -- kranto mcp")
     return Check(OK, "mcp", f"the MCP extra is not installed (optional; {MCP_INSTALL})")
@@ -1548,13 +1607,14 @@ def cmd_mcp(args, host: Host) -> int:
     try:
         from kranto.page.host_api import mcp_main
     except ImportError:
-        print("kranto mcp: this the page has no MCP server; update Kranto", file=sys.stderr)
+        print("kranto mcp: this version of Kranto has no MCP server; update Kranto",
+              file=sys.stderr)
         return 2
     if getattr(args, "term", None):
         try:
             from kranto.page.host_api import term_mcp_main
         except ImportError:
-            print("kranto mcp: this the page has no Open in Claude Code; update Kranto",
+            print("kranto mcp: this version of Kranto has no Open in Claude Code; update Kranto",
                   file=sys.stderr)
             return 2
         _loop_home_env(args, host)
@@ -1568,7 +1628,7 @@ def cmd_mcp(args, host: Host) -> int:
     if console or compact:
         import inspect
         if "console" not in inspect.signature(mcp_main).parameters:
-            print("kranto mcp: this the page has no --console or --compact; update Kranto",
+            print("kranto mcp: this version of Kranto has no --console or --compact; update Kranto",
                   file=sys.stderr)
             return 2
         return mcp_main(url, console=console, compact=compact)
@@ -1641,7 +1701,7 @@ def cmd_term(args, host: Host) -> int:
     try:
         from kranto.page.host_api import term_cli
     except ImportError:
-        print("kranto term: this the page has no Open in Claude Code; update Kranto",
+        print("kranto term: this version of Kranto has no Open in Claude Code; update Kranto",
               file=sys.stderr)
         return 2
     _loop_home_env(args, host)
@@ -1664,7 +1724,7 @@ def cmd_trace(args, host: Host) -> int:
     try:
         from kranto.page.host_api import add_trace_group
     except ImportError:
-        print("kranto trace: this the page has no traces; update Kranto", file=sys.stderr)
+        print("kranto trace: this version of Kranto has no traces; update Kranto", file=sys.stderr)
         return 2
     _loop_home_env(args, host)
     p = argparse.ArgumentParser(prog="kranto")
@@ -1921,7 +1981,7 @@ def find_layout(args, host: Host) -> Found:
     ws = Path(args.workspace or old_ws).expanduser().resolve()
     cfg_path = config_mod.config_path(ws)
     if cfg_path is None:
-        raise KrantoError(f"no the server workspace at {ws} (no kranto.yaml); pass -w")
+        raise KrantoError(f"no workspace at {ws} (no kranto.yaml); pass -w")
     lh = paths.loop_home(args.loop_home or os.environ.get(paths.LOOP_HOME_ENV) or legacy.LOOP_HOME)
     tasks = old_tasks_dir(lh)
     why_not = host.systemd()
@@ -2515,6 +2575,12 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
     s.add_argument(
         "--foreground", action="store_true", help="serve here instead of installing kranto.service"
     )
+    s.add_argument(
+        "--adopt",
+        action="store_true",
+        help="rewrite and restart the unit even when another install's command runs it "
+        "(without it, up from a checkout or a second tool leaves that unit alone)",
+    )
     s.set_defaults(func=cmd_up)
 
     from . import wizard
@@ -2743,7 +2809,7 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_eval)
 
     s = sub.add_parser("adopt", help="switch an older installation to Kranto, in place")
-    s.add_argument("-w", "--workspace", help="the the server workspace (default ~/kranto-kb)")
+    s.add_argument("-w", "--workspace", help="the server workspace (default ~/kranto-kb)")
     s.add_argument(
         "--loop-home", help="the loop's home (default $KRANTO_LOOP_HOME, else ~/kranto-loop)"
     )

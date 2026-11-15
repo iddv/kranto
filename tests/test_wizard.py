@@ -373,7 +373,7 @@ def test_preflight_names_what_is_missing_and_how_to_get_it(user_home):  # noqa: 
 
 
 def _fake_loop(monkeypatch):
-    """the page's loop settings, recorded: ``(store, wrote)``."""
+    """The page's loop settings, recorded: ``(store, wrote)``."""
     store: dict = {}
     wrote = []
     host_api = types.ModuleType("kranto.page.host_api")

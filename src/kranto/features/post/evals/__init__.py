@@ -18,4 +18,22 @@ proposed angles and marks every draft with ``rubric.py`` (the owner's eight rule
 checker's fixtures and the judge's check); ``outline.py`` measures how alike the drafts' shapes
 are; ``export.py`` and ``readpage.py`` let any model write from the same prompts and build the
 blind page from any set of drafts (``python -m kranto.features.post.evals export|read``).
+
+The items, the recordings and the owner's reads are not part of the package: they are the
+test fixtures under ``tests/fixtures/post_evals/`` in a checkout (``FIXTURES``), so the eval
+runs from a checkout only.
 """
+from __future__ import annotations
+
+from pathlib import Path
+
+FIXTURES = Path(__file__).resolve().parents[5] / "tests" / "fixtures" / "post_evals"
+
+
+def fixture(name: str) -> Path:
+    """One of the eval's files, from a checkout's fixtures."""
+    path = FIXTURES / name
+    if not path.is_file():
+        raise FileNotFoundError(f"{name}: the prose eval reads its items and recordings from a "
+                                f"checkout's {FIXTURES.relative_to(FIXTURES.parents[2])}")
+    return path

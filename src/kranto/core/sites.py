@@ -237,11 +237,26 @@ def fit(site: Site, text: str, limit: int) -> tuple[str, bool]:
 TAG = re.compile(r"(?<![\w#])#(\w{2,40})")
 
 
-def clean(site: Site, text: str, allowed: set[str]) -> tuple[str, list[str]]:
-    """The model's words with what the site cannot carry taken off: any address that is not
-    one of ``allowed`` (the post's link and the sources), and tags past the site's count.
-    ``(text, removed)``, ``removed`` in words for the draft's facts."""
+# a mention: @name, or @name@server (Mastodon's: it notifies that person)
+MENTION = re.compile(r"(?<![\w@/.])@[A-Za-z0-9_]{1,30}(?:@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+)?"
+                     r"(?![\w@])")
+# a site named without its scheme ("evil.example", "example.com/page"): the common top-level
+# names only, so "Node.js", "README.md" or "v1.2" are words, not sites
+BARE_TLDS = ("com", "net", "org", "io", "dev", "ai", "app", "co", "uk", "de", "fr", "nl",
+             "eu", "us", "ca", "au", "in", "jp", "info", "xyz", "me", "tech", "sh", "so", "gg",
+             "ly", "to", "tv", "gov", "edu", "site", "online", "blog", "page", "link", "example")
+BARE = re.compile(r"(?<![\w@/.:-])(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+"
+                  r"(?:" + "|".join(BARE_TLDS) + r")(?:/[^\s<>\"')\]]*)?(?![\w-])",
+                  re.IGNORECASE)
+
+
+def scrub(text: str, allowed: set[str], known: str = "") -> tuple[str, list[str]]:
+    """``text`` with every address that is not one of ``allowed`` taken off, and every mention
+    (``@name``, ``@name@server``) and site named without its scheme (``evil.example``) that
+    ``known`` (the material's words) does not have: the link filter a post's words and its
+    disclosure line both go through. ``(text, removed)``, ``removed`` in words."""
     removed: list[str] = []
+    have = known.lower()
 
     def link(m: re.Match[str]) -> str:
         url = m.group(0).rstrip(".,;:!?")
@@ -251,6 +266,39 @@ def clean(site: Site, text: str, allowed: set[str]) -> tuple[str, list[str]]:
         removed.append(f"an address that is not one of the sources ({urlsplit(url).hostname})")
         return tail
     out = URL.sub(link, text)
+    # what the addresses kept hold is not looked at again (their host is a bare name)
+    kept = [(m.start(), m.end()) for m in URL.finditer(out)]
+
+    def inside(m: re.Match[str]) -> bool:
+        return any(a <= m.start() and m.end() <= b for a, b in kept)
+
+    def mention(m: re.Match[str]) -> str:
+        if inside(m) or m.group(0).lower() in have:
+            return m.group(0)
+        removed.append(f"a mention the sources do not have ({m.group(0)})")
+        return ""
+    out = MENTION.sub(mention, out)
+    kept = [(m.start(), m.end()) for m in URL.finditer(out)]
+
+    def bare(m: re.Match[str]) -> str:
+        site = m.group(0).rstrip(".,;:!?")
+        tail = m.group(0)[len(site):]
+        if inside(m) or site.lower() in have or site.lower().split("/")[0] in have:
+            return m.group(0)
+        removed.append(f"a site the sources do not name ({site.split('/')[0]})")
+        return tail
+    out = BARE.sub(bare, out)
+    out = re.sub(r"[ \t]+([.,;:!?])", r"\1", out)
+    out = re.sub(r"[ \t]+\n", "\n", re.sub(r"[ \t]{2,}", " ", out)).strip()
+    return out, removed
+
+
+def clean(site: Site, text: str, allowed: set[str], known: str = "") -> tuple[str, list[str]]:
+    """The model's words with what the site cannot carry taken off: any address that is not
+    one of ``allowed`` (the post's link and the sources), a mention or a bare site name that
+    ``known`` lacks (``scrub``), and tags past the site's count. ``(text, removed)``,
+    ``removed`` in words for the draft's facts."""
+    out, removed = scrub(text, allowed, known)
     tags = TAG.findall(out)
     if len(tags) > site.hashtags:
         keep = set(tags[:site.hashtags])

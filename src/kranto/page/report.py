@@ -17,7 +17,7 @@ from urllib.parse import quote
 
 MAX_URL = 6000
 CUT_NOTE = "\n\n(the rest is in the copied report)"
-# the server/scrub.py's secret, e-mail, phone and user patterns (kept the same by hand)
+# The server/scrub.py's secret, e-mail, phone and user patterns (kept the same by hand)
 _SECRETS = [
     re.compile(r"-----BEGIN [A-Z ]{0,20}PRIVATE KEY-----.{0,20000}?-----END [A-Z ]{0,20}"
                r"PRIVATE KEY-----", re.S),

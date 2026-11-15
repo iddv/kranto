@@ -1,4 +1,4 @@
-// Reflection: what an assistant did shows on the page. the server keeps each verb an
+// Reflection: what an assistant did shows on the page. The server keeps each verb an
 // assistant ran or prepared in <data>/verbs.json; the live feed says "verb" when it changes, and
 // this reads GET /api/verbs/recent?since=, marks the rows the verbs touched for a while ("✦ Add
 // topic, by Claude Code") and has the page read the server's data again.

@@ -31,7 +31,7 @@
   });
   const T = $derived(TOPIC.t || newStep());
   const locked = $derived(!!T.id);
-  // the scout is one model call: with no key it could only fail (QA B13); an older the server
+  // the scout is one model call: with no key it could only fail (QA B13); an older server
   // without /api/setup's key part does not hold it
   const keyed = $derived.by(() => {
     const k = host ? read<{ key?: { set?: boolean } }>(SETUP_API, 30000).data?.key : null;

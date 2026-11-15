@@ -52,7 +52,7 @@ LOOP_HOME = "~/brb-loop"
 COOKIE = f"{_OLD}_session"
 MCP_SERVER = _OLD
 DISTS = (f"{_OLD}afk", _OLD, f"{_OLD}brb")             # distributions an old install has
-# the page's settings file (loop.yaml): its section for the server, on an old install
+# The page's settings file (loop.yaml): its section for the server, on an old install
 LOOP_SECTION = f"{_OLD}afk"
 # stored outside Kranto: the draft's field in a Sanity document, the keys of exported traces
 SANITY_META = f"{_OLD}Meta"
@@ -69,6 +69,61 @@ def new_env_name(name: str) -> str | None:
         if name.startswith(prefix):
             return product.ENV_PREFIX + name[len(prefix):]
     return None
+
+
+def old_names(new: str) -> list[str]:
+    """Every old name a version from before the rename reads for the variable ``new`` (its
+    renamed name, if it had one, and the old prefix's spelling); [] for a name not Kranto's."""
+    if not new.startswith(product.ENV_PREFIX):
+        return []
+    out = [old for old, now in ENV_RENAMED.items() if now == new]
+    out.append(ENV_PREFIXES[0] + new[len(product.ENV_PREFIX):])
+    return list(dict.fromkeys(out))
+
+
+def ours(name: str) -> bool:
+    """A variable named after the product, under its new name or an old one."""
+    return name.startswith(product.ENV_PREFIX) or new_env_name(name) is not None
+
+
+def unit_environment(text: str, user_home: Path | str) -> dict[str, str]:
+    """The ``Environment=`` assignments of a unit file's text, in order (several on one line,
+    quoted or not), ``%h`` expanded. ``EnvironmentFile=`` is not read (it holds secrets)."""
+    import shlex
+
+    out: dict[str, str] = {}
+    for line in text.splitlines():
+        key, sep, value = line.strip().partition("=")
+        if not sep or key.strip() != "Environment":
+            continue
+        try:
+            words = shlex.split(value)
+        except ValueError:
+            words = [value.strip().strip('"')]
+        for word in words:
+            name, eq, val = word.partition("=")
+            if eq and name.replace("_", "a").isalnum() and not name[:1].isdigit():
+                out[name] = val.replace("%h", str(user_home))
+    return out
+
+
+def unit_vars(unit: str, environ: os._Environ[str] | dict[str, str] | None = None,
+              user_home: Path | str | None = None) -> dict[str, str]:
+    """The variables named after the product (old names or new) that the installed ``unit`` sets,
+    its drop-ins included (a later file wins, as systemd reads them): what a version from before
+    the rename must be started with on the way back, or it takes the default home and unit."""
+    env = os.environ if environ is None else environ
+    home = Path(user_home or env.get("HOME") or Path.home())
+    path = unit_dir(env, home) / unit
+    files = [path] + sorted((path.parent / f"{unit}.d").glob("*.conf"))
+    out: dict[str, str] = {}
+    for f in files:
+        try:
+            text = f.read_text(errors="replace")
+        except OSError:
+            continue
+        out.update({k: v for k, v in unit_environment(text, home).items() if ours(k)})
+    return out
 
 
 def adopt_env(environ: os._Environ[str] | dict[str, str] | None = None) -> list[str]:

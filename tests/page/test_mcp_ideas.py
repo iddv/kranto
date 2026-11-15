@@ -85,7 +85,7 @@ POST = {"drafts": [{"id": 5, "word": "newsletter", "title": "This week", "fact":
 
 
 def off_client():
-    """the server with builds off (``/api/status``'s ``builds: false``): its home and Post answer;
+    """The server with builds off (``/api/status``'s ``builds: false``): its home and Post answer;
     the build loop's snapshot is never read."""
     def afk_get(path, query=None):
         return {"/api/status": (200, {"builds": False}), "/api/home": (200, HOME),

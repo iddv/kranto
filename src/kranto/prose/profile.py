@@ -44,13 +44,14 @@ SWITCHES: dict[str, tuple[str, ...]] = {
     "hashtags": ("never", "site"),
     "links": ("post", "reply"),
     # round 3: how much wit and bite (plain until the owner says otherwise), and whether a thin
-    # item (few facts, a product note, a small tool) may take one step more
+    # item (few facts, a product note, a small tool) may take one step more (off by default: a
+    # stored "on" is kept)
     "salt": ("plain", "wry", "salty"),
     "salt_thin": ("on", "off"),
 }
 SWITCH_DEFAULTS = {"length": "medium", "register": "neutral", "opinions": "mine",
                    "emoji": "never", "hashtags": "site", "links": "post", "grade": 8,
-                   "salt": "plain", "salt_thin": "on"}
+                   "salt": "plain", "salt_thin": "off"}
 SWITCH_WORDS = {
     "length": "how long: short, medium or long",
     "register": "how formal: casual, neutral or formal",
@@ -397,6 +398,9 @@ def change(cfg, store, body: dict) -> dict:
              "writer_model",
              "never_add", "never_remove", "keep_add", "keep_remove", "always_add",
              "always_remove", "samples_add", "samples_remove"}
+    # the owner's press of a change an assistant prepared carries the press's own
+    # ``confirm: true`` (``verbs_api._call``): the press, not a field of the profile
+    body = {k: v for k, v in body.items() if k != "confirm"}
     extra = sorted(set(body) - known)
     if extra:
         raise ProfileError(f"no {', '.join(extra)} in a voice change")
@@ -456,8 +460,22 @@ def change(cfg, store, body: dict) -> dict:
         if not isinstance(d, dict) or not all(isinstance(v, str) and len(v) <= 200
                                               for v in d.values()):
             raise ProfileError("disclosure is an object: site -> a line (\"\": off)")
+        # the same link filter as a post's words (``sites.scrub``): a disclosure line is added
+        # under the post by code, after the post's own words were filtered
+        from ..core.sites import name_of, scrub
+        d = dict(d)
+        plain = False
+        for site, line in list(d.items()):
+            kept, gone = scrub(line, set())
+            if gone:
+                d[site] = kept
+                said.append(f"{name_of(site)}'s disclosure line, with its web address taken off "
+                            "(a disclosure line carries no address, mention or site name)")
+            else:
+                plain = True
         row = replace(row, disclosure={**(row.disclosure or {}), **d})
-        said.append("disclosure")
+        if plain or not d:
+            said.append("disclosure")
     if "take" in body:
         if not isinstance(body["take"], bool):
             raise ProfileError("take is true or false")

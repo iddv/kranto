@@ -12,7 +12,7 @@ import { obsQuery } from "./library";
 
 const NOW = new Date().toISOString();
 const traj = [{ at: "2026-10-01T00:00:00Z", share: 0.1, size: 10 }, { at: "2026-10-08T00:00:00Z", share: 0.12, size: 12 }];
-// the server's /api/clusters (Cluster is generated from its web/types.py)
+// The server's /api/clusters (Cluster is generated from its web/types.py)
 const cl = (cluster: number, o: Partial<Cluster> = {}): Cluster => ({
   snapshot_id: 7, cluster, lineage_id: "lin" + cluster, size: 40, share: 0.118, stories: 38, centroid_2d: [0, 0], keywords: ["crdt", "sync"], name: null, name_call_id: null,
   label: `Theme ${cluster}`, source_mix: { HN: 20, Lobsters: 18 }, topic_mix: { "AI tooling": 3, "Local-first": 30 }, origin_mix: {}, max_source_share: 0.63, max_origin_share: null,

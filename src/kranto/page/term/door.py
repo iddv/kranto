@@ -39,7 +39,7 @@ from pathlib import Path
 
 VERB = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$")      # the server's verbs: topic.add
 MAX_KIND = 80
-# the server's reads a session's MCP may ask for, under /afk on the socket (GET only): the idea
+# The server's reads a session's MCP may ask for, under /afk on the socket (GET only): the idea
 # cards, one card, the home, Post, the topics. The query keys passed on; nothing else.
 AFK_PREFIX = "/afk/api/"
 AFK_READS = tuple(re.compile(p) for p in (r"/api/home", r"/api/post", r"/api/ideas",

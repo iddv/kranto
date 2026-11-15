@@ -106,7 +106,7 @@ def test_the_page_says_why_a_session_ended(tmp_path, monkeypatch):
     assert words(reason="restart") == "Ended when Kranto restarted"
     assert words(reason="outside") == "Continued outside"
     assert words(reason="error", error="bwrap: no") == "Claude Code could not start: bwrap: no"
-    # the page asks the moment the exit frame arrives, before the record has the reason
+    # The page asks the moment the exit frame arrives, before the record has the reason
     pty = SimpleNamespace(alive=False, code=-9, viewers=0)
     term.live["abcd1234"] = service.Live("abcd1234", pty, None, None, tmp_path / "t.jsonl")
     try:

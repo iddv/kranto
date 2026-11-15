@@ -239,13 +239,17 @@ what reads like AI, underlined with its plain fix, with **Fix them** (it rewrite
 words; nothing is kept until you choose Save). **Save** keeps your words as the draft that waits
 (it is "edited by you"); the original stays under Earlier drafts, and "Start again from the
 original" brings its words back. A send that was waiting for your yes is withdrawn first, and the
-page says so. Write a post's question has one optional line, "What do you think?" (and, while How you write is not set up, a "Set up how you write" link): the post builds
+page says so. When your assistant (over `kranto mcp`, the console or an agent) asks to change a
+draft's words, nothing changes until you approve it in Needs you; the draft then says "edited by
+your assistant (mcp)", never "edited by you", and still waits for your yes before it goes. In
+the same way, an assistant's change to your voice card, the lines every post keeps or a
+disclosure line waits for your approval, and a disclosure line never carries a web address. Write a post's question has one optional line, "What do you think?" (and, while How you write is not set up, a "Set up how you write" link): the post builds
 on it and speaks for you only from it.
 
 **Settings › Posting › How you write** is your voice card (how you write, in plain words; Draft it
 from my samples writes one for you to read), four switches (how long, how formal, opinions,
 emoji), "What do you think?" on or off, and your samples. Under Advanced: the other switches
-(among them **Salt**: plain, wry or salty, and **More salt on thin items**), the checker's
+(among them **Salt**: plain, wry or salty, and **More salt on thin items**, off until you turn it on; a salty post that names a person its material does not is flagged "names a person the sources don't name" on its draft), the checker's
 strictness and rules, your never, keep and always lists, the guides each site follows,
 and a disclosure line for each site. Save keeps what you changed.
 
@@ -388,7 +392,7 @@ terminal) looks now. `cubs.auto_update: false` in `kranto.yaml` makes every upda
 Post (`#/post`, the fourth door) is where what Kranto writes for you waits: **Drafts waiting**,
 one line a draft (newsletter, blog post or short posts; its title; one fact, like "Monday's
 issue"; for short posts the sites as words, "Bluesky ✓ · Mastodon · X", ✓ on those posted; its
-age; **Open**); **Sent**, one line a post with where it went; **Where posts go**, one line with
+age; **View**, its page: Open is the word for opening the site); **Sent**, one line a post with where it went; **Where posts go**, one line with
 **Sites** (Settings › Posting); and **Earlier drafts**, folded (an issue a newer one replaced, one
 you declined), each still openable. A draft waits until you have seen it: it leaves Drafts waiting
 only when it is sent, declined, or replaced by the next one of its series. **Open** shows the
@@ -604,6 +608,11 @@ installs the new version, restarts and checks it. If the new version does not co
 puts the previous one back by itself; the data is never rolled back. If the old version did
 not stop when asked and had to be killed, the update's line under Settings › System › Updates says so:
 the new version runs, and the warning is worth reporting.
+
+If an update is cut off while it installs (the machine restarts, or the update is killed), the
+way back by hand is in `update/RECOVER.txt` in Kranto's home: `kranto status` names it, and so
+does the `kranto` command itself while no version is installed. `sh` runs its lines; they put
+the previous version back. An update that ends by itself removes the file.
 
 Before it keeps a new version, Kranto reads every page it serves once, on your own data: every
 topic, every list's first page, the home, each cub's page, the activity (only reads; nothing

@@ -14,7 +14,6 @@ import json
 import re
 from dataclasses import replace
 from functools import cache
-from pathlib import Path
 
 from bears_cub import fence
 
@@ -57,8 +56,11 @@ SAMPLES = (
 
 
 def profile(salt: str | None = None) -> Profile:
-    """The eval's profile; ``salt`` sets the salt switch (round 3), else the default."""
+    """The eval's profile; ``salt`` sets the salt switch (round 3), else the default. More
+    salt on thin items is on, as when round 3 was recorded (the product's default is off now:
+    the recordings' prompts are replayed as they were sent)."""
     p = Profile(voice=VOICE, samples=SAMPLES)
+    p = replace(p, switches={**p.switches, "salt_thin": "on"})
     if salt:
         p = replace(p, switches={**p.switches, "salt": salt})
     return p
@@ -206,4 +208,6 @@ def text_of(site: str, answer: dict | str) -> str:
 
 
 def items() -> list[dict]:
-    return json.loads((Path(__file__).parent / "items.json").read_text(encoding="utf-8"))["items"]
+    from . import fixture
+
+    return json.loads(fixture("items.json").read_text(encoding="utf-8"))["items"]
