@@ -189,3 +189,29 @@ def test_today_and_activity_serve_the_same_answer(rt, path):  # noqa: F811 - fix
     got = body["ingest"]["health"] if path == "/api/today" else body["health"]
     assert got == want and got["word"] == "Degraded"
     assert "a safety filter at OpenRouter declined one item" in got["reason"]
+
+
+def test_the_bar_says_degraded_when_claude_code_the_model_is_missing(monkeypatch):
+    """The bar said Healthy, and Watching "Works", with Claude Code (the model) gone and every
+    model call failing."""
+    from types import SimpleNamespace
+
+    from kranto import health as H
+    from kranto import setup
+    cc_rt = SimpleNamespace(cfg=SimpleNamespace(llm=SimpleNamespace(provider_name="claude_code")))
+    monkeypatch.setattr(setup, "logins", lambda **k: {"claude": {"ok": False, "installed": False}})
+    assert "not installed on this machine" in H.model_missing(cc_rt)
+    monkeypatch.setattr(setup, "logins", lambda **k: {"claude": {"ok": False, "installed": True}})
+    assert "not signed in" in H.model_missing(cc_rt)
+    monkeypatch.setattr(setup, "logins", lambda **k: {"claude": {"ok": True, "installed": True}})
+    assert H.model_missing(cc_rt) is None
+    keyed = SimpleNamespace(cfg=SimpleNamespace(llm=SimpleNamespace(provider_name="openrouter")))
+    assert H.model_missing(keyed) is None
+    # served: a Healthy word gives way to Degraded with the reason
+    monkeypatch.setattr(setup, "logins", lambda **k: {"claude": {"ok": False, "installed": False}})
+    monkeypatch.setattr(H, "health", lambda store, now=None, loop=None: H._word("Healthy", None))
+    app = SimpleNamespace(rt=SimpleNamespace(store=None, cfg=SimpleNamespace(
+        llm=cc_rt.cfg.llm, brb=SimpleNamespace(loop_home=None))),
+        brb=SimpleNamespace(mounted=False))
+    out = H.served(app)
+    assert out["word"] == "Degraded" and "Claude Code" in out["reason"]

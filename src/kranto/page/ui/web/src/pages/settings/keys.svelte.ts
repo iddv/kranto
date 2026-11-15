@@ -48,9 +48,16 @@ export function providerOf(k: KeyState): string {
 export const KEYPROV = $state<{ v: Choice | null }>({ v: null });
 
 /** the watching model's state and line, for the row, the pane and onboarding: which provider,
- * and its key */
-export function keyWords(k: KeyState, now: number = Date.now()): { st: St; line: string } {
+ * and its key. ``claude``: Claude Code's login as the server read it just now (/api/setup's
+ * logins.claude): when Claude Code is the model and it is missing or signed out, that wins
+ * over the last stored check (Gemini 7: "Works … signed in, 4 h ago" with Claude Code gone) */
+export function keyWords(k: KeyState, now: number = Date.now(), claude: { ok?: boolean; installed?: boolean } | null = null): { st: St; line: string } {
   const t = k.test, who = LABEL[providerOf(k)] || k.provider;
+  if (k.provider === "claude_code" && claude && claude.ok === false) {
+    return { st: ["x", "red", "Can't be used"],
+      line: claude.installed === false ? `${who}. Not installed on this machine: ${PRODUCT} reads nothing until it is. Install it, or choose another provider.`
+        : `${who}. Not signed in on this machine: ${PRODUCT} reads nothing until it is. Run claude once to sign in, or choose another provider.` };
+  }
   if (k.provider === "claude_code") {
     return { st: t && !t.ok ? ["warn", "amber", "Check"] : ["check", "green", "Works"],
       line: `${who}. ` + (t ? (t.ok ? `${t.detail}, ${rel(dt(t.at), now)}. Billed to your Claude plan.` : `The last check failed: ${t.detail}.`) : "Uses your Claude Code login; billed to your plan.") };

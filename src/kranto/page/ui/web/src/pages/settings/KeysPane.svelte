@@ -37,13 +37,13 @@
   {:else if !s}
     <div class="pane-in"><Loading error={c?.error} /></div>
   {:else if id === "key"}
-    {@const kw = keyWords(s.key)}
+    {@const kw = keyWords(s.key, Date.now(), s.logins?.claude ?? null)}
     <Pane title="Watching model" lede={kw.line} sections={[{ id: "key", w: "Claude API, OpenRouter, an endpoint or Claude Code" }]}>
       {#snippet kind()}<Glyph name={kw.st[0]} colour={kw.st[1]} word={kw.st[2]} />{kindLine("watching", "provider and key")}{/snippet}
       {#snippet section()}<KeyField k={s.key} done={s.done} />{/snippet}
     </Pane>
   {:else}
-    {@const kw = keyWords(s.key)}
+    {@const kw = keyWords(s.key, Date.now(), s.logins?.claude ?? null)}
     {#snippet keyNow()}{@render st(kw.st)}{" " + kw.line}{/snippet}
     <Pane title="Keys" lede="Kranto watches topics with a cheap model through your key."
       sections={[{ id: "state", w: "Now" }, { id: "kept", w: "Where keys are kept" }]}>

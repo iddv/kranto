@@ -45,7 +45,7 @@
   function line(key: string): string | null {
     const { s, p, H } = reads;
     switch (key) {
-      case "watching": return s?.data ? keyWords(s.data.key).line : host ? null : "watching is the server's: not hosted here";
+      case "watching": return s?.data ? keyWords(s.data.key, Date.now(), s.data.logins?.claude ?? null).line : host ? null : "watching is the server's: not hosted here";
       case "sources": return H?.topics ? `${H.topics.length} active topics; their sources, Add source, and the accounts some are read with` : null;
       case "prompts": return "every prompt Kranto sends a model that you can steer";
       case "spend": return H?.spend_this_month_usd != null ? `watching ${usd(H.spend_this_month_usd)} this month, ${capUsd(H.budget_usd)}` : host ? null : "spend is the server's: not hosted here";
