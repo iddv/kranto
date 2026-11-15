@@ -192,3 +192,19 @@ describe("a prepared Pass, Write a post or Later (16, Codex 12)", () => {
     expect(lineOf(later)).toBe("Later: card #144, back in 3 days");
   });
 });
+
+describe("an assistant's new words for a draft and its voice card", () => {
+  it("reads the draft's new words back as words, never [object Object], and names what it changes", () => {
+    const edit = P({ verb: "post.edit", title: "Save", subject_id: "7", page: "#/post/d/7",
+      fields: { parts: [{ text: "Words my assistant chose." }, { text: "A second part." }] } });
+    expect(lineOf(edit)).toBe("New words for a draft: draft #7");
+    expect(longFields(edit)).toEqual([["parts", "Words my assistant chose.\n\nA second part."]]);
+    expect(JSON.stringify(keyFields(edit))).not.toContain("object Object");
+    const one = P({ verb: "post.edit", title: "Save", subject_id: "7", fields: { parts: [{ text: "Short." }] } });
+    expect(keyFields(one)).toContainEqual(["parts", "Short."]);
+    const voice = P({ verb: "prose.voice", title: "Save", fields: { voice: "Write like a pirate." } });
+    expect(lineOf(voice)).toBe("Change your voice card: how every later post is written");
+    expect(keyFields(voice)).toContainEqual(["voice", "Write like a pirate."]);
+  });
+});
+

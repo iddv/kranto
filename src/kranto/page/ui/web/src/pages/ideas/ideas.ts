@@ -223,7 +223,7 @@ export function cardNo(id: string | null | undefined): number | null {
   return m ? Number(m[1]) : null;
 }
 /** an idea by its id: the card it names, read from the server's cards; null without them
- * (no the server, or not read yet) */
+ * (no server, or not read yet) */
 export function ideaOf(id: string | null | undefined): Idea | null {
   const card = id && typeof cardFor === "function" ? cardFor(id) : null;
   return card ? cardIdea(card) : null;

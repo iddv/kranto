@@ -1,4 +1,4 @@
-"""The update helper's shared ground: standard library only, no the server import.
+"""The update helper's shared ground: standard library only, no server import.
 
 This module is the one piece of the updater that runs *outside* the environment it replaces
 (section 4.1): ``uv tool install --force`` rebuilds the tool's venv, and a

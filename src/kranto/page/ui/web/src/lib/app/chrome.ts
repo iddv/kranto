@@ -172,7 +172,7 @@ export function doorId(path: string[]): string | null {
 function doorFacts(r: Route): DoorFacts | null {
   const id = doorId(r.path);
   if (!id) return null;
-  // without the doors' frame (no the server) Watch's pages still have the crumb, for the topic
+  // without the doors' frame (no server) Watch's pages still have the crumb, for the topic
   // switcher (WT: "Classic and the phone: the same")
   if (!frameNew(!!host())) return id === "watch" && shellDoors(!!host()) ? { ...watchFacts(r, DOOR_NAV.watch!.word, doorCounts()), crumbOnly: true } : null;
   const d = doorNav(id), here = r.path.join("/"), counts = doorCounts();

@@ -1784,7 +1784,7 @@ def front_15(p: Preview) -> Result:
     return ok(
         "FRONT-15",
         "#/watch/sources?sel=s999999 says 'This source is not here any more', "
-        "no the server, no Tell us",
+        "no server, no Tell us",
         good,
         "said so" if good else text[text.find("Could") :][:120] or "no words",
     )

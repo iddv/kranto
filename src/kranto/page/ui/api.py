@@ -101,7 +101,7 @@ class App:
             return self.kranto_url
         try:
             return self.loop_cfg()["kranto"].get("url")
-        except Exception:                          # noqa: BLE001 - no settings: no the server
+        except Exception:                          # noqa: BLE001 - no settings: no server
             return None
 
     def header(self) -> dict:
@@ -245,7 +245,7 @@ class App:
         from ..tokens import Store
         url = self.afk_url()
         if not url:
-            raise HttpError(503, "the server's API is not known here (no the server URL)")
+            raise HttpError(503, "the server's API is not known here (no server URL)")
         base = url.rstrip("/")
         data = json.dumps(body or {}).encode() if method == "POST" else None
         secret = Store().value("ui") if method == "POST" or owner else None

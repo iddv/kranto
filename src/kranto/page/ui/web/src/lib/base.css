@@ -1326,8 +1326,11 @@ body.doors .loading .skel i:nth-child(2) { width: 70%; } body.doors .loading .sk
 @media (prefers-reduced-motion: reduce) { .row.touched { transition: none; } }
 
 /* Settings › Posting on a phone: each site's line (what happens when you post) stays under its
-   name, the name is never broken, and the site's controls take their own line under both */
+   name, the name is never broken, and the site's controls take their own line under both; Post's
+   "Where posts go" keeps its line too */
 @media (max-width: 759px) {
+  section[aria-labelledby="post-accounts"] .lr .c-main { display: flex; flex-direction: column; -webkit-line-clamp: unset; }
+  section[aria-labelledby="post-accounts"] .lr .c-main .c-meta { display: block; white-space: normal; overflow: visible; }
   section[aria-labelledby="post-sites"] .row.lr { grid-template-columns: 0px var(--stw, 14px) 0px minmax(0, 1fr) 0px 0px 0px; row-gap: 2px; }
   section[aria-labelledby="post-sites"] .lr .c-main { display: flex; flex-direction: column; -webkit-line-clamp: unset; }
   section[aria-labelledby="post-sites"] .lr .r-title { white-space: nowrap; overflow-wrap: normal; word-break: keep-all; }

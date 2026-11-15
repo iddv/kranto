@@ -1923,7 +1923,7 @@ def find_layout(args, host: Host) -> Found:
     ws = Path(args.workspace or old_ws).expanduser().resolve()
     cfg_path = config_mod.config_path(ws)
     if cfg_path is None:
-        raise KrantoError(f"no the server workspace at {ws} (no kranto.yaml); pass -w")
+        raise KrantoError(f"no workspace at {ws} (no kranto.yaml); pass -w")
     lh = paths.loop_home(args.loop_home or os.environ.get(paths.LOOP_HOME_ENV) or legacy.LOOP_HOME)
     tasks = old_tasks_dir(lh)
     why_not = host.systemd()

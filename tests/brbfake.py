@@ -36,6 +36,6 @@ def drop(monkeypatch, *names: str) -> None:
 
 
 def missing(monkeypatch) -> None:
-    """No the page at all: every import of it fails."""
+    """No page at all: every import of it fails."""
     for name in ("kranto.page", "kranto.page.host_api"):
         monkeypatch.setitem(sys.modules, name, None)

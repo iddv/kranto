@@ -809,7 +809,7 @@ def brb_verbs(*, gated: bool = True) -> tuple[Verb, ...]:
     try:
         from kranto.page.host_api import verb_rows
         rows = verb_rows()
-    except Exception:  # noqa: BLE001 - no the page, or an older one: the core's verbs only
+    except Exception:  # noqa: BLE001 - no page, or an older one: the core's verbs only
         return ()
     out = []
     for r in rows:

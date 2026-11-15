@@ -495,7 +495,7 @@ def test_doctor_says_the_console_is_ready(user_home, monkeypatch):
     assert c.detail == "not ready: off: set term.enabled: true and restart Kranto."
     said["line"] = ("ok", "Open in Claude Code is off (term.enabled)")
     assert by_name(launcher.console_checks(cfg))["console"].detail == "off (term.enabled is false)"
-    brbfake.missing(monkeypatch)  # no the page at all
+    brbfake.missing(monkeypatch)  # no page at all
     assert [(c.status, c.name) for c in launcher.console_checks(cfg)] == [(FAIL, "kranto.page")]
 
 
@@ -768,7 +768,7 @@ def test_adopt_in_a_scratch_home_skips_the_units(user_home, legacy, tmp_path, ca
 
 def test_adopt_needs_a_workspace(user_home, capsys):
     assert launcher.main(["adopt", "--dry-run"], make_host(user_home)) == 2
-    assert "no the server workspace" in capsys.readouterr().err
+    assert "no workspace" in capsys.readouterr().err
 
 
 # -- kranto mcp (the page's) ---------------------------------------------------------
@@ -894,6 +894,14 @@ def test_kranto_trace_is_brb_trace_for_this_home(user_home, monkeypatch, capsys)
     brbfake.drop(monkeypatch, "add_trace_group")  # a version of the page without traces
     assert launcher.main(["--home", str(home), "trace", "show", "build:x/1"], host) == 2
     assert "update Kranto" in capsys.readouterr().err
+
+
+def test_kranto_term_without_the_feature_says_so_in_a_sentence(user_home, monkeypatch, capsys):
+    brbfake.drop(monkeypatch, "term_cli")           # a version of the page without it
+    host = make_host(user_home)
+    assert launcher.main(["term", "list"], host) == 2
+    assert capsys.readouterr().err == ("kranto term: this version of Kranto has no Open in "
+                                       "Claude Code; update Kranto\n")
 
 
 def test_down_disable_keeps_it_from_starting_at_boot(user_home, capsys):

@@ -186,7 +186,7 @@ class Traces:
 
         from .afk import AfkTrace
         if self.afk_fetch is None or not _re.fullmatch(r"[A-Za-z0-9-]{8,64}", uuid or ""):
-            raise TraceError(404, f"no the server run {uuid!r}")
+            raise TraceError(404, f"no server run {uuid!r}")
 
         def fetch(path: str) -> dict:
             try:
