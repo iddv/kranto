@@ -53,15 +53,36 @@
 </script>
 
 <DialogFrame {title} okText="Write draft" {details} {close} ok={(btn) => startWrite(btn, about, as, close, angle)}>
-  <dl class="kv" id="write-post-facts">
+  <dl class="kv wp-kv" id="write-post-facts">
     <dt>About</dt><dd id="write-post-about">{aboutLine(about)}</dd>
     <dt>As</dt>
-    <dd>{#if canShort}<label class="inline"><input type="radio" name="write-as" value="blog" bind:group={as} /> Blog post</label>{" "}{#if ticked.length}<label class="inline"><input type="radio" name="write-as" value="short" bind:group={as} /> {shortLine(ticked)}</label>{:else}<label class="inline muted"><input type="radio" name="write-as" value="short" disabled /> <a href="#/settings/posting" onclick={close}>Short posts: choose your sites first</a></label>{/if}{:else}Blog post{/if}</dd>
-    <dt><label for="write-post-angle">Why does this interest you? One sentence.</label></dt>
-    <dd>
+    <dd>{#if canShort}<label class="inline wp-as"><input type="radio" name="write-as" value="blog" bind:group={as} /> Blog post</label>{" "}{#if ticked.length}<label class="inline wp-as"><input type="radio" name="write-as" value="short" bind:group={as} /> {shortLine(ticked)}</label>{:else}<label class="inline wp-as muted"><input type="radio" name="write-as" value="short" disabled /> <a href="#/settings/posting" onclick={close}>Short posts: choose your sites first</a></label>{/if}{:else}Blog post{/if}</dd>
+    <!-- the angle's question sits above its box at every width: a long label beside it made the
+         dialog wider than a phone (390 px: 570 px of content in 358) -->
+    <dt class="wp-full"><label for="write-post-angle">Why does this interest you? One sentence.</label></dt>
+    <dd class="wp-full">
       <input id="write-post-angle" class="wide" type="text" maxlength="600" bind:value={angle} />
       {#if angles.length}<span class="small" id="write-post-angles">{#each angles as a (a.kind)}<button type="button" class="linkish small angle" data-angle={a.kind} aria-label={`${kindWord(a.kind)}: ${a.text}`} onclick={() => (angle = a.text)}>{a.text}</button><br />{/each}<button type="button" class="linkish small" id="write-post-skip" onclick={() => (angle = "")}>Skip</button></span>{:else if anglesWhy}<span class="muted small" id="write-post-angles-why">{anglesWhy}</span>{#if anglesWhy.includes("Settings › Watching")}{" "}<a class="small" id="write-post-angles-fix" href="#/settings/watching" onclick={close}>Settings › Watching ›</a>{/if}{/if}
     </dd>
   </dl>
   {#if noVoice}<p class="muted small" id="write-post-voice"><a href="#/settings/posting/voice" onclick={close}>Set up how you write ›</a></p>{/if}
 </DialogFrame>
+
+<style>
+  /* the dialog fits a phone: every row's content may shrink, the angle's box is the row's width */
+  .wp-kv { min-width: 0; }
+  .wp-kv :global(dd) { min-width: 0; margin: 0; }
+  .wp-kv .wp-full { grid-column: 1 / -1; }
+  .wp-kv dt.wp-full { margin-top: 6px; color: var(--ink2, var(--muted)); }
+  .wp-kv #write-post-angle { width: 100%; max-width: 100%; box-sizing: border-box; min-width: 0; }
+  /* a radio and its words stay together; the words wrap beside the circle, never under it */
+  .wp-kv .wp-as { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: 6px; }
+  .wp-kv .wp-as input { flex: none; margin-top: 3px; }
+  #write-post-angles { display: block; overflow-wrap: anywhere; }
+  #write-post-angles .angle { white-space: normal; text-align: left; }
+  @media (max-width: 640px) {
+    /* on a phone each label sits above its field */
+    .wp-kv { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
+    .wp-kv dt { margin-top: 6px; }
+  }
+</style>

@@ -6,7 +6,7 @@ import type { Facts } from "../../lib/app";
 import { ui } from "../../lib/shell.svelte";
 import { answering, count, draw, settle, stub, where } from "../testing.svelte";
 import PostPage from "./PostPage.svelte";
-import { accountHref, accountWords, connectedCount, draftFact, dueLine, dueShort, failedAbout, failedTitle, fixWords, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
+import { accountHref, accountWords, connectedCount, draftFact, dueLine, dueShort, dueWhen, failedAbout, failedTitle, fixWords, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
 import { outcomeLine, whenOf } from "../../features/ask";
 import { mount, unmount } from "svelte";
 import AboutWhatDialog from "../../features/post/AboutWhatDialog.svelte";
@@ -132,7 +132,8 @@ describe("Post with short posts", () => {
     expect(rows.length).toBe(1);
     expect(rows[0]!.querySelector(".c-meta")?.textContent).toBe("from #143 · Bluesky ✓ · Mastodon · X · Threads");
     expect(rows[0]!.querySelectorAll("[data-act=post-open]").length).toBe(1);
-    expect(target.querySelector("[aria-labelledby=post-sent] .c-meta")?.textContent).toBe("Posted to Bluesky · posted by you");
+    // where and how it went is the sent row's title (a phone keeps it); the post's title its fact
+    expect(target.querySelector("[aria-labelledby=post-sent] .r-title")?.textContent).toBe("Bluesky · posted by you");
     expect(target.querySelector("[aria-labelledby=post-accounts]")?.textContent).toContain("Bluesky, Mastodon, X and Threads open in the site");
     expect(target.textContent).not.toMatch(/copy and open/i);
     // Post's budget with one write of four sites waiting: 173 words, 12 controls
@@ -152,8 +153,11 @@ describe("Post with short posts", () => {
       due: "2026-11-17T09:00:00Z", due_words: "Tuesday 17 Nov, 09:00" });
     const { target, done } = await page({ ...POST, drafts: [], scheduled: [held] });
     const g = target.querySelector("[aria-labelledby=post-scheduled]")!;
-    expect(titles(target, "post-scheduled")).toEqual(["Kiosks"]);
-    expect(g.querySelector(".c-meta")?.textContent).toBe("Goes Tuesday 17 Nov, 09:00 · Bluesky");
+    // its day, hour and site are the row's title, on the person's own clock; the post's title its fact
+    const at = new Date("2026-11-17T09:00:00Z");
+    const hh = `${String(at.getHours()).padStart(2, "0")}:${String(at.getMinutes()).padStart(2, "0")}`;
+    expect(titles(target, "post-scheduled")).toEqual([`${at.toLocaleDateString("en-GB", { weekday: "short" })} ${at.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}, ${hh} · Bluesky`]);
+    expect(g.querySelector(".c-meta")?.textContent).toBe("Kiosks");
     expect([...g.querySelectorAll(".btn")].map((x) => x.textContent)).toEqual(["Cancel"]);
     expect(g.querySelectorAll(".btn.primary").length).toBe(0);
     done();
@@ -165,6 +169,9 @@ describe("Post with short posts", () => {
     expect(dueShort(new Date(2026, 10, 16, 9, 0).toISOString(), now)).toBe("09:00");
     expect(dueShort(new Date(2026, 10, 17, 9, 0).toISOString(), now)).toBe("Tue");
     expect(dueShort(new Date(2026, 11, 1, 9, 0).toISOString(), now)).toBe("1 Dec");
+    // the server's words when the time does not read, and the site after them
+    expect(dueWhen({ due: null, due_words: "Tuesday 17 Nov, 09:00", site_word: "Bluesky" })).toBe("Tuesday 17 Nov, 09:00 · Bluesky");
+    expect(dueWhen({ due: new Date(2026, 10, 17, 9, 0).toISOString(), due_words: null, site_word: "Bluesky" })).toBe("Tue 17 Nov, 09:00 · Bluesky");
   });
 
   it("says a missed hour on the draft's row, so it is asked again", async () => {
@@ -182,8 +189,8 @@ describe("Post with short posts", () => {
     const li = draft(41, { cub: "social", kind: "short", site: "linkedin", site_word: "LinkedIn", note: "posted: https://www.linkedin.com/feed/update/urn:li:share:1/", link: "https://www.linkedin.com/feed/update/urn:li:share:1/", ticket: null, reach: null });
     const foot = "No numbers from LinkedIn: LinkedIn gives its numbers only to approved partners.";
     const { target, done } = await page({ ...POST, sent: [sky, li], reach_foot: foot });
-    const metas = [...target.querySelectorAll("[aria-labelledby=post-sent] .c-meta")].map((x) => x.textContent);
-    expect(metas[0]).toBe("Posted to Bluesky · 4 replies, 9 reposts, 31 likes · posted: https://bsky.app/profile/a/post/x");
+    const metas = [...target.querySelectorAll("[aria-labelledby=post-sent] .r-title")].map((x) => x.textContent);
+    expect(metas[0]).toBe("Bluesky · 4 replies, 9 reposts, 31 likes · posted: https://bsky.app/profile/a/post/x");
     expect(metas[1]).not.toMatch(/likes/);
     expect(target.querySelectorAll("#post-reach-foot").length).toBe(1);
     expect(target.querySelector("#post-reach-foot")?.textContent).toBe(foot);
