@@ -6,7 +6,16 @@
   // read one function (src/kranto/page/ui/details.py), so they never disagree. No word budget: it is the
   // record for the owner who asks; its words stay plain (keys only as code).
   import { read } from "../lib/reads.svelte";
+  import { landOf } from "../lib/app/route";
   import { closeDetails, DETAILS, detailsPath, type DetailsRecord } from "./details.svelte";
+
+  /** whether a record's page is the page open now, where it lands (#/ideas/card:1 lands on
+   * #/ideas?sel=i1: its Open its page closed the drawer and came back to the same card) */
+  function here(page: string): boolean {
+    const now = location.hash;
+    const at = (() => { try { return landOf(page); } catch { return page; } })();
+    return [page, at].some((p) => now === p || now.startsWith(p + "?") || now.startsWith(p + "/"));
+  }
 
   const r = $derived(DETAILS.sel ? read<DetailsRecord>(detailsPath(DETAILS.sel), 15000) : null);
   const d = $derived(r?.data || null);
@@ -31,7 +40,7 @@
           <dl>{#each g.rows as [k, v], i (k + i)}<dt>{k}</dt><dd>{#if v.startsWith("#/")}<a href={v} onclick={closeDetails}>{v}</a>{:else if /^https?:\/\//.test(v)}<a href={v} target="_blank" rel="noopener noreferrer">{v}</a>{:else}{v}{/if}</dd>{/each}</dl>
         {/each}
         <!-- its page, unless it is the page open now (11, Codex 5: it reopened the same sheet) -->
-        {#if d.page && !(location.hash === d.page || location.hash.startsWith(d.page + "?") || location.hash.startsWith(d.page + "/"))}<p class="page"><a href={d.page} onclick={closeDetails}>Open its page ›</a></p>{/if}
+        {#if d.page && !here(d.page)}<p class="page"><a href={d.page} onclick={closeDetails}>Open its page ›</a></p>{/if}
         <p class="tools">The console reads the same record: <code>{d.tool}</code></p>
       {/if}
     </div>
