@@ -22,6 +22,7 @@ The model's output is data the writer reads back; nothing it says becomes an ins
 from __future__ import annotations
 
 import hashlib
+import re
 from typing import Any
 
 from .profile import Profile, closest, default, guide_text
@@ -29,15 +30,45 @@ from .profile import Profile, closest, default, guide_text
 ANGLE_WORDS = (
     "# The angle\n\n"
     "The person's angle on this piece is in the `angle` fence: their own sentence, or a "
-    "proposal they picked, which is now theirs. Build the post on it:\n"
-    "- the first sentence makes this claim, prediction or question, so that a reader who "
+    "proposal they picked, which is now theirs. Build the post on it, and follow it outward:\n"
+    "- the first sentence makes the angle's big claim, bet or scene, so that a reader who "
     "follows the topic wants the next one;\n"
-    "- the sources then back it and tell the story, in the order the argument needs;\n"
+    "- argue the big claim, not the news: what else must be true for it, and how likely that "
+    "is; the item is the evidence, told in the facts the argument needs;\n"
     "- leave out every fact that doesn't serve it;\n"
-    "- its stance is theirs: state it plainly, boldly when it is bold, and argue for it from "
-    "the sources; \"I\" is fine for the stance and what follows from it;\n"
+    "- the speculation is the person's own and said so (\"I think\", \"my bet\", \"if this "
+    "holds\"), never stated as a fact; every fact still comes from the sources;\n"
+    "- a scene stays a picture: a role (\"a night-shift picker\"), never an invented name, and "
+    "never told as if it happened;\n"
+    "- its stance is theirs: state it plainly, boldly when it is bold; \"I\" is fine for the "
+    "stance and what follows from it;\n"
     "- never invent an experience they did not write: no \"I tried\", \"I've used\", \"at my "
     "company\".")
+# salt (round 3): the voice card's switch, one step more on a thin item when the person allows
+SALT_STEPS = ("plain", "wry", "salty")
+SALT_WORDS = {
+    "wry": ("# Salt: wry\n\n"
+            "Wry: understatement and a raised eyebrow. Let the facts' own contrast carry the "
+            "joke; one wry line at most. The wit is aimed at the thing (the product, the claim, "
+            "the hype, the industry's habit), never at a person or a group of people."),
+    "salty": ("# Salt: salty\n\n"
+              "Salty: the person's sharpest register. Sarcasm, deadpan ridicule and a little "
+              "trolling, aimed at the thing: the product, the claim, the hype, the industry's "
+              "habit. Open with an edge, not a summary, and give the reader at least two lines "
+              "they would quote for their bite (\"Nothing says 'trust us' like a meter you "
+              "can't read.\"). The thinner the item, the more the attitude carries it. Never "
+              "jab at a person or a group of people, never a slur, and name no private person "
+              "(only the companies, products and public sources the material names). The facts "
+              "stay exact; the bite is in how they're put."),
+}
+# a thin item (round 3): little to say, so attitude carries it; a rule on the material
+THIN_WORDS = 40            # facts of fewer words than this
+THIN_SOURCES = 1           # or at most this many numbered sources
+THIN_NOTE = re.compile(
+    r"\b(?:released?|launch(?:es|ed)?|ships?|shipped|show hn|open-source|open source|plugin|"
+    r"extension|cli|wrapper|library|framework|version \d|v\d+\.\d+|changelog|beta|"
+    r"canary|tracker|dashboard|test suite|checker|linter|bot|classifier|harness|watcher|"
+    r"conformance test)\b", re.I)
 NO_ANGLE_WORDS = (
     "# No angle\n\n"
     "The person gave no angle. Write a plain summary of what the sources say: the most "
@@ -49,17 +80,17 @@ SUGGEST_WORDS = ("You may suggest one opinion, marked [suggested] at its start, 
 # share an outline; none is a template of sections
 FORMS = (
     "One paragraph that makes the angle's case with the two strongest facts, then a short "
-    "second paragraph that ends on a question to the reader.",
-    "Three or four paragraphs of different lengths: the claim, the story the sources tell, "
-    "and what you would watch for next.",
+    "second paragraph that asks the reader where they think it stops.",
+    "Three or four paragraphs of different lengths: the big claim, the fact from the item that "
+    "makes it plausible, what else would have to be true and how likely you think it is.",
     "The claim in one or two sentences; then the single most surprising fact, alone in a short "
-    "paragraph; then the rest in one paragraph that ends on a prediction.",
+    "paragraph; then where it leads, in one paragraph that ends on your bet.",
     "A short opening paragraph with the claim, then the evidence told as a running story in "
-    "one longer paragraph, ending on its strongest fact.",
-    "Two paragraphs: the first argues the angle; the second says what changes for the reader "
-    "if it is right.",
-    "Start from the one detail a reader would repeat to a friend, say what it means for the "
-    "angle, and close on what happens next.",
+    "one longer paragraph, then one line with your odds or the sign you'd watch for.",
+    "Two paragraphs: the first argues where this leads, with the item as the evidence; the "
+    "second names the other change that has to collide with it, and your odds.",
+    "Start from the one detail a reader would repeat to a friend, say what it means at the end "
+    "of the line, and close on what would have to happen first.",
 )
 
 
@@ -69,6 +100,34 @@ def angle_of(material: dict[str, Any]) -> str:
     if raw is None or not str(raw).strip():
         raw = material.get("take")
     return " ".join(str(raw or "").split())
+
+
+def thin(material: dict[str, Any]) -> str | None:
+    """Why the piece is thin, in words, or None: few facts (under ``THIN_WORDS`` words, or at
+    most ``THIN_SOURCES`` numbered source), or a subject that is a product note or a small tool
+    (its title, never its sources, names a release, a plugin, a canary, a test suite...). A
+    rule on the material: no model is asked."""
+    facts = str(material.get("facts") or "")
+    title = str(material.get("title") or "")
+    numbered = len(re.findall(r"^\s*\[\d+\]", facts, re.M))
+    if len(facts.split()) < THIN_WORDS and numbered <= THIN_SOURCES:
+        return "few facts"
+    if numbered and numbered <= THIN_SOURCES and len(facts.split()) < 2 * THIN_WORDS:
+        return "one source"
+    m = THIN_NOTE.search(title)
+    if m:
+        return f"a product note or a small tool ({m.group(0).lower()})"
+    return None
+
+
+def salt_of(p: Profile, material: dict[str, Any]) -> str:
+    """The salt this piece is written with: the person's switch, one step more (never past
+    salty) on a thin piece when their ``salt_thin`` switch is on."""
+    sw = p.switches
+    base = str(sw.get("salt")) if sw.get("salt") in SALT_STEPS else "plain"
+    if sw.get("salt_thin", "on") == "on" and thin(material):
+        return SALT_STEPS[min(SALT_STEPS.index(base) + 1, len(SALT_STEPS) - 1)]
+    return base
 
 
 def form_for(title: str, angle: str) -> str:
@@ -143,6 +202,9 @@ def compose(material: dict[str, Any], site: str | None = None, profile: Profile 
                       "on what it can carry)\n\n" + features.strip())
     if language:
         system.append(f"Write in the language with the code {language}.")
+    salt = salt_of(p, material)
+    if salt in SALT_WORDS:
+        system.append(SALT_WORDS[salt])
     system.append(ANGLE_WORDS if take else NO_ANGLE_WORDS)
     if p.switches.get("opinions") == "suggest" and not take:
         system.append(SUGGEST_WORDS)

@@ -9,8 +9,13 @@
   // and the page moves to it. An edited draft offers "Start again from the original" under its
   // verbs. Copy puts the markdown on the clipboard and Download saves <title>.md: neither needs
   // an account, a model or the network. SOCIAL's read fields, when the read carries them, are
-  // drawn as plain lines (the siblings above the words, the extras under them). The Post page
-  // (pages/post) mounts it for #/post/d/<id>.
+  // drawn as plain lines (the siblings above the words, the extras under them). A short post (a
+  // site's variant of one write) draws its posts, each with its count the site's way (red past the
+  // limit), and its verbs: Open in <site> first (the site's own composer with the draft filled in:
+  // a plain link, nothing is sent; off on the preview, with its words), then I posted it (the
+  // person's record, with Not yet), Post to <site> when they switched the site to Post directly
+  // (the confirm dialog), Copy (the posts' words), Edit, Download, Decline, Details. There is no
+  // "copy and open". The Post page (pages/post) mounts it for #/post/d/<id>.
   import Loading from "../../ui/Loading.svelte";
   import Md from "../../ui/Md.svelte";
   import { openDetails } from "../../ui/details.svelte";
@@ -24,7 +29,7 @@
   import DraftEditor from "./DraftEditor.svelte";
   import ProseFlags from "./ProseFlags.svelte";
   import { siteOf } from "./prose";
-  import { copyText, downloadHref, editPath, sheetPath, type PostEdited, type PostSheet } from "./post";
+  import { copyText, downloadHref, editPath, partsText, sheetPath, type PostEdited, type PostSheet } from "./post";
 
   // titled: the sheet's own title (off on the draft's page, whose head has it)
   let { id, tick = 0, titled = true }: { id: number | string; tick?: number; titled?: boolean } = $props();
@@ -40,17 +45,34 @@
   const folded = $derived(!all && parts.length > 4);
   const shown = $derived((folded ? parts.slice(0, 4) : parts).join("\n\n"));
   const waits = $derived(!!s && s.group === "waiting" && (s.ticket != null || s.again != null));
-  const canSend = $derived(!!s && waits && s.account);
+  // a short post: a site's variant, with its posts and its own verbs
+  const short = $derived(!!s && !!s.site);
+  const posts = $derived(s?.parts || []);
+  const canSend = $derived(!!s && waits && s.account && !short);
+  // I posted it shows once Open was followed, or while the draft waits for it (Not yet hides it)
+  let opened = $state(false);
+  let notYet = $state(false);
+  const askPosted = $derived(!!s && short && !!s.posted_by_you && !notYet && (opened || s.group === "waiting"));
   // the words PROSE checks: the editor's own (sources by outlet), else the markdown
   const words = $derived(s ? (s.edit?.body ?? s.edit?.parts?.map((p) => p.text).join("\n\n") ?? s.markdown) : "");
   let copied = $state(false);
 
   async function copy(): Promise<void> {
     if (!s) return;
-    const ok = await copyText(s.markdown);
+    const ok = await copyText(short && posts.length ? partsText(posts) : s.markdown);
     copied = ok;
     // a refusal is not a success: amber, with the warning mark (17, Codex 22)
-    app()?.say(ok ? "Copied: the post's markdown is on your clipboard." : "The browser did not allow copying: use Download.", ok ? undefined : "amber");
+    app()?.say(ok ? (short ? "Copied: the post is on your clipboard." : "Copied: the post's markdown is on your clipboard.") : "The browser did not allow copying: use Download.", ok ? undefined : "amber");
+  }
+  /** I posted it: the person posted the opened draft themselves; Kranto sends nothing */
+  function posted(btn: HTMLElement): void {
+    const L = app();
+    if (!s || !L) return;
+    void L.act(btn, () => L.api(`${sheetPath(s.id)}/posted`, {}), (r) => {
+      afkDropPrefix("/api/post");
+      L.afkDrop();
+      L.say((r as { say?: string } | null)?.say || "Recorded: posted by you.");
+    });
   }
   function send(btn: HTMLElement): void {
     if (s) openAsk({ cub: s.cub, ticket: s.ticket, again: s.again }, btn);
@@ -97,23 +119,41 @@
   <section class="draft-sheet" id="draft-sheet" data-draft={String(s.id)}>
     {#if titled}<h2 id="draft-title">{s.title}</h2>{/if}
     <p class="muted small" id="draft-facts">{facts}</p>
-    {#if s.siblings?.length}<p class="muted small" id="draft-siblings">{s.siblings.map((x) => x.site + (x.state === "sent" ? " ✓" : "")).join(" · ")}</p>{/if}
+    {#if s.siblings?.length}<p class="muted small" id="draft-siblings">{#each s.siblings as x, i (x.id)}{#if i}{" · "}{/if}{#if String(x.id) === String(s.id)}<b>{x.word || x.site}{x.state === "sent" ? " ✓" : ""}</b>{:else}<a href={href(`post/d/${x.id}`)}>{(x.word || x.site) + (x.state === "sent" ? " ✓" : "")}</a>{/if}{/each}</p>{/if}
     {#if editing}
       <DraftEditor {s} close={() => (editing = false)} saved={moved} />
     {:else}
-      <div class="draft-text" id="draft-text"><Md text={shown} links /></div>
-      {#if folded}<p><button type="button" class="linkish small" id="draft-show-all" onclick={() => (all = true)}>{`Show all ${s.words} words`}</button></p>{/if}
+      {#if short && posts.length}
+        <div class="draft-text" id="draft-text">
+          {#each posts as p, i (i)}
+            <div class="draft-part" id={"draft-part-" + i}>
+              {#if posts.length > 1}<p class="muted small">{`${i + 1} of ${posts.length}`}</p>{/if}
+              <p class="draft-part-text">{p.text}</p>
+              {#if s.limit && p.used != null}<p class={"muted small draft-count" + (p.used > s.limit.max ? " over red" : "")} id={"draft-count-" + i}>{`${p.used} of ${s.limit.max} ${s.limit.unit}`}</p>{/if}
+            </div>
+          {/each}
+        </div>
+      {:else}
+        <div class="draft-text" id="draft-text"><Md text={shown} links /></div>
+      {/if}
+      {#if folded && !short}<p><button type="button" class="linkish small" id="draft-show-all" onclick={() => (all = true)}>{`Show all ${s.words} words`}</button></p>{/if}
       {#each s.extras || [] as x (x.key)}<p class="muted small draft-extra">{x.words}</p>{/each}
       {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} id="draft-flags" />{/if}
       <p class="acts" id="draft-verbs">
+        {#if short && waits}
+          {#if s.open}<a class="btn sm primary" id="draft-open" href={s.open} target="_blank" rel="noopener noreferrer" onclick={() => (opened = true)}>{`Open in ${s.site_word || s.site}`}</a>
+          {:else if s.open_off}<button type="button" class="btn sm primary" id="draft-open" disabled>{`Open in ${s.site_word || s.site}`}</button><span class="muted small" id="draft-open-off">{s.open_off}</span>{/if}
+          {#if s.direct}<button type="button" class={"btn sm" + (s.open || s.open_off ? "" : " primary")} id="draft-direct" disabled={!s.direct.ready} title={s.direct.why || ""} onclick={(e) => send(e.currentTarget)}>{s.direct.word}</button>{#if !s.direct.ready && s.direct.why}<span class="muted small" id="draft-direct-why">{s.direct.why}</span>{/if}{/if}
+        {/if}
         {#if canSend}<button type="button" class="btn sm primary" id="draft-send" onclick={(e) => send(e.currentTarget)}>{s.ticket != null ? s.verb || "Send" : "Send again"}</button>{/if}
-        <button type="button" class={"btn sm" + (canSend ? "" : " primary")} id="draft-copy" onclick={() => void copy()}>{copied ? "Copied" : "Copy"}</button>
+        <button type="button" class={"btn sm" + (canSend || (short && waits) ? "" : " primary")} id="draft-copy" onclick={() => void copy()}>{copied ? "Copied" : "Copy"}</button>
         {#if s.can_edit}<button type="button" class="btn sm" id="draft-edit" title={s.ticket != null ? "Your words become the draft that waits; a send waiting for your yes is withdrawn first" : "Your words become the draft that waits"} onclick={() => (editing = true)}>Edit</button>{/if}
         <a class="btn sm" id="draft-download" href={downloadHref(s.id)} download={s.filename}>Download</a>
-        {#if waits && !s.account}<a class="btn sm quiet" id="draft-connect" href={href("settings/posting")}>Connect an account to send</a>{/if}
+        {#if waits && !s.account && !short}<a class="btn sm quiet" id="draft-connect" href={href("settings/posting")}>Connect an account to send</a>{/if}
         {#if s.ticket != null}<button type="button" class="btn sm quiet" id="draft-decline" onclick={decline}>Decline</button>{/if}
         {#if (s.ticket ?? s.again) != null}<button type="button" class="linkish small" id="draft-details" onclick={() => openDetails(`ask:${s.ticket ?? s.again}`)}>Details ›</button>{/if}
       </p>
+      {#if askPosted}<p class="acts small" id="draft-posted"><button type="button" class="btn sm" id="draft-posted-yes" onclick={(e) => posted(e.currentTarget)}>I posted it</button><button type="button" class="linkish small" id="draft-posted-no" onclick={() => (notYet = true)}>Not yet</button></p>{/if}
       {#if s.edited && s.can_edit && s.original_draft != null && s.original_draft !== s.id}<p class="small" id="draft-again"><a href={href(`post/d/${s.original_draft}`)}>The original draft ›</a>{" · "}<button type="button" class="linkish small" onclick={again}>Start again from the original</button></p>{/if}
       {#if s.link}<p class="small" id="draft-link"><a href={s.link} target="_blank" rel="noopener noreferrer">Where it went ↗</a></p>{/if}
     {/if}

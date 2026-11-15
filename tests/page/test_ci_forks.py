@@ -20,8 +20,11 @@ def jobs():
 
 
 def test_every_job_runs_where_the_runner_variable_says():
+    """All but ci.yml's ``sandbox``, which always runs on GitHub's own runner (it needs a fresh
+    /proc inside bubblewrap)."""
     bad = [f"{wf}:{name}: {job.get('runs-on')}" for wf, name, job in jobs()
-           if job.get("runs-on") != RUNNER]
+           if job.get("runs-on") != ("ubuntu-latest" if (wf, name) == ("ci.yml", "sandbox")
+                                     else RUNNER)]
     assert bad == []
 
 

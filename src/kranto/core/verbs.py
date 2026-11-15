@@ -305,19 +305,24 @@ CORE: tuple[Verb, ...] = (
          cost="about $0.06 (one card call and its check)"),
     Verb("post.write", "Write a post", "Write a draft post about an idea card (about: card:<n>), "
          "a news item (brief:<id>:<item>, the item counted from 1) or this week's news (week), as "
-         "a blog post (as: blog, the default) or a short post for Mastodon (as: toot, a card "
-         "only). One model call in the background; the draft waits on Post, and nothing is sent "
-         "until the owner chooses Send there.", "spend", "POST", "/api/post/write",
+         "a blog post (as: blog, the default), short posts for the sites the owner ticked in "
+         "Settings › Posting (as: short, a card or an item: with their blog connected, the blog "
+         "post first and each short post linking to it) or a short post for Mastodon (as: toot, "
+         "a card only). Model calls in the background; the drafts wait on Post, and nothing is "
+         "sent until the owner opens the site or chooses to post there.", "spend", "POST",
+         "/api/post/write",
          fields=(F("about", "line", "card:<n>, brief:<id>:<item> or week", True),
-                 F("as", "enum", "blog (a blog post) or toot (a short post)",
-                   choices=("blog", "toot")),
+                 F("as", "enum", "blog (a blog post), short (short posts for the ticked "
+                                 "sites) or toot (a short post for Mastodon)",
+                   choices=("blog", "short", "toot")),
                  F("angle", "text", "the owner's angle, one sentence: their own, or one of "
                                     "/api/post/angles' proposals they picked (optional). The "
                                     "post opens on its claim, prediction or question; none "
                                     "writes a plain summary"),
                  F("take", "text", "the angle's old name (optional): read when angle is "
                                    "absent")),
-         page="#/post", cost="about $0.03 (one model call)"),
+         page="#/post", cost="about $0.03 (one model call; short posts: one a site, and the "
+                             "blog post first when it is connected)"),
     Verb("post.edit", "Save", "Save the owner's own words for a waiting draft ("
          "): title and body (a long post), or parts (a short post or a thread, each its "
          "text), or drop (an extra to remove). The edit is filed as the next draft of the same "
@@ -616,6 +621,12 @@ ROUTE_ALLOW: dict[tuple[str, str], str] = {
     ("POST", "/auth/code"): "signing a browser in: how the page gets its token",
     ("POST", "/auth/signout"): "signing this browser out",
     ("POST", "/api/telemetry/view"): "the page's own count of a page view (usage reports)",
+    ("POST", "/api/post/d/{id:int}/posted"): "I posted it: the person's own record, on the page "
+                                             "only, that they posted a draft in the site "
+                                             "themselves; never an assistant's (nothing is sent)",
+    ("POST", "/api/post/sites"): "Settings › Posting's choices (the sites ticked, Post "
+                                 "directly): the person's, on the page; an assistant may read "
+                                 "them (GET), never switch on a send",
     ("POST", "/api/home/visit"): "the home's own visit marker, moved as the page draws the home "
                                  "(While you were away counts from it); nobody's decision",
     ("POST", "/brb/{path:path}"): "the page's writes: its own registry and parity test",

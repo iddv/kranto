@@ -16,12 +16,12 @@ detectors, and nothing here claims it does.
 | **Your voice card** | how you write, in plain words, at most about 250 words. Your old tone setting (`blog.tone`, `toot.tone`, `newsletter.intro`) became its first line, once | `<home>/prose/voice.md` |
 | **Your samples** | things you wrote; the 3 closest to each post (by embedding) go in as examples | `<home>/prose/samples/<id>.md` (a first line `site: mastodon` is optional) |
 | **Your lists** | **never** (words, or `/regular expressions/`), **keep** (your phrases the checker leaves alone), **always** (a sign-off) | `<home>/prose/never.txt`, `keep.txt`, `always.txt`: one a line, `#` a comment |
-| **Switches** | length (short, medium, long), register (casual, neutral, formal), opinions (only mine, or suggest one marked for you), emoji (never, sparingly), hashtags (never, the site's), links (in the post, or in the first reply), reading level (a grade, 8) | the `settings` row `prose.profile` |
+| **Switches** | length (short, medium, long), register (casual, neutral, formal), opinions (only mine, or suggest one marked for you), emoji (never, sparingly), hashtags (never, the site's), links (in the post, or in the first reply), reading level (a grade, 8), salt (plain, wry or salty; plain by default) and more salt on thin items (on: a thin item, with few facts or about a product note or a small tool, goes one step saltier) | the `settings` row `prose.profile` |
 | **The checker** | strictness (off, light, strict) and the rules you turned off | `prose.profile` |
 | **Guides per site** | which guides each site's writer follows (the floor always) | `prose.profile` |
 | **Disclosure** | per site, off by default; a ready line: "Drafted with Kranto from my notes; edited and sent by me." | `prose.profile` |
-| **Your angle** | one sentence on Write a post: why this interests you. Type your own, or pick one of three Kranto proposes (a claim, a prediction, a question). It drives the post: its first sentence, its stance, what it leaves out | sent with the write (`angle`; `take` is its old name) |
-| **The writer's model** | per writer (blog, toot, newsletter), apart from the models that watch your sources; unset, the reason tier's model writes | `prose.profile` (`writers`) |
+| **Your angle** | one sentence on Write a post: why this interests you. Type your own, or pick one of the three Kranto proposes: where it leads (in five or ten years), a bet (a number or a name, and why) and a scene (the item in one real situation). Each goes past the item's own claim. It drives the post: its first sentence, its stance, what it leaves out | sent with the write (`angle`; `take` is its old name) |
+| **The writer's model** | per writer (blog, toot, newsletter, social), apart from the models that watch your sources; unset, the reason tier's model writes. A writer may also be on OpenAI's own API with a key you paste (`kranto provider openai --key-stdin`, kept as `OPENAI_API_KEY` in the home's `.env`); it is never the watcher's. No default is chosen | `prose.profile` (`writers`) |
 
 You, or your own Claude Code, may edit the files under `<home>/prose/` by hand; kranto reads them
 fresh for every post.
@@ -31,6 +31,21 @@ cares about; the sources back it and tell the story. It names a source once and 
 with what is missing, carries one caveat at most, and has no fixed sections: the angle chooses
 the shape. A blog post is short, 120 to 200 words unless your length switch says otherwise, and never padded. With no
 angle, the writer writes a plain summary and the draft says it has none.
+
+**It goes past the item** (round 3, from the owner's second blind read). The item is the
+evidence; the post argues what it means: where it leads, what else must be true for it and how
+likely that is. The speculation is yours and said so ("I think", "my bet"), never stated as a
+fact; every fact still comes from the sources. A post from an idea card is about what the card's
+evidence means for the reader's world; the idea itself, a tool someone could build, is
+background. Kranto checks each proposed angle with a rule before showing it (no model call): it
+refuses an experience, a stock prediction ("within a year, more X will Y"), a tool as where it
+leads, a bet with no number or name, and an angle that only restates the item; a refused one is
+asked for once more, and a stock one that comes back is left out.
+
+**Salt** is how much wit and bite a post carries: plain, wry (understatement) or salty (a jab at
+the thing: the product, the claim, the hype). Salt is aimed at things, never at a person or a
+group, never a slur, and a salty post names no private person: the checker flags a name or a
+handle the material doesn't have (`salt.person`).
 
 **Never invented.** A stance is fine when your angle carries it ("My bet: …"); an experience is
 not, whatever the angle ("I tried it", "at my company"). A post says "I" or "we" for anything
@@ -81,6 +96,7 @@ nothing of yours backs (`voice.invented_i`), and the writer cuts one that is lef
 | `claim.sections` | three or more sections of near-equal length |
 | `claim.skeleton` | the "What happened / Why it matters" headings |
 | `claim.restates` | nothing in the post but facts: no stance, prediction, question or reader in it |
+| `salt.person` | a person's name or a handle the post's material does not name (checked when the material is given) |
 
 The `claim.*` rules come from the owner's blind read of round 1; each has a
 fixture made from the posts he read. `claim.no_hook`, `claim.sections`, `claim.skeleton` and
@@ -102,7 +118,7 @@ must stay unflagged at both strictness levels.
 | `POST /api/prose/voice/draft` (no verb: nothing is stored) | `{samples?: [text]}` (else your saved samples) | `{voice, say}`: one model call drafts a voice card for you to read and edit; save it with `prose.voice` |
 | `POST /api/prose/learn` (verb `prose.learn`, reversible) | `{draft, sent}` | `{proposals, say}`: proposals from what you changed (kept open) |
 | | `{proposal, answer: yes or no}` | `{ok, say, proposal, answer}`: a yes applies it; a no is remembered |
-| `POST /api/post/angles` (no verb: nothing is stored) | `{about: card:<n> or brief:<id>:<item>, as?: blog or toot}` | `{about, as, angles: [{kind: claim, prediction or question, text, words}], model, say}`: Write a post's angle step, one model call under the writer's own model; 409 with no model key ("type your own sentence"), 400 for `week` |
+| `POST /api/post/angles` (no verb: nothing is stored) | `{about: card:<n> or brief:<id>:<item>, as?: blog or toot}` | `{about, as, angles: [{kind: end, bet or scene, text, words, retried?, close?}], model, say}`: Write a post's angle step, one model call (two when the rule refuses a proposal) under the writer's own model; two or three angles; 409 with no model key ("type your own sentence"), 400 for `week` |
 
 **Write a post's angle step:** the person reads an item or a card, chooses Write a post, and sees
 one box ("Why does this interest you? One sentence.") with the three proposals beside it (from

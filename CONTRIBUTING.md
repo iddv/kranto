@@ -48,6 +48,7 @@ The root:
 | `stored/` | the contracts for what Kranto stores as JSON: one type per column, every writer and reader goes through it |
 | `core/` | the contract a feature sees: the manifest, events, tickets, settings, the cub runtime (`core/cubs/`) and the brokers |
 | `features/` | Kranto's own features (news), each a package with one manifest; `features/post/evals/` is the prose eval, not a feature |
+| `social/` | short posts for the sites people use: one version a site through the prose engine, your own site first ([docs/posting.md](docs/posting.md)) |
 | `prose/` | the prose engine every post is written through: the profile, compose, check, revise, learn, and the shipped guides ([docs/prose.md](docs/prose.md)) |
 | `cubs/` | the reference cubs Kranto ships (`newsletter`, `toot`), installed like any cub |
 | `web/` | the app host: the JSON API routers, the sign-in, the pages the server serves |

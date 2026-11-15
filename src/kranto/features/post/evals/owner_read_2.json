@@ -1,0 +1,155 @@
+{
+ "read": "owner-read-2 (14 November 2026), verbatim picks and comments; claude = Sonnet 5.5, gpt = gpt-6.1-sol, gemini = gemini-4-argon-high, one call each from round 2's export",
+ "posts": [
+  {
+   "post": 1,
+   "name": "brief-24-1.blog.prediction",
+   "item": "brief-24-1",
+   "site": "blog",
+   "angle_kind": "prediction",
+   "angle": "Within a year, at least two other major robotics labs will publish dexterous grasping results trained with little or no teleoperation data, and teleop-heavy pipelines will shrink to fine-tuning.",
+   "owner_pick": "claude",
+   "comment": "Although the bet is like kinda .. meh? We should think more hyperbolistic, beyond the means - what is the end? What does it mean if people can rapidly train body movemoent on video? Is lifelike robotics closer than we think? What other leaps might have to coilide for this to be true? And how likely is that",
+   "drafts": {
+    "claude": "# Amazon says its robot hand learned to grasp without teleoperation, and others will follow\n\nWithin a year, I expect at least two other major robotics labs to publish dexterous grasping results trained with little or no teleoperation data. Teleop-heavy pipelines will shrink to fine-tuning.\n\nAmazon FAR's Dex-Hands team showed Pick Anything, a single policy that grasps 66 objects. It uses a stereo camera head, no wrist cameras and Sharpa Wave hands. A researcher on the team says it was trained on video and reinforcement learning, with zero teleoperation data. [1]\n\nThat matters because teleoperation is the costly part. Someone has to wear a rig or hold controllers and demonstrate every grasp, hour after hour. Video is cheap by comparison, and simulation is cheaper still.\n\nIf one team can reach 66 objects without a human driving the hand, others will try the same recipe. My bet is that teleop data gets used where it is hardest to replace: the last few percent of reliability on a specific task.\n\nWhat I'd watch for: a second lab reporting a similar object count with no demonstrations at all.",
+    "gpt": "# Within a year, more robotics labs will cut teleop from grasp training\n\nWithin a year, I expect at least 2 other major robotics labs to publish dexterous grasping results trained with little or no teleoperation data. My bet is that teleop-heavy pipelines will shrink to fine-tuning.\n\nAmazon FAR’s Dex-Hands team offers a reason to make that bet. Its Pick Anything system uses 1 policy to grasp 66 objects. The setup has a stereo camera head, no wrist cameras and Sharpa Wave hands. A researcher says the policy was trained on video and reinforcement learning, with zero teleoperation data. [1]\n\nThat puts the cost of human demonstrations in question. If other labs can repeat this approach, I expect them to save teleoperation for refining behaviour. I’ll watch whether the next results keep human demonstrations out of the main training run. Will at least 2 major labs get there within a year?",
+    "gemini": "# Teleoperation for robot grasping will shrink to fine-tuning within a year\n\nWithin a year, at least two other major robotics labs will publish dexterous grasping results trained with little or no teleoperation data, and teleop-heavy pipelines will shrink to fine-tuning.\n\nHuman teleoperation data is costly to collect. Amazon FAR's Dex-Hands team just showed that dexterous grasping doesn't need it. Their system, Pick Anything, grasps 66 objects with a single policy. It uses Sharpa Wave hands and a stereo camera head, with no wrist cameras. A researcher on the team says it was trained on video and RL with zero teleoperation data.\n\nIf video and RL can train one policy across 66 objects, I don't see other labs paying for big teleoperation runs up front. They'll save human data for fine-tuning. Which lab will be next to drop teleop from its base training?"
+   }
+  },
+  {
+   "post": 2,
+   "name": "brief-21-1.blog.claim",
+   "item": "brief-21-1",
+   "site": "blog",
+   "angle_kind": "claim",
+   "angle": "China didn't block this deal over robots.",
+   "owner_pick": "gpt",
+   "comment": "",
+   "drafts": {
+    "claude": "# China's block of SoftBank–ABB wasn't about robots\n\nChina didn't block this deal over robots; it blocked it over data. China's foreign investment security review office prohibited SoftBank Group's roughly $5.375B purchase of ABB's robotics division, and ABB confirmed the block.\n\nThe detail that matters: the FT reports that regulators feared robotics data would go overseas to train AI models.\n\nThat reading changes what a robotics company is worth to a regulator. A robot arm is hardware, but a fleet of them in factories produces a steady stream of real-world data, and that data is what AI models need. If Beijing sees the data as the asset, the sale of the machines is almost beside the point. Any buyer with AI ambitions, from SoftBank on down, now faces the same question before it signs: where will the data go? My bet is that this is the first of several cross-border robotics deals stopped on those grounds, and that buyers will start pricing data-residency terms into offers before regulators force the issue.",
+    "gpt": "# China blocked ABB Robotics’ sale over data\n\nChina didn't block this deal over robots. It blocked it over fears about where their data would go.\n\nThe FT reports that regulators feared robotics data would go overseas to train AI models.[1]\n\nChina's foreign investment security review office prohibited SoftBank Group's roughly $5.375 billion purchase of ABB's robotics division. ABB confirmed the block.[1] That puts a question about AI training at the centre of a robotics sale: who gets to use the data once the business changes hands? I think that question will follow other buyers across borders. A buyer can agree on a price and still face a block over the data the robots produce. My bet: more robotics deals will depend on where that data stays and who can train on it.",
+    "gemini": "# China didn't block SoftBank's $5.4B ABB Robotics deal over the robots\n\nChina didn't block SoftBank's $5.4B purchase of ABB Robotics over the robots. Cross-border robotics deals can now fail over where the training data goes.\n\nThe FT reports that regulators feared robotics data would go overseas to train AI models.\n\nChina's foreign investment security review office prohibited SoftBank Group's roughly $5.375B acquisition of ABB's robotics division, and ABB confirmed the block. SoftBank was buying a robotics business, but the review office looked at where its data might go. The catch is AI training: if that data goes abroad to train models, a robotics sale becomes an AI call. A foreign buyer can want the robots and still lose the deal over their data. That's a new risk for buyers. Cross-border robotics deals now have to pass an AI data test too. I bet regulators will block more of them over AI training data."
+   }
+  },
+  {
+   "post": 3,
+   "name": "card-158.blog.claim",
+   "item": "card-158",
+   "site": "blog",
+   "angle_kind": "claim",
+   "angle": "Memory benchmarks score what an agent remembers and ignore whose memory it is.",
+   "owner_pick": "none",
+   "comment": "The meta here is that shared memory is a thing, not testing shared memory - this means implies cluster of agents, fleets of consciouness, botnets, a being being created from AI - like a cattipilar, its being birthed.",
+   "drafts": {
+    "claude": "# Memory benchmarks score recall, not whose memory it is\n\nMemory benchmarks score what an agent remembers and ignore whose memory it is. The AML CYCLE 2 benchmark for long-term agent memory has Textual, Coding and Multimodal tracks, each with a result table [3]. None of them asks whether user A's secret can show up in user B's session. Memory gateways keep multiplying too; ContextMemory, for one, keeps session state as editable markdown files behind an OpenAI-compatible API [2].\n\nThe isolation question has started to get an answer. A new arXiv preprint on cross-user credential leakage through shared long-term memory proposes a three-stage audit [1]. It separates exposure, behavior and state: did a foreign credential reach the prompt, did the agent act on it, and did the other account change?\n\nMy bet is that this audit becomes a CI test. If you add shared memory to a multi-user agent, run it against your own store before release, the way you'd run row-level-security tests. A recall score can't tell you a leak happened. A failing test can.",
+    "gpt": "# Memory benchmarks score recall and skip whose memory it is\n\nMemory benchmarks score what an agent remembers and ignore whose memory it is. The AML CYCLE 2 benchmark has Textual, Coding and Multimodal tracks, each with a result table. Those tracks test recall, not isolation between users. [3] That leaves a question for anyone building a shared memory store: can one user's credentials turn up in another user's prompt? An arXiv preprint proposes a 3-stage audit. It separates exposure from the agent acting on a credential, then checks whether the other account's state changed. [1] Those are different failures. A recall score won't tell you which happened.\n\nIf you're adding shared memory to a multi-user agent, I'd turn that audit into tests you run in CI. Seed separate accounts, try to retrieve a foreign credential, and check each stage before release. That's a proposed test suite, built around the paper's audit. [1] Your release check would ask 2 questions: did the agent remember, and was it allowed to remember that?",
+    "gemini": "# Memory benchmarks score what an agent remembers, not whose memory it is\n\nMemory benchmarks score what an agent remembers and ignore whose memory it is. ContextMemory is an open-source memory gateway for llama.cpp and vLLM [2]. It keeps session state as editable markdown files behind an OpenAI-compatible API [2]. The AML CYCLE 2 benchmark scores long-term agent memory across Textual, Coding and Multimodal tracks, each with a result table [3]. Those tracks measure recall. They don't test isolation between users. An arXiv preprint on shared long-term agent memory tackles that problem: cross-user credential leakage [1]. It proposes a 3-stage audit that separates exposure, behavior and state [1].\n\nIf you're adding shared memory to a multi-user agent, a recall table won't tell you it's safe to ship. I'd want this audit packaged as a runnable test suite for CI, much like row-level security tests. A team could run it against its own store before release. That would check whether a foreign credential reaches the prompt, the agent acts on it, or the other account changes [1]. How do you test shared agent memory for cross-user leaks today?"
+   }
+  },
+  {
+   "post": 4,
+   "name": "brief-19-1.toot.question",
+   "item": "brief-19-1",
+   "site": "toot",
+   "angle_kind": "question",
+   "angle": "Does ISO 21423 cover traffic rules like right of way at intersections, or only messages?",
+   "owner_pick": "gpt",
+   "comment": "Slightly too obscrube - C is best because it puts it in a real life situation which is easier to think about and extrapolate for humans",
+   "drafts": {
+    "claude": "Do mixed-vendor robots get shared right-of-way rules? ISO 21423:2026 from A3 sets common communication requirements for AGVs and AMRs from different suppliers in one facility. The wording is about communication. Whether it reaches traffic rules is the open question.",
+    "gpt": "Does ISO 21423:2026 cover who has right of way when robots meet at an intersection, or just their messages? A3 published it to set common communication requirements for mobile robots from different suppliers sharing a facility.",
+    "gemini": "Does ISO 21423 cover robot traffic rules like right of way at intersections, or only messages? A3 published ISO 21423:2026. It sets common communication requirements for AGVs and AMRs from different suppliers, so fleets don't need custom integration to share a site."
+   }
+  },
+  {
+   "post": 5,
+   "name": "brief-20-1.toot.claim",
+   "item": "brief-20-1",
+   "site": "toot",
+   "angle_kind": "claim",
+   "angle": "Calling Liber-0 \"learned from human experience\" oversells it.",
+   "owner_pick": "claude",
+   "comment": "",
+   "drafts": {
+    "claude": "Think Liber-0 learned from human experience? Not quite. LiberAI says it was pretrained on 2.2 million hours of human video and glove-recorded motion, but the pretraining also included robot data. Its own number: 36.0% success across 600 zero-shot trials.",
+    "gpt": "Calling Liber-0 “learned from human experience” oversells it. Pretraining used over 2.2 million hours of human video and glove-recorded motion, plus robot data. LiberAI reports 36.0% success across 600 zero-shot trials.",
+    "gemini": "If you're hoping robots can learn by watching us, calling Liber-0 \"learned from human experience\" oversells it. Pretraining used over 2.2 million hours of human video and glove-recorded motion, but included robot data. LiberAI reports 36.0% success on 600 zero-shot trials."
+   }
+  },
+  {
+   "post": 6,
+   "name": "brief-26-1.blog.prediction",
+   "item": "brief-26-1",
+   "site": "blog",
+   "angle_kind": "prediction",
+   "angle": "Within a year, at least one other automaker will announce a humanoid pilot built on a general robot model.",
+   "owner_pick": "gpt",
+   "comment": "",
+   "drafts": {
+    "claude": "# Mercedes just showed the first automaker pilot; others will follow within a year\n\nAt least one other automaker will announce a humanoid pilot built on a general robot model within a year. Mercedes-Benz is the first to put numbers on the table, so the rest have a benchmark to beat.\n\nGoogle DeepMind introduced Gemini Robotics 2.5, its most capable vision-language-action model to date [1]. It reports a 96% success rate for Apollo 2 humanoids sorting parts on Mercedes-Benz lines [1].\n\nThat's the detail I'd repeat to a friend. A 96% rate on a real production line isn't a lab demo. It's a number a plant manager can compare with a human shift.\n\nOnce one carmaker has that number, its rivals need a reply. They don't have to build a model. They can license a general one and point a humanoid at their own parts bins.\n\nDeepMind also released an open safety benchmark, ASIMOV-jailbreak [1]. Anyone planning a pilot now has a public way to test the model before it goes near a worker.\n\nSo my bet is one more announcement before November 2027. Who goes first?",
+    "gpt": "# Another automaker will announce a humanoid pilot within a year\n\nWithin a year, at least 1 other automaker will announce a humanoid pilot built on a general robot model. The number behind my bet is 96%: Google DeepMind reports that success rate for Apollo 2 humanoids sorting parts on Mercedes-Benz lines with Gemini Robotics 2.5. [1]\n\nSorting parts is a narrow task, but it gives the next automaker something concrete to test. Can the same model handle work on its own lines? That’s a more useful starting question than whether a humanoid can put on a good demo.\n\nDeepMind also released ASIMOV-jailbreak, an open safety benchmark. [1] A sorting success rate doesn’t settle safety, and I’d want a pilot to test both.\n\nMy bet is on another pilot announcement. The next automaker will still have to show what its robots can do. Will its results match Mercedes-Benz’s 96%?",
+    "gemini": "# Another automaker will pilot humanoids on a general model within a year\n\nWithin a year, at least one other automaker will announce a humanoid pilot built on a general robot model. Apollo 2 humanoids just hit a 96% success rate sorting parts on Mercedes-Benz lines.\n\nGoogle DeepMind says the robots ran Gemini Robotics 2.5, its most capable vision-language-action model to date. Until now, general robot foundation models mostly stayed in demos. Production-line work is harder. A 96% mark on a car line is the number a rival plant boss takes to the board. The team also released ASIMOV-jailbreak, an open safety benchmark: once a general model moves onto a factory line, plants have to test its safety limits.\n\nSorting parts is still one narrow job, and a 4% miss rate matters on a busy line. Even so, I don't think other carmakers will wait long to run their own trials. Which automaker puts a general model on its line next?"
+   }
+  },
+  {
+   "post": 7,
+   "name": "brief-23-1.blog.question",
+   "item": "brief-23-1",
+   "site": "blog",
+   "angle_kind": "question",
+   "angle": "If every robot carries a tamper-proof code, who gets to read it: the maker, the owner, or only the state?",
+   "owner_pick": "gpt",
+   "comment": "",
+   "drafts": {
+    "claude": "# Who gets to read a robot's lifetime ID code?\n\nEvery robot made in China may soon carry a tamper-proof code for life, and nobody has said who can read it. On Nov 6, China's industry ministry (MIIT) posted a draft that would put the code on every complete robot, with makers registering products and filing codes within 20 working days [1]. It reaches past humanoids to industrial and service robots, so it bears on any maker selling into China [1].\n\nA code that can't be altered is only half the system; the other half is access. If the maker reads it, the code is a product record. If the owner reads it, it's a service tool. If only the state does, it's a tracking system. Comments are open until Dec 5. Which of the three do you think the final rule will pick?",
+    "gpt": "# Who gets to read a robot's lifetime ID?\n\nIf every robot carries a tamper-proof code, who gets to read it: the maker, the owner, or only the state? China's industry ministry, MIIT, has proposed a code on every complete robot made in the country. Makers would register products and file codes within 20 working days. The draft extends traceability beyond humanoids to industrial and service robots. It also bears on makers selling into China. MIIT posted it on November 6, with comments open until December 5. [1] My question is who should have access to those records once the maker has filed them.\n\nI'd want an owner to be able to read the record attached to their robot. If you're responsible for the machine, should you also have access to its history?",
+    "gemini": "# If every robot carries a tamper-proof ID, who gets to read it?\n\nIf every robot carries a tamper-proof code, who gets to read it: the maker, the owner, or only the state? China's industry ministry, MIIT, posted a draft on November 6. It would require a tamper-proof lifetime ID code on every complete robot made in the country. Makers have 20 working days to register their products and file the codes. The rule doesn't stop at humanoids. It extends traceability to industrial and service robots, and it bears on makers selling into China. The maker tags the robot and files the code, and the ministry holds the record. I bet the owner gets left out, stuck with a tag that only answers to the state.\n\nThe draft is open for comment until December 5. If you buy an industrial or service robot, shouldn't you get to read its lifetime ID too?"
+   }
+  },
+  {
+   "post": 8,
+   "name": "card-160.blog.claim",
+   "item": "card-160",
+   "site": "blog",
+   "angle_kind": "claim",
+   "angle": "Usage meters that show percent used are close to useless.",
+   "owner_pick": "none",
+   "comment": "The level of post here needs way more salt for me to go with any of these things. Seems maybe a rule of thumb, the lower the IQ post, the higher levels of salt/sarcasm and trolling needs to be present",
+   "drafts": {
+    "claude": "# Percent-used meters tell you almost nothing about your limits\n\nA usage meter that shows \"62% used\" says nothing about how much work that 62% bought, and that's why such meters are close to useless. Anthropic removed the 5-hour limit for verified Ultra accounts on 30 October and said weekly limits were unchanged [1]. If the size of a percent can move without notice, the meter can't show it. A preprint on \"Anytime Contracts for AI Services\" argues that providers can silently route requests to cheaper models, and that stochastic outputs make this hard to spot [2].\n\nA better meter would borrow from uptime monitoring. Run one fixed task on a schedule. Log tokens, cost and a pass/fail check for each percent of the limit used. If that ratio shifts, you know something changed: a tighter limit, a model swap or a new system prompt. Vendors do edit prompts, and one added two sentences to Claude Code's for Opus 5.5 [3].\n\nWould you rather learn about a cut from a canary, or from a stalled task halfway through a job?",
+    "gpt": "# Percent-used meters tell you too little about AI limits\n\nUsage meters that show percent used are close to useless. They tell you how much allowance you've spent, but not how much work it buys. A dev.to analysis says Anthropic removed the 5-hour limit for verified Ultra accounts on 30 October 2026, while weekly limits stayed unchanged.[1] Even knowing the window doesn't settle what you're getting. The preprint *Anytime Contracts for AI Services* argues that providers can silently route requests to cheaper models. It says the variation in their answers makes that drop hard to detect.[2] A percentage alone can't answer either question: has the allowance changed, or has the service?\n\nI'd rather track a fixed task: run it on a schedule, check whether it passes, and log tokens and cost per percent consumed. One odd result wouldn't prove a cut, but a repeated change would give me something to investigate. What does 10% of your allowance buy today?",
+    "gemini": "# Usage meters that show percent used are close to useless\n\nUsage meters that show percent used are close to useless. They report how much of a window is gone, not how much work 1% of that window buys. Limits change often. A 31 October 2026 dev.to analysis says Anthropic removed the 5-hour limit for verified Ultra accounts on 30 October, with weekly limits stated as unchanged [1]. The model behind the meter can shift too. An arXiv preprint, *Anytime Contracts for AI Services*, argues that AI providers can silently route requests to cheaper models [2]. Randomness in the output makes that drop in quality hard to spot [2]. I'd rather trust a small canary than a percent bar. It'd run one fixed task on a schedule and log tokens, cost and a pass or fail check per 1% of limit used.\n\nThe pattern comes from uptime monitoring. A change in that ratio flags a silent limit cut or a model swap before you hit a wall mid-task. How much of your weekly quota would you spend on a canary to know what 1% still buys?"
+   }
+  },
+  {
+   "post": 9,
+   "name": "card-152.blog.question",
+   "item": "card-152",
+   "site": "blog",
+   "angle_kind": "question",
+   "angle": "How much agreement with the LLM's labels is enough before you'd swap in a 642 KB CPU classifier and stop paying for GPU runs?",
+   "owner_pick": "none",
+   "comment": "I don't know to boring to read myself tbh",
+   "drafts": {
+    "claude": "# What agreement rate would make you drop the GPU labeler?\n\nAt what agreement with the LLM's labels would you swap in a small CPU classifier and stop paying for GPU runs? I'd start the question at 90%, and I'd want it measured on my own data, not someone else's benchmark.\n\nThe case for trying is real. One author reports 94.25% accuracy on Banking77 using bge-large-en-v1.5 embeddings plus logistic regression [1]. The classifier is 642 KB and runs in 3 seconds on CPU. Those are accuracy figures against the dataset's gold labels, not agreement with an LLM, but they show how little a fixed task may need.\n\nThe training signal can also come from a model. One arXiv paper fine-tunes a multilingual encoder on frontier-model annotations in 35 languages, to build a privacy redaction tagger [2]. The LLM labels; a small model learns to copy them.\n\nSo the tool I'd want is simple. Label a sample with your local LLM, train the small model on it, then report agreement and speed side by side. I haven't seen anyone package that for local-LLM users.\n\nWhere is your line: 90%, 95%, or only when the disagreements are the ones you'd have fixed by hand anyway?",
+    "gpt": "# When is a 642 KB CPU classifier good enough to replace an LLM?\n\nHow closely would a 642 KB CPU classifier need to match your LLM’s labels before you stopped paying for GPU runs? I’d want a workflow that measures that agreement on texts held back from training, then lets me choose.\n\nThe pieces look promising. One author reports 94.25% accuracy on Banking77 using bge-large-en-v1.5 embeddings and logistic regression. The classifier is 642 KB and runs in 3 seconds on CPU.[1] That accuracy isn’t a measure of agreement with your LLM, though. A separate paper trains a multilingual encoder on frontier-model annotations to redact private information in 35 languages.[2] It’s an example of using a larger model’s labels to train a smaller one.\n\nI’d watch for a tool that joins those steps: label a sample, train the classifier, then report agreement and speed. Show me the texts where the models disagree, too. Would you switch at 95% agreement if the remaining errors fell on labels you rarely use?",
+    "gemini": "# Train a 642 KB CPU classifier on your local LLM's labels\n\nHow much agreement with the LLM's labels is enough before you'd swap in a 642 KB CPU classifier and stop paying for GPU runs? Many people now run a local LLM over thousands of texts for a fixed labeling or extraction task. It's slow, and it needs a GPU.\n\nThe pieces to replace that job already exist separately. On Hacker News, an author reported 94.25% accuracy on Banking77 using bge-large-en-v1.5 embeddings plus logistic regression [1]. The classifier is 642 KB and runs in 3 seconds on a CPU [1]. An arXiv paper also fine-tunes a multilingual encoder on frontier-model annotations in 35 languages to build a privacy redaction tagger [2]. A local tool could work the same way. It would take the LLM's labels on a sample and train an embedding plus logistic regression model, or a small encoder.\n\nNobody has packaged this into a workflow for the local-LLM user yet. I'd watch for one that reports two numbers: how closely the tiny model agrees with the LLM, and how much faster it runs."
+   }
+  },
+  {
+   "post": 10,
+   "name": "card-155.blog.prediction",
+   "item": "card-155",
+   "site": "blog",
+   "angle_kind": "prediction",
+   "angle": "Within a year, vLLM will ship a multi-decision scoring endpoint, and the first published audits will show that swapping candidate order flips a noticeable share of its decisions.",
+   "owner_pick": "none",
+   "comment": "Within a year...",
+   "drafts": {
+    "claude": "# vLLM will get a multi-decision scoring endpoint, and audits will show order bias\n\nWithin a year, vLLM will ship a multi-decision scoring endpoint, and the first published audits will show that swapping candidate order flips a noticeable share of its decisions.\n\nThe pieces are already moving. A vLLM pull request (#57250) is adapting Google's DiffusionGemma 26B-A4B to run structured decision tasks in a single denoising step, with several decisions read from logprobs in one forward pass [2].\n\nRouting, moderation and scoring need many small answers fast, and generation is the wrong unit for that. DuplexJev does the same thing from the research side: it feeds ASR encoder hidden states through a small connector into a frozen LLM and reads each decision as a single-token distribution over answer options [1].\n\nCheap decisions will get trusted quickly. Ai2's FairStress benchmark has 300 two-candidate scenarios across 29 domains, built to test asymmetry in decision robustness [3]. Two-candidate choices are exactly what a scoring endpoint serves. My bet is that the first audit harness to swap candidate order will find a flip rate nobody planned for. Who ships that check before production traffic does?",
+    "gpt": "# vLLM will add multi-decision scoring, and order will sway the answers\n\nWithin a year, I expect vLLM to ship a multi-decision scoring endpoint, and early audits to show candidate order flips a noticeable share of decisions.\n\nA vLLM pull request already reads multiple decisions from logprobs in one forward pass, using a single denoising step with Google’s DiffusionGemma 26B-A4B. [2]\n\nThat gives the endpoint a plausible starting point. DuplexJev also reads decisions as single-token distributions over answer options from a frozen LLM, rather than generating answers token by token. [1] But cheap decisions need checks. Ai2’s FairStress has 300 two-candidate scenarios across 29 domains and tests asymmetry in decision robustness. [3] I’d pair the endpoint with an audit that swaps candidate order and counts changed answers. That would put a number on how often the choice depends on position. My bet is that the first published results will make order checks a routine part of serving these decisions.",
+    "gemini": "# vLLM will score decisions in one pass, and candidate order will flip them\n\nWithin a year, vLLM will ship a multi-decision scoring endpoint, and the first published audits will show that swapping candidate order flips a noticeable share of its decisions. Routing and moderation don't need full text generation: they just need many small decisions answered fast.\n\nA vLLM pull request (#57250) already adapts Google's DiffusionGemma 26B-A4B for this job [2]. It runs structured decision tasks in one denoising step, with multiple decisions read from logprobs in a single forward pass.\n\nThe same shape is turning up elsewhere. Researchers built DuplexJev to feed ASR encoder hidden states through a small connector into a frozen LLM [1]. It skips autoregressive generation and reads each decision as a single-token distribution over answer options. Cheap calls like that aren't ready for production without a harness to check their stability. Ai2's FairStress benchmark tests asymmetry across 300 two-candidate decision scenarios in 29 domains [3]. Once vLLM ships its endpoint, I bet the first FairStress-style audits will show that a simple A-for-B order swap flips the winner."
+   }
+  }
+ ]
+}
