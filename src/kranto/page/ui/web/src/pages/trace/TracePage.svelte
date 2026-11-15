@@ -10,6 +10,7 @@
   import { untrack } from "svelte";
   import type { View } from "../../lib/pages.svelte";
   import { app } from "../../lib/shell.svelte";
+  import { pageUrl } from "../../lib/base";
   import { href } from "../../lib/router";
   import Virtual from "../../ui/Virtual.svelte";
   import Inspector from "./Inspector.svelte";
@@ -326,7 +327,7 @@
       <select aria-label="Stage" bind:value={stage} onchange={() => void applyFilter()}><option value="">Stage</option>{#each stagesHere as s (s)}<option value={s}>{s}</option>{/each}</select>
       <select aria-label="Kind" bind:value={kind} onchange={() => void applyFilter()}><option value="">Kind</option>{#each ["session", "turn", "tool", "subagent", "hook", "call", "event"] as k (k)}<option value={k}>{KIND[k]}</option>{/each}</select>
       {#if store?.form === "timeline"}<span class="t-seg"><button type="button" class="btn sm" aria-label="Zoom out" onclick={() => (zoom = Math.max(1, zoom / 2))}>−</button><button type="button" class="btn sm" aria-label="Zoom in" onclick={() => (zoom = Math.min(64, zoom * 2))}>+</button></span>{/if}
-      <a class="btn sm quiet dl" href={`api/trace/download?trace=${encodeURIComponent(store?.id || "")}`} download={`trace-${key}.json`}>Download (redacted)</a>
+      <a class="btn sm quiet dl" href={pageUrl(`api/trace/download?trace=${encodeURIComponent(store?.id || "")}`)} download={`trace-${key}.json`}>Download (redacted)</a>
       <span class="t-hint small muted">j k move · ← → fold · e next error · t next tool · / search</span>
     </div>
     {#if note}<p class="flash amber small" role="status">{verifyAt ? note.replace(/;?\s*open the verify session\.?$/i, ".") : note}{#if verifyAt}{" "}<button type="button" class="linkish" id="open-verify" onclick={() => { tab = "overview"; select(verifyAt!); }}>Open the verify session ›</button>{/if}{#if view.w.r.q.check}{" "}<button type="button" class="linkish" onclick={() => { words = view.w.r.q.check || ""; void applyFilter(); }}>Search the trace for {view.w.r.q.check}</button>{/if}</p>{/if}

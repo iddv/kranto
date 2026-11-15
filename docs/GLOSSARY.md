@@ -11,7 +11,7 @@ The words Kranto uses, in the app and in both repositories.
   `kranto` command and `kranto update`.
 - **the page**: the half that builds. It takes an idea through the build pipeline to a
   private GitHub repo, maintains what it published or adopted, and draws the builds part of
-  the page (mounted at `/brb/`).
+  the page (drawn at `/`; its own files and calls under `/brb/`).
 - **`afk`, `brb`, `kranto`**: the commands. `kranto` runs the app; `afk` and `brb` are each half
   on its own.
 - **Home**: where an install keeps its data. A kranto home (default `~/.kranto`) holds

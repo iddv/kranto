@@ -85,7 +85,7 @@ def test_a_write_without_a_token_is_refused(rt, fake_api, caplog):
                      headers={"authorization": "Bearer " + "0" * 43})
         assert r.status_code == 401 and "not a current" in r.json()["error"]
         assert web.get("/api/status").status_code == 200          # reads stay open
-        assert web.get("/brb/").status_code == 200
+        assert web.get("/").status_code == 200
     assert rt.store.pause_reason() is None
     assert not [c for c in fake_api.calls if c[0] == "POST"]
     assert "refused POST /pause: it carries no kranto token" in caplog.text

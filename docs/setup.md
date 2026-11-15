@@ -194,7 +194,7 @@ ssh -N -L 8765:127.0.0.1:8765 you@the-machine-running-kranto
 ## 6. Set your spend caps, then the model key and logins (person)
 
 **Spend is uncapped by default for builds.** Set a daily cap before anything can build. Open
-http://127.0.0.1:8765/brb/#/settings/spend (**Settings › Spend**, from ⚙ in the top bar) and scroll to
+http://127.0.0.1:8765/#/settings/spend (**Settings › Spend**, from ⚙ in the top bar) and scroll to
 **Builds**:
 
 - **Daily cap**: no new pitch or build starts once today's spend reaches it.
@@ -211,7 +211,7 @@ The **Caps** list also has **Project caps** (a cap per weekly check for ideas, a
 month), and **Settings › Publishing**, under **Fixes**, has a cap per fix. All are empty by default,
 which means no cap.
 
-Then click **Set up Kranto** on the start page (or open http://127.0.0.1:8765/brb/#/welcome).
+Then click **Set up Kranto** on the start page (or open http://127.0.0.1:8765/#/welcome).
 Welcome has three steps, **Model**, **First topic** and **Ready**, and then **How you write**
 (with `builds.enabled`: **Watching**, **Topics**, **Building** and **Publishing (optional)**).
 Step 1, **Which model reads for you?**, offers the ways in as boxes: **A model key** (**Paste a
@@ -392,7 +392,7 @@ you can give it an identity of its own: a GitHub App on your account, named `kra
 login>`, so comments, labels and pull requests carry a `kranto-<you>[bot]` badge and each call
 gets a token for one repository at a time.
 
-1. Open http://127.0.0.1:8765/brb/#/settings/github (**Settings › Accounts › GitHub**)
+1. Open http://127.0.0.1:8765/#/settings/github (**Settings › Accounts › GitHub**)
    on 127.0.0.1 or localhost (through your tunnel, if you use one): GitHub sends the browser
    back to that address.
 2. Click **Create Kranto's GitHub App**, read what it gets, and click **Create on GitHub**.

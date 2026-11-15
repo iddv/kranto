@@ -1,5 +1,6 @@
-"""Kranto's page (the page's server: the page, its console and trace), mounted at ``/brb/``
-(approach (a)).
+"""Kranto's page (the page's server: the page, its console and trace). The page is drawn at
+``/``; its own files, calls and terminal socket keep the internal prefix ``/brb/``, and the old
+``/brb/`` address answers 308 to ``/`` (a bookmark's ``#/…`` is kept by the browser).
 
 the page exports one plain function through its host API, ``handle(method, path, query,
 body) -> (status, content_type, body)``. When ``brb.enabled`` is set in kranto.yaml and that
@@ -25,6 +26,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -170,8 +172,29 @@ def routes(brb: Brb) -> list[Route]:
                 headers["content-encoding"] = "gzip"
         return Response(data, status_code=status, headers=headers)
 
-    return [Route("/brb", lambda r: RedirectResponse("/brb/", status_code=307)),
+    async def to_root(request: Request):
+        # the page's old address: the page is at / now; a browser keeps the #/… fragment
+        query = request.url.query
+        return RedirectResponse("/" + (f"?{query}" if query else ""), status_code=308)
+
+    return [Route("/brb", to_root), Route("/brb/", to_root), Route("/brb/index.html", to_root),
             Route("/brb/{path:path}", endpoint, methods=["GET", "HEAD", "POST"])]
+
+
+# a link of the page's document to one of its own files ("static/…", "loop/feed.xml"): relative
+# under /brb/, so the document drawn at / names them with the prefix
+_OWN_LINK = re.compile(r'((?:src|href)=")(?![a-z][a-z0-9+.-]*:|/|#)')
+
+
+async def document(brb: Brb, request: Request) -> Response:
+    """The page's document, drawn at ``/``: what ``/brb/`` served, its own files linked under
+    ``/brb/``. Its calls to its own server go there too (the page's ``lib/base.ts``)."""
+    status, ctype, data, _ = await run_in_threadpool(
+        brb.call_with_headers, "GET", "/", request.url.query, b"", request.scope.get(IDENTITY))
+    if status == 200 and ctype.startswith("text/html"):
+        data = _OWN_LINK.sub(r"\1/brb/", data.decode("utf-8")).encode("utf-8")
+    return Response(data, status_code=status,
+                    headers={"content-type": ctype, "cache-control": "no-store"})
 
 
 TERM_WS = "/brb/term/ws/{tid}"

@@ -267,7 +267,7 @@ def c_inspect(rt, args, ask, out) -> int:
     up = d.get("update")
     if up:
         from ...launcher import port_of
-        where = (f"on the page, http://127.0.0.1:{port_of(rt.cfg)}/brb/#/cub/{args.id}"
+        where = (f"on the page, http://127.0.0.1:{port_of(rt.cfg)}/#/cub/{args.id}"
                  if up.get("needs") == "house"
                  else f"kranto cub update {args.id} --apply {up['job']}")
         print(f"  update   {up.get('version')} is staged (job {up['job']}); apply it {where}"
@@ -325,7 +325,7 @@ def c_dry(rt, args, ask, out) -> int:
 
 def c_live(rt, args, ask, out) -> int:
     from ...launcher import port_of
-    url = f"http://127.0.0.1:{port_of(rt.cfg)}/brb/#/cub/{args.id}?sel=settings"
+    url = f"http://127.0.0.1:{port_of(rt.cfg)}/#/cub/{args.id}?sel=settings"
     print(f"a kind goes live on the page, with its confirm: {url}", file=out)
     return REFUSED
 
@@ -342,7 +342,7 @@ def c_update(rt, args, ask, out) -> int:
         if j["needs"] == "house":
             from ...launcher import port_of
             print(f"this update adds a permission or the cub may send: apply it on the page, "
-                  f"http://127.0.0.1:{port_of(rt.cfg)}/brb/#/cub/{args.id}", file=out)
+                  f"http://127.0.0.1:{port_of(rt.cfg)}/#/cub/{args.id}", file=out)
             return REFUSED
         if not _yes(args, ask, f"Apply {args.id} {j['cub']['version']}?"):
             return REFUSED

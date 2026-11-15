@@ -709,7 +709,7 @@ def test_the_x_client_id_goes_to_the_running_kranto_and_then_the_browser(user_ho
     assert code == 0, out.out
     assert calls == [("POST", "/api/connections/x/credentials",
                       {"client_id": "abcDEF123_-xyz789"})]
-    assert "/brb/#/settings/connections/x" in out.out and "127.0.0.1, not localhost" in out.out
+    assert "/#/settings/connections/x" in out.out and "127.0.0.1, not localhost" in out.out
     saved = json.loads((user_home / ".kranto" / wizard.SETUP_FILE).read_text())
     assert "abcDEF123" not in json.dumps(saved)                # the id is not in setup.json
 

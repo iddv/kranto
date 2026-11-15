@@ -1150,7 +1150,7 @@ def sources(run: Run) -> int:
     run.decided["sources"] = {"x": "client saved"}
     run.wrote("X's client id (kept encrypted with the connections, data/secrets/)")
     run.io.say(
-        f"  X has no device sign-in. Open http://127.0.0.1:{run.port}/brb/#/settings/"
+        f"  X has no device sign-in. Open http://127.0.0.1:{run.port}/#/settings/"
         "connections/x in your browser (127.0.0.1, not localhost), click Connect and "
         "allow read access. Then add X sources from Add source."
     )

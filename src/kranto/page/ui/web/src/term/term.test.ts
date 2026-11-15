@@ -6,13 +6,15 @@ import TerminalPanel from "./TerminalPanel.svelte";
 import { clampTermw, loadTermw, setTermw, TERMW_KEY, TERMW_MIN, termwNow } from "./TermSplit.svelte";
 
 describe("the terminal's socket", () => {
-  it("sits beside the page, ws or wss as the page, with the ticket", () => {
+  it("sits under the page's own prefix, ws or wss as the page, with the ticket", () => {
     const at = (href: string) => ({ href, protocol: new URL(href).protocol }) as Location;
-    expect(socketUrl("c3f1a9e2", "a/b", at("http://localhost:18765/brb/#/ideas"))).toBe(
+    // the document drawn at / under Kranto's server: the socket keeps the page's prefix
+    expect(socketUrl("c3f1a9e2", "a/b", at("http://localhost:18765/#/ideas"), "/brb/")).toBe(
       "ws://localhost:18765/brb/term/ws/c3f1a9e2?ticket=a%2Fb",
     );
-    expect(socketUrl("c3f1a9e2", "t", at("https://h.example/brb/"))).toBe(
-      "wss://h.example/brb/term/ws/c3f1a9e2?ticket=t",
+    // the page's small server alone: its prefix is /
+    expect(socketUrl("c3f1a9e2", "t", at("https://h.example/"), "/")).toBe(
+      "wss://h.example/term/ws/c3f1a9e2?ticket=t",
     );
   });
 

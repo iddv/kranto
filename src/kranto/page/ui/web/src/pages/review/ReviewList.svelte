@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pageUrl } from "../../lib/base";
   // Review (WORKSPACE.md 2.10): the list is the queue, the progress bar its toolbar, one row an
   // item with the grade given in its end cell; the current item is the selected row (data-cur:
   // the old module's markSel) and the pane. Keys only (QUEUE_KEYS, set as the page's keys on every
@@ -54,7 +55,7 @@
 {:else if !Q.items}
   <List title="Review" about="grading" crumb="this week's queue"><p class="empty">Loading…</p></List>
 {:else if !n}
-  <List title="Review" about="grading" crumb="this week's queue"><div class="mark-empty"><img src="static/brand/icon-192.png" alt="" width="96" height="96" /><p>Nothing waits for a grade this week. The queue fills with the cards Kranto writes this week; it is rebuilt each week.</p><a class="btn" href="#/">Go home</a></div></List>
+  <List title="Review" about="grading" crumb="this week's queue"><div class="mark-empty"><img src={pageUrl("static/brand/icon-192.png")} alt="" width="96" height="96" /><p>Nothing waits for a grade this week. The queue fills with the cards Kranto writes this week; it is rebuilt each week.</p><a class="btn" href="#/">Go home</a></div></List>
 {:else}
   <List title="Review" about="grading" crumb="this week's queue" tools={progress}>
     {#if ui.facts?.door}<div class="inpane review-card"><ReviewPane {view} /></div>{/if}

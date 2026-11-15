@@ -37,7 +37,7 @@ describe("the live feed", () => {
   it("reads again on a change, once for a burst, at most every 2 s", async () => {
     const f = live(L);
     const s = FakeSource.all[0] as FakeSource;
-    expect(s.url).toBe("api/stream");
+    expect(s.url).toBe("/api/stream"); // under the page's prefix (here "/": lib/base.ts)
     s.emit("open");
     s.emit("change", { kinds: ["builds"] });
     s.emit("change", { kinds: ["term"] });

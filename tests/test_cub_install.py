@@ -617,7 +617,7 @@ def test_the_command_line(home, tmp_path, capsys):
     assert "installed hello 1.0.0 (owner) in practice" in out and "It cannot" in out
     assert cub("list") == 0 and "hello" in capsys.readouterr().out
     assert cub("live", "hello", "book.propose") == 2
-    assert "/brb/#/cub/hello?sel=settings" in capsys.readouterr().out
+    assert "/#/cub/hello?sel=settings" in capsys.readouterr().out
     assert cub("dry", "hello", "book.propose") == 0
     assert cub("inspect", "hello") == 0 and "pinned   yes" in capsys.readouterr().out
     assert cub("check", str(src)) == 0 and "the manifest is valid" in capsys.readouterr().out

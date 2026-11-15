@@ -1,7 +1,7 @@
 # The web UI: how it is built and served
 
 Kranto's page is one HTML page (`src/kranto/page/ui/app.html`) with hash routes (`#/home`,
-`#/ideas/…`), served by `api.handle` under the server, which mounts it at `/brb/`. The page has no
+`#/ideas/…`), served by `api.handle` under the server: the document at `/`, its own files, calls and terminal socket under `/brb/` (`/brb/` itself answers 308 to `/`, and a browser keeps the `#/…` part, so an old bookmark lands on the same page). The page has no
 snapshot of its own: every page reads what it shows from the server's API (`/api/ideas`,
 `/api/today`, `/api/home`, `/api/status`…) and the page server's own few routes (the header,
 Activity, the console, traces, feedback). It is one Svelte 5 app in TypeScript, built by Vite. The shell (the

@@ -170,7 +170,7 @@ class Auth:
         return response
 
     async def open_link(self, request: Request):
-        """``GET /auth/open?code=…&next=/brb/``: the link ``kranto open`` prints."""
+        """``GET /auth/open?code=…[&next=/#/…]``: the link ``kranto open`` prints."""
         value = await run_in_threadpool(self.store.redeem, request.query_params.get("code"))
         if not value:
             return HTMLResponse(

@@ -10,6 +10,13 @@ import { onPageLoaded } from "./lib/pages.svelte";
 import { onArrive, setFetcher } from "./lib/reads.svelte";
 import { connect } from "./lib/shell.svelte";
 import { upgradeCustom } from "./lib/theme";
+import { pageUrl } from "./lib/base";
+
+// The document is drawn at "/" while the page's own server stays under its prefix: a relative
+// call ("api/term") goes there, never to the server's own /api/ of the same name.
+const fetchAt = window.fetch.bind(window);
+window.fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
+  fetchAt(typeof input === "string" ? pageUrl(input) : input, init)) as typeof window.fetch;
 
 upgradeCustom(); // a custom theme saved before it had a page of its own (lib/theme.ts)
 connect(app);

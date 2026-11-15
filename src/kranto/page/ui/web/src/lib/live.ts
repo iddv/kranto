@@ -5,6 +5,7 @@
 // whatever happens, so a missed event never leaves a page stale. A new version on the feed's
 // host event means Kranto was updated: the page reloads. the server's status and who this browser
 // is are read every 60 s.
+import { pageUrl } from "./base";
 import type { App } from "./app";
 
 export const GAP_MS = 2000;
@@ -69,7 +70,7 @@ export function live(L: Pick<App, "refresh" | "loadHost" | "loadWho">, url = "ap
       polling(true);
       return;
     }
-    const s = (es = new EventSource(url));
+    const s = (es = new EventSource(pageUrl(url)));
     s.addEventListener("open", () => {
       errors = [];
       polling(false);

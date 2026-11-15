@@ -566,7 +566,7 @@ class SourcesAPI:
         except KeyError:
             outcome = {"error": "no such provider"}
         if self.app.brb.mounted:
-            target = "/brb/#/settings/connections?" + urlencode(outcome)
+            target = "/#/settings/connections?" + urlencode(outcome)
         else:
             target = "/connections?" + urlencode(
                 {"msg": f"Connected {outcome['connected']}." if "connected" in outcome

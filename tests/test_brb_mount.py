@@ -86,12 +86,13 @@ def client(rt, **kw):
 
 def test_mounted_routes_to_handle(rt, fake_api):
     with client(rt) as web:
-        page = web.get("/brb/")
+        page = web.get("/")
         assert page.status_code == 200 and "<title>Kranto</title>" in page.text
         assert page.headers["content-type"].startswith("text/html")
         assert "frame-ancestors 'none'" in page.headers["content-security-policy"]
-        assert web.get("/brb", follow_redirects=False).headers["location"] == "/brb/"
-        assert web.get("/", follow_redirects=False).headers["location"] == "/brb/"
+        for old in ("/brb", "/brb/", "/brb/index.html"):
+            r = web.get(old, follow_redirects=False)
+            assert r.status_code == 308 and r.headers["location"] == "/", old
         r = web.get("/brb/api/echo?dir=%2Ftmp%2Fx&since=3").json()
         assert r == {"method": "GET", "query": "dir=%2Ftmp%2Fx&since=3", "body": ""}
         r = web.post("/brb/api/echo", json={"id": "i1234abcd"}).json()
@@ -121,7 +122,7 @@ def test_versioned_static_files_are_cached_for_good_and_gzipped(rt, fake_api):
         raw = web.get("/brb/static/v9.9.9/app/app-c0ffee.js",
                       headers={"accept-encoding": "identity"})
         assert "content-encoding" not in raw.headers and raw.content == big
-        page = web.get("/brb/")
+        page = web.get("/")
         assert page.headers["cache-control"] == "no-store"
     assert len(gzip.compress(big)) < len(big) // 10
 
@@ -255,18 +256,18 @@ def test_mount_refuses_cross_origin_chat_posts(rt, fake_api):
 def test_mounts_api_version_2(rt, fake_api):
     fake_api.API_VERSION = 2
     with client(rt) as web:
-        assert web.get("/brb/").status_code == 200
+        assert web.get("/").status_code == 200
 
 
 def test_shared_header_on_kranto_pages(rt, fake_api):
     with client(rt) as web:
         page = web.get("/connections").text
-    for tab in ('href="/brb/#/today">Today', 'href="/brb/#/ideas"',
-                'href="/brb/#/settings"', "/static/kranto-afk.css",
-                'href="/brb/#/library"'):
+    for tab in ('href="/#/today">Today', 'href="/#/ideas"',
+                'href="/#/settings"', "/static/kranto-afk.css",
+                'href="/#/library"'):
         assert tab in page, tab
-    assert "/brb/#/chat" not in page                 # the project chat went (the page)
-    assert "/brb/#/builds" not in page and "building" not in page     # builds left (CUT)
+    assert "/#/chat" not in page                 # the project chat went (the page)
+    assert "/#/builds" not in page and "building" not in page     # builds left (CUT)
     assert not [c for c in fake_api.calls if c[1] == "/api/header"]   # no builds' figures
     assert 'action="/pause"' in page and 'name="next" value="/connections"' in page
     assert "Kranto afk, still watching" not in page
@@ -291,19 +292,19 @@ def test_old_pages_redirect_to_their_hash_routes_when_mounted(rt, fake_api):
     """UI-v4.md 2.3: with Kranto UI mounted, the server's old page addresses answer 302 to
     the hash route that replaced them, their query kept; their forms still post where they
     did. /topics and a strike's /grade/... link (pages until) go there too."""
-    want = {"/library": "/brb/#/library",
-            "/library?topic=2&q=solar": "/brb/#/library?topic=2&q=solar",
-            "/ideas": "/brb/#/ideas", "/health": "/brb/#/settings/health",
-            "/watches": "/brb/#/watch", "/clusters": "/brb/#/library/clusters",
-            "/map": "/brb/#/library/map", "/rollups?q=x": "/brb/#/library/rollups?q=x",
-            "/obs/244": "/brb/#/library/o/244", "/obs/nope": "/brb/#/library",
-            "/topics": "/brb/#/settings", "/topics?msg=hi": "/brb/#/settings?msg=hi",
-            "/grade/message/7": "/brb/#/settings/health?message=7",
-            "/grade/observation/5": "/brb/#/library/o/5",
-            "/grade/idea/3": "/brb/#/ideas/card:3",
-            "/grade/cluster/c-1": "/brb/#/library/clusters",
-            "/grade/message/x": "/brb/#/settings/health",
-            "/grade/nope/1": "/brb/#/settings/health"}
+    want = {"/library": "/#/library",
+            "/library?topic=2&q=solar": "/#/library?topic=2&q=solar",
+            "/ideas": "/#/ideas", "/health": "/#/settings/health",
+            "/watches": "/#/watch", "/clusters": "/#/library/clusters",
+            "/map": "/#/library/map", "/rollups?q=x": "/#/library/rollups?q=x",
+            "/obs/244": "/#/library/o/244", "/obs/nope": "/#/library",
+            "/topics": "/#/settings", "/topics?msg=hi": "/#/settings?msg=hi",
+            "/grade/message/7": "/#/settings/health?message=7",
+            "/grade/observation/5": "/#/library/o/5",
+            "/grade/idea/3": "/#/ideas/card:3",
+            "/grade/cluster/c-1": "/#/library/clusters",
+            "/grade/message/x": "/#/settings/health",
+            "/grade/nope/1": "/#/settings/health"}
     with client(rt) as web:
         for path, to in want.items():
             r = web.get(path, follow_redirects=False)
@@ -311,7 +312,7 @@ def test_old_pages_redirect_to_their_hash_routes_when_mounted(rt, fake_api):
         # watches are retired: their old page opens Watch, and nothing takes their form
         assert web.post("/watches", data={"query": ""}, follow_redirects=False).status_code == 405
         assert web.get("/connections").status_code == 200
-        assert web.get("/", follow_redirects=False).headers["location"] == "/brb/"
+        assert web.get("/", follow_redirects=False).status_code == 200      # the page itself
 
 
 def test_not_mounted_when_disabled(tmp_path, store, embedder, make_client, fake_api):
@@ -319,7 +320,7 @@ def test_not_mounted_when_disabled(tmp_path, store, embedder, make_client, fake_
     with client(rt) as web:
         assert web.get("/brb/").status_code == 404
         page = web.get("/library").text
-        assert "still watching" in page and "/brb/#" not in page
+        assert "still watching" in page and "/brb/#" not in page and "/#/" not in page
         for path in ("/", "/ideas", "/health", "/watches", "/map", "/clusters", "/rollups",
                      "/topics", "/obs/1", "/grade/message/1"):
             r = web.get(path, follow_redirects=False)
@@ -369,7 +370,7 @@ def test_pause_is_watchings_alone(rt, fake_api):
         page = web.get("/connections").text
         assert ">Paused<" in page and 'action="/resume"' in page
         r = web.post("/resume", data={"next": "//evil.example/"}, follow_redirects=False)
-        assert r.headers["location"] == "/brb/#/settings/health"   # never off this site
+        assert r.headers["location"] == "/#/settings/health"   # never off this site
         assert rt.store.pause_reason() is None
     assert not [c for c in fake_api.calls if c[1] == "/api/loop/pause"]
 
@@ -395,8 +396,8 @@ def test_form_redirects_go_to_the_kranto_ui_when_mounted(rt, fake_api, tmp_path,
     assert cards.list_ideas(store)
     off = runtime(tmp_path, store, embedder, make_client, enabled=False)
     for app_rt, want in ((rt, {
-            "topics": "/brb/#/settings?msg=", "connections": "/brb/#/settings/connections?msg=",
-            "health": "/brb/#/settings/health?msg="}),
+            "topics": "/#/settings?msg=", "connections": "/#/settings/connections?msg=",
+            "health": "/#/settings/health?msg="}),
             (off, {"topics": "/topics?msg=", "connections": "/connections?msg=",
                    "health": "/health?msg="})):
         with client(app_rt) as web:
@@ -431,3 +432,28 @@ def test_brb_config(tmp_path):
         with pytest.raises(ConfigError):
             afk_config.load(tmp_path)
     assert replace(BrbConfig(), enabled=True).harness == "claude-code"
+
+
+def test_the_page_is_drawn_at_the_root_with_its_own_files_under_its_prefix(rt, fake_api):
+    """The document at / links its own files under /brb/ (they keep their addresses); an old
+    /brb/ bookmark answers 308 to / with its query, and a browser keeps the #/… part."""
+    fake_api.handle = lambda m, path, q=None, b=None: (
+        (200, "text/html; charset=utf-8",
+         b'<!doctype html><title>Kranto</title><link href="static/kranto.css">'
+         b'<script src="static/v1/app/app.js"></script><a href="#/ideas">x</a>'
+         b'<a href="https://example.com/">y</a>')
+        if path == "/" else (404, "application/json", b"{}"))
+    with client(rt) as web:
+        html = web.get("/").text
+        assert 'href="/brb/static/kranto.css"' in html and 'src="/brb/static/v1/app/app.js"' in html
+        assert 'href="#/ideas"' in html and 'href="https://example.com/"' in html
+        r = web.get("/brb/?sel=i3", follow_redirects=False)
+        assert r.status_code == 308 and r.headers["location"] == "/?sel=i3"
+
+
+def test_links_point_at_the_page_at_the_root(rt, fake_api):
+    from kranto.links import KRANTO, Links
+
+    assert KRANTO == "/#/"
+    assert Links(kranto=True, base="http://127.0.0.1:8765").idea(3).startswith(
+        "http://127.0.0.1:8765/#/")

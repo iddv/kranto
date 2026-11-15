@@ -1,10 +1,10 @@
-"""Where links back to this instance point: Kranto UI when the page is mounted at
-``/brb/``, the server's old page addresses otherwise (which, since redirect to the
-Kranto UI once it is mounted, and until then show how to install Kranto).
+"""Where links back to this instance point: the page (drawn at ``/``) when it is mounted, else
+the server's old page addresses (which redirect to the page once it is mounted, and until then
+show how to install Kranto).
 
 Delivered messages, the Atom feed and the redirects after a form all link through
-here, so moving a page is one change. Kranto UI routes on the URL fragment
-(``/brb/#/library/o/12``); a message to show after a redirect rides in the
+here, so moving a page is one change. The page routes on the URL fragment
+(``/#/library/o/12``); a message to show after a redirect rides in the
 fragment's query (``#/settings/health?msg=...``), which the UI shows as a notice.
 """
 
@@ -14,7 +14,7 @@ import importlib.util
 from dataclasses import dataclass
 from urllib.parse import urlencode
 
-KRANTO = "/brb/#/"
+KRANTO = "/#/"
 
 
 def kranto_mounted(cfg) -> bool:
