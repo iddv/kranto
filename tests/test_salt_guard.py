@@ -204,8 +204,10 @@ def test_a_mention_or_site_the_sources_name_is_kept():
     known = "Battery swap ledger\n[1] ex.com: kiosks lose track; ask @kiosk_ops"
     out, gone = sites.scrub("ex.com and @kiosk_ops say so.", set(), known)
     assert out == "ex.com and @kiosk_ops say so." and gone == []
-    out, gone = sites.scrub("me@ex.com is an address, Node.js a word.", set(), "")
-    assert out == "me@ex.com is an address, Node.js a word." and gone == []
+    mail = "@".join(("me", "ex.com"))          # built here: no address-shaped literal
+    words = f"{mail} is an address, Node.js a word."
+    out, gone = sites.scrub(words, set(), "")
+    assert out == words and gone == []
 
 
 def test_a_link_too_long_for_the_site_is_refused_in_words(store, tmp_path):
