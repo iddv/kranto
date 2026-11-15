@@ -113,7 +113,8 @@ def check(rt, body: dict) -> dict[str, Any]:
         raise ProseError("strictness is off, light or strict")
     return prose.check(_text(body), _opt(body, "site", str), prose.load(rt.cfg, rt.store),
                        kind=_opt(body, "kind", str), limits=_opt(body, "limits", dict),
-                       take=_opt(body, "take", str), strictness=body.get("strictness"))
+                       take=_opt(body, "take", str), strictness=body.get("strictness"),
+                       sources=_opt(body, "sources", str))
 
 
 def voice(rt, body: dict) -> dict[str, Any]:

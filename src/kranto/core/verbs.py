@@ -351,7 +351,9 @@ CORE: tuple[Verb, ...] = (
                  F("site", "line", "the site it is for: blog, newsletter, mastodon, bluesky, "
                                    "linkedin, threads, x or substack"),
                  F("take", "text", "the owner's own line for it: a first-person claim it does "
-                                   "not back is flagged")),
+                                   "not back is flagged"),
+                 F("sources", "text", "what it was written from: a person's name or a handle "
+                                      "these do not have is flagged")),
          page="#/settings/posting"),
     Verb("prose.voice", "Save", "Change the owner's prose profile: the voice card, samples "
          "(samples_add [{text, site}], samples_remove [ids]), the never, keep and always lists "

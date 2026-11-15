@@ -138,7 +138,7 @@
       {/if}
       {#if folded && !short}<p><button type="button" class="linkish small" id="draft-show-all" onclick={() => (all = true)}>{`Show all ${s.words} words`}</button></p>{/if}
       {#each s.extras || [] as x (x.key)}<p class="muted small draft-extra">{x.words}</p>{/each}
-      {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} id="draft-flags" />{/if}
+      {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} sources={s.sources ?? null} id="draft-flags" />{/if}
       <p class="acts" id="draft-verbs">
         {#if short && waits}
           {#if s.open}<a class="btn sm primary" id="draft-open" href={s.open} target="_blank" rel="noopener noreferrer" onclick={() => (opened = true)}>{`Open in ${s.site_word || s.site}`}</a>

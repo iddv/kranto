@@ -366,7 +366,8 @@ def short_sheet(rt, d: dict[str, Any], t: dict[str, Any] | None, group: str
     address with the draft filled in, or None) and ``open_off`` (why Open is off: the preview,
     or Mastodon's server not typed yet), ``tier`` (``open`` or ``send``), ``direct``
     (``{word, ready, why}`` when the person switched the site to Post directly) and
-    ``posted_by_you`` (the I posted it the page offers after Open). None for other drafts."""
+    ``posted_by_you`` (the I posted it the page offers after Open), ``sources`` (what it was
+    written from, for the page's check). None for other drafts."""
     if d["cub"] != SOCIAL:
         return {}
     from .. import preview
@@ -387,7 +388,10 @@ def short_sheet(rt, d: dict[str, Any], t: dict[str, Any] | None, group: str
         "parts": [{"text": p, "used": sites.count(site or site_id, p)} for p in parts],
         "limit": {"max": site.limit, "unit": site.unit} if site and site.limit else None,
         "extras": extras, "siblings": sibs, "open": None, "open_off": None,
-        "tier": "open", "direct": None, "posted_by_you": waits}
+        "tier": "open", "direct": None, "posted_by_you": waits,
+        # what it was written from (the page's check flags a name they lack); None for a
+        # draft written before Kranto kept it
+        "sources": c.get("sources") if isinstance(c.get("sources"), str) else None}
     if site is None:
         return out
     link = c.get("link") if isinstance(c.get("link"), str) else None
@@ -782,7 +786,9 @@ def write(rt, about: Any, as_: Any, *, door: str, take: Any = None,
         raise WriteError(not_written(str(exc)), 502) from None
     if isinstance(out, dict) and out.get("ok") is False:
         raise WriteError(not_written(str(out.get("say") or out.get("error") or "")))
-    return {"cub": cid, "say": (out or {}).get("say") if isinstance(out, dict) else None}
+    ref = out.get("draft_ref") if isinstance(out, dict) else None
+    return {"cub": cid, "say": (out or {}).get("say") if isinstance(out, dict) else None,
+            "draft_ref": ref if isinstance(ref, str) and ref else None}
 
 
 def _sources_of(rt, about: str) -> tuple[str | None, str, dict[str, Any]]:
@@ -820,9 +826,16 @@ def _sources_of(rt, about: str) -> tuple[str | None, str, dict[str, Any]]:
     return None, "", {}
 
 
-def _newest_blog_draft(store, after: int) -> dict[str, Any] | None:
-    r = store.query_one("SELECT * FROM cub_drafts WHERE cub = 'blog' AND service = 'sanity' "
-                        "AND id > ? ORDER BY id DESC LIMIT 1", (int(after),))
+def _blog_draft(store, ref: str | None, after: int) -> dict[str, Any] | None:
+    """The blog draft a short write links to: the one its own blog write returned (``ref``);
+    for a blog writer that returns none (an older cub), the newest written since ``after``
+    (two writes at once could then cross: the shipped writer returns its ref)."""
+    if ref:
+        r = store.query_one("SELECT * FROM cub_drafts WHERE cub = 'blog' AND ref = ? "
+                            "ORDER BY id DESC LIMIT 1", (ref,))
+    else:
+        r = store.query_one("SELECT * FROM cub_drafts WHERE cub = 'blog' AND service = 'sanity' "
+                            "AND id > ? ORDER BY id DESC LIMIT 1", (int(after),))
     if r is None:
         return None
     try:
@@ -846,8 +859,8 @@ def write_short(rt, about: str, angle: str, *, door: str) -> dict[str, Any]:
     if social.blog_target(store) is not None:
         top = store.query_one("SELECT MAX(id) AS n FROM cub_drafts")
         before = int((top["n"] if top else 0) or 0)
-        write(rt, about, "blog", door=door, angle=angle or None)
-        draft = _newest_blog_draft(store, before)
+        wrote = write(rt, about, "blog", door=door, angle=angle or None)
+        draft = _blog_draft(store, wrote.get("draft_ref"), before)
         if draft is None:
             raise WriteError("No short post was written: the blog post they link to was not "
                              "written. Activity has what happened.", 502)
