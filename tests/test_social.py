@@ -436,6 +436,23 @@ def test_an_edit_past_the_sites_limit_is_refused_in_words(store, tmp_path):
     assert t["kind"] == "post.open" and t["fields"]["text"] == "My own words."
 
 
+def test_an_edit_drops_what_kranto_took_off_the_writers_words(store, tmp_path):
+    """"Kranto took off …" described the writer's words; the person's own words replace them,
+    so the line goes, and the draft's other lines (the link) stay."""
+    set_blob(store, PostingSites.SETTING, PostingSites(sites=["bluesky"], direct={}))
+    rt = _rt(store, tmp_path)
+    social.write_all(rt, sites.choices(store), _material(), "Kiosks need ledgers.",
+                     about="card:7",
+                     complete=Model("Kiosks lose batteries, see https://spam.example/x"),
+                     profile=prose.default())
+    rt.cubs = None
+    r = store.query_one("SELECT id, content FROM cub_drafts WHERE cub = ?", (FILER,))
+    assert "removed" in [e["key"] for e in json.loads(r["content"])["extras"]]
+    out = post_api.edit_draft(rt, r["id"], {"parts": [{"text": "My own words."}]})
+    keys = [e["key"] for e in draft_of(store, out["ref"])["content"]["extras"]]
+    assert "removed" not in keys and "link" in keys
+
+
 # -- the Bluesky send, against the documented shapes ---------------------------------------------
 
 class Ctx:
