@@ -388,6 +388,10 @@ class FeatureContext:
                     summary = dict(r.result)
                     got = summary.pop("status", "ok")
                     status = got if got in ("ok", "degraded", "failed", "skipped") else "ok"
+                    # a failed or degraded result may say why (``error``): the run's reason
+                    why = summary.get("error")
+                    if status in ("failed", "degraded") and isinstance(why, str) and why:
+                        error = str(summary.pop("error"))[:300]
                 if r.stop_requested():
                     status = "skipped"
                     summary = {**summary, "stopped_by": r.stopped_by or "owner"}

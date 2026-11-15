@@ -437,3 +437,46 @@ def test_a_week_old_window_for_a_weekly_topic(news):
     since, prev = brief.window(ctx, news.topic, "weekly", datetime(2026, 9, 24, tzinfo=UTC))
     assert prev is None and since == iso(datetime(2026, 9, 17, tzinfo=UTC))
     assert iso(datetime(2026, 9, 24, tzinfo=UTC) - timedelta(days=7)) == since
+
+
+# -- a failed try keeps the good brief, and its run says it failed --------------------------------
+
+
+def test_a_failed_brief_never_takes_the_good_one_off_today_and_its_run_failed(news):
+    """With no model, Brief now for a topic with a good brief took the good one off Today, and
+    Activity listed the failed try as "Wrote a brief"."""
+    ctx = news.ctx()
+    api.toggle(ctx, {"topic_id": news.topic, "on": True})
+    news.replies = [reply([item()])]
+    good = brief.write(ctx, _topic(news), trigger="now")
+    assert good["status"] == "ok"
+    news.replies = ["no JSON here"]                       # the model's answer cannot be read
+    api.write_now(news.ctx(), {"topic_id": news.topic})
+    [t] = [x for x in api.latest(ctx, {})["topics"] if x["topic"]["id"] == news.topic]
+    assert t["brief"]["id"] == good["id"] and t["brief"]["status"] == "ok"
+    failed = t["failed"]
+    assert failed is not None and failed["id"] > good["id"] and failed["why"]
+    run = ctx.store.query_one("SELECT status, error FROM runs WHERE kind = 'news.write' "
+                              "ORDER BY rowid DESC LIMIT 1")
+    assert run["status"] == "failed" and run["error"] == failed["why"]
+
+
+def test_a_failed_brief_says_claude_code_is_missing_and_where_it_is_fixed(news):
+    ctx = news.ctx()
+    row = {"id": 9, "created_at": "2026-09-24T09:00:00Z",
+           "error": "FatalLLMError: Claude Code: Claude Code is not installed (no claude on PATH)"}
+    line = api.failed_line(ctx, row)
+    assert line["why"].startswith("Claude Code is not installed on this machine.")
+    assert line["fix"] == "settings/watching"
+    plain = api.failed_line(ctx, {**row, "error": "ValueError: the reply has no JSON object"})
+    assert plain["why"] == "the reply has no JSON object" and plain["fix"] is None
+
+
+def test_a_topic_whose_only_brief_failed_says_why(news):
+    ctx = news.ctx()
+    api.toggle(ctx, {"topic_id": news.topic, "on": True})
+    news.replies = ["no JSON here"]
+    out = brief.write(ctx, _topic(news), trigger="now")
+    assert out["status"] == "failed"
+    [t] = [x for x in api.latest(ctx, {})["topics"] if x["topic"]["id"] == news.topic]
+    assert t["brief"]["status"] == "failed" and t["failed"]["id"] == out["id"]

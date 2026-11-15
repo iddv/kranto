@@ -278,7 +278,9 @@ One story is open at a time (the first when the page opens): what happened, **Wh
 its outlets and days, its idea when it has one, and three plain buttons: **Read the story** (or
 **Write the full story**, which asks first: about 10 cents), **Write a post**, and **Idea from
 this**. Click another line, or use the keys `j` and `k`, to open another; the address keeps the open one
-(`#/news?s=<brief>.<n>`).
+(`#/news?s=<brief>.<n>`). A newer brief that could not be written (no working model, say) never
+takes a good one off Today: the good brief stays, with one line under it saying when the try
+failed, why, and a link to where it is fixed; Activity marks that run failed, with its reason.
 
 **A story's page** (`#/news/i/<brief>/<n>`; an article's old address `#/news/a/<id>` lands here) is
 the story whole: its summary, Why it matters (with the idea the full story found in it, and the

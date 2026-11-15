@@ -49,6 +49,24 @@ const ok = { id: 7, status: "ok" as const, kind: "paper", headline: "Six models"
 const IDEAS = "/api/ideas?embedding=ref";
 
 describe("News › Today: one line a story", () => {
+  it("keeps the good brief when a newer try failed, with one line under it saying why and where to fix it", async () => {
+    stub();
+    hosted();
+    const why = "Claude Code is not installed on this machine. Install it, or choose another provider on Settings › Watching.";
+    answering({ [LATEST]: { topics: [{ topic: { id: 3, name: "Robotics" }, brief: brief(), failed: { id: 13, created_at: NOW, why, fix: "settings/watching" } }] },
+      [ROWS]: rows(true), [IDEAS]: { ideas: [] } });
+    const { target, done } = await draw(NewsToday, where("news"));
+    await settle();
+    // the good brief's stories are still there
+    expect(target.querySelectorAll("section.brief li.story").length).toBeGreaterThan(0);
+    const line = target.querySelector("p.failed-try")!;
+    expect(line.textContent).toContain("A newer brief could not be written at");
+    expect(line.textContent).toContain("Claude Code is not installed on this machine");
+    expect(line.querySelector("a")?.getAttribute("href")).toBe("#/settings/watching");
+    expect(target.querySelector(".quiet-topic")).toBeNull();
+    done();
+  });
+
   it("says how much there is, opens the first story, and draws the others as one line each", async () => {
     stub();
     hosted();

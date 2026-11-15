@@ -182,13 +182,34 @@ def latest(ctx: Any, params: dict[str, Any]) -> dict[str, Any]:
         with rowsafe.row(out, "brief", t["id"], topic={"id": t["id"], "name": t["name"]}):
             if not brief.topic_setting(ctx, t["id"])["enabled"]:
                 continue
-            r = ctx.db.query_one("SELECT * FROM news_briefs WHERE topic_id = ? ORDER BY id "
-                                 "DESC LIMIT 1", (t["id"],))
+            newest = ctx.db.query_one("SELECT * FROM news_briefs WHERE topic_id = ? ORDER BY "
+                                      "id DESC LIMIT 1", (t["id"],))
+            # a failed try never takes the topic's good brief off Today: the newest ok or
+            # quiet brief stays, and the failure is one line under it (``failed``)
+            good = newest if newest is None or newest["status"] != "failed" else \
+                ctx.db.query_one("SELECT * FROM news_briefs WHERE topic_id = ? AND status IN "
+                                 "('ok', 'quiet') ORDER BY id DESC LIMIT 1", (t["id"],))
+            r = good or newest
             b = _brief(r) if r else None
+            failed = failed_line(ctx, newest) if newest is not None and \
+                newest["status"] == "failed" else None
             out.append({"topic": {"id": t["id"], "name": t["name"]},
                         "brief": {**b, "articles": _articles_of(ctx, b["id"]),
-                                  "stories": _stories(ctx, b)} if b else None})
+                                  "stories": _stories(ctx, b)} if b else None,
+                        "failed": failed})
     return {"topics": out}
+
+
+def failed_line(ctx: Any, r: Any) -> dict[str, Any]:
+    """A failed brief as Today's one line under the good one: when, why in the owner's words
+    (``model_trouble``: the provider's own trouble, said with where it is fixed), and the
+    page's route that fixes it."""
+    from kranto import model_trouble
+    error = r["error"] or ""
+    t = model_trouble.said(error, model_trouble.provider_of(getattr(ctx, "rt", None)))
+    why = t["words"] if t else (error.split(": ", 1)[-1][:200] or "no reason was given")
+    return {"id": r["id"], "created_at": r["created_at"], "why": why,
+            "fix": t["fix"] if t else None}
 
 
 def today(ctx: Any, params: dict[str, Any]) -> dict[str, Any]:
@@ -321,10 +342,15 @@ def write_now(ctx: Any, fields: dict[str, Any]) -> dict[str, Any]:
 
     def work() -> None:
         try:
-            with ctx.run("news.write", subject=("topic", topic_id, topic.get("name"))):
+            with ctx.run("news.write", subject=("topic", topic_id, topic.get("name"))) as run:
                 out = brief.write(ctx, topic, trigger="now")
                 if out is not None and out["status"] == "ok":
                     articles.run_due(ctx, [topic])
+                elif out is not None and out["status"] == "failed":
+                    # the run failed with the brief, its reason in words (Activity listed a
+                    # failed try as "Wrote a brief")
+                    run.result = {"status": "failed", "brief_id": out["id"],
+                                  "error": failed_line(ctx, out)["why"]}
         except Exception:  # noqa: BLE001 - written as a failed brief or logged
             ctx.log.exception("Brief now failed for topic %s", topic_id)
 
