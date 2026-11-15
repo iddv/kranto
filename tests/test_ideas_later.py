@@ -136,3 +136,43 @@ def test_idea_later_is_a_verb_of_every_door():
     assert v is not None and v.path == "/api/ideas/{idea_id}/later" and v.method == "POST"
     assert v.subject == "idea" and v.ladder == "reversible"
     assert [f.name for f in v.fields] == ["days"]
+
+
+def test_later_on_a_card_it_cannot_put_off_says_so_and_changes_nothing(rt):  # noqa: F811
+    # a passed card (or a posted one) stays where it is: never "Later: done" with a state the
+    # card does not have
+    n = _card(rt)
+    with _web(rt) as web:
+        assert web.post("/api/feedback", json={"target": "idea", "target_id": str(n),
+                                               "value": "not_useful"}).status_code == 200
+        r = web.post(f"/api/ideas/{n}/later", json={"days": 7})
+        assert r.status_code == 409, r.text
+        assert r.json()["error"] == f"card #{n} is passed: Later does not apply"
+        assert web.get(f"/api/ideas/{n}").json()["state"] == "passed"
+    assert rt.store.query("SELECT id FROM outcomes WHERE idea_id = ?", (n,)) == []
+
+
+def test_an_assistants_later_is_recorded_as_the_assistant_and_told_truly(rt):  # noqa: F811
+    from kranto import tokens
+    from kranto.web.app import create_app
+    n = _card(rt)
+    tokens.Store().ensure_doors()
+    mcp = {"authorization": "Bearer " + tokens.Store().value("mcp")}
+    app = create_app(rt)
+    with web_client(app, "http://127.0.0.1:8765", signed_in=False) as web:
+        r = web.post("/api/verbs/idea.later", headers=mcp,
+                     json={"subject": n, "fields": {"days": 7}, "client": "codex"})
+        assert r.status_code == 200 and r.json()["ok"], r.text
+        assert r.json()["answer"]["state"] == "later"
+    with web_client(app, "http://127.0.0.1:8765") as web:
+        card = web.get(f"/api/ideas/{n}").json()
+        assert card["state"] == "later" and card["later_until"]
+        assert web.post("/api/feedback", json={"target": "idea", "target_id": str(n),
+                                               "value": "not_useful"}).status_code == 200
+    rows = rt.store.query("SELECT source FROM outcomes WHERE idea_id = ?", (n,))
+    assert [r["source"] for r in rows] == ["assistant"]
+    with web_client(app, "http://127.0.0.1:8765", signed_in=False) as web:
+        r = web.post("/api/verbs/idea.later", headers=mcp, json={"subject": n, "fields": {}})
+    out = r.json()
+    assert not out["ok"], out
+    assert out["say"] == f"Later did not happen: card #{n} is passed: Later does not apply"

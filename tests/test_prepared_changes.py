@@ -99,3 +99,22 @@ def test_a_prepared_row_carries_its_sentence_and_every_change(rt):  # noqa: F811
     labels = [c["label"] for c in row["changes"]]
     assert labels == ["Voice card", "Salt"]
     assert "samples_add" not in row["says"]
+
+
+def test_a_press_that_only_started_work_says_started_never_done():
+    from kranto.core import verbs
+    from kranto.web.verbs_api import VerbsAPI, started_only
+    write = verbs.get("post.write")
+    assert write is not None
+    running = {"say": "Writing the draft. It will be on Post in about a minute.",
+               "job": {"key": "post:short:card:1", "state": "running"}}
+    out = VerbsAPI._answer(None, write, 200, running, None, {"about": "card:1"}, "mcp:x")
+    assert out["ok"] and out["started"]
+    assert out["say"].startswith("Write a post: started, not finished yet.")
+    assert ": done" not in out["say"]
+    brief = {"started": True, "topic_id": 2, "running": True}
+    assert started_only(brief) and not started_only({**brief, "running": False})
+    done = VerbsAPI._answer(None, write, 200, {"job": {"state": "done"}}, None, {}, "mcp:x")
+    assert done["say"].startswith("Write a post: done.") and "started" not in done
+    for shape in (None, [], "x", {"job": None}, {"job": "running"}):
+        assert not started_only(shape)

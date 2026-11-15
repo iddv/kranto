@@ -88,6 +88,17 @@ def why_of(status: int, answer: Any, title: str = "") -> str:
     return text
 
 
+def started_only(answer: Any) -> bool:
+    """Whether a route's answer says it only started work that runs on (a job still running:
+    Write a post's ``{job: {state: running}}``, Brief now's ``{started, running: true}``)."""
+    if not isinstance(answer, dict):
+        return False
+    job = answer.get("job")
+    if isinstance(job, dict) and job.get("state") in ("running", "queued"):
+        return True
+    return answer.get("running") is True
+
+
 class VerbError(Exception):
     """A verb refused; ``refusal`` is its kind for the usage events (never its words)."""
 
@@ -766,13 +777,25 @@ class VerbsAPI:
             sid = got if isinstance(got, str | int) and not isinstance(got, bool) else None
         page = verbs.fill(verb.page, sid, fields)
         why = None if ok else why_of(status, answer, verb.title)
+        started = ok and started_only(answer)
+        if started:
+            # the press only started work in the background (Write a post, Brief now): "done"
+            # would say the draft or the brief exists when it may still fail
+            said = answer.get("say") if isinstance(answer, dict) else None
+            say = (f"{verb.title}: started, not finished yet."
+                   + (f" {said}" if isinstance(said, str) and said.strip() else "")
+                   + f" When it is done it shows on {page}; if it fails, Activity and Needs you "
+                     "say why.")
+        else:
+            say = (f"{verb.title}: done. It shows on {page}." if ok else
+                   f"{verb.title} did not happen: {why}")
         out: dict[str, Any] = {
             "ok": ok, "verb": verb.kind, "status": status,
             "subject": {"kind": skind or verb.subject, "id": sid},
             "page": page, "mark": verbs.fill(verb.mark, sid, fields), "by": by,
-            "undo": verb.undo, "answer": answer,
-            "say": (f"{verb.title}: done. It shows on {page}." if ok else
-                    f"{verb.title} did not happen: {why}")}
+            "undo": verb.undo, "answer": answer, "say": say}
+        if started:
+            out["started"] = True
         if not ok:
             out["error"] = why          # PAR: the words every client reads first
         if isinstance(answer, dict) and answer.get("_run"):

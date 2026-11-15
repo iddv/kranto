@@ -465,8 +465,24 @@ class IdeasAPI:
         if body is None:
             return _error(f"expected a JSON object under {MAX_JSON_BYTES} bytes")
         days = body.get("days", outcomes.LATER_DAYS)
+        # who decided: the command line, an assistant over its door (kranto mcp, the console,
+        # an agent: it said "ui" for all of them), else the page
         by = verbs.acting_by()
-        source = "cli" if by == "cli" else "ui"
+        source = "cli" if by == "cli" else "ui" if by in (None, "", "ui") else "assistant"
+
+        def state_now() -> str | None:
+            card = next((r for r in read_ideas(self.rt.store, grading=self._grading())
+                         if r["id"] == idea_id), None)
+            return None if card is None else str(card.get("state") or "waiting")
+        # Later puts off a card that waits (or brings back one put off); a card already posted
+        # or passed stays where it is, so the answer says so instead of "Later: done" with a
+        # state the card does not have
+        before = await run_in_threadpool(state_now)
+        if before is None:
+            return _error(f"no idea card #{idea_id}", 404)
+        if before not in ("waiting", "later"):
+            return JSONResponse({"error": f"card #{idea_id} is {before}: Later does not apply",
+                                 "state": before}, status_code=409)
         try:
             got = await run_in_threadpool(outcomes.later, self.rt.store, idea_id, days,
                                           source=source)
@@ -474,9 +490,11 @@ class IdeasAPI:
             return _error(str(exc), 404)
         except ValueError as exc:
             return _error(str(exc))
-        until = outcomes.later_until({"decision": got})
-        return JSONResponse({"id": idea_id, "state": "later" if until else "waiting",
-                             "later_until": until, "outcome": got})
+        # the answer is the card as the next read shows it, never the row just written
+        after = await run_in_threadpool(state_now) or "waiting"
+        until = outcomes.later_until({"decision": got}) if after == "later" else None
+        return JSONResponse({"id": idea_id, "state": after, "later_until": until,
+                             "outcome": got})
 
     def get_idea(self, request: Request) -> Response:
         from .app import path_id

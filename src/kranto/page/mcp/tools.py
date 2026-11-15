@@ -161,16 +161,72 @@ def _dict(x: object) -> dict:
     return x if isinstance(x, dict) else {}
 
 
+def _n(n: int, one: str, many: str | None = None) -> str:
+    return f"{n} {one if n == 1 else (many or one + 's')}"
+
+
 def home_needs_you(c: Client) -> dict:
-    """What waits for the owner with builds off: the drafts on Post (each with whether its
-    account is connected: without one it is copied, not sent) and the items an assistant
-    prepared, from ``/api/home`` and ``/api/post``. Sending is always the owner's click."""
-    h, p = _afk_read(c, "/api/home"), _afk_read(c, "/api/post")
+    """What waits for the owner, as the page's Needs you lists it: the drafts on Post (each with
+    whether its account is connected: without one it is copied, not sent), the writes that failed
+    with their reason, the changes an assistant prepared (each in one sentence), the proposed
+    sources, the sources failing or worth removing, what waits for a grade, what Kranto warns
+    about and its messages (the heartbeat). Sending is always the owner's click. (The second
+    outside try: this listed drafts and prepared items only, where the page had six kinds.)"""
+    h, p, t = _afk_read(c, "/api/home"), _afk_read(c, "/api/post"), _afk_read(c, "/api/today")
+    prep, act = _afk_read(c, "/api/prepared"), _afk_read(c, "/api/activity")
+    queue = _afk_read(c, "/api/review/queue")
     drafts = [{"id": d.get("id"), "kind": d.get("word") or d.get("kind"), "title": d.get("title"),
                "fact": d.get("fact"), "account": bool(d.get("account")),
                "open": f"#/post/d/{d.get('id')}"} for d in p.get("drafts") or []
               if isinstance(d, dict)]
-    return {"sentence": h.get("sentence"), "waiting": h.get("waiting"), "drafts": drafts}
+    failed = [{"what": "Write a post", "about": f.get("about"), "title": f.get("title"),
+               "why": f.get("error"), "at": f.get("at"), "open": "#/post"}
+              for f in p.get("failed") or [] if isinstance(f, dict) and not f.get("dismissed")]
+    prepared = [{"id": r.get("uuid"), "what": r.get("says") or r.get("title"),
+                 "by": r.get("by_words"), "changes": [
+                     f"{x.get('label')}: {x.get('value')}" for x in r.get("changes") or []
+                     if isinstance(x, dict)],
+                 "open": r.get("page") or "#/needs", "approve": "on the page only"}
+                for r in prep.get("prepared") or []
+                if isinstance(r, dict) and r.get("state") == "open"]
+    proposed = [{"topic": x.get("name"), "topic_id": x.get("id"), "sources": x.get("proposed"),
+                 "open": "#/watch/sources?status=proposed"}
+                for x in t.get("topics") or [] if isinstance(x, dict) and x.get("proposed")]
+    failing = [{"source": f.get("label"), "runs": f.get("failing_runs"), "why": f.get("error"),
+                "open": f"#/settings/sources/{f.get('id')}"}
+               for f in t.get("sources_failing") or [] if isinstance(f, dict)]
+    removing = [{"source": r.get("label"), "open": f"#/settings/sources/{r.get('id')}"}
+                for r in t.get("sources_to_remove") or [] if isinstance(r, dict)]
+    review = [x for x in queue.get("items") or []
+              if isinstance(x, dict) and x.get("target") != "build"]
+    warns = [{"what": i.get("title") or i.get("id"), "why": i.get("error") or i.get("words"),
+              "open": "#/activity"} for i in act.get("incidents") or [] if isinstance(i, dict)]
+    warns += [{"what": f"{f.get('title')} is failing", "why": f.get("error"), "open": "#/activity"}
+              for f in act.get("failing") or [] if isinstance(f, dict)]
+    messages = [{"title": m.get("title"), "at": m.get("created_at"),
+                 "open": f"#/needs?sel=m{m.get('id')}"}
+                for m in t.get("messages") or [] if isinstance(m, dict)]
+    n_prop = sum(int(x["sources"] or 0) for x in proposed if isinstance(x["sources"], int))
+    parts = [s for s in (
+        _n(len(drafts), "draft waits", "drafts wait") if drafts else "",
+        (_n(len(failed), "write failed", "writes failed") + ": " + "; ".join(
+            str(f["why"] or "no reason given") for f in failed[:2])) if failed else "",
+        _n(len(prepared), "prepared change waits", "prepared changes wait") + " for your yes"
+        if prepared else "",
+        f"{_n(n_prop, 'proposed source')} for {_n(len(proposed), 'topic')}" if proposed else "",
+        _n(len(failing), "source is failing", "sources are failing") if failing else "",
+        _n(len(removing), "source to remove or keep", "sources to remove or keep")
+        if removing else "",
+        f"{_n(len(review), 'thing waits', 'things wait')} for a grade" if review else "",
+        _n(len(warns), "warning") if warns else "",
+        _n(len(messages), "message") if messages else "") if s]
+    said = ("Needs you: " + "; ".join(parts) + ".") if parts else "Nothing needs you now."
+    return {"sentence": h.get("sentence"), "said": said, "waiting": h.get("waiting"),
+            "drafts": drafts, "failed": failed, "prepared": prepared,
+            "proposed_sources": proposed, "sources_failing": failing,
+            "sources_to_remove": removing,
+            "review": {"count": len(review), "open": "#/review"} if review else None,
+            "warnings": warns, "messages": messages}
 
 
 def kranto_status(c: Client) -> dict:
@@ -473,10 +529,13 @@ READS = {
     "kranto_status": (kranto_status, "Kranto at a glance: the home's sentence, what waits for a "
                      "yes, today's brief by topic, the new ideas and the quiet line (topics, "
                      "sources, the next run).", _obj({})),
-    "kranto_needs_you": (kranto_needs_you, "What waits for the owner now: the drafts on Post (each "
-                        "says whether its account is connected; without one it is copied, not "
-                        "sent) and what an assistant prepared. Sending is always the owner's "
-                        "click on the page.", _obj({})),
+    "kranto_needs_you": (kranto_needs_you, "What waits for the owner now, as the page's Needs you "
+                        "lists it: the drafts on Post (each says whether its account is "
+                        "connected; without one it is copied, not sent), the writes that failed "
+                        "and why, the changes an assistant prepared (each in one sentence: only "
+                        "the owner approves them, on the page), the proposed sources, sources "
+                        "failing or to remove, what waits for a grade, warnings and messages. "
+                        "Sending is always the owner's click on the page.", _obj({})),
     "kranto_list_ideas": (kranto_list_ideas, "The idea cards as Ideas lists them, in the owner's "
                          "order (the first waiting card is the one to look at first), each with "
                          "where it sits (waiting, later, posted, passed) and why it ranks there; "
@@ -714,13 +773,58 @@ def run_verb(c: Client, kind: str, args: dict, verb: dict | None = None) -> dict
         if not isinstance(err, str) or not err.strip() or err.lstrip().startswith(("{", "[")):
             err = f"Kranto answered {status} and gave no reason"
         raise ToolError(f"{kind}: {' '.join(err.split())[:400]}")
-    keep = ("say", "ok", "prepared", "page", "mark", "run", "subject", "undo", "why", "by")
+    keep = ("say", "ok", "prepared", "page", "mark", "run", "subject", "undo", "why", "by",
+            "started")
     res = {k: out.get(k) for k in keep if isinstance(out, dict) and out.get(k) is not None}
     answer = out.get("answer") if isinstance(out, dict) else None
     if isinstance(answer, dict):
         res["answer"] = doc(f"{kind}'s answer", {k: v for k, v in answer.items()
                                                  if k not in ("_run",)})
+        if res.get("started") and kind == "post.write":
+            res.update(_write_result(c, answer))
     return res
+
+
+WRITE_WAIT = 25.0            # seconds a Write a post waits for its draft before it says started
+WRITE_POLL = 2.0
+
+
+def _write_result(c: Client, answer: dict, _sleep=None, _clock=None) -> dict:
+    """A Write a post the server only started: wait a little for its job, then say what happened
+    (the draft waits on Post, or why none was written); still running, it stays "started" with
+    where to look (the second outside try: "Write a post: done" while the job still ran, and then
+    failed)."""
+    import time
+    sleep, clock = _sleep or time.sleep, _clock or time.monotonic
+    job = answer.get("job") if isinstance(answer.get("job"), dict) else {}
+    key = str(job.get("key") or "")
+    _, as_, about = (key.split(":", 2) + ["", ""])[:3] if key.startswith("post:") else ("", "", "")
+    if c.afk_get is None or not about:
+        return {}
+    end = clock() + WRITE_WAIT
+    state, error = "running", None
+    while clock() < end:
+        sleep(WRITE_POLL)
+        try:
+            status, got = c.afk_get("/api/post/write", {"about": about, "as": as_})
+        except ToolError:
+            break
+        if status != 200 or not isinstance(got, dict):
+            break
+        state, error = str(got.get("state") or "running"), got.get("error")
+        if state != "running":
+            break
+    if state == "done":
+        return {"say": "Write a post: done. The draft waits on #/post; nothing is sent until the "
+                       "owner chooses to.", "started": False, "ok": True}
+    if state == "failed":
+        why = " ".join(str(error or "it gave no reason").split())[:300]
+        return {"say": f"Write a post did not happen: {why}. It is on #/post with its reason "
+                       "(kranto_outcomes says it too).", "started": False, "ok": False,
+                "error": why}
+    return {"say": "Write a post: started, not finished yet. The draft shows on #/post when it is "
+                   "done; kranto_needs_you lists it then, and kranto_outcomes says why if it "
+                   "failed."}
 
 
 def _read_path(path: str) -> str:

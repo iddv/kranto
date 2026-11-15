@@ -80,6 +80,71 @@ def test_status_and_needs_you_read_the_home_and_post():
     assert "drafts on Post" in T.READS["kranto_needs_you"][1]
 
 
+def test_needs_you_lists_what_the_pages_needs_you_lists():
+    # the second outside try: drafts and prepared only, where the page had a failed write,
+    # proposed sources, a review and the heartbeat as well
+    post = {**POST, "failed": [{"about": "card:2", "title": "VAT payback", "at": "t",
+                                "error": "Claude Code is not installed on this machine"},
+                               {"about": "card:9", "error": "gone", "dismissed": True}]}
+    today = {"topics": [{"id": 1, "name": "Home battery storage", "proposed": 8},
+                        {"id": 2, "name": "Local-first software", "proposed": 6},
+                        {"id": 3, "name": "Quiet", "proposed": 0}],
+             "sources_failing": [{"id": 4, "label": "A feed", "failing_runs": 3, "error": "404"}],
+             "sources_to_remove": [], "messages": [{"id": 5, "title": "Heartbeat: all quiet",
+                                                    "created_at": "t"}]}
+    prepared = {"prepared": [{"uuid": "u1", "state": "open", "title": "Save",
+                              "says": "Change your voice card and set Salt to salty.",
+                              "by_words": "by Codex (outside)", "page": "#/settings/posting",
+                              "changes": [{"label": "Voice card", "value": "Short."},
+                                          {"label": "Salt", "value": "salty"}]},
+                             {"uuid": "u2", "state": "pressed", "title": "Save"}]}
+    queue = {"items": [{"target": "idea", "id": 2}, {"target": "build", "id": 1}]}
+    activity = {"incidents": [], "failing": []}
+    c = afk_client({"/api/home": HOME, "/api/post": post, "/api/today": today,
+                    "/api/prepared": prepared, "/api/review/queue": queue,
+                    "/api/activity": activity})
+    ny = T.call(c, "kranto_needs_you")
+    assert [f["why"] for f in ny["failed"]] == ["Claude Code is not installed on this machine"]
+    assert ny["prepared"] == [{"id": "u1", "what": "Change your voice card and set Salt to salty.",
+                               "by": "by Codex (outside)",
+                               "changes": ["Voice card: Short.", "Salt: salty"],
+                               "open": "#/settings/posting", "approve": "on the page only"}]
+    assert [(p["topic"], p["sources"]) for p in ny["proposed_sources"]] == [
+        ("Home battery storage", 8), ("Local-first software", 6)]
+    assert ny["sources_failing"][0]["why"] == "404"
+    assert ny["review"] == {"count": 1, "open": "#/review"}
+    assert ny["messages"][0]["title"] == "Heartbeat: all quiet"
+    assert ny["said"] == ("Needs you: 1 draft waits; 1 write failed: Claude Code is not installed "
+                          "on this machine; 1 prepared change waits for your yes; 14 proposed "
+                          "sources for 2 topics; 1 source is failing; 1 thing waits for a grade; "
+                          "1 message.")
+
+
+def test_write_a_post_says_started_and_then_what_happened():
+    started = {"ok": True, "started": True, "say": "Write a post: started, not finished yet.",
+               "answer": {"say": "Writing the draft.",
+                          "job": {"key": "post:short:card:1", "state": "running"}}}
+    for job, want, ok in (({"state": "done"}, "Write a post: done.", True),
+                          ({"state": "failed", "error": "Claude Code is not installed on this "
+                                                        "machine"},
+                           "Write a post did not happen: Claude Code is not installed", False),
+                          ({"state": "running"}, "Write a post: started, not finished yet.", None)):
+        asked = []
+
+        def afk_get(p, q=None, job=job):
+            asked.append((p, q))
+            return 200, job
+        c = T.Client(get=lambda p, q=None: (404, {}), post=lambda p, b: (404, {}),
+                     afk_get=afk_get, afk_post=lambda p, b: (200, started))
+        clock = iter(range(0, 100, 5))
+        got = T._write_result(c, started["answer"], _sleep=lambda s: None,
+                              _clock=lambda: next(clock))
+        assert got["say"].startswith(want), got
+        assert not got["say"].startswith("Write a post: done") or ok is True
+        assert got.get("ok") is ok
+        assert asked[0] == ("/api/post/write", {"about": "card:1", "as": "short"})
+
+
 def test_without_a_host_the_cards_and_the_library_say_so():
     c = T.Client(get=lambda p, q=None: (404, {}), post=lambda p, b: (404, {}))
     for name, args in (("kranto_list_ideas", {}), ("kranto_get_idea", {"idea": "7"}),
