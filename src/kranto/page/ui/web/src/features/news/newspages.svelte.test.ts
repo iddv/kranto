@@ -137,7 +137,7 @@ describe("News › Today: one line a story", () => {
     done();
   });
 
-  // Gemini 19: a card only on the same map theme read as "Idea from this"
+  // a card only on the same map theme read as "Idea from this"
   it("says how a story's idea was found, on the brief's item and the story's page", async () => {
     expect(ideaLabel(1)).toBe("Idea from this story");
     expect(ideaLabel(2)).toBe("An idea that cites this story");

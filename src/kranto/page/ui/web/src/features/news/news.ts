@@ -129,7 +129,7 @@ export interface StoryIdea {
   /** brief:<id>:<item>, the item counted from 1 */
   story: string;
 }
-/** how a story's idea was found, said on the brief's item and the story's page (Gemini 19: a
+/** how a story's idea was found, said on the brief's item and the story's page (a
  * card only on the same map theme read as made from the story): rule 1 a card made from this
  * story, 2 a card citing its evidence, 3 a card of its theme */
 export function ideaLabel(rule: number | null | undefined): string {

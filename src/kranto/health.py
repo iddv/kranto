@@ -246,8 +246,8 @@ def served(app: Any, now: datetime | None = None) -> dict[str, Any]:
 def model_missing(rt: Any) -> str | None:
     """Why the watcher's model cannot be called right now, when Claude Code is the model and
     this machine's check (``setup.logins``, cached) says it is not installed or not signed in;
-    None otherwise. The bar said Healthy, and Watching "Works", with every model call failing
-    (Gemini 7). A key provider's trouble is the key's incident, from its first failure."""
+    None otherwise. The bar said Healthy, and Watching "Works", with every model call failing.
+    A key provider's trouble is the key's incident, from its first failure."""
     try:
         if rt.cfg.llm.provider_name != "claude_code":
             return None

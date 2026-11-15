@@ -50,7 +50,7 @@ export const KEYPROV = $state<{ v: Choice | null }>({ v: null });
 /** the watching model's state and line, for the row, the pane and onboarding: which provider,
  * and its key. ``claude``: Claude Code's login as the server read it just now (/api/setup's
  * logins.claude): when Claude Code is the model and it is missing or signed out, that wins
- * over the last stored check (Gemini 7: "Works … signed in, 4 h ago" with Claude Code gone) */
+ * over the last stored check ("Works … signed in, 4 h ago" with Claude Code gone) */
 export function keyWords(k: KeyState, now: number = Date.now(), claude: { ok?: boolean; installed?: boolean } | null = null): { st: St; line: string } {
   const t = k.test, who = LABEL[providerOf(k)] || k.provider;
   if (k.provider === "claude_code" && claude && claude.ok === false) {

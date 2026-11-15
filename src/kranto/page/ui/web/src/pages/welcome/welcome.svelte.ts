@@ -47,7 +47,7 @@ export function modelWorks(s: ReadyFacts): boolean {
   return !(s.key.test && s.key.test.ok === false);
 }
 /** Ready's first line: a time only when a brief can come by itself; else what is still missing
- * and where it is set (Codex, Gemini: "In about 5 minutes" with no topic and no model) */
+ * and where it is set (it said "In about 5 minutes" with no topic and no model) */
 export function briefLine(s: ReadyFacts): { text: string; href: string | null; link: string | null } {
   const missing: string[] = [];
   let href: string | null = null, link: string | null = null;

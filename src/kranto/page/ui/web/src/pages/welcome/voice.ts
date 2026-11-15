@@ -21,8 +21,8 @@ export const switchLabel = (k: string): string => LABELS[k] || k;
 export function splitSamples(text: string): string[] {
   return text.split(/^\s*-{3,}\s*$/m).map((s) => s.trim()).filter((s) => s.length >= 20).slice(0, 5);
 }
-/** the samples line under the box: how many are kept, and those left out and why (Gemini 14:
- * a short sample was dropped without a word) */
+/** the samples line under the box: how many are kept, and those left out and why (a short
+ * sample was dropped without a word) */
 export function samplesLine(text: string): string {
   const parts = text.split(/^\s*-{3,}\s*$/m).map((s) => s.trim()).filter(Boolean);
   const kept = splitSamples(text).length;

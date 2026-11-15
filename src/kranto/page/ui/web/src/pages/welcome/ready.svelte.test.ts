@@ -142,7 +142,7 @@ describe("Welcome", () => {
   });
 });
 
-// Codex, Gemini: Ready promised "The first brief in about 5 minutes" with no topic and no model
+// Ready promised "The first brief in about 5 minutes" with no topic and no model
 describe("Ready's first brief", () => {
   it("promises a time only when a brief can come; else it says what is still missing", async () => {
     stubbed();
