@@ -2398,6 +2398,21 @@ class PostAccount(TypedDict):
     platform: str | None
 
 
+class PostSibling(TypedDict):
+    """One site of a write's short posts: its newest draft, the site, its name and where the
+    draft stands (``waiting``, ``sent``, ``earlier``)."""
+    id: int
+    site: str
+    word: str
+    state: str
+
+
+class PostSitesLine(TypedDict):
+    """Post's one line about where short posts go, and how many sites are ticked."""
+    line: str
+    ticked: int
+
+
 class PostDraft(TypedDict):
     """One draft's row on Post: ``kind`` the account it goes through (``newsletter``,
     ``mastodon``, ``blog``, else the service's name), ``word`` its kind in a word; ``ticket`` the
@@ -2421,6 +2436,14 @@ class PostDraft(TypedDict):
     note: str | None
     link: str | None
     account: bool
+    # a short post's own (``post_api._short_row``): its site, the write it belongs to, how it
+    # goes (``open``: the person posts it in the site; ``direct``: Kranto posts it after their
+    # yes), and on Post's waiting row, every site of the write
+    site: NotRequired[str]
+    site_word: NotRequired[str]
+    write: NotRequired[str | None]
+    way: NotRequired[Literal["open", "direct"]]
+    sites: NotRequired[list[PostSibling]]
 
 
 # A Write a post that wrote no draft: ``about`` and ``as`` as it was asked (Try again
@@ -2439,6 +2462,7 @@ class Post(TypedDict):
     sent: list[PostDraft]
     earlier: list[PostDraft]
     accounts: list[PostAccount]
+    sites: PostSitesLine
     failed: list[PostFailed]
 
 
@@ -2461,6 +2485,28 @@ class PostLimit(TypedDict):
     unit: str
 
 
+class PostCounted(TypedDict):
+    """One post of a short post's draft, with its length counted the site's way."""
+    text: str
+    used: int
+
+
+class PostExtra(TypedDict):
+    """What else goes with a short post's words, in a line: the link, the card, what Kranto
+    took off. ``drop``: the person may remove it."""
+    key: str
+    words: str
+    drop: bool
+
+
+class PostDirect(TypedDict):
+    """Post directly, when the person switched the site to it: the button's words, whether the
+    account is connected, and why not."""
+    word: str
+    ready: bool
+    why: str | None
+
+
 class PostSheet(PostDraft):
     """``GET /api/post/d/{id}``: a draft's row with its group, its words as markdown (what Copy
     and Download give), the file name Download uses, its length and its account."""
@@ -2477,6 +2523,58 @@ class PostSheet(PostDraft):
     edited: bool
     edited_from: int | None
     original_draft: int
+    # a short post's draft page (``post_api.short_sheet``)
+    parts: NotRequired[list[PostCounted]]
+    extras: NotRequired[list[PostExtra]]
+    siblings: NotRequired[list[PostSibling]]
+    open: NotRequired[str | None]
+    open_off: NotRequired[str | None]
+    tier: NotRequired[Literal["open", "send"]]
+    direct: NotRequired[PostDirect | None]
+    posted_by_you: NotRequired[bool]
+
+
+class PostingSite(TypedDict):
+    """One site on Settings › Posting: the ways it can go (``open``, ``direct``), the person's
+    choices, the posting account when Kranto can post there, and its limit."""
+    id: str
+    name: str
+    ways: list[str]
+    ticked: bool
+    direct: bool
+    can_direct: bool
+    account: str | None
+    account_state: str
+    connection: str | None
+    needs: str | None
+    instance: str | None
+    limit: int
+    unit: str
+    disclose: bool
+
+
+class PostingGone(TypedDict):
+    """A site Kranto does not offer, with why, and what would make it possible."""
+    id: str
+    name: str
+    why: str | None
+    later: str | None
+
+
+class PostingBlog(TypedDict):
+    """The person's own site (Sanity), step one of Write a post."""
+    state: str
+    account: str | None
+    post_url: str | None
+
+
+class Posting(TypedDict):
+    """``GET /api/post/sites`` (Settings › Posting): every site Kranto offers with the person's
+    choices, the ones it does not offer, the disclosure line, and the blog."""
+    sites: list[PostingSite]
+    not_offered: list[PostingGone]
+    disclosure: str
+    blog: PostingBlog
 
 
 class PostEdited(TypedDict):
@@ -2494,6 +2592,7 @@ RETURNS: dict[str, type] = {
     "/api/home": HomeToday,
     "/api/post": Post,
     "/api/post/d/{id}": PostSheet,
+    "/api/post/sites": Posting,
     "/api/status": Status,
     "/api/topics": Topics,
     "/api/sources": Sources,

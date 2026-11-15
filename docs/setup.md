@@ -292,6 +292,14 @@ forget <post URL>` removes one at once. Without an X developer account, an xAI k
 instead (`python -m kranto.cli provider xai --key-stdin`, then **X / Twitter › Search through Grok** in Add
 source; xAI bills $5 per 1,000 posts Grok reads, plus the model's tokens).
 
+A post writer can run on its own model, apart from the models that watch your sources
+(`docs/prose.md`, "The writer's model"). For a GPT model, paste an OpenAI key with
+`kranto provider openai --key-stdin` (it is tested, spending nothing, and kept as
+`OPENAI_API_KEY` in the home's `.env` only when it works), then set the writer's model, for
+example `{"writer_model": {"blog": {"provider": "openai", "model": "<a model id>"}}}` with the
+verb `prose.voice`. The key is used for that writer only, never for watching; no writer model is
+chosen for you.
+
 ## 8. Ready (person)
 
 Step 3, **Ready**: four lines and a button.

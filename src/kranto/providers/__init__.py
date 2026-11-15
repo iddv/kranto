@@ -69,6 +69,9 @@ def make_provider(name: str, cfg: LLMConfig, *, key: Callable[[str | None], str 
         c = cfg.claude_code
         return ClaudeCodeProvider(cwd=c.cwd, home=c.home, structured=c.structured,
                                   sandbox=c.sandbox, timeout=c.timeout_seconds)
+    if name == "openai":
+        from .openai import KEY_ENV, OpenAIProvider
+        return OpenAIProvider(key=lambda: key(KEY_ENV), http=http())  # type: ignore[return-value]
     if name == "xai":
         from .xai import XAIProvider
         return XAIProvider(key=lambda: key("XAI_API_KEY"), http=http())
@@ -319,6 +322,34 @@ def xai_key(root: Path | str, key: str | None = None, *, environ=None,
     use = key or _key_from(KEY_ENV, root, environ)
     p = XAIProvider(key=lambda: use, http=httpx.Client(timeout=setup.KEY_TEST_SECONDS,
                                                          transport=transport))
+    try:
+        result = p.test(use)
+    finally:
+        p.close()
+    out = {"ok": result.ok, "detail": setup.scrub_key(result.detail, use or ""), "changed": False}
+    if result.ok and key is not None and (os.environ.get(KEY_ENV) != key
+                                          or KEY_ENV not in _dotenv_names(root)):
+        setup.write_env_key(root, KEY_ENV, key)
+        os.environ[KEY_ENV] = key
+        out["changed"] = True
+    return out
+
+
+def openai_key(root: Path | str, key: str | None = None, *, environ=None,
+               transport: httpx.BaseTransport | None = None) -> dict:
+    """The OpenAI key, for a post writer's own model only (P-11), never the watcher's: test
+    ``key`` (default: the one set) with ``GET /v1/models``, spending nothing, and only when it
+    passes and was given, write it to ``<root>/.env`` (0600) as ``OPENAI_API_KEY``. Returns
+    ``{"ok", "detail", "changed"}``, never the key."""
+    from .. import setup
+    from .openai import KEY_ENV, OpenAIProvider
+    root = Path(root)
+    environ = os.environ if environ is None else environ
+    if key is not None:
+        key = setup.check_key_shape(key)
+    use = key or _key_from(KEY_ENV, root, environ)
+    p = OpenAIProvider(key=lambda: use, http=httpx.Client(timeout=setup.KEY_TEST_SECONDS,
+                                                            transport=transport))
     try:
         result = p.test(use)
     finally:

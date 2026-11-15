@@ -208,8 +208,10 @@ def test_the_sdk_tables_are_the_adapters():
     from kranto import newsletter
     legacy = set(newsletter.legacy_services())         # aliases Kranto honours for one release
     assert set(kinds.BROKER) == set(brokers.grantable()) - legacy
+    # Kranto's own kinds (the short posts' Open and Bluesky send) are never a cub's to ask for
+    own = {k for k, s in tickets.KINDS.items() if s.first_party_only}
     assert set(kinds.TICKETS) == set(tickets.kind_names()) - {"trade.instruct"} \
-        - set(newsletter.legacy_kinds())
+        - set(newsletter.legacy_kinds()) - own
     for service, ops in kinds.BROKER.items():
         adapter = brokers.ADAPTERS[service]
         assert set(ops) == brokers.grantable()[service]
@@ -220,7 +222,8 @@ def test_the_sdk_tables_are_the_adapters():
             assert (op.per_day if op.side == "draft" else op.per_hour) == \
                 spec.get("per_day" if op.side == "draft" else "per_hour")
     tickets.kind_names()
-    for kind in ("send.newsletter", "send.buttondown", "post.mastodon"):
+    for kind in ("send.newsletter", "send.buttondown", "post.mastodon", "post.bluesky",
+                 "post.open"):
         assert tickets.KINDS[kind].perform is not None
 
 

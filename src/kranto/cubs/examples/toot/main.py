@@ -30,10 +30,11 @@ def _limit(ctx) -> int:
     return min(limit, TICKET_TEXT)
 
 
-TASK = ("Write one Mastodon post of at most {room} characters, spaces included, about an idea "
-        "card. Open on the reader's interest (why they should care), with the person's angle "
-        "when there is one, then the card's fact that backs it, in connected sentences. Every "
-        "fact comes from the card. Answer JSON with text.")
+TASK = ("Write one Mastodon post of at most {room} characters, spaces included, from an idea "
+        "card: about what its fact means for the reader's world, not a tool to build. Open on "
+        "the reader's interest (why they should care), with the person's angle when there is "
+        "one, then the card's fact that backs it, in connected sentences. Every fact comes "
+        "from the card. Answer JSON with text.")
 
 
 UNREAD = "The model answered in a form Kranto could not read: try again."

@@ -977,6 +977,26 @@ def cmd_provider_xai(args) -> int:
     return 0 if result["ok"] else 1
 
 
+def cmd_provider_openai(args) -> int:
+    """The OpenAI key for a post writer's own model (never the watcher's): test it, and with
+    --key-stdin keep it in the workspace's .env (0600). Spends nothing. The writer's model is
+    then set with the verb prose.voice (writer_model, provider "openai")."""
+    from . import providers, setup
+    root = config_mod.find_workspace(args.workspace)
+    key = sys.stdin.readline().strip() if args.key_stdin else None
+    try:
+        result = providers.openai_key(root, key)
+    except setup.SetupError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    print(f"OpenAI, for a writer's own model only: {'ok' if result['ok'] else 'FAILED'}: "
+          f"{result['detail']}")
+    if result["changed"]:
+        print(f"written: OPENAI_API_KEY in {root / '.env'} (mode 600); restart Kranto for the "
+              "running server to use it")
+    return 0 if result["ok"] else 1
+
+
 def cmd_provider_use(args) -> int:
     """Make a provider the watcher's: test, then write llm.provider, the tiers' models and,
     with --key-stdin, the key into the workspace's .env (0600)."""
@@ -1453,6 +1473,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--key-stdin", action="store_true",
                    help="read the key from the first line of stdin (never an argument)")
     p.set_defaults(func=cmd_provider_xai)
+    p = prov_sub.add_parser("openai", help="the OpenAI key, for a post writer's own model only "
+                                           "(never the watcher's): test it, or keep it")
+    p.add_argument("--key-stdin", action="store_true",
+                   help="read the key from the first line of stdin (never an argument)")
+    p.set_defaults(func=cmd_provider_openai)
     p = prov_sub.add_parser("use", help="test a provider, then make it the watcher's")
     p.add_argument("provider", choices=("anthropic", "openrouter", "openai_compat",
                                         "claude_code"))

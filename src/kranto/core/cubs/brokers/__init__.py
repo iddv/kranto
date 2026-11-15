@@ -4,23 +4,30 @@ granted an adapter's ``read`` and ``draft`` operations, never a ``perform`` one,
 ticket's confirm runs. ``ADAPTERS`` lists the services this Kranto offers; importing this
 package gives ``send.newsletter`` (and its earlier names, aliases for one release) and
 ``post.mastodon`` their performers and read-backs, and ``draft.sanity`` (a post filed in Sanity as
-a draft, never published: ``sanity``). The newsletter service names no platform: the one
-connected does the work (``newsletter``)."""
+a draft, never published: ``sanity``), and the short posts' kinds (``social``: ``post.open``,
+Kranto's own, whose confirm is I posted it; ``post.bluesky``, the ``bluesky`` adapter's). The
+newsletter service names no platform: the one connected does the work (``newsletter``)."""
 
 from __future__ import annotations
 
 from ... import tickets
 from .base import Op, performer
+from .bluesky import BlueskyAdapter
+from .linkedin import LinkedInAdapter
 from .mastodon import MastodonAdapter
 from .newsletter import adapters as _newsletter_adapters
 from .newsletter import register_kinds as _newsletter_kinds
 from .sanity import SanityAdapter
 from .sanity import register_kind as _sanity_kind
+from .social import register_kinds as _social_kinds
+from .threads import ThreadsAdapter
 
 _newsletter_kinds()
 _sanity_kind()
+_social_kinds()
 ADAPTERS: dict = {**_newsletter_adapters(), "mastodon": MastodonAdapter(),
-                  "sanity": SanityAdapter()}
+                  "sanity": SanityAdapter(), "bluesky": BlueskyAdapter(),
+                  "linkedin": LinkedInAdapter(), "threads": ThreadsAdapter()}
 
 __all__ = ["ADAPTERS", "Op", "call", "grantable"]
 
@@ -39,7 +46,9 @@ def call(host, adapter, spec, args: dict) -> dict:
 
 def _register() -> None:
     for adapter in ADAPTERS.values():
-        if not adapter.cub_grantable:
+        # a cub's adapter, or one that performs only Kranto's own kinds (Bluesky's send)
+        if not adapter.cub_grantable and not all(
+                tickets.KINDS[name].first_party_only for name in adapter.kinds):
             continue
         for kind in adapter.kinds:
             spec = tickets.KINDS[kind]

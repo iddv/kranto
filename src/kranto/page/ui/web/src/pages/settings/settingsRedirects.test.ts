@@ -91,6 +91,8 @@ describe("every Settings address lands on its page", () => {
     // or cub called cubs"; and the shop's own tabs of Cubs land on Post
     for (const gone of ["cubs", "invest", "radar", "layout"]) expect(landOf("#/settings/" + gone), gone).toBe("#/settings");
     expect(landOf("#/settings/newsletter")).toBe("#/settings/newsletter");
+    // the short posts' old settings address (the toot cub, folded into short posts) is Posting's
+    expect(landOf("#/settings/toot")).toBe("#/settings/posting");
     for (const tab of ["available", "made"]) expect(landOf("#/cubs/" + tab), tab).toBe("#/post");
     // Invest, the radar and the browser pages left: their old addresses land on a page that is,
     // without the selection, which named one of their objects

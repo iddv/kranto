@@ -232,24 +232,37 @@ def _said(row: dict) -> dict:
 # -- about an idea card -------------------------------------------------------------------------
 
 
-CARD_TASK = ("You write a blog post of 120 to 200 words in markdown (no title line) about an "
-             "idea card, built on the person's angle: its first sentence makes the angle's "
-             "claim, prediction or question, and the card and its sources back it. No fixed "
-             "sections. Cite a source as [n] using only the numbers given; every fact comes "
-             "from the card and its sources. A title under 80 characters that says the claim, "
-             "and a one-sentence excerpt.")
-ITEM_TASK = ("You write a blog post of 120 to 200 words in markdown (no title line) about one "
+CARD_TASK = ("You write a blog post of 120 to 200 words in markdown (no title line) from an "
+             "idea card, built on the person's angle. The post is about what the card's "
+             "evidence means for the reader's world: the change its sources show, where it "
+             "leads, and why the reader should care. It is not a description of a tool to "
+             "build: the card's idea is background, worth one sentence at most. The first "
+             "sentence makes the angle's claim, bet or scene about the world, and the sources "
+             "back it. No fixed sections. Cite a source as [n] using only the numbers given; "
+             "every fact comes from the card and its sources. A title under 80 characters that "
+             "says the claim, and a one-sentence excerpt.")
+ITEM_TASK = ("You write a blog post of 120 to 200 words in markdown (no title line) from one "
              "news item, built on the person's angle: its first sentence makes the angle's "
-             "claim, prediction or question, and the item's facts back it. No fixed sections. "
-             "Every fact comes from the item. A title under 80 characters that says the claim, "
-             "and a one-sentence excerpt.")
+             "claim, bet or scene, the post argues where it leads, and the item's facts are the "
+             "evidence. No fixed sections. Every fact comes from the item. A title under 80 "
+             "characters that says the claim, and a one-sentence excerpt.")
 WEEK_TASK = ("You write intro, a three-sentence opening for a weekly post, from its items. "
              "Nothing the items do not say.")
 
 
+# the same words as Kranto's ``prose.material`` (a test holds them equal): the change the card's
+# sources show leads, and the idea is labelled background, so the post is about the reader's
+# world and not a tool to build
+CARD_LINES = (("one_liner", "What the sources show (the post is about this and what it means): "),
+              ("insight", "What they suggest: "),
+              ("thesis", "The idea a builder might act on (background only, not the post's "
+                         "subject): "))
+
+
 def card_material(card: dict, srcs: list[dict], angle: str = "") -> dict:
-    about = "\n".join(x for x in (card.get("title"), card.get("one_liner"), card.get("thesis"),
-                                  card.get("insight"), card.get("why")) if x)
+    lines = [str(card.get("title") or "").strip()]
+    lines += [label + str(card[k]).strip() for k, label in CARD_LINES if card.get(k)]
+    about = "\n".join(x for x in lines if x)
     facts = "\n".join(f"[{s['n']}] {s.get('source') or ''}: {s.get('claim') or ''}"
                       for s in srcs) or "(no sources)"
     return {"angle": angle or None, "title": about, "facts": facts}

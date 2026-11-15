@@ -12,6 +12,7 @@ import ast
 import hashlib
 import json
 import re
+from dataclasses import replace
 from functools import cache
 from pathlib import Path
 
@@ -55,8 +56,12 @@ SAMPLES = (
 )
 
 
-def profile() -> Profile:
-    return Profile(voice=VOICE, samples=SAMPLES)
+def profile(salt: str | None = None) -> Profile:
+    """The eval's profile; ``salt`` sets the salt switch (round 3), else the default."""
+    p = Profile(voice=VOICE, samples=SAMPLES)
+    if salt:
+        p = replace(p, switches={**p.switches, "salt": salt})
+    return p
 
 
 @cache
@@ -77,7 +82,28 @@ def _consts(cub: str) -> dict[str, str]:
 
 
 def _about(item: dict) -> str:
+    """The material's ``about`` as round 1 and 2 gave it (a card's lines run together)."""
     return item.get("about") or item["title"]
+
+
+def card_fields(item: dict) -> dict[str, str]:
+    """A recorded card's fields from its ``about`` (title, one-liner, thesis, and the line on
+    how many stories it rests on, which round 3 leaves out)."""
+    lines = [x.strip() for x in str(item.get("about") or "").split("\n")]
+    keys = ("title", "one_liner", "thesis", "why")
+    got: dict[str, str | None] = dict(zip(keys, lines, strict=False))
+    got["title"] = got.get("title") or item["title"]
+    got["one_liner"] = item.get("one_liner") or got.get("one_liner")
+    return {k: str(v) for k, v in got.items() if v and k != "why"}
+
+
+def about(item: dict, rnd: int = 3) -> str:
+    """The material's ``about``: from round 3 a card's change leads and its idea is labelled
+    background (``prose.material``); an item's headline as before."""
+    if item["kind"] == "card" and rnd >= 3:
+        from ....prose.material import card_about
+        return card_about(card_fields(item))
+    return _about(item)
 
 
 def take_of(item: dict) -> str | None:
@@ -128,7 +154,7 @@ def new_blog(item: dict, p: Profile | None = None, embedder=None,
              angle: str | None = None) -> list[dict]:
     c = _consts("blog")
     task = c["CARD_TASK"] if item["kind"] == "card" else c["ITEM_TASK"]
-    material = {"angle": _angle(item, angle), "title": _about(item), "facts": item["facts"]}
+    material = {"angle": _angle(item, angle), "title": about(item), "facts": item["facts"]}
     return compose(material, "blog", p or profile(), kind="long", embedder=embedder,
                    task=f"{task} You write for my blog. Answer JSON with title, excerpt, body.")
 
@@ -143,13 +169,14 @@ def new_toot(item: dict, p: Profile | None = None, embedder=None,
 
 
 def prompt(writer: str, site: str, item: dict, embedder=None,
-           angle: str | None = None) -> list[dict]:
+           angle: str | None = None, p: Profile | None = None) -> list[dict]:
     """The prompt of the ``old`` writer or the ``new`` one; ``angle`` (new only): the piece's
-    angle, "" for none, None for the item's recorded take."""
+    angle, "" for none, None for the item's recorded take; ``p``: the profile (default the
+    eval's)."""
     if writer == "old":
         return old_blog(item) if site == "blog" else old_toot(item)
-    return new_blog(item, embedder=embedder, angle=angle) if site == "blog" else \
-        new_toot(item, embedder=embedder, angle=angle)
+    return new_blog(item, p, embedder=embedder, angle=angle) if site == "blog" else \
+        new_toot(item, p, embedder=embedder, angle=angle)
 
 
 def sha(messages: list[dict]) -> str:

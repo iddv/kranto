@@ -1,6 +1,7 @@
 """CI for strangers: the workflow runs on `pull_request` and pushes to main only (never
 `pull_request_target`), its token reads and nothing more, and no job names a runner label in
-the tree: each runs where the repository's RUNNER variable says, or on GitHub's own runner."""
+the tree: each runs where the repository's RUNNER variable says, or on GitHub's own runner
+(ci.yml's `sandbox` always there)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -26,4 +27,7 @@ def test_no_job_names_a_runner_label():
     for name, doc in docs():
         for job, body in (doc.get("jobs") or {}).items():
             runs = str(body.get("runs-on"))
+            if (name, job) == ("ci.yml", "sandbox"):      # always GitHub's own runner
+                assert runs == "ubuntu-latest", (name, job)
+                continue
             assert "vars.RUNNER" in runs and "self-hosted" not in runs, (name, job)
