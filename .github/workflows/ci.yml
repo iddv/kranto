@@ -170,9 +170,11 @@ jobs:
   # Both sandboxes in real bubblewrap, on every pull request: the cub runtime's security test
   # plan and failure modes, and the console's box (the Claude token, credentials, the source
   # repo, push, the network and an injected README, each tested against a probe inside the
-  # session). A sandbox that cannot start is a failure here, never a skip.
+  # session). A sandbox that cannot start is a failure here, never a skip. This job always runs on
+  # GitHub's own runner, whatever RUNNER says: it needs a fresh /proc inside bubblewrap, which a
+  # hardened runner of your own may refuse.
   sandbox:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
