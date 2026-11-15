@@ -78,6 +78,23 @@ export function outcomeLine(state: string, note: string | null | undefined): { t
 
 const cap = (s: string): string => (s ? s[0]!.toUpperCase() + s.slice(1) : s);
 
+/** two lines that say the same thing, give or take a closing full stop and case ("This is the
+ * preview: nothing is sent" and "…sent."): said once */
+export const sameWords = (a: string | null | undefined, b: string | null | undefined): boolean => {
+  const n = (s: string | null | undefined) => String(s || "").trim().replace(/[.\s]+$/, "").toLowerCase();
+  return !!n(a) && n(a) === n(b);
+};
+
+/** a server time (UTC) as Schedule's box takes it (datetime-local): on the person's own clock for
+ * a post Kranto holds, in UTC for a platform's own schedule; "" when it does not read */
+export function inputOf(iso: string | null | undefined, zone: "utc" | "local" = "utc"): string {
+  const t = iso ? new Date(iso) : null;
+  if (!t || Number.isNaN(t.getTime())) return "";
+  if (zone !== "local") return t.toISOString().slice(0, 16);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}T${p(t.getHours())}:${p(t.getMinutes())}`;
+}
+
 /** a time the owner picks for Schedule (a datetime-local's value) as the server's UTC time: read
  * as UTC for a platform's own schedule, as the person's own clock for a post Kranto holds */
 export const whenOf = (local: string, zone: "utc" | "local" = "utc"): string | null => {

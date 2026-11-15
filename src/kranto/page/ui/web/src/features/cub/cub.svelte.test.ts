@@ -254,6 +254,30 @@ describe("the one dialog of what a cub asks (SEND)", () => {
     expect(d.q("#dlg-ok")?.textContent).toBe("Approve");
     d.done();
   });
+
+  it("Change the time opens titled so, its When filled with the hour it has; a refusal the preview line says is said once", async () => {
+    const L = stub();
+    const held = view({ kind: "post.bluesky" }, { question: "Post this to Bluesky?", verb: "Post to Bluesky", needs: null, schedule: true, zone: "local",
+      practice: { on: true, words: "This is the preview: nothing is sent", switch: null } });
+    L.api.mockImplementation(async (path: string) => { if (path.endsWith("/confirm")) throw new Error("This is the preview: nothing is sent."); return held; });
+    const target = document.createElement("div");
+    document.body.append(target);
+    const due = new Date(2026, 10, 17, 9, 0).toISOString();
+    const c = mount(AskDialog, { target, props: { id: 88, close: () => {}, retime: due } });
+    await settle();
+    flushSync();
+    expect(target.querySelector("#dlg-t")?.textContent).toBe("Change the time");
+    expect((target.querySelector("#ask-at") as HTMLInputElement).value).toBe("2026-11-17T09:00");
+    expect(target.querySelector("#dlg-ok")?.textContent).toBe("Schedule");
+    (target.querySelector("#dlg-ok") as HTMLButtonElement).click();
+    await settle();
+    flushSync();
+    const said = [...target.querySelectorAll(".ask-line")].map((x) => x.textContent).filter((t) => /preview/i.test(t || ""));
+    expect(said).toEqual(["This is the preview: nothing is sent"]);
+    expect(target.querySelector("#ask-practice")?.className).toContain("c-red");
+    void unmount(c);
+    target.remove();
+  });
 });
 
 describe("an installed cub's head and its Log", () => {
