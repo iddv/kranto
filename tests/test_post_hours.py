@@ -301,6 +301,10 @@ def test_no_door_may_edit_a_scheduled_draft_so_its_time_never_carries_other_word
     for door in ("ui", "cli"):
         with pytest.raises(post_api.WriteError, match="cancel its time first"):
             post_api.edit_draft(rt, d["id"], {"parts": [{"text": "Other words."}]}, door)
+    # an assistant's edit (``edited_by``), pressed by the owner after the time was chosen
+    with pytest.raises(post_api.WriteError, match="cancel its time first"):
+        post_api.edit_draft(rt, d["id"], {"parts": [{"text": "My assistant's words."}]}, "mcp",
+                            by="mcp:claude-code")
     assert hours.held_of(store, tid) is not None
     hours.tick(store, rt, now=AT_NINE)
     assert sent == [tid]
