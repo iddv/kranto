@@ -1,6 +1,6 @@
 # The preview
 
-A second Kranto on the same machine as yours, built from a branch (`oss`), serving **a copy of
+A second Kranto on the same machine as yours, built from a branch of this repository (`main` by default), serving **a copy of
 your data** on `127.0.0.1:8766`, that **cannot send**. You try a branch on it before anything
 reaches Kranto you use. It never touches your Kranto's folders, and it is never updated by
 `kranto update`: `kranto-preview refresh` builds it again from the branch.
@@ -9,7 +9,7 @@ reaches Kranto you use. It never touches your Kranto's folders, and it is never 
 |---|---|---|
 | Address | `127.0.0.1:8765` | `127.0.0.1:8766` (loopback only; its own sign-in) |
 | Unit | `kranto.service` | `kranto-preview.service`, a transient user unit with a 3 GB memory cap (nothing is written under `~/.config/systemd`; after a reboot, `kranto-preview up` starts it again) |
-| Code | a release | wheels built from the branch, in `~/kranto-preview/venv` |
+| Code | a release | the wheel built from the branch, in `~/kranto-preview/venv` |
 | Data | `~/kranto-kb`, `~/kranto-loop`, `~/tasks` | `~/kranto-preview/home` and `~/kranto-preview/loop`: a copy (below); `~/tasks` is not copied |
 | Secrets | yours | none: no model key, no account |
 | Jobs | on | off (a still copy: every page works, nothing new is read) until `kranto-preview jobs on` |
@@ -44,15 +44,18 @@ does in your Kranto: when you open one of the five, or choose Show today.
 | `kranto-preview refresh-data` | the data only: a fresh copy of your Kranto (it asks first: the preview's own changes are lost) |
 | `kranto-preview open` | a one-time sign-in link; its first line is the one command to run on your PC |
 | `kranto-preview away [days]` | marks the copy last opened `days` ago (9), so its home says "While you were away"; it refuses on any home that is not a preview's |
-| `kranto-preview status` | the two commits it runs, when the data was copied, the bar's sentence, the jobs, the unit |
+| `kranto-preview status` | the commit it runs, when the data was copied, the bar's sentence, the jobs, the unit |
 | `kranto-preview fresh` | an empty home on `127.0.0.1:8767`, for walking Welcome; `fresh link` signs in again, `fresh down` removes it |
 | `kranto-preview jobs on` / `off` | the scheduler. Reading needs a model key, which you put in `~/kranto-preview/home/.env` yourself; with it, reading costs what your Kranto's does, a second time |
 | `kranto-preview down` | stops it (the copy stays) |
 | `kranto-preview logs` | the unit's last lines |
 | `kranto-preview remove` | stops it and deletes `~/kranto-preview`, and nothing else |
 
-The command lives in the server at `scripts/preview/kranto-preview`; `up` links
-`~/kranto-preview/bin/kranto-preview` to the copy of it on the branch. It puts `~/.local/bin` (where
+The command lives at `scripts/preview/kranto-preview`; `up` links
+`~/kranto-preview/bin/kranto-preview` to the copy of it on the branch. Run through a link of that
+kind in another folder (`<folder>/bin/<name>`, with the copy in `<folder>/home`), it keeps that
+folder and names its unit after the link: an older preview keeps its folder, unit, port and
+bookmarks. It puts `~/.local/bin` (where
 `uv` is) on its own PATH, so it works over a plain `ssh <this machine> '…'` with no login shell.
 
 `scripts/preview/acceptance.py` checks a running preview read-only against the owner's Gate A
@@ -90,10 +93,9 @@ existed).
 The console in the preview is your own Claude Code, as in your Kranto, working in the preview's
 folder; its Kranto tools reach only the preview.
 
-## For the tracks that merge into `oss`
+## After a merge
 
-After each merge, run `kranto-preview refresh` and post "preview at `<afk sha>`, `<brb sha>`,
-routes ok" in the notes. A refresh takes a lock, so two never interleave; the second one wins.
-A refresh that fails is the merging track's next fix. To try your own branch before merging, set
-`KRANTO_PREVIEW_AFK_BRANCH` or `KRANTO_PREVIEW_BRB_BRANCH` (and `..._AFK_URL`, `..._BRB_URL` for a
-local clone) for one `refresh`, then refresh again from `oss`.
+Run `kranto-preview refresh` and say "preview at `<sha>`, routes ok" where your team talks. A
+refresh takes a lock, so two never interleave; the second one wins. A refresh that fails is the
+merging change's next fix. To try a branch before merging, set `KRANTO_PREVIEW_BRANCH` (and
+`KRANTO_PREVIEW_URL` for a local clone) for one `refresh`, then refresh again from `main`.
