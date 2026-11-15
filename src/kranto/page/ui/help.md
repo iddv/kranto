@@ -221,8 +221,11 @@ Send. **Write draft** answers at once ("Writing the draft. It will be on Post in
 and the post is written in the background: one model call, in your site's name and tone
 (Settings › Posting), with the card's or the item's own sources linked under it by Kranto, never
 by the model. The blog writer is Kranto's own: it is added the first time you ask for a blog post.
-When the draft is on Post the page says so; when none could be written (the model did not
-answer, say, on an install with no model key) a red line says why and what to check.
+When the draft is on Post the page says so; when none could be written a red line says why and
+what to check, for the provider you use: "Claude Code is not installed on this machine", with
+how to install it or choose another provider, when Claude Code reads for you and is missing;
+"no model key is set" only for a provider that takes a key. The write stays on Post under **No
+draft written**, its reason on a line of its own, with a link to Settings › Watching.
 The console does the same with `post.write`.
 
 **A draft waits until it is seen.** A draft's ask has no time limit. It leaves the drafts that

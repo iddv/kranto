@@ -6,7 +6,7 @@ import type { Facts } from "../../lib/app";
 import { ui } from "../../lib/shell.svelte";
 import { answering, count, draw, settle, stub, where } from "../testing.svelte";
 import PostPage from "./PostPage.svelte";
-import { accountHref, accountWords, connectedCount, draftFact, dueLine, dueShort, failedAbout, failedTitle, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
+import { accountHref, accountWords, connectedCount, draftFact, dueLine, dueShort, failedAbout, failedTitle, fixWords, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
 import { outcomeLine, whenOf } from "../../features/ask";
 import { mount, unmount } from "svelte";
 import AboutWhatDialog from "../../features/post/AboutWhatDialog.svelte";
@@ -107,7 +107,11 @@ describe("Post", () => {
     expect(box.textContent).toContain("no model key is set");
     expect([...box.querySelectorAll(".btn")].map((x) => x.textContent)).toEqual(["Settings › Watching", "Try again", "Dismiss"]);
     expect(box.querySelector("a.btn")?.getAttribute("href")).toBe("#/settings/watching");
+    // its reason is a line of its own under the row, so a phone shows it too
+    expect(box.querySelector(".row-why")?.textContent).toBe(failed[0]!.error);
     done();
+    expect(fixWords("settings/spend")).toBe("Settings › Spend");
+    expect(fixWords("settings/watching")).toBe("Settings › Watching");
     expect(failedAbout(failed[0]!)).toEqual({ card: 160, title: "Fixed-task canary", sources: 0 });
     expect(failedTitle({ as: "toot", title: null })).toBe("Write a short post about this: no draft");
     expect(failedTitle({ as: "short", title: "Robots" })).toBe("Write short posts about Robots: no draft");

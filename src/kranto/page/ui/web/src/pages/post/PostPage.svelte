@@ -24,7 +24,7 @@
   import { ui } from "../../lib/shell.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { dismissWrite, retryWrite, writeAny } from "../../features/post/post";
-  import { cancelHour, draftFact, draftHref, dueLine, dueShort, failedAbout, failedTitle, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
+  import { cancelHour, draftFact, draftHref, dueLine, dueShort, failedAbout, failedTitle, fixWords, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
 
   let { view }: { view: View } = $props();
   const host = $derived(!!ui.facts?.header.host);
@@ -75,10 +75,13 @@
     {#if d.failed.length}
       <Group id="post-failed" title="No draft written" count={String(d.failed.length)}>
         {#each d.failed as f (f.as + f.about)}
-          {#snippet end()}{#if f.fix}<a class="btn sm" href={"#/" + f.fix}>Settings › Watching</a>{/if}<button type="button" class="btn sm" data-act="post-retry" onclick={(e) => retryWrite(e.currentTarget, failedAbout(f), f.as)}>Try again</button><button type="button" class="btn sm quiet" data-act="post-dismiss" onclick={(e) => dismissWrite(e.currentTarget, f.about, f.as)}>Dismiss</button>{/snippet}
-          <Row title={failedTitle(f)} meta={f.error} age={ago(dt(f.at))} {end}>
+          {#snippet end()}{#if f.fix}<a class="btn sm" href={"#/" + f.fix}>{fixWords(f.fix)}</a>{/if}<button type="button" class="btn sm" data-act="post-retry" onclick={(e) => retryWrite(e.currentTarget, failedAbout(f), f.as)}>Try again</button><button type="button" class="btn sm quiet" data-act="post-dismiss" onclick={(e) => dismissWrite(e.currentTarget, f.about, f.as)}>Dismiss</button>{/snippet}
+          <Row title={failedTitle(f)} age={ago(dt(f.at))} {end}>
             {#snippet st()}<span class="gl c-red" role="img" aria-label="failed"><span class="hglyph" aria-hidden="true">✕</span></span>{/snippet}
           </Row>
+          <!-- its reason, on its own line under the row, on a phone too (the row's fact gave way
+               there, and the failed row lost why) -->
+          <li class="row-why small" data-why={f.as + f.about}>{f.error}</li>
         {/each}
       </Group>
     {/if}
@@ -118,6 +121,8 @@
 {/if}
 
 <style>
+  /* a failed write's reason, its own line under its row (desktop and phone alike) */
+  .row-why { list-style: none; color: var(--red, var(--ink)); padding: 0 8px 6px 34px; overflow-wrap: anywhere; }
   /* a phone (the mock,): a group's note goes to its own line under the heading, and a
      draft's kind is its glyph (the word is its label) so its title keeps the room */
   @media (max-width: 700px) {

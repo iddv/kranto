@@ -49,6 +49,7 @@ from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
 from ..core import asks, tickets, verbs
+from ..model_trouble import provider_of
 
 LINE = "Drafts wait here until you have seen them."
 LIMIT = 60                       # the newest drafts read; older ones are in the cubs' own pages
@@ -746,9 +747,11 @@ TAKE_MAX = 600
 
 
 class WriteError(ValueError):
-    def __init__(self, words: str, code: int = 400) -> None:
+    """A write refused or failed, in words; ``fix``: the page's route that fixes it, if any."""
+
+    def __init__(self, words: str, code: int = 400, fix: str | None = None) -> None:
         super().__init__(words)
-        self.words, self.code = words, code
+        self.words, self.code, self.fix = words, code, fix
 
 
 def plan_write(about: Any, as_: Any, take: Any = None,
@@ -838,9 +841,10 @@ def write(rt, about: Any, as_: Any, *, door: str, take: Any = None,
     try:
         out = rt.cubs.action(cid, kind, method, fields, door=door)
     except Exception as exc:  # noqa: BLE001 - said in words; the job keeps them for the page
-        raise WriteError(not_written(str(exc)), 502) from None
+        raise WriteError(not_written(str(exc), provider_of(rt)), 502) from None
     if isinstance(out, dict) and out.get("ok") is False:
-        raise WriteError(not_written(str(out.get("say") or out.get("error") or "")))
+        raise WriteError(not_written(str(out.get("say") or out.get("error") or ""),
+                                     provider_of(rt)))
     ref = out.get("draft_ref") if isinstance(out, dict) else None
     return {"cub": cid, "say": (out or {}).get("say") if isinstance(out, dict) else None,
             "draft_ref": ref if isinstance(ref, str) and ref else None}
@@ -940,7 +944,7 @@ def write_short(rt, about: str, angle: str, *, door: str) -> dict[str, Any]:
     names = [sites.name_of(s) for s in out["written"]]
     if not names:
         why = "; ".join(f"{sites.name_of(k)}: {v}" for k, v in out["failed"].items())
-        raise WriteError(not_written(why), 502)
+        raise WriteError(not_written(why, provider_of(rt)), 502)
     say = f"Short posts written for {', '.join(names)}: they wait on Post."
     if material.link_to == "post":
         say = "Your blog post is written first. " + say + " Each links to your blog post."
@@ -1030,9 +1034,13 @@ def propose_angles(rt, about: Any, as_: Any = "blog") -> dict[str, Any]:
         raise WriteError(f"No angles this time ({exc}): try again, or type your own "
                          "sentence.", 502) from None
     except Exception as exc:  # noqa: BLE001 - the provider's refusal, in the owner's words
-        raise WriteError(not_written(str(exc)).replace("No draft was written",
-                                                       "No angles were proposed"), 502) \
-            from None
+        from .. import model_trouble
+        t = model_trouble.said(str(exc), provider_of(rt))
+        if t is not None:
+            raise WriteError(f"No angles were proposed: {model_trouble.inline(t['words'])} Or "
+                             "type your own sentence.", 502, fix=t["fix"]) from None
+        raise WriteError(not_written(str(exc), provider_of(rt)).replace(
+            "No draft was written", "No angles were proposed"), 502) from None
     return {"about": about, "as": as_, "angles": out, "model": used.get("model"),
             "say": "Pick one, change it, or write your own sentence."}
 
@@ -1270,6 +1278,7 @@ def failed_writes(store, jobs) -> list[dict[str, Any]]:
         return []
     import time
 
+    from .. import model_trouble
     from ..store import iso
     out = []
     for j in jobs.listing("post:"):
@@ -1280,24 +1289,31 @@ def failed_writes(store, jobs) -> list[dict[str, Any]]:
             continue
         _, as_, about = (j["key"].split(":", 2) + ["", ""])[:3]
         error = str(j["error"] or "No draft was written.")
+        trouble = model_trouble.said(error)
         out.append({"about": about, "as": as_, "error": error,
                     "at": iso(datetime.fromtimestamp(at, UTC)),
                     "title": _about_title(store, about),
-                    "fix": FIX_KEY if "model key" in error else None})
+                    "fix": trouble["fix"] if trouble else
+                    FIX_KEY if "model key" in error else None})
     return out
 
 
-def not_written(why: str) -> str:
-    """Why no draft was written, in the owner's words (the page's toast after Write draft): a
-    missing key says so; a model that did not answer names the key to check; a cub's own
-    words stand; the machinery's words ("the handler raised HostError …") never reach the
-    owner."""
+def not_written(why: str, provider: str | None = None) -> str:
+    """Why no draft was written, in the owner's words (the page's toast after Write draft):
+    a model's trouble said for the provider in use (``model_trouble``: Claude Code not
+    installed says so and how to fix it; "model key" only for a provider that takes one); a
+    cub's own words stand; the machinery's words ("the handler raised HostError …") never
+    reach the owner."""
+    from .. import model_trouble
     low = why.lower()
     if "no api key" in low or "no model key" in low:
         return NO_KEY
-    if "model did not answer" in low or "llmerror" in low or "budget" in low:
-        return ("No draft was written: the model did not answer. Check the model key on "
-                "Settings › Watching, then choose Write a post again.")
+    t = model_trouble.said(why, provider)
+    if t is not None:
+        if t["words"] == model_trouble.NO_KEY:
+            return NO_KEY
+        return (f"No draft was written: {model_trouble.inline(t['words'])} Then choose Write "
+                "a post again.")
     if not why or "handler raised" in low or "error" in low.split(":", 1)[0]:
         return "No draft was written: the writer stopped. Activity has what happened."
     return f"No draft was written: {why}"
@@ -1351,7 +1367,8 @@ class PostAPI:
             out = await run_in_threadpool(propose_angles, self.rt, body.get("about"),
                                           body.get("as") or "blog")
         except WriteError as exc:
-            return JSONResponse({"error": exc.words}, status_code=exc.code)
+            return JSONResponse({"error": exc.words, **({"fix": exc.fix} if exc.fix else {})},
+                                status_code=exc.code)
         return JSONResponse(out)
 
     async def job(self, request: Request):
@@ -1404,7 +1421,8 @@ class PostAPI:
             out = await run_in_threadpool(edit_draft, self.rt, request.path_params["id"], body,
                                           door, by)
         except WriteError as exc:
-            return JSONResponse({"error": exc.words}, status_code=exc.code)
+            return JSONResponse({"error": exc.words, **({"fix": exc.fix} if exc.fix else {})},
+                                status_code=exc.code)
         return JSONResponse(out)
 
     async def posted(self, request: Request):
@@ -1415,7 +1433,8 @@ class PostAPI:
             out = await run_in_threadpool(posted_by_you, self.rt, request.path_params["id"],
                                           identity)
         except WriteError as exc:
-            return JSONResponse({"error": exc.words}, status_code=exc.code)
+            return JSONResponse({"error": exc.words, **({"fix": exc.fix} if exc.fix else {})},
+                                status_code=exc.code)
         return JSONResponse(out)
 
     async def learned(self, request: Request):
@@ -1431,7 +1450,8 @@ class PostAPI:
             out = await run_in_threadpool(cancel_hour, self.rt, request.path_params["id"],
                                           request.scope.get(IDENTITY))
         except WriteError as exc:
-            return JSONResponse({"error": exc.words}, status_code=exc.code)
+            return JSONResponse({"error": exc.words, **({"fix": exc.fix} if exc.fix else {})},
+                                status_code=exc.code)
         return JSONResponse(out)
 
     async def sites(self, request: Request):
@@ -1445,7 +1465,8 @@ class PostAPI:
         try:
             out = await run_in_threadpool(posting_write, self.rt.store, body)
         except WriteError as exc:
-            return JSONResponse({"error": exc.words}, status_code=exc.code)
+            return JSONResponse({"error": exc.words, **({"fix": exc.fix} if exc.fix else {})},
+                                status_code=exc.code)
         return JSONResponse(out)
 
     async def download(self, request: Request):

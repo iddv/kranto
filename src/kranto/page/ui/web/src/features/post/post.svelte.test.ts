@@ -140,6 +140,19 @@ describe("Write a post", () => {
     done();
   });
 
+  it("links the angle step's failure to where it is fixed when the words name it", async () => {
+    const L = stub();
+    const why = "No angles were proposed: Claude Code is not installed on this machine. Install it, or choose another provider on Settings › Watching. Or type your own sentence.";
+    L.api.mockImplementation(async (path: string) => { if (path === "/api/post/angles") throw new Error(why); return {}; });
+    answering({ "/api/prose": { voice: "v", samples: [] }, "/api/post/sites": POSTING });
+    const { target, done } = show(WritePostDialog, { about: { card: 143, title: "Court booking", sources: 3 }, close: () => {} });
+    await settle();
+    expect(target.querySelector("#write-post-angles-why")?.textContent).toBe(why);
+    expect(target.querySelector("#write-post-angles-fix")?.getAttribute("href")).toBe("#/settings/watching");
+    expect(target.textContent).not.toContain("model key");
+    done();
+  });
+
   // 4: why none was written takes the place of "Writing the draft" (a red line, not a toast
   // beside it), and Post reads again, where the failed write stays
   it("follows the job: a draft on Post, or why none was written, in a red line", async () => {

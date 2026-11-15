@@ -60,7 +60,7 @@
     <dt><label for="write-post-angle">Why does this interest you? One sentence.</label></dt>
     <dd>
       <input id="write-post-angle" class="wide" type="text" maxlength="600" bind:value={angle} />
-      {#if angles.length}<span class="small" id="write-post-angles">{#each angles as a (a.kind)}<button type="button" class="linkish small angle" data-angle={a.kind} aria-label={`${kindWord(a.kind)}: ${a.text}`} onclick={() => (angle = a.text)}>{a.text}</button><br />{/each}<button type="button" class="linkish small" id="write-post-skip" onclick={() => (angle = "")}>Skip</button></span>{:else if anglesWhy}<span class="muted small" id="write-post-angles-why">{anglesWhy}</span>{/if}
+      {#if angles.length}<span class="small" id="write-post-angles">{#each angles as a (a.kind)}<button type="button" class="linkish small angle" data-angle={a.kind} aria-label={`${kindWord(a.kind)}: ${a.text}`} onclick={() => (angle = a.text)}>{a.text}</button><br />{/each}<button type="button" class="linkish small" id="write-post-skip" onclick={() => (angle = "")}>Skip</button></span>{:else if anglesWhy}<span class="muted small" id="write-post-angles-why">{anglesWhy}</span>{#if anglesWhy.includes("Settings › Watching")}{" "}<a class="small" id="write-post-angles-fix" href="#/settings/watching" onclick={close}>Settings › Watching ›</a>{/if}{/if}
     </dd>
   </dl>
   {#if noVoice}<p class="muted small" id="write-post-voice"><a href="#/settings/posting/voice" onclick={close}>Set up how you write ›</a></p>{/if}
