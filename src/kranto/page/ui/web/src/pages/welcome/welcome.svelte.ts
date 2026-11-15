@@ -31,6 +31,43 @@ export const stepDone = (i: number, s: { key?: { set?: boolean } | null; topics?
 /** where Start reading goes: How you write, while the first read runs (F-13) */
 export const afterReady = (): string => "welcome/voice";
 
+/** what Ready needs of /api/setup to say when the first brief comes */
+export interface ReadyFacts {
+  topics?: number;
+  scheduler?: boolean;
+  first_brief_minutes?: number;
+  key?: { set?: boolean; provider?: string; test?: { ok?: boolean } | null } | null;
+  logins?: { claude?: { ok?: boolean; installed?: boolean } | null } | null;
+}
+/** whether a model works: its key set (a key provider), Claude Code installed and signed in
+ * (its login), and its last test not failed */
+export function modelWorks(s: ReadyFacts): boolean {
+  if (!s.key?.set) return false;
+  if (s.key.provider === "claude_code" && s.logins?.claude && s.logins.claude.ok === false) return false;
+  return !(s.key.test && s.key.test.ok === false);
+}
+/** Ready's first line: a time only when a brief can come by itself; else what is still missing
+ * and where it is set (Codex, Gemini: "In about 5 minutes" with no topic and no model) */
+export function briefLine(s: ReadyFacts): { text: string; href: string | null; link: string | null } {
+  const missing: string[] = [];
+  let href: string | null = null, link: string | null = null;
+  if (!modelWorks(s)) {
+    const cc = s.key?.provider === "claude_code" ? s.logins?.claude : null;
+    missing.push(cc && cc.installed === false ? "Claude Code, which reads for you, is not installed on this machine"
+      : cc && cc.ok === false ? "Claude Code, which reads for you, is not signed in on this machine"
+        : "a model that works (step 1)");
+    href = "#/welcome";
+    link = "Step 1 ›";
+  }
+  if (!(s.topics || 0)) {
+    missing.push("a topic to watch (step 2)");
+    if (!href) { href = "#/welcome/topics"; link = "Step 2 ›"; }
+  }
+  if (missing.length) return { text: `No brief yet. Still missing: ${missing.join(", and ")}.`, href, link };
+  if (s.scheduler === false) return { text: "When you choose Run now: Kranto is not reading by itself here (its scheduler is off).", href: null, link: null };
+  return { text: `In about ${s.first_brief_minutes ?? 5} minutes.`, href: null, link: null };
+}
+
 export const SUGGEST: [string, string][] = [
   ["AI developer tooling", "Tools developers use to build with and alongside AI: coding agents and harnesses, IDE integrations, MCP servers and other integration surfaces, agent skills and plugin packs, evals and prompt tooling."],
   ["LLM tooling and infrastructure", "Running and operating language models: local inference servers, serving and routing, observability and cost control, fine-tuning and evaluation tooling, and the open-source projects and vendors that ship them."],

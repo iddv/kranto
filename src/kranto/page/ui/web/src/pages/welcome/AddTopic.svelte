@@ -130,7 +130,7 @@
     L.afkDrop();
     return r.id;
   }
-  const SAVED = (name: string) => `Saved “${name}”. Its sources come once a model key works; you can add one by hand now.`;
+  const SAVED = (name: string) => `Saved “${name}”. Its sources come once a model works (step 1); you can add one by hand now.`;
   /** the foot's one button: watch what is ticked (or save the topic typed, unscouted), then go on */
   function onward(btn: HTMLButtonElement): void {
     const L = app(), t = T, watch = pending, typed = !t.id && !!t.name.trim();

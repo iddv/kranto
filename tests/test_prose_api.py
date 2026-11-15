@@ -101,3 +101,19 @@ def test_post_write_carries_the_take_as_the_angle():
         assert "600" in exc.words
     else:
         raise AssertionError("a long take is refused")
+
+
+def test_the_voice_card_draft_says_claude_code_is_missing_in_words(rt, monkeypatch):  # noqa: F811
+    """Show my voice card on an install whose Claude Code is gone answered with the raw error."""
+    from kranto.web import prose_api
+
+    def complete(rt_, purpose, max_tokens):
+        def call(messages, schema):
+            raise RuntimeError("Claude Code: Claude Code is not installed (no claude on PATH)")
+        return call
+    monkeypatch.setattr(prose_api, "_complete", complete)
+    with web_client(create_app(rt), "http://127.0.0.1:8765") as client:
+        r = client.post("/api/prose/voice/draft", json={"samples": ["I write short things. "
+                                                                    "Very short ones."]})
+        assert r.status_code == 502
+        assert r.json()["error"].startswith("Claude Code is not installed on this machine.")
