@@ -56,6 +56,7 @@ and the block says which results those are.
 from __future__ import annotations
 
 import statistics
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
@@ -74,6 +75,10 @@ if TYPE_CHECKING:
     from .sources.x import XSource
 
 MAX_PROPOSALS = 20
+# Places test-read at once (``check_all``). Different hosts only: one host is still asked one
+# request at a time (``sources.pacing``). Each fetch holds at most one capped response
+# (``sources.MAX_RESPONSE_BYTES``), so this bounds the scout's extra memory too.
+FETCHERS = 6
 SIMILARITY_SAMPLE = 30
 RECENT_DAYS = 30
 MAX_WILDCARDS = 3
@@ -477,7 +482,8 @@ def _site_feed(kind: str, params: dict[str, Any] | None, discovered_from: str | 
 
 
 def _found_instead(found: Proposal, failed: dict[str, Any], http: sources.HTTP,
-                   embedder: Embedder, topic: library.Topic | None, now: datetime | None
+                   embedder: Embedder | Later, topic: library.Topic | None,
+                   now: datetime | None
                    ) -> tuple[Validation, str, str, dict[str, Any] | None] | None:
     validation, label, kind, params = validate(found, http, embedder, topic, now=now)
     if validation.status != "valid":
@@ -488,7 +494,7 @@ def _found_instead(found: Proposal, failed: dict[str, Any], http: sources.HTTP,
 def validate(
     proposal: Proposal,
     http: sources.HTTP,
-    embedder: Embedder,
+    embedder: Embedder | Later,
     topic: library.Topic | None,
     *,
     now: datetime | None = None,
@@ -556,23 +562,60 @@ def validate(
             params)
 
 
-def _measure(items: list[sources.Item], embedder: Embedder, topic: library.Topic | None,
-             now: datetime, discovered_from: str | None = None) -> Validation:
+class Later:
+    """Stands in for the embedder while a place is fetched on another thread: ``_measure``
+    keeps the sample's texts here and measures no similarity; ``measure_later`` embeds them
+    afterwards on the calling thread. The embedding model is never run from two threads at
+    once, so a scout's memory is what one model run takes (``embed.batches``)."""
+
+    def __init__(self) -> None:
+        self.texts: list[str] | None = None
+
+
+def measure_later(embedder: Embedder, topic: library.Topic,
+                  pending: list[tuple[Validation, Later]]) -> list[Validation]:
+    """Each fetched place's median similarity, from the texts its ``Later`` kept: one call
+    to the embedder for all of them (it batches by itself). A validation with no texts kept
+    (not valid) is returned as it came."""
+    texts = [t for v, later in pending if v.status == "valid" and later.texts
+             for t in later.texts]
+    if not texts:
+        return [v for v, _ in pending]
+    vectors = embedder.embed_documents(texts) @ topic.embedding
+    out, at = [], 0
+    for v, later in pending:
+        if v.status != "valid" or not later.texts:
+            out.append(v)
+            continue
+        sims = vectors[at:at + len(later.texts)]
+        at += len(later.texts)
+        out.append(replace(v, median_similarity=round(float(statistics.median(sims.tolist())),
+                                                      4)))
+    return out
+
+
+def _measure(items: list[sources.Item], embedder: Embedder | Later,
+             topic: library.Topic | None, now: datetime,
+             discovered_from: str | None = None) -> Validation:
     """A fetched source's numbers. Without a topic (a pasted list with none chosen) the
-    similarity is not measured: every item is judged."""
+    similarity is not measured: every item is judged. With a ``Later`` the texts are kept
+    for ``measure_later``."""
     dated = [it.published_at for it in items if it.published_at]
     recent = sum(1 for d in dated if d >= now - timedelta(days=RECENT_DAYS))
     similarity = None
     if topic is not None:
-        sims = embedder.embed_documents([it.text_for_prefilter() for it in
-                                         items[:SIMILARITY_SAMPLE]]) @ topic.embedding
-        similarity = round(float(statistics.median(sims.tolist())), 4)
+        texts = [it.text_for_prefilter() for it in items[:SIMILARITY_SAMPLE]]
+        if isinstance(embedder, Later):
+            embedder.texts = texts
+        else:
+            sims = embedder.embed_documents(texts) @ topic.embedding
+            similarity = round(float(statistics.median(sims.tolist())), 4)
     return Validation("valid", items=len(items), recent=recent,
                       latest=iso(max(dated)) if dated else None,
                       median_similarity=similarity, discovered_from=discovered_from)
 
 
-def _validate_x(proposal: Proposal, x: XScouting, embedder: Embedder,
+def _validate_x(proposal: Proposal, x: XScouting, embedder: Embedder | Later,
                 topic: library.Topic | None,
                 *, now: datetime | None = None
                 ) -> tuple[Validation, str, str, dict[str, Any] | None]:
@@ -610,6 +653,50 @@ def _preset_record(proposal: Proposal, params: dict[str, Any] | None = None) -> 
     return record
 
 
+def check_all(
+    proposals: list[Proposal],
+    http: sources.HTTP,
+    embedder: Embedder,
+    topic: library.Topic | None,
+    *,
+    now: datetime | None = None,
+    x: XScouting | None = None,
+    fetchers: int = FETCHERS,
+) -> list[tuple[Validation, str, str, dict[str, Any] | None]]:
+    """``validate`` for every proposal, in their order: the places are fetched side by side
+    (at most ``fetchers`` at once), and each one's sample is embedded on this thread as soon
+    as its fetch is in, while the others are still being fetched.
+
+    Embedding the samples is most of a scout's time on a CPU (measured 2026-11-14: 18 places
+    fetched in 43 s one after another, their 265 sample texts embedded in 100 to 300 s), so
+    the fetches hide under it instead of adding to it.
+
+    Politeness is unchanged: every request still goes through the process-wide pacing
+    (``sources.pacing``), so one host is still asked one request at a time, its gap apart;
+    only different hosts are read at once. The embedding model runs on this thread only, so
+    memory is one model run's, as before."""
+    if not proposals:
+        return []
+    laters = [Later() for _ in proposals]
+
+    def one(i: int) -> tuple[Validation, str, str, dict[str, Any] | None]:
+        return validate(proposals[i], http, laters[i] if topic is not None else embedder,
+                        topic, now=now, x=x)
+
+    out: list[tuple[Validation, str, str, dict[str, Any] | None] | None] = [None] * len(proposals)
+    with ThreadPoolExecutor(max_workers=max(1, min(fetchers, len(proposals))),
+                            thread_name_prefix="scout-fetch") as pool:
+        futures = {pool.submit(one, i): i for i in range(len(proposals))}
+        for done in as_completed(futures):
+            i = futures[done]
+            v, label, kind, params = done.result()
+            if topic is not None:
+                v = measure_later(embedder, topic, [(v, laters[i])])[0]
+                laters[i].texts = None                  # the texts are not kept past their use
+            out[i] = (v, label, kind, params)
+    return [o for o in out if o is not None]
+
+
 def scout_topic(
     store: Store,
     llm: LLMClient,
@@ -645,17 +732,24 @@ def scout_topic(
     summary = search_summary(found)
     weeks = cast(Any, searcher.cfg).recent_weeks if searcher is not None else 12
     proposals, call_id = propose(llm, topic, reddit_sources(store, topic.id), x, found, weeks)
+    # Which proposals are fetched: every one but the X proposals past the cap.
+    capped, checked_x = set(), 0
+    for index, proposal in enumerate(proposals):
+        if proposal.preset in X_SCOUT_PRESETS:
+            if x is None or checked_x >= x.max_proposals:
+                capped.add(index)
+            checked_x += 1
+    checked = check_all([p for i, p in enumerate(proposals) if i not in capped], http,
+                        embedder, topic, now=now, x=x)
+    checked_at = iter(checked)
     results = []
-    checked_x = 0
-    for proposal in proposals:
+    for index, proposal in enumerate(proposals):
         is_x = proposal.preset in X_SCOUT_PRESETS
-        if is_x and (x is None or checked_x >= x.max_proposals):
+        if index in capped:
             v = Validation("invalid", error="not fetched: X proposal cap")
             results.append(ScoutResult(None, proposal.value, proposal, v, "invalid", summary))
             continue
-        checked_x += int(is_x)
-        validation, label, kind, params = validate(proposal, http, embedder, topic, now=now,
-                                                   x=x)
+        validation, label, kind, params = next(checked_at)
         how, cited = grounding(proposal, found)
         record = {**asdict(validation), "why": proposal.why, "topic_id": topic.id,
                   "role": proposal.role, **_preset_record(proposal, params),

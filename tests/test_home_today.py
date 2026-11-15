@@ -84,6 +84,16 @@ def test_the_ordinary_home_says_the_day_the_brief_the_cards_and_the_quiet_line(r
     q = got["quiet"]
     assert q["read_at"] == iso(NOW - timedelta(hours=2)) and q["topics"] >= 1
     assert q["next"] == {"kind": "ideas", "words": "ideas", "at": iso(NOW + timedelta(hours=10))}
+    assert q["reading"] is False
+
+
+def test_the_quiet_line_says_a_read_runs_now(rt, monkeypatch):  # noqa: F811
+    """A first run: while the first read ran, the home's foot line said "not read yet" (no
+    finished read yet); ``reading`` lets it say the read runs now"""
+    from kranto import tick
+    monkeypatch.setattr(tick, "_CURRENT", tick.Progress("r1", iso(NOW), 5))
+    q = home.today(_rt(rt), now=NOW, next_run={})["quiet"]
+    assert q["read_at"] is None and q["reading"] is True
 
 
 def test_the_home_shows_what_waits_on_ideas_a_later_or_posted_card_is_left_out(rt):  # noqa: F811
