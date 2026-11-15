@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Connections - the server{% endblock %}
+{% block content %}
+<h1>Connections</h1>
+<p class="sub">Accounts Kranto may read with: only read-only scopes are asked for, and nothing is posted, followed or changed through them. A newsletter platform and Mastodon (posting) are the exception, for cubs that send: they send only when you press Confirm on a cub's ticket. Tokens stay encrypted on this machine and never appear in the pages, the logs or an export.</p>
+{% if message %}<div class="msg">{{ message }}</div>{% endif %}
+{% if unavailable %}<div class="msg">Connected accounts are off here: {{ unavailable }}.</div>{% endif %}
+
+<h2>Your accounts ({{ accounts | length }})</h2>
+{% for a in accounts %}
+<div class="obs">
+  <div><strong>{{ a.provider_name }}</strong> {{ a.account }} <span class="pill">{{ 'needs login' if a.state == 'needs_login' else 'connected' }}</span></div>
+  <p class="muted">{{ a.scopes | length }} {{ '' if a.writes else 'read-only ' }}scope{{ 's' if a.scopes | length != 1 }} ({{ a.scopes | join(', ') }}) · connected {{ a.connected_at | short_date }}{% if a.last_used_at %} · last used {{ a.last_used_at | short_date }}{% endif %} · {{ a.sources | length }} source{{ 's' if a.sources | length != 1 }}{% if a.note %} · {{ a.note }}{% endif %}</p>
+  <form class="inline" method="post" action="/connections/{{ a.id }}/test"><button type="submit">Test</button></form>
+  <form class="inline" method="post" action="/connections/{{ a.id }}/disconnect"><button class="link" type="submit">disconnect</button></form>
+</div>
+{% else %}<p class="muted">None yet.</p>{% endfor %}
+
+<h2>Available</h2>
+<p class="muted">Open this page as http://localhost:PORT or http://127.0.0.1:PORT when you connect (Bluesky and X: 127.0.0.1 only): the site sends your browser back to that address, through your SSH tunnel.</p>
+{% for p in providers %}{% if p.state == 'available' %}
+<div class="panel" id="{{ p.key }}">
+  <h3 style="margin-top: 0">{{ p.name }}</h3>
+  <p>{{ p.blurb }}</p>
+  <p class="muted">{{ 'Uses' if p.writes else 'Reads' }}: {{ p.reads }} {{ p.never }}</p>
+  <ol>{% for s in p.steps %}<li>{{ s }}</li>{% endfor %}</ol>
+  {% if p.key == 'mastodon' %}
+  <form method="post" action="/connections/mastodon/start">
+    <p><label>Instance <input name="instance" placeholder="mastodon.social" required></label>
+    <button class="primary" type="submit">Connect</button></p>
+  </form>
+  {% elif p.key == 'bluesky' %}
+  <form method="post" action="/connections/bluesky/start">
+    <p><label>Handle <input name="handle" placeholder="name.bsky.social" required></label>
+    <button class="primary" type="submit">Connect</button></p>
+  </form>
+  <p class="muted">Or, with an app password:</p>
+  <ol>{% for s in p.alt_steps %}<li>{{ s }}</li>{% endfor %}</ol>
+  {% elif p.flow == 'client' %}
+  {% if p.cost %}<p class="muted">{{ p.cost }}</p>{% endif %}
+  {% if p.client_set %}<p class="muted">Your client is saved.</p>
+  <form method="post" action="/connections/{{ p.key }}/start"><p><button class="primary" type="submit">Connect</button></p></form>
+  {% endif %}
+  {% elif p.key == 'github' and p.device %}
+  <p class="muted">GitHub's device flow is set up (connections.github_client_id): sign in with it from Settings › Sources › Accounts in Kranto UI, or paste a token here.</p>
+  {% elif p.key == 'github' %}
+  <p class="muted">GitHub's device flow (no token to paste) needs an OAuth app you register:</p>
+  <ol>{% for s in p.device_steps %}<li>{{ s }}</li>{% endfor %}</ol>
+  {% endif %}
+  {% if p.fields %}
+  <form method="post" action="/connections/{{ p.key }}/credentials" autocomplete="off">
+    <p>{% for f in p.fields %}<label>{{ f.label }} <input name="{{ f.key }}" type="{{ 'password' if f.secret else 'text' }}" placeholder="{{ f.placeholder }}" required></label> {% endfor %}
+    <button type="submit">{{ 'Save' if p.flow == 'client' else 'Save and test' }}</button></p>
+  </form>
+  {% endif %}
+</div>
+{% endif %}{% endfor %}
+
+<h2>Not offered</h2>
+<table>
+{% for p in providers %}{% if p.state == 'not_offered' %}<tr><td><strong>{{ p.name }}</strong></td><td class="muted">{{ p.reason }}</td></tr>{% endif %}{% endfor %}
+</table>
+
+<h2>How tokens are kept</h2>
+<table>
+{% for k, v in storage.items() %}<tr><td><strong>{{ k | capitalize }}</strong></td><td class="muted">{{ v }}</td></tr>{% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,417 @@
+{
+ "about": "20 real items from Kranto's library (a copy, 2026-11-12): 10 News brief items and 10 idea cards with their sources' claims.",
+ "items": [
+  {
+   "id": "brief-26-1",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "DeepMind releases Gemini Robotics 2.5 with Mercedes-Benz factory results",
+   "facts": "Google DeepMind introduced Gemini Robotics 2.5, its most capable vision-language-action model to date. It reports a 96% success rate for Apollo 2 humanoids sorting parts on Mercedes-Benz lines, and released an open safety benchmark, ASIMOV-jailbreak.\nKranto on whether general robot foundation models are moving from demos to production-line work.",
+   "sources": [
+    {
+     "label": "exa 5",
+     "url": "https://deepmind.google/blog/gemini-robotics-2-5-accelerates-real-world-physical-intelligence/"
+    },
+    {
+     "label": "exa 8",
+     "url": "https://latestrobotnews.com/daily-brief-2026-11-11-gemini-96-percent-mercedes-lines/"
+    },
+    {
+     "label": "exa 9",
+     "url": "https://arstechnica.com/google/2026/11/deepmind-reveals-gemini-robotics-2-5-and-open-safety-benchmark-asimov-jailbreak/"
+    },
+    {
+     "label": "obs 13183",
+     "url": "https://roboticsweekly.news/issues/2026-11-10"
+    }
+   ]
+  },
+  {
+   "id": "brief-25-2",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "Boston Dynamics puts wheels on Atlas to test whole-body control",
+   "facts": "Boston Dynamics released video of Atlas with scooter wheels in place of feet, a research testbed and not a product. It combines model-based control with a reinforcement-learning policy trained in simulation, and the robot performed a 360-degree jump.\nShows sim-to-real reinforcement learning being applied to humanoid whole-body control, though this is a testbed.",
+   "sources": [
+    {
+     "label": "obs 12999",
+     "url": "https://www.therobotreport.com/boston-dynamics-adds-wheels-to-atlas-humanoid-to-test-whole-body-control/"
+    },
+    {
+     "label": "exa 7",
+     "url": "https://interestingengineering.com/ai-robotics/boston-dynamics-atlas-wheeled-robot"
+    }
+   ]
+  },
+  {
+   "id": "brief-24-1",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "Amazon team's single policy grasps 66 objects with no teleoperation data",
+   "facts": "Amazon FAR's Dex-Hands team showed Pick Anything, one policy using a stereo camera head, no wrist cameras and Sharpa Wave hands. A researcher says it was trained on video and RL with zero teleoperation data.\nKranto on whether dexterous grasping can be trained without costly human teleoperation data.",
+   "sources": [
+    {
+     "label": "obs 12825",
+     "url": "https://roboticsweekly.news/issues/2026-11-08"
+    },
+    {
+     "label": "exa 3",
+     "url": "https://roboticsweekly.news/"
+    }
+   ]
+  },
+  {
+   "id": "brief-23-1",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "China drafts lifetime ID codes for every robot made in the country",
+   "facts": "China's industry ministry (MIIT) posted a draft on Nov 6, open for comment until Dec 5. It would require a tamper-proof code on every complete robot, with makers registering products and filing codes within 20 working days.\nIt would extend traceability rules beyond humanoids to industrial and service robots, and it Kranto on makers selling into China.",
+   "sources": [
+    {
+     "label": "obs 12718",
+     "url": "https://news.ycombinator.com/item?id=50406482"
+    }
+   ]
+  },
+  {
+   "id": "brief-22-1",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "US FCC bans new models of some connected devices, including legged robots",
+   "facts": "The Robot Report reports the FCC banned new models of certain connected advanced devices, including legged robots and AMRs, with Intel and Husqvarna among firms already conditionally approved. This came alongside coverage of China's block on SoftBank's ABB Robotics deal.\nKranto on whether new legged and mobile robot models can reach the US market.",
+   "sources": [
+    {
+     "label": "obs 12612",
+     "url": "https://www.therobotreport.com/industry-experts-discuss-china-blocking-softbank-acquisition-abb-robotics/"
+    }
+   ]
+  },
+  {
+   "id": "brief-21-1",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "China blocks SoftBank's $5.4B purchase of ABB Robotics",
+   "facts": "China's foreign investment security review office prohibited SoftBank Group's roughly $5.375B acquisition of ABB's robotics division, and ABB confirmed the block. The FT reports regulators feared robotics data would go overseas to train AI models.\nIt shows how data concerns over AI training can stop cross-border robotics deals.",
+   "sources": [
+    {
+     "label": "obs 12441",
+     "url": "https://www.therobotreport.com/chinese-regulators-block-softbanks-5-4b-acquisition-of-abb-robotics/"
+    }
+   ]
+  },
+  {
+   "id": "brief-20-1",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "LiberAI unveils Liber-0 world action model trained on human experience",
+   "facts": "Beijing-based LiberAI announced Liber-0, pretrained on over 2.2 million hours of human video and glove-recorded motion. It self-reports 36.0% overall success across 600 zero-shot trials, though pretraining included robot data.\nShows how far learning from human video, rather than robot demonstrations, currently gets on unseen manipulation tasks.",
+   "sources": [
+    {
+     "label": "obs 12258",
+     "url": "https://www.therobotreport.com/liberai-unveils-liber-0-a-world-action-model-that-grounds-human-experience-in-robot-action/"
+    }
+   ]
+  },
+  {
+   "id": "brief-19-1",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "A3 publishes ISO 21423 for mixed-vendor mobile robot communication",
+   "facts": "A3 published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers operating in the same facility.\nKranto on whether fleets from several vendors can share a site without custom integration.",
+   "sources": [
+    {
+     "label": "obs 12030",
+     "url": "https://www.therobotreport.com/new-iso-interoperability-standard-covers-collaboration-among-mobile-robots-from-multiple-vendors/"
+    }
+   ]
+  },
+  {
+   "id": "brief-18-4",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "Robots race up Mount Tai in China's first robot climbing competition",
+   "facts": "The inaugural World Robot Climbing Mount Tai Competition ended Monday in Tai'an, Shandong, with robots from more than 50 embodied AI organizations. One report says robots climbed 3,100 stone steps in 43 minutes.\nIt is a public test of legged-robot mobility on rough terrain, which the organizers tie to rescue and inspection work.",
+   "sources": [
+    {
+     "label": "exa 5",
+     "url": "https://technode.com/2026/11/03/robots-climb-mount-tai-in-chinas-first-major-mountain-challenge/"
+    },
+    {
+     "label": "exa 8",
+     "url": "https://www.asiae.co.kr/en/article/2026110308483675677"
+    }
+   ]
+  },
+  {
+   "id": "brief-17-2",
+   "kind": "item",
+   "topic": "Robotics",
+   "title": "Bedrock Robotics raises $600M at $4.1B for working excavators",
+   "facts": "A weekly roundup reports Bedrock Robotics raised $600M at $4.1B for excavators already doing paid work. It also says Agility's SPAC trust is down to about $164M ahead of AGLT, and four of the top five humanoid shippers are Chinese.\nShows where robotics funding went this week and how the humanoid market is split by shipments.",
+   "sources": [
+    {
+     "label": "exa 1",
+     "url": "https://hive.behindrobotics.com/week-in-behind-robotics-2026-w44/"
+    }
+   ]
+  },
+  {
+   "id": "card-160",
+   "kind": "card",
+   "topic": "AI developer tooling",
+   "title": "Fixed-task canary that detects silent tightening of AI subscription limits and quality",
+   "one_liner": "Existing trackers report how much of a window is used, not how much work a percent of that window buys.",
+   "about": "Fixed-task canary that detects silent tightening of AI subscription limits and quality\nExisting trackers report how much of a window is used, not how much work a percent of that window buys.\nExisting trackers report how much of a window is used, not how much work a percent of that window buys. A small canary would run the same fixed task on a schedule and log tokens, cost and a pass/fail check per percent of limit consumed. A change in that ratio would flag a silent cut in limits, a model swap or a prompt change before the user hits a wall mid-task. The pattern is borrowed from uptime and SLA monitoring, and the preconditions are frequent limit changes plus opaque meters.\nthey form a group of 604 distinct stories drawn from 50 sources, none supplying more than 70%, and no single origin either: a theme that independent sources converged on.",
+   "facts": "[1] dev.to: A dev.to analysis dated 2026-10-31 says Anthropic removed the 5-hour limit for verified Ultra accounts on 30 October while weekly limits were stated as unchanged.\n[2] arXiv search: LLM agent evaluation: An arXiv preprint, 'Anytime Contracts for AI Services', argues that AI providers can silently route requests to cheaper models and that stochastic outputs make this degradation hard to detect.\n[3] HN search: Claude Code: A news piece reports that Anthropic added two sentences to Claude Code's system prompt for Opus 5.5 to steer it away from recreating someone else's specific video game.\n[4] simonwillison.net: AWS documentation says that when usage reaches a project's spend limit, AWS pauses the project's resources until the period resets.",
+   "sources": [
+    {
+     "label": "dev.to",
+     "url": "https://dev.to/r3dtuxedo/no-five-hour-window-doesnt-mean-no-limit-cka"
+    },
+    {
+     "label": "arXiv search: LLM agent evaluation",
+     "url": "https://arxiv.org/abs/2610.22781v1"
+    },
+    {
+     "label": "HN search: Claude Code",
+     "url": "https://news.ycombinator.com/item?id=50346001"
+    },
+    {
+     "label": "simonwillison.net",
+     "url": "https://docs.aws.amazon.com/accounts/latest/reference/create-spend-limit.html"
+    }
+   ]
+  },
+  {
+   "id": "card-159",
+   "kind": "card",
+   "topic": "LLM tooling and infrastructure",
+   "title": "A conformance test for local model serving: does my stack emit valid tool calls?",
+   "one_liner": "Which model, quant, engine version and flags a person picks now changes whether agents work, and the only public measurement of this (Ubicloud's) was done by a hosting company for one model.",
+   "about": "A conformance test for local model serving: does my stack emit valid tool calls?\nWhich model, quant, engine version and flags a person picks now changes whether agents work, and the only public measurement of this (Ubicloud's) was done by a hosting company for one model.\nWhich model, quant, engine version and flags a person picks now changes whether agents work, and the only public measurement of this (Ubicloud's) was done by a hosting company for one model. A small tool that runs the user's own tool schemas against their own local endpoint, with and without constrained decoding, would report a schema-validity rate and name the flag that fixes it. Setup guides pick the stack, and this would check what the stack actually does.\nthey sit together in meaning although they come from sources watched for different topics (AI developer tooling, LLM tooling and infrastructure): the same shape turning up in unrelated places.",
+   "facts": "[1] HN search: vllm: Ubicloud reported that Kimi K2.6 on vLLM 0.28 produced the expected tool-call schema only 92% of the time.\n[2] HN search: coding agent: Reika is a coding agent CLI designed for small local models of 8B–35B parameters at Q2–Q4 quantization, and it publishes measured findings on harness mitigations.\n[3] arXiv search: LLM inference serving: InferOpt addresses the problem that inference serving requires tuning dozens of layer-wise knobs and that existing approaches use mechanism-specific heuristics returning single operating points.",
+   "sources": [
+    {
+     "label": "HN search: vllm",
+     "url": "https://news.ycombinator.com/item?id=50242870"
+    },
+    {
+     "label": "HN search: coding agent",
+     "url": "https://news.ycombinator.com/item?id=49982904"
+    },
+    {
+     "label": "arXiv search: LLM inference serving",
+     "url": "https://arxiv.org/abs/2610.04473v1"
+    }
+   ]
+  },
+  {
+   "id": "card-158",
+   "kind": "card",
+   "topic": "AI developer tooling",
+   "title": "Cross-user leakage test suite for shared agent memory stores, run in CI",
+   "one_liner": "Memory gateways and memory benchmarks are multiplying, but the benchmark tracks described measure recall (textual, coding, multimodal), not isolation between users.",
+   "about": "Cross-user leakage test suite for shared agent memory stores, run in CI\nMemory gateways and memory benchmarks are multiplying, but the benchmark tracks described measure recall (textual, coding, multimodal), not isolation between users.\nMemory gateways and memory benchmarks are multiplying, but the benchmark tracks described measure recall (textual, coding, multimodal), not isolation between users. The preprint's three-stage audit, which separates a foreign credential reaching the prompt from the agent acting on it and from the other account changing, could be packaged as a runnable test suite. A team adding shared memory to a multi-user agent could run it against its own store before release, much like row-level-security tests.\nthey form a group of 471 distinct stories drawn from 50 sources, none supplying more than 70%, and no single origin either: a theme that independent sources converged on.",
+   "facts": "[1] arXiv search: LLM agent evaluation: An arXiv preprint on cross-user credential leakage through shared long-term agent memory proposes a three-stage audit separating exposure, behavior and state.\n[2] HN search: vllm: ContextMemory is an open-source memory gateway for llama.cpp and vLLM that keeps session state as editable markdown files behind an OpenAI-compatible API.\n[3] HN show: A Show HN post describes the AML CYCLE 2 benchmark for long-term agent memory, with Textual, Coding and Multimodal tracks that each have a result table.\n[4] HN search: agent skills: A forward-deployed engineer released an open-source TypeScript agent framework meant to let businesses own and control agent implementations locally.",
+   "sources": [
+    {
+     "label": "arXiv search: LLM agent evaluation",
+     "url": "https://arxiv.org/abs/2610.25707v1"
+    },
+    {
+     "label": "HN search: vllm",
+     "url": "https://news.ycombinator.com/item?id=49889447"
+    },
+    {
+     "label": "HN show",
+     "url": "https://news.ycombinator.com/item?id=50161060"
+    },
+    {
+     "label": "HN search: agent skills",
+     "url": "https://news.ycombinator.com/item?id=49998857"
+    }
+   ]
+  },
+  {
+   "id": "card-157",
+   "kind": "card",
+   "topic": "AI developer tooling",
+   "title": "Compile long single-prompt voice agents into an explicit, checkable state graph",
+   "one_liner": "Small-business voice agents are being shipped as one giant prompt that quietly encodes a state machine, and nobody can inspect or test that machine.",
+   "about": "Compile long single-prompt voice agents into an explicit, checkable state graph\nSmall-business voice agents are being shipped as one giant prompt that quietly encodes a state machine, and nobody can inspect or test that machine.\nSmall-business voice agents are being shipped as one giant prompt that quietly encodes a state machine, and nobody can inspect or test that machine. A tool could read such a prompt, extract the implied states, transitions and tool calls, and flag ambiguous or conflicting instructions and unreachable steps. The owner could then keep the prompt or move to an explicit flow. The need is visible now because the single-prompt style has become the default in production deployments.\nthey sit together in meaning although they come from sources watched for different topics (AI developer tooling, LLM tooling and infrastructure): the same shape turning up in unrelated places.",
+   "facts": "[1] #llm on hachyderm.io: A practitioner audited nine production voice agents on the Retell platform and reported that all nine use a single-prompt architecture with no explicit states or flow graph.\n[2] huggingface.co: OSWorld 2.0's failure-case walkthrough of a purchase-order task says the agent treats initial rules as a fixed anchor while requests arrive via spreadsheet, finance channel and DMs.\n[3] arXiv search: LLM agents tool use: An arXiv paper presents an automotive C/C++ coding assistant exposing generate, edit and verify tools over MCP, where the developer can run verify on any code on demand.\n[4] HN front page: An essay by Alex Gaynor argues that properties made true by construction through better tools, libraries and abstractions are far cheaper to guarantee than properties verified after the fact.",
+   "sources": [
+    {
+     "label": "#llm on hachyderm.io",
+     "url": "https://www.urbanmind.net/display/f7dd981d-2bb6df91-490ee5b00b069f0f"
+    },
+    {
+     "label": "huggingface.co",
+     "url": "https://osworld-v2.xlang.ai/"
+    },
+    {
+     "label": "arXiv search: LLM agents tool use",
+     "url": "https://arxiv.org/abs/2610.35982v1"
+    },
+    {
+     "label": "HN front page",
+     "url": "https://alexgaynor.net/2026/sep/07/is-it-correct/"
+    }
+   ]
+  },
+  {
+   "id": "card-156",
+   "kind": "card",
+   "topic": "AI developer tooling",
+   "title": "Compose-file watcher that flags self-hosted images facing license or free-tier cuts",
+   "one_liner": "Self-hosters track versions and CVEs but have no routine signal for when a tool they depend on narrows its free tier, changes license or is wound down.",
+   "about": "Compose-file watcher that flags self-hosted images facing license or free-tier cuts\nSelf-hosters track versions and CVEs but have no routine signal for when a tool they depend on narrows its free tier, changes license or is wound down.\nSelf-hosters track versions and CVEs but have no routine signal for when a tool they depend on narrows its free tier, changes license or is wound down. A tool could read a compose file or image list and match it to a curated feed of vendor changes, with a pointer to the usual successor project. Several such changes landed within weeks of each other in autumn 2026, so people running a stack of 20 or more services (as in [exa 3]) have more tools exposed to this risk than they can follow by hand.\nthey form a group of 547 distinct stories drawn from 46 sources, none supplying more than 70%, and no single origin either: a theme that independent sources converged on.",
+   "facts": "[1] selfh.st: Portainer is dropping its Community Edition with the upcoming v3.0, while still offering three free nodes of the mainline version on application.\n[2] HN show: TraceUX is a self-hosted session replay and feedback tool in a single Go binary with SQLite, positioned as a lightweight replacement for Smartlook, which is shutting down.\n[3] simonwillison.net: Cloudflare will fund Deno for one more year with monthly bug and security releases and then stop developing the runtime, which stays open source.",
+   "sources": [
+    {
+     "label": "selfh.st",
+     "url": "https://selfh.st/weekly/2026-09-18/"
+    },
+    {
+     "label": "HN show",
+     "url": "https://news.ycombinator.com/item?id=49997043"
+    },
+    {
+     "label": "simonwillison.net",
+     "url": "https://simonwillison.net/2026/Oct/9/deno-is-joining-cloudflare/"
+    }
+   ]
+  },
+  {
+   "id": "card-155",
+   "kind": "card",
+   "topic": "LLM tooling and infrastructure",
+   "title": "Serve many structured decisions from one LLM forward pass, with a decision audit harness",
+   "one_liner": "Standard LLM serving treats generation as the unit of work, but routing, moderation and scoring need many small decisions answered fast.",
+   "about": "Serve many structured decisions from one LLM forward pass, with a decision audit harness\nStandard LLM serving treats generation as the unit of work, but routing, moderation and scoring need many small decisions answered fast.\nStandard LLM serving treats generation as the unit of work, but routing, moderation and scoring need many small decisions answered fast. Frozen LLMs can now answer them from single-token option distributions, and serving stacks are starting to accommodate this. A thin multi-decision scoring endpoint, paired with a harness that checks the decisions for stability and asymmetry under input perturbation, would be useful before anyone trusts these cheap decisions in production.\nthey sit together in meaning although they come from sources watched for different topics (AI developer tooling, LLM tooling and infrastructure): the same shape turning up in unrelated places.",
+   "facts": "[1] arXiv search: LLM inference serving: Researchers describe DuplexJev, which feeds ASR encoder hidden states through a small connector into a frozen LLM and reads each decision as a single-token distribution over answer options rather than generating autoregressively.\n[2] HN search: vllm: A vLLM pull request is adapting Google's DiffusionGemma 26B-A4B to run structured decision tasks in a single denoising step, with multiple decisions read from logprobs in one forward pass.\n[3] huggingface.co: Ai2 introduced FairStress, a fairness benchmark of 300 two-candidate decision scenarios across 29 domains that tests asymmetry in decision robustness.",
+   "sources": [
+    {
+     "label": "arXiv search: LLM inference serving",
+     "url": "https://arxiv.org/abs/2610.02638v1"
+    },
+    {
+     "label": "HN search: vllm",
+     "url": "https://news.ycombinator.com/item?id=49887652"
+    },
+    {
+     "label": "huggingface.co",
+     "url": "https://huggingface.co/blog/allenai/fairstress"
+    }
+   ]
+  },
+  {
+   "id": "card-154",
+   "kind": "card",
+   "topic": "AI developer tooling",
+   "title": "A deterministic linter that extracts the implicit state machine from long voice-agent prompts",
+   "one_liner": "A deterministic tool could parse an exported prompt into its implied steps, tool triggers and transitions, then flag problems such as a tool no step calls, a step with no exit, or contradictory instructions.",
+   "about": "A deterministic linter that extracts the implicit state machine from long voice-agent prompts\nA deterministic tool could parse an exported prompt into its implied steps, tool triggers and transitions, then flag problems such as a tool no step calls, a step with no exit, or contradictory instructions.\nA deterministic tool could parse an exported prompt into its implied steps, tool triggers and transitions, then flag problems such as a tool no step calls, a step with no exit, or contradictory instructions. This is the lint step for prompts, and it becomes worthwhile now that prompts are thousands of words long and sit in revenue-bearing deployments. It would also give builders a path to migrate to explicit flow graphs.\nthey sit together in meaning although they come from sources watched for different topics (AI developer tooling, LLM tooling and infrastructure): the same shape turning up in unrelated places.",
+   "facts": "[1] #llm on hachyderm.io: A practitioner audited nine production voice agents on the Retell platform and reported that all nine use a single-prompt architecture with no explicit states or flow graph.\n[2] arXiv search: LLM agents tool use: An arXiv paper presents an automotive C/C++ coding assistant exposing generate, edit and verify tools over MCP, where the developer can run verify on any code on demand instead of relying on the agent to check its own output.\n[3] arXiv search: LLM agent evaluation: An arXiv pilot study proposes measuring LLM user-simulator persona fidelity deterministically with model-free instruments, stylometry and lexicon-based content analysis.\n[4] HN front page: An essay by Alex Gaynor argues that properties made true by construction through better tools and abstractions are cheaper to guarantee than properties verified after the fact.\n[5] #llm on hachyderm.io: The author of an LLM retry library reported a burst test of 100 simultaneous calls against a fake provider with a rate limiter, using the library's default retry policy.",
+   "sources": [
+    {
+     "label": "#llm on hachyderm.io",
+     "url": "https://www.urbanmind.net/display/f7dd981d-2bb6df91-490ee5b00b069f0f"
+    },
+    {
+     "label": "arXiv search: LLM agents tool use",
+     "url": "https://arxiv.org/abs/2610.35982v1"
+    },
+    {
+     "label": "arXiv search: LLM agent evaluation",
+     "url": "https://arxiv.org/abs/2610.10988v1"
+    },
+    {
+     "label": "HN front page",
+     "url": "https://alexgaynor.net/2026/sep/07/is-it-correct/"
+    },
+    {
+     "label": "#llm on hachyderm.io",
+     "url": "https://www.urbanmind.net/display/f7dd981d-86801c48-872a1d3021142d49"
+    }
+   ]
+  },
+  {
+   "id": "card-153",
+   "kind": "card",
+   "topic": "AI developer tooling",
+   "title": "Per-agent quotas and circuit breakers for agent-opened pull requests and CI minutes",
+   "one_liner": "Agent-authored changes are bursty and cheap to produce.",
+   "about": "Per-agent quotas and circuit breakers for agent-opened pull requests and CI minutes\nAgent-authored changes are bursty and cheap to produce.\nAgent-authored changes are bursty and cheap to produce. Per-human assumptions in CI, review and billing break when one employee's agents open hundreds of PRs after a model release. The cost-control pattern from AI apps (hourly caps, circuit breakers, spend limits) can be applied to the pull-request pipeline: tag agent-authored PRs, give each actor a CI-minutes budget, queue the overflow, and trip a breaker on surges. Teams are only now seeing this load, so tooling built for it has little competition.\nthey form a group of 606 distinct stories drawn from 49 sources, none supplying more than 70%, and no single origin either: a theme that independent sources converged on.",
+   "facts": "[1] HN search: coding agent: A company reported that its monthly GitHub Actions minutes went from 2,500-8,000 to 35,870 in September and 40,001 in October, with surges following a model release on 22 September.\n[2] simonwillison.net: Simon Willison relayed Anthropic's claim that average merged code changes rose from about 2,500/day in May 2026 to over 30,000/day by September 2026.\n[3] latent.space: Airbnb's CTO said 60% of the company's code is AI-authored and that feature and improvement shipments are up about 80% year over year.\n[4] #llm on hachyderm.io: A developer of a free AI app described using per-user and per-IP hourly limits, daily circuit breakers and hard spend caps at the API provider level to control costs.",
+   "sources": [
+    {
+     "label": "HN search: coding agent",
+     "url": "https://news.ycombinator.com/item?id=50337175"
+    },
+    {
+     "label": "simonwillison.net",
+     "url": "https://simonwillison.net/2026/Oct/13/redesigning-source-control-at-anthropic/"
+    },
+    {
+     "label": "latent.space",
+     "url": "https://www.latent.space/p/airbnb"
+    },
+    {
+     "label": "#llm on hachyderm.io",
+     "url": "https://sigmoid.social/@Toon/117404366423232978"
+    }
+   ]
+  },
+  {
+   "id": "card-152",
+   "kind": "card",
+   "topic": "LLM tooling and infrastructure",
+   "title": "Turn a local-LLM labeling job into a tiny CPU classifier trained on the LLM's own labels",
+   "one_liner": "Many people now run a local LLM over thousands of texts for a fixed labeling or extraction task, which is slow and needs a GPU.",
+   "about": "Turn a local-LLM labeling job into a tiny CPU classifier trained on the LLM's own labels\nMany people now run a local LLM over thousands of texts for a fixed labeling or extraction task, which is slow and needs a GPU.\nMany people now run a local LLM over thousands of texts for a fixed labeling or extraction task, which is slow and needs a GPU. A tool could take the local LLM's labels on a sample, train an embedding plus logistic regression model (or a small encoder) on them, and report how closely it agrees with the LLM and how much faster it runs. The pieces are already shown separately: local LLM labeling, cheap classifiers near SOTA, and encoder versus local-LLM latency measurements. Nobody in these observations has packaged them into a workflow for the local-LLM user.\nthey sit together in meaning although they come from sources watched for different topics (AI developer tooling, LLM tooling and infrastructure): the same shape turning up in unrelated places.",
+   "facts": "[1] HN search: local LLM: An author reports 94.25% accuracy on Banking77 using bge-large-en-v1.5 embeddings plus logistic regression, with a 642 KB classifier running in 3 seconds on CPU.\n[2] arXiv search: LLM fine-tuning evaluation: An arXiv paper fine-tunes a multilingual encoder on frontier-model annotations in 35 languages to build a privacy redaction tagger.\n[3] HN search: local-first: A post describes a real-time interview assistant that does audio capture, voice-activity detection, whisper.cpp transcription and LLM inference all on-device.",
+   "sources": [
+    {
+     "label": "HN search: local LLM",
+     "url": "https://news.ycombinator.com/item?id=49858795"
+    },
+    {
+     "label": "arXiv search: LLM fine-tuning evaluation",
+     "url": "https://arxiv.org/abs/2609.38630v2"
+    },
+    {
+     "label": "HN search: local-first",
+     "url": "https://news.ycombinator.com/item?id=49738454"
+    }
+   ]
+  },
+  {
+   "id": "card-151",
+   "kind": "card",
+   "topic": "AI developer tooling",
+   "title": "Placebo-controlled effectiveness and conflict checks for community Claude Code skills",
+   "one_liner": "A registry of one million skills makes choosing among them the bottleneck.",
+   "about": "Placebo-controlled effectiveness and conflict checks for community Claude Code skills\nA registry of one million skills makes choosing among them the bottleneck.\nA registry of one million skills makes choosing among them the bottleneck. The one placebo-controlled trial found most popular skills indistinguishable from neutral text, and a mining study found a very large number of similar-skill pairs that can silently compete. A local tool that tests the skills a person actually has installed against a placebo of equal length, and flags description overlap between them, would apply a known vetting pattern to a registry that has grown faster than anyone can judge it.\nthey form a group of 745 distinct stories drawn from 50 sources, none supplying more than 70%, and no single origin either: a theme that independent sources converged on.",
+   "facts": "[1] HN search: agent skills: Vercel's skills.sh registry reached one million agent skills in seven months, with 280 million installs recorded.\n[2] HN search: Claude Code: A placebo-controlled trial of 9 popular Claude Code skills on 15 public tasks found 2 beat placebo at Holm-adjusted p=0.049, 1 did worse, and 6 showed no measurable difference.\n[3] arXiv search: LLM agents tool use: An arXiv preprint mining 20,947 repositories found 822,109 candidate similar-skill pairs, noting the model picks between similar skills by name and description alone.\n[4] HN search: Claude Code: A Claude Code pack with 21 skills and a supervisor pattern was posted, installable via the plugin marketplace, the skills CLI, or manual copy.",
+   "sources": [
+    {
+     "label": "HN search: agent skills",
+     "url": "https://news.ycombinator.com/item?id=49903054"
+    },
+    {
+     "label": "HN search: Claude Code",
+     "url": "https://news.ycombinator.com/item?id=49979220"
+    },
+    {
+     "label": "arXiv search: LLM agents tool use",
+     "url": "https://arxiv.org/abs/2610.11647v1"
+    },
+    {
+     "label": "HN search: Claude Code",
+     "url": "https://news.ycombinator.com/item?id=50158230"
+    }
+   ]
+  }
+ ]
+}

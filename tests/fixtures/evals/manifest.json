@@ -1,0 +1,7 @@
+{
+ "built_at": "fixed",
+ "from": "scripts/dev/eval_fixtures.py: synthetic items, no third-party text",
+ "judge_threshold": 0.03,
+ "parent": null,
+ "version": "fixtures"
+}

@@ -1,0 +1,41 @@
+name: Source request
+description: A kind of source the server should be able to watch
+labels: [source]
+body:
+  - type: markdown
+    attributes:
+      value: See "Adding a source kind" in CONTRIBUTING.md for what an adapter needs. A source is only added if its terms allow automated reading.
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: The site or service, and an example URL.
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: How it can be read
+      options:
+        - RSS or Atom feed
+        - Public JSON API without a key
+        - API with a free key
+        - API that needs an account login (OAuth)
+        - Only by scraping pages
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: terms
+    attributes:
+      label: Terms
+      description: A link to its terms of use or API terms, and what they say about automated access.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What it would add
+      description: Which topics it covers that current sources miss.
+    validations:
+      required: true

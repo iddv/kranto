@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Kranto{% endblock %}{% if kranto is not none %} · Kranto{% endif %}</title>
+<link rel="icon" href="/static/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+<link rel="apple-touch-icon" href="/static/icon-180.png">
+<script src="/static/theme.js"></script>
+<link rel="stylesheet" href="/static/style.css">
+{% if kranto is not none %}<link rel="stylesheet" href="/static/kranto-afk.css">{% endif %}
+{% block head %}{% endblock %}
+</head>
+<body>
+{% set set_nav = kranto is not none and nav in ('topics', 'connections', 'health') %}
+{% if kranto is not none %}
+{# the page is mounted at /brb/: one header for both tools (DESIGN-v3.md). #}
+<header class="hd">
+  <div class="wrap hd-top">
+    <a class="brand" href="/brb/#/today">Kranto</a><span class="sub2">on this machine</span>
+    <span class="grow"></span>
+    <span class="hd-state" role="status">
+      {% if paused %}
+      <svg class="i c-amber" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.4 14.6 8 8 14.6 1.4 8Z"/><path d="M8 5v3.4M8 10.8v.1"/></svg>
+      <span>Paused</span>
+      {% else %}
+      <svg class="i spin c-blue" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" opacity=".3"/><path d="M8 2a6 6 0 0 1 6 6"/></svg>
+      <span>Running</span>
+      {% endif %}
+    </span>
+    {% if paused %}
+    <form method="post" action="/resume"><input type="hidden" name="next" value="{{ request.url.path }}"><button class="btn" type="submit">Resume</button></form>
+    {% else %}
+    <form method="post" action="/pause"><input type="hidden" name="next" value="{{ request.url.path }}"><input type="hidden" name="reason" value="paused from Kranto"><button class="btn" type="submit">Pause</button></form>
+    {% endif %}
+  </div>
+  <nav class="wrap tabs" aria-label="Sections">
+    <a class="tab" href="/brb/#/today">Today</a>
+    <a class="tab" href="/brb/#/ideas"{% if nav == 'ideas' %} aria-current="page"{% endif %}>Ideas</a>
+    <a class="tab" href="/brb/#/library">Library</a>
+    <a class="tab" href="/brb/#/settings"{% if set_nav %} aria-current="page"{% endif %}>Settings</a>
+  </nav>
+</header>
+{% if paused %}<div class="flash" role="status"><strong>Paused.</strong>
+  Watching is paused ({{ paused }}): no model calls. Resume starts it again.</div>{% endif %}
+{% else %}
+{# kranto alone (no kranto UI): only the connection sign-in pages and the install notice #}
+<header class="top">
+  <a class="brand" href="/">Kranto<small>still watching</small></a>
+  <nav>
+    <a href="/connections" class="{{ 'on' if nav == 'connections' }}">Connections</a>
+  </nav>
+</header>
+{% if paused %}<div class="banner">Paused: {{ paused }}. No model calls are made until you resume.</div>{% endif %}
+{% endif %}
+<main>
+{% if set_nav %}
+<nav class="subnav" aria-label="Settings pages">
+  <a href="/brb/#/settings"{% if nav == 'topics' %} aria-current="page"{% endif %}>Topics and sources</a>
+  <a href="/brb/#/settings/connections"{% if nav == 'connections' %} aria-current="page"{% endif %}>Connections</a>
+  <a href="/brb/#/settings/rules">Build rules</a>
+  <a href="/brb/#/settings/spend">Spend</a>
+  <a href="/brb/#/settings/health"{% if nav == 'health' %} aria-current="page"{% endif %}>Health</a>
+</nav>
+{% endif %}
+{% block content %}{% endblock %}
+</main>
+<footer>the server {{ version }}. Every observation links to its source and to the model call that produced it.</footer>
+</body>
+</html>

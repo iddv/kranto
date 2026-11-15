@@ -1,0 +1,1119 @@
+{
+ "runs": {
+  "brief-26-1": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nGoogle DeepMind has introduced Gemini Robotics 2.5, which it describes as its most capable vision-language-action model so far. A vision-language-action model takes in images and language instructions and outputs actions for a robot to carry out.\n\nThe headline number is a 96% success rate for Apollo 2 humanoid robots sorting parts on Mercedes-Benz production lines. That figure is DeepMind's own report. The item does not say how success was defined, how many attempts were counted, or how the robots did on tasks beyond sorting, so the number is hard to interpret on its own.\n\nDeepMind also released an open safety benchmark called ASIMOV-jailbreak. The item gives no details about what it measures or how it works.\n\n## Why it may matter\n\nFor a while, general-purpose robot models have mostly been shown in demos: a lab, a tidy table, a handful of tasks. A result tied to a real automaker's production lines points toward something different, which is whether these models can do repeatable work in a place where mistakes cost time and money.\n\nThat is the question the item itself raises: are general robot foundation models moving from demos to production-line work? One reported result on one kind of task cannot settle it. Sorting parts is a specific job, and a 96% rate leaves open how the remaining 4% fails and what happens when it does.\n\n## What I would want to know\n\n- How was the 96% measured, and over how long a period?\n- Was the sorting done in live production or in a controlled part of the line?\n- Does the model handle changes in parts or layout without retraining?\n- What does ASIMOV-jailbreak actually test, and how do other models score on it?\n\nThe open benchmark is the part others can check. If outside researchers can run it, it gives a shared way to compare safety claims, which is harder to do with a single company's factory numbers.\n\nFor now, this is a reported milestone worth watching, with the details still to come.",
+     "sha": "e4de5fd6528f21bd",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "The factory numbers matter more than the model name. Google DeepMind introduced Gemini Robotics 2.5, which it calls its most capable vision-language-action model to date. The figure to look at is 96%: the success rate it reports for Apollo 2 humanoids sorting parts on Mercedes-Benz lines.\n\nA vision-language-action model takes in images and instructions and turns them into robot movements. Version numbers say little about how well that works. A success rate on a real production line says more, because the factory sets the task, not the lab.\n\nDeepMind also released an open safety benchmark called ASIMOV-jailbreak. The item gives no detail on what it tests.\n\nThe item says this Kranto on whether general robot foundation models are moving from demos to production-line work. A 96% rate on sorting parts is a point in favor. The item doesn't say how many trials that covers, how long the robots ran, or what happens in the other 4% of cases, and those answers would show how close this is to everyday factory use.",
+     "draft": "The factory numbers matter more than the model name. Google DeepMind introduced Gemini Robotics 2.5, which it calls its most capable vision-language-action model to date. The figure to look at is 96%: the success rate it reports for Apollo 2 humanoids sorting parts on Mercedes-Benz lines.\n\nA vision-language-action model takes in images and instructions and turns them into robot movements. Version numbers tell me little about how well that works. A success rate on a real production line tells me more, because the task is set by the factory and not by the lab.\n\nDeepMind also released an open safety benchmark called ASIMOV-jailbreak. The item gives no detail on what it tests.\n\nThe item says this Kranto on whether general robot foundation models are moving from demos to production-line work. A 96% rate on sorting parts is a point in favor. The item doesn't say how many trials that covers, how long the robots ran, or what happens in the other 4% of cases, and those answers would show how close this is to everyday factory use.",
+     "rounds": 1,
+     "changed": [
+      {
+       "start": 392,
+       "end": 449,
+       "before": "Version numbers tell me little about how well that works.",
+       "after": "Version numbers say little about how well that works."
+      },
+      {
+       "start": 450,
+       "end": 564,
+       "before": "A success rate on a real production line tells me more, because the task is set by the factory and not by the lab.",
+       "after": "A success rate on a real production line says more, because the factory sets the task, not the lab."
+      }
+     ],
+     "sha": "f7bbe567708e2790",
+     "model": null,
+     "redrafted": true
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Google DeepMind introduced Gemini Robotics 2.5, its most capable vision-language-action model so far. It reports a 96% success rate for Apollo 2 humanoids sorting parts on Mercedes-Benz lines, and released an open safety benchmark called ASIMOV-jailbreak.",
+     "sha": "808192021b7ac3c1",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "The factory numbers matter more than the model name. DeepMind reports a 96% success rate for Apollo 2 humanoids sorting parts on Mercedes-Benz lines, using its new Gemini Robotics 2.5. That Kranto on whether general robot models are moving from demos to production lines.",
+     "draft": "The factory numbers matter more than the model name. DeepMind reports a 96% success rate for Apollo 2 humanoids sorting parts on Mercedes-Benz lines, using its new Gemini Robotics 2.5. That Kranto on whether general robot models are moving from demos to production lines.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "3209a8ed3dd4b3ac",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-25-2": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nBoston Dynamics released video of its Atlas humanoid with scooter wheels where its feet would normally be. The company describes this as a research testbed, not a product. In the footage, the robot performs a 360-degree jump.\n\nThe odd hardware is not the main point. The interesting part is how the robot is controlled.\n\n## How it works\n\nAccording to the item, the system combines two approaches. One is model-based control, the traditional engineering method in which the controller relies on an explicit physical model of the robot. The other is a reinforcement-learning policy that was trained in simulation.\n\nBlending the two is a notable choice. Model-based methods are well understood and predictable, while learned policies can pick up behaviors that are hard to write by hand. Using both suggests the team is not treating this as an either-or question.\n\n## Why it may matter\n\nThe item frames this as an example of sim-to-real reinforcement learning being applied to humanoid whole-body control. Whole-body control means coordinating the entire robot, arms, torso and legs, at once rather than handling each part separately. Training in simulation and then running the result on a physical machine is attractive because it lets a robot practice far more than it could safely do in the real world.\n\nA 360-degree jump is a demanding maneuver, so it works as a visible check that the approach can handle dynamic motion on real hardware.\n\n## What to keep in mind\n\nThe caveat is worth repeating: this is a testbed. Putting wheels on a humanoid is not a sign that Atlas is headed for a wheeled design, and the item does not say so. It also gives no details about how well the method generalizes, how it would perform on the standard foot configuration, or what comes next.\n\nWhat I find worth watching is whether this kind of hybrid control, classical methods plus a simulation-trained policy, shows up in later Atlas work. For now, it is a short demonstration of an approach, and a reasonably clear one.",
+     "sha": "6ce91373f69ac32b",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Boston Dynamics has released video of Atlas with scooter wheels in place of feet. The company describes it as a research testbed, not a product.\n\nThe robot combines model-based control with a reinforcement-learning policy trained in simulation. In the video, it performs a 360-degree jump.\n\nThe work is an example of sim-to-real reinforcement learning applied to humanoid whole-body control: the policy is trained in a simulated environment and then run on the real machine. Because the wheels make this a testbed, the video does not say how the approach would carry over to a walking Atlas.",
+     "draft": "Boston Dynamics has released video of Atlas with scooter wheels in place of feet. The company describes it as a research testbed, not a product.\n\nThe robot combines model-based control with a reinforcement-learning policy trained in simulation. In the video, it performs a 360-degree jump.\n\nThe work is an example of sim-to-real reinforcement learning applied to humanoid whole-body control: the policy is trained in a simulated environment and then run on the real machine. Because the wheels make this a testbed, the video does not say how the approach would carry over to a walking Atlas.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "9aaee2daf25467ad",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Boston Dynamics released video of Atlas with scooter wheels in place of feet. It's a research testbed, not a product. The setup pairs model-based control with a reinforcement-learning policy trained in simulation, and the robot pulled off a 360-degree jump.",
+     "sha": "392d747d528d190b",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Boston Dynamics posted video of Atlas with scooter wheels for feet. A research testbed, not a product. It pairs model-based control with a reinforcement-learning policy trained in simulation, and did a 360-degree jump. It's sim-to-real learning for humanoid whole-body control.",
+     "draft": "Boston Dynamics released video of Atlas with scooter wheels in place of feet. It's a research testbed, not a product. The control combines model-based control with a reinforcement-learning policy trained in simulation, and the robot did a 360-degree jump. It shows sim-to-real learning applied to humanoid whole-body control.",
+     "rounds": 1,
+     "changed": [
+      {
+       "start": 0,
+       "end": 325,
+       "before": "Boston Dynamics released video of Atlas with scooter wheels in place of feet. It's a research testbed, not a product. The control combines model-based control with a reinforcement-learning policy trained in simulation, and the robot did a 360-degree jump. It shows sim-to-real learning applied to humanoid whole-body control.",
+       "after": "Boston Dynamics posted video of Atlas with scooter wheels for feet. A research testbed, not a product. It pairs model-based control with a reinforcement-learning policy trained in simulation, and did a 360-degree jump. It's sim-to-real learning for humanoid whole-body control."
+      }
+     ],
+     "sha": "56ea5e95dfce60cb",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-24-1": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nAmazon FAR's Dex-Hands team has shown a system called Pick Anything. It is a single policy that grasped 66 objects. The setup uses a stereo camera head and Sharpa Wave hands, and it has no wrist cameras.\n\nA researcher says the policy was trained on video and reinforcement learning (RL), with zero teleoperation data. That detail comes from a researcher's account, so it is worth treating as a claim until a fuller write-up is available.\n\n## Why teleoperation data is the sticking point\n\nTeleoperation data means a person remotely controls a robot hand while the system records what happens. Those recordings can then be used to teach the robot. It is a common way to get demonstrations, but it is costly, because it takes human time and operator effort for every example.\n\nThe item frames the result as bearing on one question: can dexterous grasping be trained without that expensive human data? If a policy can learn from video and RL instead, the cost of building up training data could look quite different.\n\n## What stands out in the setup\n\nTwo hardware choices are worth noticing. First, the policy uses a stereo camera head, which is a pair of cameras mounted together to see the scene. Second, there are no wrist cameras. Many grasping setups put a camera near the hand to see the object up close. Doing without one means the policy is working from the head view alone, at least as described.\n\nThe hands are Sharpa Wave hands, which is the dexterous hardware used in the demonstration.\n\n## What we don't know yet\n\nThe item is short, and a lot is missing. It does not say how reliably the policy grasped each of the 66 objects, how those objects were chosen, or whether they were seen during training. It does not describe the video data used, how the RL was set up, or how the result compares with approaches that rely on teleoperation.\n\nSo the honest reading is this: one team showed one policy handling 66 objects, and a researcher says no teleoperation data was involved. Whether that holds up across other objects, hands, and settings is something I would want to see in the details.\n\nIt is a small but interesting data point on whether the human-demonstration bottleneck is as firm as it seems.",
+     "sha": "17e59a4c46879753",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Amazon FAR's Dex-Hands team has shown Pick Anything, a single policy that grasps 66 objects. It uses a stereo camera head and Sharpa Wave hands, with no wrist cameras.\n\nA researcher says the policy was trained on video and reinforcement learning (RL), with zero teleoperation data. Teleoperation means a person remotely controls the robot to record examples for it to learn from.\n\nThat matters because collecting teleoperation data for dexterous hands is costly. If a policy can learn to grasp from video and RL alone, that cost drops out of the training process.\n\nThe sources give no details beyond this: no success rates, and no description of how the 66 objects were chosen or tested.",
+     "draft": "Amazon FAR's Dex-Hands team has shown Pick Anything, a single policy that grasps 66 objects. It uses a stereo camera head and Sharpa Wave hands, with no wrist cameras.\n\nA researcher says the policy was trained on video and reinforcement learning (RL), with zero teleoperation data. Teleoperation means a person remotely controls the robot to record examples for it to learn from.\n\nThat matters because collecting teleoperation data for dexterous hands is costly. If a policy can learn to grasp from video and RL alone, that cost drops out of the training process.\n\nThe sources give no details beyond this: no success rates, and no description of how the 66 objects were chosen or tested.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "0d284ed567b1aacb",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Amazon FAR's Dex-Hands team showed Pick Anything: one policy that grasps 66 objects using a stereo camera head, no wrist cameras, and Sharpa Wave hands. A researcher says it was trained on video and RL, with zero teleoperation data.",
+     "sha": "913d00ac9b190cdb",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Amazon FAR's Dex-Hands team showed Pick Anything, one policy that grasps 66 objects with a stereo camera head, no wrist cameras and Sharpa Wave hands. A researcher says it trained on video and RL with zero teleoperation data, the costly human kind.",
+     "draft": "Amazon FAR's Dex-Hands team showed Pick Anything, one policy that grasps 66 objects with a stereo camera head, no wrist cameras and Sharpa Wave hands. A researcher says it trained on video and RL with zero teleoperation data, the costly human kind.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "d339bca226e412b7",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-23-1": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nOn Nov 6, China's industry ministry (MIIT) posted a draft rule on robot identification. The public can comment on it until Dec 5. As described, it would require a tamper-proof code on every complete robot made in the country. Makers would also have to register their products and file the codes within 20 working days.\n\n## What the draft covers\n\nThe notable part is the scope. Traceability rules in this area have been tied to humanoid robots. This draft would extend them to industrial and service robots too. That is a much wider set of machines than the humanoids that tend to get the headlines.\n\nThe code is described as a lifetime ID. The idea seems to be that each robot carries one identifier for as long as it exists, and that the identifier can't be altered. The draft ties that code to a registration step, so the code and the product would be linked in records that makers file.\n\n## Why it may matter\n\nThe item says the draft Kranto on makers selling into China. If the rule is adopted as drafted, those companies would presumably have to deal with the coding and registration requirements. The item doesn't say how, or whether foreign makers face different steps from domestic ones, so that is a question I can't answer from this.\n\nA second thing to watch is the 20-working-day filing window. It is a short period, and it tells us the ministry wants registration to follow production closely rather than happen months later. Whether that is easy or hard will depend on details of the final text, which we haven't seen.\n\n## What to watch\n\nThis is a draft, and the comment period runs until Dec 5. Drafts can change after feedback, so the final version may differ. Things worth checking when it appears:\n\n- Whether the final rule keeps the scope across industrial and service robots\n- How \"complete robot\" is defined\n- How the filing deadline works in practice\n- What the rule means for companies selling into China\n\nFor now, it is a proposal, but one that points toward every robot made in China having a permanent, traceable identity.",
+     "sha": "c12d5e2cc4332547",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "China's industry ministry (MIIT) posted a draft on Nov 6 that would require a tamper-proof code on every complete robot. Comments are open until Dec 5. [1]\n\nMakers would have to register their products and file the codes within 20 working days. [1]\n\nThe draft extends traceability rules beyond humanoid robots to industrial and service robots. It also Kranto on makers selling into China. [1]\n\nI think lifetime ID codes are a bad idea for hobby robots. The sources don't say whether hobby robots fall under the draft, so that part is my view, not a reading of the text.\n\nThe open question is scope: the draft says \"every complete robot,\" and the comment period runs until Dec 5.",
+     "draft": "China's industry ministry (MIIT) posted a draft on Nov 6 that would require a tamper-proof code on every complete robot. Comments are open until Dec 5. [1]\n\nMakers would have to register their products and file the codes within 20 working days. [1]\n\nThe draft extends traceability rules beyond humanoid robots to industrial and service robots. It also Kranto on makers selling into China. [1]\n\nI think lifetime ID codes are a bad idea for hobby robots. The sources don't say whether hobby robots fall under the draft, so that part is my view, not a reading of the text.\n\nThe open question is scope: the draft says \"every complete robot,\" and the comment period runs until Dec 5.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "6761d95336531a55",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "China's industry ministry (MIIT) has posted a draft that would put a tamper-proof ID code on every complete robot made in the country. Makers would register products and file codes within 20 working days. The draft was posted Nov 6 and is open for comment until Dec 5.",
+     "sha": "790ea60c42556bf6",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "China's industry ministry drafted a rule: a tamper-proof ID code on every complete robot, with makers filing codes within 20 working days. It extends past humanoids to industrial and service robots. Comments close Dec 5. I think lifetime ID codes are a bad idea for hobby robots.",
+     "draft": "China's industry ministry drafted a rule: a tamper-proof ID code on every complete robot, with makers filing codes within 20 working days. It extends past humanoids to industrial and service robots. Comments close Dec 5. I think lifetime ID codes are a bad idea for hobby robots.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "37a4c8d94df72c33",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-22-1": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nThe Robot Report says the US Federal Communications Commission has banned new models of certain connected advanced devices. The categories named include legged robots and autonomous mobile robots (AMRs). Some companies are already in the clear, at least in part: Intel and Husqvarna are among the firms that have been conditionally approved.\n\nThe report ran alongside coverage of a separate story, China's block on SoftBank's deal for ABB Robotics.\n\n## What we can say, and what we can't\n\nThe item is short, so there are limits to what it tells us. It says the ban applies to new models, and it says the approvals are conditional. It does not spell out here what those conditions are, how the FCC defines the covered devices, or what happens to models already on sale. Those details will decide how much this matters in practice, so they are worth looking up in the full report and the FCC's own documents before drawing conclusions.\n\n## Why it may matter\n\nThe practical question is whether new legged and mobile robot models can reach the US market. A ban on new models, with a conditional approval route for some firms, suggests that a manufacturer launching a fresh product may need to be on the right side of that process first. Established players that have already won conditional approval, such as Intel and Husqvarna, may be better placed than those that have not. That is an inference from the headline facts, not something the item states outright.\n\nIt is also notable that two robotics stories landed together: one about US market access, the other about a cross-border acquisition being blocked by China. Both are about governments deciding who gets to build and sell robots where. The item does not say the two are connected, and I would not assume they are. Still, they sit in the same news cycle and point to a similar theme.\n\n## What I'd watch\n\nI'd look for the exact scope of the ban, the terms of the conditional approvals, and whether more companies are added to the approved list. Those details will show whether this is a narrow gate or a broad one.",
+     "sha": "8fecf5105725eca2",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "The US Federal Communications Commission has banned new models of certain connected advanced devices. The Robot Report says the category includes legged robots and AMRs (autonomous mobile robots) [1].\n\nSome firms are already conditionally approved. Intel and Husqvarna are named among them [1].\n\nThe ban Kranto on whether new legged and mobile robot models can reach the US market. The report doesn't say how the conditional approvals work or which products they cover.\n\nThe Robot Report ran this alongside coverage of a separate story: China's block on SoftBank's ABB Robotics deal [1].",
+     "draft": "The US Federal Communications Commission has banned new models of certain connected advanced devices. The Robot Report says the category includes legged robots and AMRs (autonomous mobile robots) [1].\n\nSome firms are already conditionally approved. Intel and Husqvarna are named among them [1].\n\nThe ban Kranto on whether new legged and mobile robot models can reach the US market. The report doesn't say how the conditional approvals work or which products they cover.\n\nThe Robot Report ran this alongside coverage of a separate story: China's block on SoftBank's ABB Robotics deal [1].",
+     "rounds": 0,
+     "changed": [],
+     "sha": "fcdd37ac7f890afc",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "The Robot Report says the FCC has banned new models of certain connected advanced devices, including legged robots and AMRs. Intel and Husqvarna are among firms already conditionally approved. The same coverage notes China's block on SoftBank's ABB Robotics deal.",
+     "sha": "556fd80593779a0d",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "The Robot Report says the FCC banned new models of certain connected advanced devices, including legged robots and AMRs. Intel and Husqvarna are among firms already conditionally approved. It Kranto on whether new legged and mobile robot models can reach the US market.",
+     "draft": "The Robot Report says the FCC banned new models of certain connected advanced devices, including legged robots and AMRs. Intel and Husqvarna are among firms already conditionally approved. It Kranto on whether new legged and mobile robot models can reach the US market.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "33b978f835a70dfe",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-21-1": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nChina's foreign investment security review office has prohibited SoftBank Group's acquisition of ABB's robotics division. The deal was valued at roughly $5.375 billion. ABB has confirmed the block.\n\n## The stated worry\n\nAccording to the Financial Times, regulators were concerned that robotics data would end up overseas and be used to train AI models. That is the reported reason, and the item does not say more about which data regulators had in mind or how it would have moved across borders. It is worth keeping in mind that this comes from the FT's reporting rather than from a detailed public explanation.\n\n## Why it may matter\n\nMost of the conversation about AI training data has focused on text, images and video. This case points to something different: the data produced by robots, which are machines that operate in the physical world. If regulators see that kind of data as valuable for training AI, then a company that makes robots, and the information flowing through them, starts to look like a strategic asset and not just a manufacturing business.\n\nThe item frames the block as a sign that data concerns over AI training can stop cross-border robotics deals. That seems a fair reading of what happened here, though a single decision does not tell us how consistently such concerns will be applied elsewhere.\n\n## What I'd watch\n\nA few open questions come to mind, and the item does not answer them:\n\n- What happens to ABB's robotics division now that the sale has been blocked?\n- Will other robotics acquisitions face similar scrutiny from regulators in China or elsewhere?\n- Will companies begin to treat the data their machines generate as something that needs to be protected in a deal?\n\nFor now, the plain facts are these: a multibillion-dollar sale was stopped, the seller confirmed it, and the reported reason was about data and AI. It is a small but concrete example of AI training data becoming a matter of national security review, not only a matter of commerce.",
+     "sha": "137e9264949b8c51",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "China's foreign investment security review office has prohibited SoftBank Group's acquisition of ABB's robotics division, a deal worth roughly $5.375B. ABB confirmed the block.\n\nThe Financial Times reports that regulators feared robotics data would go overseas to train AI models. That is the reason given in the report; the item does not say more about what data was at issue or how it would have been used.\n\nThe case shows how concerns over data used for AI training can stop a cross-border robotics deal.",
+     "draft": "China's foreign investment security review office has prohibited SoftBank Group's acquisition of ABB's robotics division, a deal worth roughly $5.375B. ABB confirmed the block.\n\nThe Financial Times reports that regulators feared robotics data would go overseas to train AI models. That is the reason given in the report; the item does not say more about what data was at issue or how it would have been used.\n\nThe case shows how concerns over data used for AI training can stop a cross-border robotics deal.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "b35907a70d9ffc33",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "China's foreign investment security review office has blocked SoftBank's roughly $5.375B purchase of ABB's robotics division, and ABB confirmed it. The FT reports regulators worried robotics data would go overseas to train AI models.",
+     "sha": "452396ebe22c1a46",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "China's foreign investment security review office has blocked SoftBank Group's roughly $5.375B purchase of ABB's robotics division, and ABB confirmed the block. The FT reports regulators feared robotics data would go overseas to train AI models.",
+     "draft": "China's foreign investment security review office has blocked SoftBank Group's roughly $5.375B purchase of ABB's robotics division, and ABB confirmed the block. The FT reports regulators feared robotics data would go overseas to train AI models.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "0e321ffa6796a1ea",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-20-1": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nBeijing-based LiberAI has announced Liber-0, which it calls a world action model trained on human experience. According to the announcement, the model was pretrained on more than 2.2 million hours of human video and motion recorded with gloves. The glove data matters because it captures how hands actually move, which video alone only shows indirectly.\n\nLiberAI reports an overall success rate of 36.0% across 600 zero-shot trials. Zero-shot here means the tasks were unseen: the model was not specifically trained on them beforehand.\n\n## The caveat\n\nThe 36.0% figure is self-reported, so it has not been checked by anyone outside the company. There is also an important qualification: pretraining included robot data. That means the result is not a clean test of learning from humans alone. Some of what the model can do may come from the robot data mixed in, and the announcement as summarized here does not say how much each source contributed.\n\n## Why it may matter\n\nRobot demonstrations are slow and expensive to collect, since someone has to operate a machine and record it. Human video and glove recordings are far easier to gather at scale. If a model can learn useful manipulation skills from that kind of data, the bottleneck in robotics shifts from collecting robot demonstrations to making good use of data people already produce.\n\nThis item is best read as a data point on how far that approach currently goes on unseen manipulation tasks. A 36.0% success rate suggests it goes some distance, but also that most trials did not succeed. Without details on the tasks, the robot used, or how success was judged, it is hard to say how the number compares with other approaches.\n\n## What I'd want to know next\n\n- How much of the performance depends on the robot data in pretraining?\n- What counted as a success, and how varied were the 600 trials?\n- Can independent groups reproduce the result?\n\nUntil those questions are answered, Liber-0 is an interesting claim about learning from human experience rather than a settled result.",
+     "sha": "077fdff2d1c841bc",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Beijing-based LiberAI has announced Liber-0, a world action model pretrained on over 2.2 million hours of human video and glove-recorded motion.\n\nThe company reports 36.0% overall success across 600 zero-shot trials. These are self-reported numbers. Pretraining also included robot data, so the result doesn't come from human video alone.\n\nThe result may matter because it shows how far learning from human video, rather than robot demonstrations, currently gets on unseen manipulation tasks. At 36.0%, the model fails on most trials, and the mix of robot data in pretraining makes it hard to say how much of the score comes from the human footage.\n\nThe item doesn't say which tasks were tested or how the trials were run.",
+     "draft": "Beijing-based LiberAI has announced Liber-0, a world action model pretrained on over 2.2 million hours of human video and glove-recorded motion.\n\nThe company reports 36.0% overall success across 600 zero-shot trials. These are self-reported numbers. Pretraining also included robot data, so the result doesn't come from human video alone.\n\nThe result may matter because it shows how far learning from human video, rather than robot demonstrations, currently gets on unseen manipulation tasks. At 36.0%, the model fails on most trials, and the mix of robot data in pretraining makes it hard to say how much of the score comes from the human footage.\n\nThe item doesn't say which tasks were tested or how the trials were run.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "f5cf7909ef17275c",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Beijing-based LiberAI announced Liber-0, a world action model pretrained on over 2.2 million hours of human video and glove-recorded motion. It reports 36.0% overall success across 600 zero-shot trials. Self-reported, and pretraining also included robot data.",
+     "sha": "588cec9f03c898a3",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "LiberAI announced Liber-0, pretrained on over 2.2 million hours of human video and glove-recorded motion. It self-reports 36.0% success in 600 zero-shot trials, but pretraining included robot data. It shows how far human video, not robot demos, gets on unseen manipulation tasks.",
+     "draft": "LiberAI announced Liber-0, pretrained on over 2.2 million hours of human video and glove-recorded motion. It self-reports 36.0% success in 600 zero-shot trials, though pretraining included robot data. It shows how far human video, not robot demos, gets on unseen manipulation tasks.",
+     "rounds": 1,
+     "changed": [
+      {
+       "start": 0,
+       "end": 282,
+       "before": "LiberAI announced Liber-0, pretrained on over 2.2 million hours of human video and glove-recorded motion. It self-reports 36.0% success in 600 zero-shot trials, though pretraining included robot data. It shows how far human video, not robot demos, gets on unseen manipulation tasks.",
+       "after": "LiberAI announced Liber-0, pretrained on over 2.2 million hours of human video and glove-recorded motion. It self-reports 36.0% success in 600 zero-shot trials, but pretraining included robot data. It shows how far human video, not robot demos, gets on unseen manipulation tasks."
+      }
+     ],
+     "sha": "eeb03baa0dbe8f28",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-19-1": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nA3 has published ISO 21423:2026, a standard developed by ISO Technical Committee 299. It sets common communication requirements for automated guided vehicles (AGVs), autonomous mobile robots (AMRs) and similar systems. The focus is on machines from different suppliers that operate in the same facility.\n\n## Why it may matter\n\nA site that buys robots from more than one vendor often has to connect them to each other, or to a shared system, through custom work. The item says this standard Kranto on whether fleets from several vendors can share a site without that custom integration. That is the practical question here: whether a warehouse or factory can mix suppliers and still have the machines communicate in an agreed way.\n\nA shared set of requirements could, in principle, give buyers and vendors a common reference point. The item doesn't go into how that would work in practice, so I'd hold back from guessing at the details.\n\n## What I'd like to know\n\nThe short announcement leaves several things open, and they're worth watching for:\n\n- What exactly the communication requirements cover, and how detailed they are.\n- Whether vendors will adopt the standard, and how quickly.\n- How conformance would be shown, if at all.\n- How it fits alongside any existing approaches that fleets already use.\n\nNone of these are answered in the item, so it's too early to say how much custom integration the standard will actually remove.\n\n## A note on the source\n\nThe item is brief: who published it, which committee developed it, and what it aims to do. A standard existing is not the same as a standard being widely used. Whether ISO 21423 changes life on the factory floor will depend on what vendors and site operators do with it over the coming months and years.\n\nStill, a published, internationally developed standard aimed at mixed-vendor sites is a concrete step toward a problem that many operators of mobile robots run into. I'll be curious to see how it plays out.",
+     "sha": "52bb79034af9c9b0",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "A3 has published ISO 21423:2026, a standard for how mobile robots from different vendors communicate. It was developed by ISO Technical Committee 299. [1]\n\nThe standard sets common communication requirements for AGVs (automated guided vehicles), AMRs (autonomous mobile robots) and similar systems. It covers the case where these machines come from different suppliers and work in the same facility. [1]\n\nThat Kranto on a practical question: whether fleets from several vendors can share a site without custom integration. [1]\n\nThe item doesn't say what the requirements contain, or when vendors are expected to adopt them.",
+     "draft": "A3 has published ISO 21423:2026, a standard for how mobile robots from different vendors communicate. It was developed by ISO Technical Committee 299. [1]\n\nThe standard sets common communication requirements for AGVs (automated guided vehicles), AMRs (autonomous mobile robots) and similar systems. It covers the case where these machines come from different suppliers and work in the same facility. [1]\n\nThat Kranto on a practical question: whether fleets from several vendors can share a site without custom integration. [1]\n\nThe item doesn't say what the requirements contain, or when vendors are expected to adopt them.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "f32bea37bb9acc30",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers working in the same facility.",
+     "sha": "506e458d93374907",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers in one facility. It Kranto on whether multi-vendor fleets can share a site without custom integration.",
+     "draft": "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers working in the same facility. The card's reason: it Kranto on whether fleets from several vendors can share a site without custom integration.",
+     "rounds": 1,
+     "changed": [
+      {
+       "start": 0,
+       "end": 318,
+       "before": "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers working in the same facility. The card's reason: it Kranto on whether fleets from several vendors can share a site without custom integration.",
+       "after": "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers in one facility. It Kranto on whether multi-vendor fleets can share a site without custom integration."
+      }
+     ],
+     "sha": "34edbe7e87a353e1",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-18-4": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nThe inaugural World Robot Climbing Mount Tai Competition ended Monday in Tai'an, in China's Shandong province. Robots from more than 50 embodied AI organizations took part. One report says robots climbed 3,100 stone steps in 43 minutes.\n\nThat is the extent of what the item gives us. It does not say which robots finished, which won, or how many started, so I will not guess at those details.\n\n## Why stairs are a hard test\n\nA stone staircase on a mountain is a different problem from a flat factory floor or a lab demo. Steps can be uneven, worn, or slick, and a legged robot has to place each foot, keep its balance, and not fall over thousands of times in a row. Doing that once on a clean indoor staircase is one thing. Doing it over a long outdoor climb is another.\n\nThe item describes the event as a public test of legged-robot mobility on rough terrain. A public contest also means the results are seen by an audience rather than only reported in a company's own video.\n\n## The rescue and inspection link\n\nThe organizers tie the competition to rescue and inspection work. The idea is easy to follow: places that are hard or dangerous for people to reach, such as rubble, steep ground, or industrial sites, are also places where wheels often fail and legs might do better.\n\nThat is the organizers' framing, though, and a staircase climb does not prove a robot is ready for a disaster zone. The item does not say any of these robots are being used for rescue or inspection today.\n\n## What I would watch\n\nThe 43-minute figure comes from one report, so it is worth treating as a single data point. I would be curious to see whether later events publish fuller results: how many robots finished, how many needed help, and how the entries differed. Those details would say much more about where legged robots stand than a headline number can.",
+     "sha": "47a1305fc70564f8",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "The first World Robot Climbing Mount Tai Competition ended Monday in Tai'an, Shandong. Robots from more than 50 embodied AI organizations took part.\n\nOne report says robots climbed 3,100 stone steps in 43 minutes. The sources give no other results, so which robot did it and how the others fared is unknown.\n\nThe event is a public test of how legged robots move on rough terrain, and the organizers tie it to rescue and inspection work. There, a robot may have to cross uneven ground that wheels can't handle.",
+     "draft": "The first World Robot Climbing Mount Tai Competition ended Monday in Tai'an, Shandong. Robots from more than 50 embodied AI organizations took part.\n\nOne report says robots climbed 3,100 stone steps in 43 minutes. The sources give no other results, so I can't say which robot did it or how the others fared.\n\nThe event is a public test of how legged robots move on rough terrain. The organizers tie it to rescue and inspection work, where a robot may have to cross uneven ground that wheels can't handle.",
+     "rounds": 2,
+     "changed": [
+      {
+       "start": 214,
+       "end": 504,
+       "before": "The sources give no other results, so I can't say which robot did it or how the others fared.\n\nThe event is a public test of how legged robots move on rough terrain. The organizers tie it to rescue and inspection work, where a robot may have to cross uneven ground that wheels can't handle.",
+       "after": "The sources give no other results, so which robot did it and how the others fared is unknown.\n\nThe event is a public test of how legged robots move on rough terrain. The organizers tie it to rescue and inspection work, where a robot may have to cross uneven ground that wheels can't handle."
+      },
+      {
+       "start": 214,
+       "end": 504,
+       "before": "The sources give no other results, so which robot did it and how the others fared is unknown.\n\nThe event is a public test of how legged robots move on rough terrain. The organizers tie it to rescue and inspection work, where a robot may have to cross uneven ground that wheels can't handle.",
+       "after": "The sources give no other results, so which robot did it and how the others fared is unknown.\n\nThe event is a public test of how legged robots move on rough terrain, and the organizers tie it to rescue and inspection work. There, a robot may have to cross uneven ground that wheels can't handle."
+      }
+     ],
+     "sha": "521f1675ffad74bc",
+     "model": null,
+     "redrafted": true
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "The first World Robot Climbing Mount Tai Competition wrapped up Monday in Tai'an, Shandong, with robots from more than 50 embodied AI organizations. One report says robots climbed 3,100 stone steps in 43 minutes.",
+     "sha": "83422ca9de0cd0d3",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "The first World Robot Climbing Mount Tai Competition ended Monday in Tai'an, Shandong, with robots from 50+ embodied AI groups. They reportedly climbed 3,100 stone steps in 43 minutes. Organizers call it a public test of legged robots on rough terrain for rescue and inspection.",
+     "draft": "The first World Robot Climbing Mount Tai Competition ended Monday in Tai'an, Shandong, with robots from more than 50 embodied AI organizations. One report says robots climbed 3,100 stone steps in 43 minutes. Organizers call it a public test of legged-robot mobility on rough terrain, tied to rescue and inspection work.",
+     "rounds": 1,
+     "changed": [
+      {
+       "start": 0,
+       "end": 319,
+       "before": "The first World Robot Climbing Mount Tai Competition ended Monday in Tai'an, Shandong, with robots from more than 50 embodied AI organizations. One report says robots climbed 3,100 stone steps in 43 minutes. Organizers call it a public test of legged-robot mobility on rough terrain, tied to rescue and inspection work.",
+       "after": "The first World Robot Climbing Mount Tai Competition ended Monday in Tai'an, Shandong, with robots from 50+ embodied AI groups. They reportedly climbed 3,100 stone steps in 43 minutes. Organizers call it a public test of legged robots on rough terrain for rescue and inspection."
+      }
+     ],
+     "sha": "d812e811c8f20a2b",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "brief-17-2": {
+   "blog": {
+    "old": {
+     "text": "## What happened\n\nA weekly robotics roundup reports that Bedrock Robotics raised $600M at a $4.1B valuation. The item describes the company's product as excavators that are already doing paid work. That detail is the interesting part: this is not a pitch about a robot that might one day be useful, but machines the roundup says are earning money now.\n\nThe same roundup includes two other points. First, Agility's SPAC trust is down to about $164M ahead of AGLT. Second, four of the top five humanoid shippers are Chinese.\n\n## Why it may matter\n\nThe summary frames the item as a snapshot of where robotics funding went this week. A $600M round at a $4.1B valuation is a large bet on a single company, and the fact that it is tied to working excavators suggests investors may be paying attention to robots with a clear job and a paying customer.\n\nThe Agility figure is worth a second look. A SPAC trust is the pool of cash held for a merger, and the roundup says Agility's has shrunk to about $164M before the AGLT listing. The item does not say why it shrank or what it means for the deal, so I would not read too much into it. It is simply a number to watch.\n\nThe humanoid note is about shipments, not funding. If four of the top five shippers are Chinese, then the humanoid market, measured by units shipped, is split in a way that differs from the headlines that often focus on a few well-known names. The item does not name the companies or give shipment counts, so the details are missing here.\n\n## What I would want to know\n\nThe roundup is brief, and several questions are left open:\n\n- Who led the Bedrock round, and what will the money be used for?\n- How many excavators are working, and for which customers?\n- What happened to Agility's trust, and how does it affect AGLT?\n- Which companies make up the humanoid top five, and how many units did each ship?\n\nUntil those are answered, the clearest takeaway is modest: money appears to be flowing toward robots that already work, while the humanoid race looks less settled, and perhaps less Western, than it is often presented.",
+     "sha": "5bac5687e672f165",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Bedrock Robotics raised $600M at a $4.1B valuation, according to a weekly robotics roundup. The roundup says its excavators are already doing paid work.\n\nTwo other items from the same roundup:\n\n- Agility's SPAC trust is down to about $164M ahead of AGLT.\n- Four of the top five humanoid shippers are Chinese.\n\nThe roundup presents these as a view of where robotics funding went this week and how the humanoid market splits by shipments. It gives no more detail on the Bedrock round, such as who led it or what the money is for [1].",
+     "draft": "Bedrock Robotics raised $600M at a $4.1B valuation, according to a weekly robotics roundup. The roundup says its excavators are already doing paid work.\n\nTwo other items from the same roundup:\n\n- Agility's SPAC trust is down to about $164M ahead of AGLT.\n- Four of the top five humanoid shippers are Chinese.\n\nThe roundup presents these as a view of where robotics funding went this week and how the humanoid market splits by shipments. It gives no more detail on the Bedrock round, such as who led it or what the money is for [1].",
+     "rounds": 0,
+     "changed": [],
+     "sha": "1a9a7858997abba2",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Bedrock Robotics reportedly raised $600M at a $4.1B valuation, with its excavators already doing paid work. The same weekly roundup says Agility's SPAC trust is down to about $164M ahead of AGLT, and four of the top five humanoid shippers are Chinese.",
+     "sha": "b13cc7d0c6c20980",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "A weekly roundup reports Bedrock Robotics raised $600M at $4.1B for excavators already doing paid work. Agility's SPAC trust is down to about $164M ahead of AGLT, and four of the top five humanoid shippers are Chinese. Shows where funding went and how humanoid shipments split.",
+     "draft": "A weekly roundup reports Bedrock Robotics raised $600M at $4.1B for excavators already doing paid work. Agility's SPAC trust is down to about $164M ahead of AGLT, and four of the top five humanoid shippers are Chinese. Shows where funding went and how humanoid shipments split.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "843ced6189e620d5",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "card-160": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nMost tools that track AI subscription usage report how much of a limit window has been consumed. They don't tell you how much work one percent of that window actually buys. The idea on the card is a small canary: run the same fixed task on a schedule, and log tokens, cost and a pass/fail check per percent of limit consumed.\n\nIf that ratio shifts, something changed. It might be a silent cut to limits, a model swap, or a prompt change. The point is to learn this before you hit a wall in the middle of real work. The pattern is borrowed from uptime and SLA monitoring, where a cheap, repeatable probe tells you about a service before users complain.\n\n## Why the preconditions seem to hold\n\nThe card says the pattern fits when limits change often and meters are opaque. The sources give a few hints about both.\n\nOne dev.to analysis, dated 2026-10-31, says Anthropic removed the 5-hour limit for verified Ultra accounts on 30 October, while weekly limits were stated as unchanged [1]. That is a visible, announced change. But it shows that limit structures do move, and a percent-used meter alone would not tell you what the change did to the amount of work you can finish.\n\nA second source is an arXiv preprint, 'Anytime Contracts for AI Services'. It argues that providers can silently route requests to cheaper models, and that stochastic outputs make this degradation hard to detect [2]. That is the problem a fixed task is meant to address. One output is noisy, but the same task repeated over time, with a pass/fail check, gives a series you can compare.\n\nA third item reports that Anthropic added two sentences to Claude Code's system prompt for Opus 5.5 to steer it away from recreating someone else's specific video game [3]. This is a small, specific prompt change, and it is a reminder that prompts shift behind the scenes. Whether such a change would show up in a canary is not something the source says.\n\n## What happens at the limit\n\nThe fourth source is AWS documentation, which says that when usage reaches a project's spend limit, AWS pauses the project's resources until the period resets [4]. It is a different product, but it shows what hitting a limit can mean in practice: work stops until the window resets. That is the cost the canary tries to help you avoid.\n\n## Why it may matter\n\nThe card describes this as a theme that independent sources converged on: 604 distinct stories drawn from 50 sources, none supplying more than 70%. That suggests the worry is widely shared, though it doesn't prove the canary works.\n\nThe open questions are practical. How stable would the ratio be from run to run? How large a change would count as a real signal? The sources here don't answer those, and I wouldn't guess. But the core move is simple and cheap: hold the task fixed, so that when the meter or the model changes, you can see it in the numbers.",
+     "sha": "0f39adb9d0735b0d",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "I've been bitten by silent limit changes twice this year. A small canary helps here: run the same fixed task on a schedule and log three things. Those are tokens, cost and a pass/fail check, each per percent of limit consumed.\n\nExisting trackers report how much of a window is used. They don't report how much work a percent of that window buys. If that ratio shifts, the canary flags it. The card names three causes it could catch: a silent cut in limits, a model swap, or a prompt change. The point is to learn this before you hit a wall mid-task.\n\n## Why the meter isn't enough\n\nLimits do change. A dev.to analysis dated 2026-10-31 says Anthropic removed the 5-hour limit for verified Ultra accounts on 30 October, while weekly limits were stated as unchanged [1]. That change was announced. The worry is the ones that aren't.\n\nAn arXiv preprint, \"Anytime Contracts for AI Services\", argues that providers can silently route requests to cheaper models. It adds that stochastic outputs make this degradation hard to detect [2]. A single odd answer proves nothing. A fixed task run over and over, with a pass/fail check, gives you a baseline to compare against.\n\nPrompt changes are another kind of shift. One report says Anthropic added two sentences to Claude Code's system prompt for Opus 5.5 to steer it away from recreating someone else's specific video game [3]. That is a small edit, and a percent-used meter wouldn't show it.\n\n## Where the pattern comes from\n\nThe card borrows it from uptime and SLA monitoring. It needs two conditions: frequent limit changes and opaque meters. Both seem to hold here.\n\nThe cost of finding out late is real. AWS documentation says that when usage reaches a project's spend limit, AWS pauses the project's resources until the period resets [4]. If the limit moved without notice, you'd learn about it when the work stops.\n\nThe sources don't say whether anyone has built this canary. They also don't say how often the task should run, or how much of your own limit the canary itself would use.",
+     "draft": "I've been bitten by silent limit changes twice this year. The idea I'd want is a small canary: run the same fixed task on a schedule and log tokens, cost and a pass/fail check per percent of limit consumed.\n\nExisting trackers report how much of a window is used. They don't report how much work a percent of that window buys. If that ratio shifts, the canary flags it. The card names three causes it could catch: a silent cut in limits, a model swap or a prompt change. The point is to learn this before you hit a wall mid-task.\n\n## Why the meter isn't enough\n\nLimits do change. A dev.to analysis dated 2026-10-31 says Anthropic removed the 5-hour limit for verified Ultra accounts on 30 October, while weekly limits were stated as unchanged [1]. That change was announced. The worry is the ones that aren't.\n\nAn arXiv preprint, \"Anytime Contracts for AI Services\", argues that providers can silently route requests to cheaper models. It adds that stochastic outputs make this degradation hard to detect [2]. A single odd answer proves nothing. A fixed task run over and over, with a pass/fail check, gives you a baseline to compare against.\n\nPrompt changes are another kind of shift. One report says Anthropic added two sentences to Claude Code's system prompt for Opus 5.5 to steer it away from recreating someone else's specific video game [3]. That is a small edit, and a percent-used meter wouldn't show it.\n\n## Where the pattern comes from\n\nThe card borrows it from uptime and SLA monitoring. It needs two conditions: frequent limit changes and opaque meters. Both seem to hold here.\n\nThe cost of finding out late is real. AWS documentation says that when usage reaches a project's spend limit, AWS pauses the project's resources until the period resets [4]. If the limit moved without notice, you'd learn about it when the work stops.\n\nThe sources don't say whether anyone has built this canary. They also don't say how often the task should run, or how much of your own limit the canary itself would use.",
+     "rounds": 2,
+     "changed": [
+      {
+       "start": 58,
+       "end": 206,
+       "before": "The idea I'd want is a small canary: run the same fixed task on a schedule and log tokens, cost and a pass/fail check per percent of limit consumed.",
+       "after": "I'd want a small canary: run the same fixed task on a schedule and log three things. Those are tokens, cost and a pass/fail check, each per percent of limit consumed."
+      },
+      {
+       "start": 422,
+       "end": 468,
+       "before": "cut in limits, a model swap or a prompt change",
+       "after": "cut in limits, a model swap, or a prompt change"
+      },
+      {
+       "start": 58,
+       "end": 142,
+       "before": "I'd want a small canary: run the same fixed task on a schedule and log three things.",
+       "after": "A small canary helps here: run the same fixed task on a schedule and log three things."
+      }
+     ],
+     "sha": "f303f84215629e1a",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Usage trackers tell you how much of your AI subscription window is used. They don't tell you how much work a percent of that window buys. Idea: a fixed-task canary that runs the same task regularly, so silent tightening of limits or quality shows up as a change.",
+     "sha": "e2a3563484b77078",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "I've been bitten by silent limit changes twice this year. The idea: a fixed-task canary that detects silent tightening of AI subscription limits and quality. Existing trackers report how much of a window is used, not how much work a percent of that window buys.",
+     "draft": "I've been bitten by silent limit changes twice this year. The idea: a fixed-task canary that detects silent tightening of AI subscription limits and quality. Existing trackers report how much of a window is used, not how much work a percent of that window buys.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "692015159bb1e373",
+     "model": "claude-sonnet-5-5",
+     "redrafted": false
+    }
+   }
+  },
+  "card-159": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nWhen you run a model locally to power an agent, a lot of small choices pile up: which model, which quantization, which engine version, which flags. Any of them can change whether the model emits a tool call your code can parse. Setup guides tell you what to pick. They don't check what the stack you ended up with actually does.\n\nThe idea is a small conformance test. You point it at your own local endpoint, give it your own tool schemas, and it runs them with and without constrained decoding. It reports a schema-validity rate and names the flag that fixes the problem, if one does.\n\n## What the sources show\n\nThe only public measurement of this that the card found is from Ubicloud. They reported that Kimi K2.6 on vLLM 0.28 produced the expected tool-call schema only 92% of the time [1]. That is a useful number, but it was measured by a hosting company, for one model, on one engine version. It says little about your quant or your flags.\n\nMeanwhile, people are building for the setups where this matters most. Reika is a coding agent CLI designed for small local models of 8B to 35B parameters at Q2 to Q4 quantization, and it publishes measured findings on harness mitigations [2]. That suggests that on small, heavily quantized models, the harness around the model is doing real work to keep things functioning.\n\nA third source comes from a different corner. InferOpt, an arXiv paper on LLM inference serving, starts from the problem that serving requires tuning dozens of layer-wise knobs, and that existing approaches use mechanism-specific heuristics that return single operating points [3]. It is about performance tuning, not tool calls, so I wouldn't stretch it. But it describes the same shape: many settings, and a result that depends on the combination.\n\n## Why it may matter\n\nThe three sources come from different places: AI developer tooling and LLM infrastructure. Yet the same pattern shows up in each. The configuration you choose affects whether the system behaves, and the evidence for it is thin or scattered.\n\nA 92% schema-validity rate sounds high until an agent makes many tool calls in a row. I won't put a number on that here, because the sources don't, but it is easy to see why a failure rate like that would be a problem for anyone running a multi-step task.\n\nA conformance test would turn a vague worry into a measurement you can repeat. Change the quant, rerun it. Upgrade the engine, rerun it. Because it uses your own schemas, the result reflects your workload rather than someone else's benchmark.\n\n## What I don't know\n\nThe sources don't show how much constrained decoding helps in practice, or which flags matter most. They also don't say that such a tool doesn't already exist somewhere. The card's claim is narrower: the public measurement the card found is one hosting company's, for one model. Whether a broader test would find large gaps is the open question, and it is the thing the tool would answer.",
+     "sha": "39613048adbfe6d5",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Whether a local model emits valid tool calls depends on the stack around it, and there is no easy way to check yours. The idea is a small conformance test: run your own tool schemas against your own local endpoint and report how often the output is valid.\n\n## What the sources show\n\nThe one public measurement of this comes from Ubicloud. It reported that Kimi K2.6 on vLLM 0.28 produced the expected tool-call schema only 92% of the time [1]. That means roughly 1 call in 12 missed the schema. Ubicloud is a hosting company, and it measured one model.\n\nThe choices that could move that number are the model, the quantization level, the engine version and the flags. Reika, a coding agent CLI built for small local models of 8B to 35B parameters at Q2 to Q4 quantization, publishes measured findings on harness mitigations [2]. That is another sign that people running small, heavily quantized models work around these failures and measure them.\n\nA third source comes from a different field. InferOpt, an arXiv paper on LLM inference serving, starts from the problem that serving requires tuning dozens of layer-wise knobs [3]. It says existing approaches use mechanism-specific heuristics that return single operating points [3]. The paper is about serving performance, not tool calls. It does show the same shape: many settings, and few tools that check what a given combination does.\n\n## The proposed tool\n\nThe tool would be small. It would take the user's own tool schemas and send requests to the user's own local endpoint. It would run each schema twice, with and without constrained decoding, which forces output to follow a grammar or schema. It would then report a schema-validity rate. If constrained decoding fixes failures, it would name the flag that does it.\n\nSetup guides tell you which stack to pick. This would check what the stack actually does.\n\n## Open question\n\nThe sources give one figure, 92%, for one model on one engine version. Whether other models, quants, engine versions and flag settings score higher or lower is not measured in any of them.",
+     "draft": "Whether a local model emits valid tool calls depends on the stack around it, and there is no easy way to check yours. The idea is a small conformance test: run your own tool schemas against your own local endpoint and report how often the output is valid.\n\n## What the sources show\n\nThe one public measurement of this comes from Ubicloud. It reported that Kimi K2.6 on vLLM 0.28 produced the expected tool-call schema only 92% of the time [1]. That means roughly 1 call in 12 missed the schema. Ubicloud is a hosting company, and it measured one model.\n\nThe choices that could move that number are the model, the quantization level, the engine version and the flags. Reika, a coding agent CLI built for small local models of 8B to 35B parameters at Q2 to Q4 quantization, publishes measured findings on harness mitigations [2]. That is another sign that people running small, heavily quantized models work around these failures and measure them.\n\nA third source comes from a different field. InferOpt, an arXiv paper on LLM inference serving, starts from the problem that serving requires tuning dozens of layer-wise knobs [3]. It says existing approaches use mechanism-specific heuristics that return single operating points [3]. The paper is about serving performance, not tool calls. It does show the same shape: many settings, and few tools that check what a given combination does.\n\n## The proposed tool\n\nThe tool would be small. It would take the user's own tool schemas and send requests to the user's own local endpoint. It would run each schema twice, with and without constrained decoding, which forces output to follow a grammar or schema. It would then report a schema-validity rate. If constrained decoding fixes failures, it would name the flag that does it.\n\nSetup guides tell you which stack to pick. This would check what the stack actually does.\n\n## Open question\n\nThe sources give one figure, 92%, for one model on one engine version. Whether other models, quants and flag settings score higher or lower is not measured in any of them.",
+     "rounds": 2,
+     "changed": [
+      {
+       "start": 1954,
+       "end": 2006,
+       "before": "Whether other models, quants and flag settings score",
+       "after": "Whether other models, quants, engine versions and flag settings score"
+      }
+     ],
+     "sha": "a0525a78b89d7378",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Idea: a conformance test for local model serving. Does your stack emit valid tool calls? The model, quant, engine version and flags you pick now decide whether agents work. The only public measurement we know of is Ubicloud's, run by a hosting company on one model.",
+     "sha": "06b49648648bca5e",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Whether a local agent works now depends on the model, quant, engine version and flags you pick. The only public measurement of this is Ubicloud's, done by a hosting company for one model. A conformance test would check whether your stack emits valid tool calls.",
+     "draft": "Whether a local agent works now depends on the model, quant, engine version and flags you pick. The only public measurement of this is Ubicloud's, done by a hosting company for one model. A conformance test would check whether your stack emits valid tool calls.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "28b4f667cf20c8e0",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-158": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nAgents are gaining long-term memory, and in many products that memory is shared across users. The idea on the table is a cross-user leakage test suite that a team runs in CI against its own memory store before release. The comparison is to row-level-security tests in databases: you don't trust the isolation, you check it, every time.\n\n## What the sources show\n\nThree things point in this direction.\n\nFirst, memory tooling is growing. One open-source project, ContextMemory, is a memory gateway for llama.cpp and vLLM that keeps session state as editable markdown files behind an OpenAI-compatible API [2]. Another post describes the AML CYCLE 2 benchmark for long-term agent memory, with Textual, Coding and Multimodal tracks, each with its own result table [3].\n\nSecond, those benchmark tracks, as described, measure recall. They ask how well an agent remembers. The card's observation is that they do not ask whether memory stays on the right side of a user boundary [3].\n\nThird, there is a preprint on cross-user credential leakage through shared long-term agent memory. It proposes a three-stage audit that separates exposure, behavior and state [1]. In plain terms, the audit asks three different questions: did a foreign credential reach the prompt, did the agent act on it, and did the other account actually change?\n\nThe test suite idea is to package that audit as something runnable. The sources describe the audit itself, not a finished test suite, so the packaging is a proposal rather than an existing product.\n\n## Why the three stages matter\n\nSplitting the check into stages is useful because the failures differ. A credential showing up in a prompt is a leak, but it may be harmless if the agent ignores it. An agent that uses it is worse. An account that changes as a result is the real damage. A single pass/fail test would blur these together, while three separate signals tell a team where its isolation is breaking down.\n\n## Why it may matter\n\nIf shared memory becomes a standard part of multi-user agents, isolation becomes a property teams need to verify, not assume. Recall benchmarks can show a memory system is good at remembering and still say nothing about whether it remembers the wrong person's secrets. A suite run before each release would turn the preprint's audit into routine practice, in the way database teams already treat access rules.\n\n## Open questions\n\nThe sources do not say how such a suite would be built, what attack cases it would include, or how well it would work against real memory stores. Those are the things worth finding out. The gap itself, recall measured and isolation not, seems clear enough to be worth a closer look.",
+     "sha": "e123fd17fd21cd3d",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Shared memory for multi-user agents has benchmarks for recall but none, in the sources here, for isolation between users. The idea: package a preprint's audit as a test suite and run it in CI.\n\nMemory tooling is multiplying. ContextMemory is an open-source memory gateway for llama.cpp and vLLM. It keeps session state as editable markdown files behind an OpenAI-compatible API [2]. A Show HN post describes the AML CYCLE 2 benchmark for long-term agent memory, with Textual, Coding and Multimodal tracks, each with a result table [3]. Those tracks measure recall. They do not measure whether one user's data reaches another.\n\nThat gap is what an arXiv preprint on cross-user credential leakage through shared long-term agent memory addresses [1]. It proposes a three-stage audit that separates three things:\n\n- **Exposure:** a foreign credential reaches the prompt.\n- **Behavior:** the agent acts on it.\n- **State:** the other account changes.\n\nThe split matters because the stages are different failures. A credential in the prompt is a leak even if the agent ignores it. A credential the agent uses is worse. A change in the other account's state is the damage itself [1].\n\nThe proposal is to turn this audit into a runnable test suite. A team adding shared memory to a multi-user agent would run it against its own store before release, much like row-level-security tests. Those tests check that a database query can't return another user's rows, and this suite would check the same boundary for memory.\n\nThe card also notes that this theme shows up across 471 distinct stories from 50 sources, none supplying more than 70% of them. It describes the theme as one that independent sources converged on, not one with a single origin.\n\nThe sources don't say whether the preprint ships code or what its test cases look like. Turning the audit into a suite would start there.",
+     "draft": "Shared memory for multi-user agents has benchmarks for recall but none, in the sources here, for isolation between users. The idea: package a preprint's audit as a test suite and run it in CI.\n\nMemory tooling is multiplying. ContextMemory is an open-source memory gateway for llama.cpp and vLLM. It keeps session state as editable markdown files behind an OpenAI-compatible API [2]. A Show HN post describes the AML CYCLE 2 benchmark for long-term agent memory, with Textual, Coding and Multimodal tracks, each with a result table [3]. Those tracks measure recall. They do not measure whether one user's data reaches another.\n\nThat gap is what an arXiv preprint on cross-user credential leakage through shared long-term agent memory addresses [1]. It proposes a three-stage audit that separates three things:\n\n- **Exposure:** a foreign credential reaches the prompt.\n- **Behavior:** the agent acts on it.\n- **State:** the other account changes.\n\nThe split matters because the stages are different failures. A credential in the prompt is a leak even if the agent ignores it. A credential the agent uses is worse. A change in the other account's state is the damage itself [1].\n\nThe proposal is to turn this audit into a runnable test suite. A team adding shared memory to a multi-user agent would run it against its own store before release, much like row-level-security tests. Those tests check that a database query can't return another user's rows, and this suite would check the same boundary for memory.\n\nThe card also notes that this theme shows up across 471 distinct stories from 50 sources, none supplying more than 70% of them. It describes the theme as one that independent sources converged on, not one with a single origin.\n\nThe sources don't say whether the preprint ships code or what its test cases look like. Turning the audit into a suite would start there.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "d33e8f304d8bb0c3",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Memory gateways and memory benchmarks keep multiplying, but the tracks described measure recall, not isolation between users. Idea: a cross-user leakage test suite for shared agent memory stores, run in CI.",
+     "sha": "67453cf153d1a152",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Memory gateways and memory benchmarks keep multiplying. The benchmark tracks described measure recall: textual, coding, multimodal. None of them measure isolation between users. The idea: a cross-user leakage test suite for shared agent memory stores, run in CI.",
+     "draft": "Memory gateways and memory benchmarks keep multiplying. The benchmark tracks described measure recall: textual, coding, multimodal. None of them measure isolation between users. The idea: a cross-user leakage test suite for shared agent memory stores, run in CI.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "f0b549715dd7f800",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-157": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nMany small-business voice agents are shipped as one long prompt. That prompt tends to describe a state machine without saying so: greet the caller, collect a name, check availability, book or decline, hand off. The states, transitions and tool calls are all there, but they live in prose, where nobody can easily inspect or test them.\n\nThe proposal is a tool that reads such a prompt and extracts the implied states, transitions and tool calls. It would then flag instructions that are ambiguous or conflicting, and steps that can never be reached. The owner could keep the prompt as it is, or move to an explicit flow built from the extracted graph.\n\n## What the sources show\n\nThe starting observation is about how common the single-prompt style is. One practitioner audited nine production voice agents on the Retell platform and reported that all nine use a single-prompt architecture, with no explicit states or flow graph [1]. Nine is a small sample, so it shows the pattern exists in real deployments rather than proving how widespread it is.\n\nA second source hints at what goes wrong when rules live in one place while the world moves. In OSWorld 2.0's failure-case walkthrough of a purchase-order task, the agent treats its initial rules as a fixed anchor, while requests arrive through a spreadsheet, a finance channel and DMs [2]. That is a different setting from voice, but the shape is similar: instructions fixed up front, inputs arriving in varied ways.\n\nThe tooling side has a loose parallel. An arXiv paper describes an automotive C/C++ coding assistant that exposes generate, edit and verify tools over MCP, and the developer can run verify on any code on demand [3]. Checking is a first-class step there, not an afterthought.\n\nFinally, an essay by Alex Gaynor argues that properties made true by construction, through better tools, libraries and abstractions, are far cheaper to guarantee than properties verified after the fact [4].\n\n## Why it may matter\n\nThe idea sits between those two positions. Extracting a graph from an existing prompt is verification after the fact: it checks something already written. Moving to an explicit flow is closer to construction, where some mistakes, such as an unreachable step, can't be written in the first place. Offering both lets an owner choose, and doesn't force a rewrite.\n\nThe need seems to be current, since the single-prompt style looks like the default in the deployments audited [1]. If the machine hidden in a prompt can be shown as a graph, an owner could see what the agent is actually instructed to do.\n\n## Open questions\n\nThe sources don't say how reliably a tool could recover states from free-form prose, or how owners would react to being shown conflicts in their own prompts. Those are the things I would want to test first.",
+     "sha": "e7bb6fd5822c3dcf",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "**A tool that turns a long voice-agent prompt into a checkable state graph is a good idea, but I think the graph would rot, because voice prompts change weekly.**\n\nThe problem is real. A practitioner audited nine production voice agents on the Retell platform and found that all nine use a single-prompt architecture, with no explicit states or flow graph [1]. The prompt still encodes a state machine, but nobody can inspect or test it. The idea is a tool that reads the prompt, pulls out the implied states, transitions and tool calls, and flags conflicting or ambiguous instructions and unreachable steps. The owner could then keep the prompt or switch to an explicit flow.\n\nThe sources point to why this is worth checking. In OSWorld 2.0's walkthrough of a purchase-order task, the agent treats its initial rules as a fixed anchor, while new requests arrive through a spreadsheet, a finance channel and DMs [2]. Rules written once and followed rigidly are what a conflict checker would catch.\n\nAlex Gaynor's essay gives the strongest argument for the explicit flow. He says properties made true by construction, through better tools, libraries and abstractions, are far cheaper to guarantee than properties verified after the fact [4]. Extracting a graph from a finished prompt is verification after the fact. Moving to an explicit flow is construction.\n\nI think that gap is the real risk. If the prompt keeps changing, a graph extracted once goes stale. The extraction would have to rerun on every edit. One of the sources has a similar shape: an automotive coding assistant exposes generate, edit and verify tools over MCP, and the developer can run verify on any code on demand [3]. A checker that runs on demand and after each edit might keep up with a weekly-changing prompt. A one-time export would not.\n\nThe sources leave one question open: would owners who edit weekly accept a flow they have to maintain, or would they rather keep the prompt and just run the check each time?",
+     "draft": "**A tool that turns a long voice-agent prompt into a checkable state graph is a good idea, but I think the graph would rot, because voice prompts change weekly.**\n\nThe problem is real. A practitioner audited nine production voice agents on the Retell platform and found that all nine use a single-prompt architecture, with no explicit states or flow graph [1]. The prompt still encodes a state machine, but nobody can inspect or test it. The idea is a tool that reads the prompt, pulls out the implied states, transitions and tool calls, and flags conflicting or ambiguous instructions and unreachable steps. The owner could then keep the prompt or switch to an explicit flow.\n\nThe sources point to why this matters. In OSWorld 2.0's walkthrough of a purchase-order task, the agent treats its initial rules as a fixed anchor, while new requests arrive through a spreadsheet, a finance channel and DMs [2]. Rules written once and followed rigidly are what a conflict checker would catch.\n\nAlex Gaynor's essay gives the strongest argument for the explicit flow. He says properties made true by construction, through better tools, libraries and abstractions, are far cheaper to guarantee than properties verified after the fact [4]. Extracting a graph from a finished prompt is verification after the fact. Moving to an explicit flow is construction.\n\nThat is where my worry comes in. If the prompt keeps changing, a graph extracted once goes stale. The extraction would have to rerun on every edit. One of the sources has a similar shape: an automotive coding assistant exposes generate, edit and verify tools over MCP, and the developer can run verify on any code on demand [3]. A checker that runs on demand and after each edit might keep up with a weekly-changing prompt. A one-time export would not.\n\nThe sources leave one question open: would owners who edit weekly accept a flow they have to maintain, or would they rather keep the prompt and just run the check each time?",
+     "rounds": 2,
+     "changed": [
+      {
+       "start": 1349,
+       "end": 1381,
+       "before": "That is where my worry comes in.",
+       "after": "That's where I start to worry."
+      },
+      {
+       "start": 703,
+       "end": 715,
+       "before": "this matters",
+       "after": "this is worth checking"
+      },
+      {
+       "start": 1349,
+       "end": 1379,
+       "before": "That's where I start to worry.",
+       "after": "I think that gap is the real risk."
+      }
+     ],
+     "sha": "4303b66c9d86fa73",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Idea: compile a long single-prompt voice agent into an explicit state graph you can inspect and test. Many small-business voice agents ship as one giant prompt that quietly encodes a state machine. Right now nobody can check it. Making the states visible is the point.",
+     "sha": "592e24f9d0b29de0",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Small-business voice agents often ship as one giant prompt that quietly encodes a state machine. Nobody can inspect or test that machine. The idea: compile the prompt into an explicit, checkable state graph. Good idea, but voice prompts change weekly, so the graph would rot.",
+     "draft": "Small-business voice agents are often shipped as one giant prompt that quietly encodes a state machine. Nobody can inspect or test that machine. The idea: compile the prompt into an explicit, checkable state graph. Good idea, but voice prompts change weekly, so the graph would rot.",
+     "rounds": 1,
+     "changed": [
+      {
+       "start": 0,
+       "end": 282,
+       "before": "Small-business voice agents are often shipped as one giant prompt that quietly encodes a state machine. Nobody can inspect or test that machine. The idea: compile the prompt into an explicit, checkable state graph. Good idea, but voice prompts change weekly, so the graph would rot.",
+       "after": "Small-business voice agents often ship as one giant prompt that quietly encodes a state machine. Nobody can inspect or test that machine. The idea: compile the prompt into an explicit, checkable state graph. Good idea, but voice prompts change weekly, so the graph would rot."
+      }
+     ],
+     "sha": "bc0324cd4d2e1867",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-156": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nMost self-hosters have some routine for knowing when an image needs updating: version trackers, CVE alerts, release feeds. What we don't have is a routine signal for a different kind of news: a tool we depend on narrows its free tier, changes its license, or is wound down.\n\nThe idea is a compose-file watcher. It would read a compose file or a plain list of images and match it against a curated feed of vendor changes. Each flagged entry would come with a pointer to the usual successor project, so the alert says what changed and where people tend to go next.\n\n## What the sources show\n\nThree recent items show how different these changes can look.\n\n- Portainer is dropping its Community Edition with the upcoming v3.0. The mainline version is still offered with three free nodes, on application [1]. A free tier still exists, but it is a different shape from the one people were running.\n- Cloudflare will fund Deno for one more year, with monthly bug and security releases, and then stop developing the runtime. It stays open source [3]. The code remains available, but the active development behind it ends.\n- TraceUX, a self-hosted session replay and feedback tool shipped as a single Go binary with SQLite, is positioned as a lightweight replacement for Smartlook, which is shutting down [2]. This one shows what a successor pointer might look like: a shutdown on one side, an alternative on the other.\n\nThese are three different kinds of change: a edition dropped, a development runway ended, a product closed. A feed would have to cover all of them, not just license edits.\n\n## Why it may matter\n\nThe card notes that several such changes landed within weeks of each other in autumn 2026. It also points out that people running stacks of 20 or more services have more tools exposed to this risk than they can follow by hand. Reading a dozen project blogs and release pages for every image is not a realistic habit.\n\nThe card also says the theme is not coming from one place: it groups 547 distinct stories from 46 sources, none supplying more than 70%. That suggests a theme that independent sources converged on, though I'd read it as a signal of interest rather than proof of demand for this specific tool.\n\n## Open questions\n\nThe hard part is likely the feed, not the matching. Someone has to curate vendor changes and keep the successor pointers honest. The sources here don't say how that would be done, or who would do it. They also don't tell us how many people would use such a tool. What they do show is that the events are real and varied, and that a compose file is already a tidy list of exactly what someone depends on.",
+     "sha": "0f0b1b38086e0e0f",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Self-hosters track versions and CVEs, but they have no routine signal for when a tool they depend on narrows its free tier, changes license or is wound down. The idea is a watcher that reads a compose file or image list and matches it against a curated feed of vendor changes. Each match would come with a pointer to the usual successor project.\n\nSeveral such changes landed within weeks of each other in autumn 2026. Three examples from the sources show how different they can look.\n\n- **Portainer.** It is dropping its Community Edition with the upcoming v3.0. The mainline version stays available with three free nodes on application [1].\n- **Smartlook.** It is shutting down. TraceUX, a self-hosted session replay and feedback tool in a single Go binary with SQLite, is positioned as a lightweight replacement [2].\n- **Deno.** Cloudflare will fund it for one more year, with monthly bug and security releases, and then stop developing the runtime. The runtime stays open source [3].\n\nThese are three kinds of change: a free edition removed, a service closed, a project losing its sponsor. A version tracker or a CVE scanner would flag none of them. The Deno case is the quietest, since the code stays open and the security releases continue for a year. A watcher would need to cover that kind of slow wind-down as well as outright shutdowns.\n\nThe card says people running a stack of 20 or more services have more tools exposed to this risk than they can follow by hand. Each tool has its own blog, release notes and forum, so keeping up means reading all of them.\n\nThe card also says the theme is not one outlet's story. It rests on 547 distinct stories drawn from 46 sources. None supplies more than 70% of them, and no single origin accounts for the pattern. Independent sources converged on it.\n\nThe sources do not say how a feed would be curated, who would maintain it, or how a successor would be chosen when a project has several. The Portainer case shows why that matters: the replacement there is a limited tier of the same product, while the Smartlook one is a different tool.",
+     "draft": "Self-hosters track versions and CVEs, but they have no routine signal for when a tool they depend on narrows its free tier, changes license or is wound down. The idea is a watcher that reads a compose file or image list and matches it against a curated feed of vendor changes. Each match would come with a pointer to the usual successor project.\n\nSeveral such changes landed within weeks of each other in autumn 2026. Three examples from the sources show how different they can look.\n\n- **Portainer.** It is dropping its Community Edition with the upcoming v3.0. The mainline version stays available with three free nodes on application [1].\n- **Smartlook.** It is shutting down. TraceUX, a self-hosted session replay and feedback tool in a single Go binary with SQLite, is positioned as a lightweight replacement [2].\n- **Deno.** Cloudflare will fund it for one more year, with monthly bug and security releases, and then stop developing the runtime. The runtime stays open source [3].\n\nThese are three kinds of change: a free edition removed, a service closed, a project losing its sponsor. A version tracker or a CVE scanner would flag none of them. The Deno case is the quietest, since the code stays open and the security releases continue for a year. A watcher would need to cover that kind of slow wind-down as well as outright shutdowns.\n\nThe card says people running a stack of 20 or more services have more tools exposed to this risk than they can follow by hand. Each tool has its own blog, release notes and forum, so keeping up means reading all of them.\n\nThe card also says the theme is not one outlet's story. It rests on 547 distinct stories drawn from 46 sources. None supplies more than 70% of them, and no single origin accounts for the pattern. Independent sources converged on it.\n\nThe sources do not say how a feed would be curated, who would maintain it, or how a successor would be chosen when a project has several. The Portainer case shows why that matters: the replacement there is a limited tier of the same product, while the Smartlook one is a different tool.",
+     "rounds": 1,
+     "changed": [],
+     "sha": "3fd0d8019107b8a6",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Self-hosters track versions and CVEs, but there's no routine signal when a tool they run narrows its free tier, changes license, or gets wound down. Idea: a compose-file watcher that flags images facing those cuts.",
+     "sha": "8876893c6971554c",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Self-hosters track versions and CVEs, but have no routine signal for when a tool they depend on narrows its free tier, changes its license or is wound down. The idea: a watcher that reads your compose file and flags images facing those changes.",
+     "draft": "Self-hosters track versions and CVEs, but have no routine signal for when a tool they depend on narrows its free tier, changes its license or is wound down. The idea: a watcher that reads your compose file and flags images facing those changes.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "b29b573cce2f86a9",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-155": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nMost LLM serving is built around generation: you send a prompt, the model writes tokens, and the system is tuned to do that quickly. But a lot of practical work is not writing. Routing a request, moderating a message, or scoring an item means picking one answer from a short list, and often many such picks at once. The idea on the card is a thin serving endpoint that answers many structured decisions from one forward pass, paired with a harness that audits those decisions before anyone relies on them.\n\n## What the sources show\n\nThree sources, found in different places, point at the same shape.\n\nThe first is a research system called DuplexJev. It passes ASR encoder hidden states through a small connector into a frozen LLM, and then reads each decision as a single-token distribution over the answer options, rather than generating text autoregressively [1]. The model is not asked to write an answer. Its probabilities over the options are the answer.\n\nThe second is on the serving side. A vLLM pull request is adapting Google's DiffusionGemma 26B-A4B to run structured decision tasks in a single denoising step, with multiple decisions read from logprobs in one forward pass [2]. That is the same pattern, now being fitted into a widely used serving stack. It is a pull request, so I would treat it as work in progress rather than a finished feature.\n\nThe third is about checking. Ai2 introduced FairStress, a fairness benchmark of 300 two-candidate decision scenarios across 29 domains, built to test asymmetry in decision robustness [3]. It is not about single-pass serving specifically, but it addresses a concern that cheap decisions raise: whether a decision holds up evenly, or whether it flips more easily in one direction than another.\n\n## Why it may matter\n\nThe card's argument is that these pieces fit together. If decisions are cheap to produce, they will be produced in large numbers, and in places where nobody reads the output. A decision read from option probabilities has no explanation attached to it, so the only way to learn whether it can be trusted is to test it.\n\nThe card suggests a harness that perturbs the input and checks two things: stability, meaning the decision stays the same when it should, and asymmetry, meaning it does not shift more readily toward one outcome than the other. FairStress shows that this kind of asymmetry testing is already being formalized for two-candidate decisions [3].\n\nThe card also notes that these sources were watched for different topics, AI developer tooling and LLM tooling and infrastructure, and still landed on the same shape. That is the reason to pay attention. It is not proof that the approach works well, and the sources here do not report accuracy or latency figures. What they show is interest from research, serving code and evaluation at the same time.\n\n## Open questions\n\nI would want to know how well a single-token readout holds up across tasks, and what a practical audit harness would need to cover beyond a two-candidate benchmark. The sources do not answer either. They do suggest the serving part is arriving first, which makes the auditing part the piece worth building early.",
+     "sha": "eaab478db6c6f957",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Routing, moderation and scoring need many small decisions answered fast. Standard LLM serving treats generation as the unit of work, which fits them badly. The idea here is a thin endpoint that returns many structured decisions from one forward pass, paired with a harness that checks those decisions for stability and asymmetry under input perturbation.\n\n## What the sources show\n\nThree sources, watched for different topics, show the same shape.\n\nThe first is research. DuplexJev feeds ASR encoder hidden states through a small connector into a frozen LLM [1]. ASR is speech recognition. The model does not generate text token by token. Each decision is read as a single-token distribution over answer options [1].\n\nThe second is serving software. A vLLM pull request is adapting Google's DiffusionGemma 26B-A4B to run structured decision tasks in a single denoising step [2]. Several decisions are read from logprobs in one forward pass [2]. Logprobs are the model's log probabilities for each candidate token.\n\nThe third is evaluation. Ai2 introduced FairStress, a fairness benchmark of 300 two-candidate decision scenarios across 29 domains [3]. It tests asymmetry in decision robustness [3].\n\nThe first two cover the cheap way to get decisions: read option probabilities instead of generating text. The third covers a way to test whether such decisions hold up.\n\n## Why a audit harness belongs with it\n\nA decision read from one token distribution is fast, but nothing in that speed says it is reliable. The idea's claim is that a harness should come first: perturb the input, then check whether the decision stays stable and whether it fails more in one direction than the other. That is the kind of asymmetry FairStress tests for, using two-candidate scenarios [3].\n\nThe sources do not say how DuplexJev or the vLLM work performs under such checks. They do not give results for any harness of this kind. What they show is that the cheap decision path is being built in research [1] and in a serving stack [2], while a benchmark for decision asymmetry already exists [3].\n\nThe open question is whether decisions read from a single forward pass hold steady when the input is slightly changed.",
+     "draft": "Routing, moderation and scoring need many small decisions answered fast. Standard LLM serving treats generation as the unit of work, which fits them badly. The idea here is a thin endpoint that returns many structured decisions from one forward pass, paired with a harness that checks those decisions for stability and asymmetry under input perturbation.\n\n## What the sources show\n\nThree sources, watched for different topics, show the same shape.\n\nThe first is research. DuplexJev feeds ASR encoder hidden states through a small connector into a frozen LLM [1]. ASR is speech recognition. The model does not generate text token by token. Each decision is read as a single-token distribution over answer options [1].\n\nThe second is serving software. A vLLM pull request is adapting Google's DiffusionGemma 26B-A4B to run structured decision tasks in a single denoising step [2]. Several decisions are read from logprobs in one forward pass [2]. Logprobs are the model's log probabilities for each candidate token.\n\nThe third is evaluation. Ai2 introduced FairStress, a fairness benchmark of 300 two-candidate decision scenarios across 29 domains [3]. It tests asymmetry in decision robustness [3].\n\nThe first two cover the cheap way to get decisions: read option probabilities instead of generating text. The third covers a way to test whether such decisions hold up.\n\n## Why a audit harness belongs with it\n\nA decision read from one token distribution is fast, but nothing in that speed says it is reliable. The idea's claim is that a harness should come first: perturb the input, then check whether the decision stays stable and whether it fails more in one direction than the other. That is the kind of asymmetry FairStress tests for, using two-candidate scenarios [3].\n\nThe sources do not say how DuplexJev or the vLLM work performs under such checks. They do not give results for any harness of this kind. What they show is that the cheap decision path is being built in research [1] and in a serving stack [2], while a benchmark for decision asymmetry already exists [3].\n\nThe open question is whether decisions read from a single forward pass hold steady when the input is slightly changed.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "963ef666037732c2",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "LLM serving treats generation as the unit of work. But routing, moderation and scoring need many small structured decisions, fast. The idea: answer many of them from one forward pass, and pair it with a decision audit harness so those answers can be checked.",
+     "sha": "12d391bff65e0466",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Standard LLM serving treats generation as the unit of work. But routing, moderation and scoring need many small decisions answered fast. The idea: serve many structured decisions from one forward pass, with a decision audit harness to check them.",
+     "draft": "Standard LLM serving treats generation as the unit of work. But routing, moderation and scoring need many small decisions answered fast. The idea: serve many structured decisions from one forward pass, with a decision audit harness to check them.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "05ba9ea704b50acd",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-154": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nA voice-agent prompt often reads like prose, but it describes a process: do this first, call this tool when that happens, move on when the caller says something else. The idea is a deterministic tool that parses an exported prompt into its implied steps, tool triggers and transitions, then flags problems. Examples include a tool that no step calls, a step with no exit, or two instructions that contradict each other. It is a lint step for prompts.\n\nThis is a proposal, not an existing product. The case for it rests on a few signals that point the same way.\n\n## What the sources show\n\nThe starting observation comes from a practitioner who audited nine production voice agents on the Retell platform. All nine use a single-prompt architecture, with no explicit states and no flow graph [1]. If that sample is typical, the state machine exists only implicitly, inside the text. Nobody can inspect it directly.\n\nThree other items, from different corners of LLM tooling, share a theme: checks that do not depend on a model's own judgment.\n\n- An automotive C/C++ coding assistant exposes generate, edit and verify tools over MCP. The developer can run verify on any code on demand, rather than relying on the agent to check its own output [2].\n- A pilot study proposes measuring user-simulator persona fidelity with model-free instruments, namely stylometry and lexicon-based content analysis [3].\n- An essay by Alex Gaynor argues that properties made true by construction, through better tools and abstractions, are cheaper to guarantee than properties verified after the fact [4].\n\nNone of these is about prompt linting. They show the same shape: a deterministic check placed next to a probabilistic system.\n\n## Why it may matter\n\nThe card's argument is about timing. Prompts are now thousands of words long and sit in revenue-bearing deployments. At that length, a dead tool or a step with no exit is easy to miss by reading, and a deterministic pass could catch it every time.\n\nThere is a tension worth naming. Gaynor's essay favors guarantees built in from the start over checks added later [4], and a linter is a check added later. But the card suggests a second benefit: the extracted graph could give builders a path to migrate to explicit flow graphs. In that reading, the linter is a bridge. It shows what the implicit structure is today, and it could lead toward a design where the structure is explicit and some of these problems cannot occur.\n\n## Open questions\n\nThe sources do not say how reliably a parser could recover steps and transitions from free-form prose, or how often such flaws occur in real prompts. Those are the things to test first. The nine-agent audit suggests there is plenty of material to try it on [1].",
+     "sha": "284071dd9f61a408",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "A deterministic linter could read an exported voice-agent prompt, pull out the steps, tool triggers and transitions it implies, and flag what is broken. Examples are a tool no step calls, a step with no exit, and instructions that contradict each other. Given the same prompt, it would give the same findings every time, with no model judging another model.\n\n## What the sources show\n\nA practitioner audited nine production voice agents on the Retell platform. All nine use a single-prompt architecture, with no explicit states or flow graph [1]. In that setup the state machine exists only in the prose, so nothing can check it. A linter would write it out.\n\nThe idea also gives builders a way off the single prompt. Once the implied steps and transitions are extracted, they can become an explicit flow graph.\n\nSimilar thinking shows up in other work on LLM agents:\n\n- An arXiv paper on an automotive C/C++ coding assistant exposes generate, edit and verify tools over MCP. The developer can run verify on any code on demand, instead of relying on the agent to check its own output [2].\n- An arXiv pilot study proposes measuring the persona fidelity of LLM user simulators deterministically, using model-free instruments: stylometry and lexicon-based content analysis [3].\n- An essay by Alex Gaynor argues that properties made true by construction, through better tools and abstractions, are cheaper to guarantee than properties verified after the fact [4].\n\nThe first two are checks that don't depend on a model grading itself. The third gives the cost argument. A linter is verification after the fact, run on prompts that already exist. An explicit flow graph is closer to Gaynor's by-construction case.\n\n## Why it may matter\n\nThe case rests on two facts about these prompts: they are now thousands of words long, and they sit in revenue-bearing deployments. At that length, a tool that is never triggered or a step that never ends is hard to spot by reading. A lint step is the kind of check that catches it before a call does.\n\nThe audit covered nine agents on one platform, and all nine had no explicit flow graph [1].",
+     "draft": "A deterministic linter could read an exported voice-agent prompt, pull out the steps, tool triggers and transitions it implies, and flag what is broken. Examples are a tool no step calls, a step with no exit, and instructions that contradict each other. Given the same prompt, it would give the same findings every time, with no model judging another model.\n\n## What the sources show\n\nA practitioner audited nine production voice agents on the Retell platform. All nine use a single-prompt architecture, with no explicit states or flow graph [1]. In that setup the state machine exists only in the prose, so nothing can check it. A linter would write it out.\n\nThe idea also gives builders a way off the single prompt. Once the implied steps and transitions are extracted, they can become an explicit flow graph.\n\nSimilar thinking shows up in other work on LLM agents:\n\n- An arXiv paper on an automotive C/C++ coding assistant exposes generate, edit and verify tools over MCP. The developer can run verify on any code on demand, instead of relying on the agent to check its own output [2].\n- An arXiv pilot study proposes measuring the persona fidelity of LLM user simulators deterministically, using model-free instruments: stylometry and lexicon-based content analysis [3].\n- An essay by Alex Gaynor argues that properties made true by construction, through better tools and abstractions, are cheaper to guarantee than properties verified after the fact [4].\n\nThe first two are checks that don't depend on a model grading itself. The third gives the cost argument. A linter is verification after the fact, run on prompts that already exist. An explicit flow graph is closer to Gaynor's by-construction case.\n\n## Why it may matter\n\nThe case rests on two facts about these prompts: they are now thousands of words long, and they sit in revenue-bearing deployments. At that length, a tool that is never triggered or a step that never ends is hard to spot by reading. A lint step is the kind of check that catches it before a call does.\n\nThe audit covered nine agents on one platform, and all nine had no explicit flow graph [1].",
+     "rounds": 1,
+     "changed": [],
+     "sha": "c130766aafb5e080",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Idea: a deterministic linter for long voice-agent prompts. It would parse an exported prompt into its implied steps, tool triggers and transitions, then flag problems like a tool no step calls, a step with no exit, or contradictory instructions.",
+     "sha": "6cb1b74057876778",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "A deterministic tool could read an exported voice-agent prompt and pull out the steps, tool triggers and transitions it implies. Then it flags problems: a tool no step calls, a step with no exit, or instructions that contradict each other.",
+     "draft": "A deterministic tool could read an exported voice-agent prompt and pull out the steps, tool triggers and transitions it implies. Then it flags problems: a tool no step calls, a step with no exit, or instructions that contradict each other.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "0cccb0bca004d2ea",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-153": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nAgent-authored changes are cheap to produce and arrive in bursts. Most CI, review and billing setups assume a human pace: one person, a few pull requests a day. The idea here is to borrow a pattern from AI apps and apply it to the pull-request pipeline. Tag agent-authored PRs, give each actor a CI-minutes budget, queue whatever overflows, and trip a circuit breaker when a surge hits.\n\n## Where the pattern comes from\n\nThe pattern is already common in AI apps. One developer of a free AI app described using per-user and per-IP hourly limits, daily circuit breakers, and hard spend caps set at the API provider level to keep costs under control [4]. The proposal is to treat an agent the way that app treats an anonymous user: welcome, but bounded.\n\n## What the sources show\n\nThe load is real, at least in the accounts gathered here. One company reported that its monthly GitHub Actions minutes went from a range of 2,500 to 8,000 up to 35,870 in September and 40,001 in October, with surges following a model release on 22 September [1]. That is the shape the idea describes: a single event, then a jump that does not seem to fall back.\n\nThe wider volume numbers point the same way. Simon Willison relayed Anthropic's claim that average merged code changes rose from about 2,500 a day in May 2026 to over 30,000 a day by September 2026 [2]. Airbnb's CTO said 60% of the company's code is AI-authored and that feature and improvement shipments are up about 80% year over year [3].\n\nThese are different kinds of evidence. One is a bill, one is a vendor claim relayed second-hand, and one is an executive's summary. None of them tests quotas or breakers on pull requests, so the sources show the problem more than they show the fix.\n\n## Why it may matter\n\nIf per-human assumptions break when one employee's agents open hundreds of PRs after a model release, the failure is probably quiet at first: a CI bill, a clogged queue, reviewers buried. A budget per actor makes the cost visible and attributable. Queuing overflow means nothing is lost, only delayed. A breaker gives a team a way to stop a surge before the invoice arrives rather than after.\n\nThe card also notes that teams are only now seeing this load, so tooling built for it has little competition. That is a claim about the market, and the sources here do not measure it. The card does say the theme appeared across 606 distinct stories from 49 sources, with no source supplying more than 70%, which suggests many people are noticing the same thing independently.\n\n## Open questions\n\nThe sources do not say what a sensible budget looks like, how to tag agent-authored work reliably, or how to avoid throttling useful changes along with runaway ones. Those are the parts I would want to see tried before trusting the idea.",
+     "sha": "ece42e1ed2dbb50f",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Agent-authored changes are bursty and cheap to produce, and CI, review and billing were built around one human at a time. The idea: apply the cost controls AI apps already use to the pull-request pipeline.\n\n## What the load looks like\n\nOne company reported that its monthly GitHub Actions minutes ran between 2,500 and 8,000, then reached 35,870 in September and 40,001 in October. The surges followed a model release on 22 September [1].\n\nThe wider volume is moving the same way. Simon Willison relayed Anthropic's claim that average merged code changes rose from about 2,500 a day in May 2026 to over 30,000 a day by September 2026 [2]. Airbnb's CTO said 60% of the company's code is AI-authored, and that feature and improvement shipments are up about 80% year over year [3].\n\nThe idea is that per-human assumptions break when one employee's agents open hundreds of PRs after a model release.\n\n## The pattern from AI apps\n\nA developer of a free AI app described how they control costs: per-user and per-IP hourly limits, daily circuit breakers, and hard spend caps at the API provider level [4].\n\nThe proposal carries that over to pull requests:\n\n- Tag agent-authored PRs.\n- Give each actor a CI-minutes budget.\n- Queue the overflow.\n- Trip a breaker on surges.\n\n## Why it may matter\n\nThe idea is drawn from 606 distinct stories across 49 sources, none supplying more than 70%, and no single origin. Independent sources converged on the theme. Teams are only now seeing this load, so tooling built for it has little competition.\n\nThe sources don't say how any team sets the budgets, or what happens to a queued PR that waits too long.",
+     "draft": "Agent-authored changes are bursty and cheap to produce, and CI, review and billing were built around one human at a time. The idea: apply the cost controls AI apps already use to the pull-request pipeline.\n\n## What the load looks like\n\nOne company reported that its monthly GitHub Actions minutes ran between 2,500 and 8,000, then reached 35,870 in September and 40,001 in October. The surges followed a model release on 22 September [1].\n\nThe wider volume is moving the same way. Simon Willison relayed Anthropic's claim that average merged code changes rose from about 2,500 a day in May 2026 to over 30,000 a day by September 2026 [2]. Airbnb's CTO said 60% of the company's code is AI-authored, and that feature and improvement shipments are up about 80% year over year [3].\n\nThe idea is that per-human assumptions break when one employee's agents open hundreds of PRs after a model release.\n\n## The pattern from AI apps\n\nA developer of a free AI app described how they control costs: per-user and per-IP hourly limits, daily circuit breakers, and hard spend caps at the API provider level [4].\n\nThe proposal carries that over to pull requests:\n\n- Tag agent-authored PRs.\n- Give each actor a CI-minutes budget.\n- Queue the overflow.\n- Trip a breaker on surges.\n\n## Why it may matter\n\nThe idea is drawn from 606 distinct stories across 49 sources, none supplying more than 70%, and no single origin. Independent sources converged on the theme. Teams are only now seeing this load, so tooling built for it has little competition.\n\nThe sources don't say how any team sets the budgets, or what happens to a queued PR that waits too long.",
+     "rounds": 1,
+     "changed": [],
+     "sha": "3be17954f01299c7",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Idea: give each coding agent its own quota and circuit breaker for the pull requests it opens and the CI minutes it uses. Agent-authored changes are bursty and cheap to produce, so a limit per agent keeps one runaway agent from flooding review queues and CI.",
+     "sha": "55740c24e7fde8bc",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Agent-authored changes are bursty and cheap to produce. The idea: per-agent quotas and circuit breakers for the pull requests agents open and the CI minutes they use.",
+     "draft": "Agent-authored changes are bursty and cheap to produce. The idea: per-agent quotas and circuit breakers for the pull requests agents open and the CI minutes they use.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "e363f9a94beb2c59",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-152": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nMany people now run a local LLM over thousands of texts for a fixed job: tag each one with a category, or pull out a field. It works, but it is slow and usually wants a GPU.\n\nThe idea is a tool that treats the LLM as a teacher. You label a sample with your local model. The tool then trains a small model on those labels, either embeddings plus logistic regression or a small encoder. It reports two numbers: how closely the small model agrees with the LLM, and how much faster it runs. If the agreement is high enough, you run the cheap model on the rest.\n\n## What the sources show\n\nNone of the sources show the whole workflow. Each shows a piece.\n\nOne author reports 94.25% accuracy on Banking77 using bge-large-en-v1.5 embeddings plus logistic regression. The resulting classifier is 642 KB and runs in 3 seconds on CPU [1]. That is a labeled benchmark rather than LLM-generated labels, but it shows how small and quick this kind of model can be.\n\nAn arXiv paper takes a closer step toward the teacher-student pattern. It fine-tunes a multilingual encoder on frontier-model annotations in 35 languages to build a privacy redaction tagger [2]. So training a small encoder on a large model's labels is already being done, though there the teacher is a frontier model rather than a local one.\n\nA third post describes a real-time interview assistant that runs audio capture, voice-activity detection, whisper.cpp transcription and LLM inference all on-device [3]. It points to people running local pipelines on their own hardware, which is where this idea would apply.\n\n## What is missing\n\nThe card's observation is that nobody in these sources has packaged the pieces into a workflow for the local-LLM user. The sources are consistent with that, but a few small searches cannot prove it. I would treat it as an open gap, not a confirmed one.\n\nThe sources also do not answer the key question: how closely does a small model match a local LLM's labels on a real task? The Banking77 figure is accuracy against ground truth, and the redaction paper uses a different teacher and task. The agreement report the tool would produce is the part that would have to be measured.\n\n## Why it may matter\n\nIf agreement turns out to be high for fixed, well-defined labeling tasks, the payoff is practical. A job that needed a GPU and hours could become a CPU job that takes seconds, and the LLM would only be needed for a sample. The agreement number would also tell you when not to switch: if the small model disagrees too often, you keep the LLM.\n\nThe same shape showing up in separate corners of AI tooling is a modest signal that people are reaching for it. It is worth a weekend experiment to see how far the agreement goes.",
+     "sha": "f6442e084938753c",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Cheap to try; I'd start with this before any fine-tuning.\n\nThe idea is simple. Many people run a local LLM over thousands of texts for a fixed labeling or extraction task. That is slow and needs a GPU. A tool could take the LLM's labels on a sample, train a small model on them, and report two numbers: how closely it agrees with the LLM and how much faster it runs. The small model would be an embedding plus logistic regression, or a small encoder.\n\n## What the sources show\n\nNo one source does the whole job. Each covers one piece.\n\nOne author on Hacker News reports 94.25% accuracy on Banking77 using bge-large-en-v1.5 embeddings plus logistic regression [1]. The classifier is 642 KB and runs in 3 seconds on CPU. That score is against the benchmark's own labels, not an LLM's, so it shows what the cheap model can reach, not how well it copies an LLM.\n\nAn arXiv paper takes the same teacher-and-student approach with a bigger model [2]. It fine-tunes a multilingual encoder on frontier-model annotations in 35 languages to build a privacy redaction tagger. So training a small model on a large model's labels is already done in published work.\n\nA third post describes an interview assistant that runs audio capture, voice-activity detection, whisper.cpp transcription and LLM inference all on the device [3]. That is the kind of local setup where a GPU-free classifier step would matter, though the post doesn't say it needs one.\n\n## What is missing\n\nThe source notes say nobody has packaged these pieces into a workflow for the person running a local LLM. That is the gap. The tool would:\n\n- sample the texts and get the LLM's labels\n- train the small model on those labels\n- report agreement with the LLM and the speed difference\n\nThe agreement number is what makes it safe to use. If the small model matches the LLM on held-out texts, you can swap it in. If it doesn't, you've lost little time, and you know the task needs the LLM, or more.\n\nThe sources don't say how large the sample needs to be, or which tasks a small classifier handles badly. Those are the first things a tool like this would have to measure.",
+     "draft": "Cheap to try; I'd start with this before any fine-tuning.\n\nThe idea is simple. Many people run a local LLM over thousands of texts for a fixed labeling or extraction task. That is slow and needs a GPU. A tool could take the LLM's labels on a sample, train a small model on them, and report two numbers: how closely it agrees with the LLM and how much faster it runs. The small model would be an embedding plus logistic regression, or a small encoder.\n\n## What the sources show\n\nNo one source does the whole job. Each covers one piece.\n\nOne author on Hacker News reports 94.25% accuracy on Banking77 using bge-large-en-v1.5 embeddings plus logistic regression [1]. The classifier is 642 KB and runs in 3 seconds on CPU. That score is against the benchmark's own labels, not an LLM's, so it shows what the cheap model can reach, not how well it copies an LLM.\n\nAn arXiv paper takes the same teacher-and-student approach with a bigger model [2]. It fine-tunes a multilingual encoder on frontier-model annotations in 35 languages to build a privacy redaction tagger. So training a small model on a large model's labels is already done in published work.\n\nA third post describes an interview assistant that runs audio capture, voice-activity detection, whisper.cpp transcription and LLM inference all on the device [3]. That is the kind of local setup where a GPU-free classifier step would matter, though the post doesn't say it needs one.\n\n## What is missing\n\nThe source notes say nobody has packaged these pieces into a workflow for the person running a local LLM. That is the gap. The tool would:\n\n- sample the texts and get the LLM's labels\n- train the small model on those labels\n- report agreement with the LLM and the speed difference\n\nThe agreement number is what makes it safe to use. If the small model matches the LLM on held-out texts, you can swap it in. If it doesn't, you've lost little time, and you know the task needs the LLM, or more.\n\nThe sources don't say how large the sample needs to be, or which tasks a small classifier handles badly. Those are the first things a tool like this would have to measure.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "74adccc97acc95de",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Running a local LLM over thousands of texts for one fixed labeling task is slow and usually needs a GPU. The idea: use the LLM's own labels to train a tiny classifier that runs on a CPU, then use that instead for the same task.",
+     "sha": "6b3afde8883412f7",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Many people now run a local LLM over thousands of texts for one fixed labeling or extraction job. It's slow and needs a GPU. The idea: use the LLM's own labels to train a tiny classifier that runs on a CPU. Cheap to try; I'd start with this before any fine-tuning.",
+     "draft": "Many people now run a local LLM over thousands of texts for one fixed labeling or extraction job. It's slow and needs a GPU. The idea: use the LLM's own labels to train a tiny classifier that runs on a CPU. Cheap to try; I'd start with this before any fine-tuning.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "c3a0bd9f1878bef5",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  },
+  "card-151": {
+   "blog": {
+    "old": {
+     "text": "## The idea\n\nSkills for coding agents are now plentiful. Vercel's skills.sh registry reached one million agent skills in seven months, with 280 million installs recorded [1]. When a registry grows that fast, finding skills stops being the problem. Choosing among them is.\n\nThe idea here is a small local tool. It would test the skills a person has actually installed against a placebo of equal length, and it would flag description overlap between those skills. Neither check is new in spirit. The card calls it a known vetting pattern, applied to a registry that has grown faster than anyone can judge it.\n\n## What the sources show\n\n**Do skills beat a placebo?** One placebo-controlled trial tested 9 popular Claude Code skills on 15 public tasks [2]. Two beat the placebo at a Holm-adjusted p=0.049. One did worse. Six showed no measurable difference. That is a small trial, and the card itself describes it as the only one of its kind. But the result is a useful reminder that a skill being popular and a skill working are different claims.\n\n**Do skills compete with each other?** An arXiv preprint mined 20,947 repositories and found 822,109 candidate similar-skill pairs [3]. The authors note that the model picks between similar skills by name and description alone [3]. These are candidate pairs, not confirmed failures, so I would not read the number as a count of real conflicts. Still, if the choice rests on a short description, two skills with near-identical descriptions could silently compete.\n\n**How skills get distributed.** One example from the discussion is a pack of 21 skills with a supervisor pattern, installable through the plugin marketplace, the skills CLI, or manual copy [4]. Installing is easy, and that ease is part of why a person's setup can fill up with skills nobody has checked.\n\n## Why it may matter\n\nIf most popular skills are indistinguishable from neutral text, then each one adds context without clear benefit. If similar skills can compete, adding more may make the agent's choices less predictable, not more. A local check would let someone ask two plain questions about their own setup: does this skill do better than filler of the same length, and does it overlap with another one I have?\n\nThere are open questions. Nine skills on 15 tasks is a narrow sample, and the sources do not say how results would carry over to other skills, tasks, or people's own work. The card also notes that this theme appeared across 745 distinct stories from 50 sources, with no source supplying more than 70%, so it is a pattern independent sources converged on, not one writer's argument.\n\nI find the framing appealing because it is modest. It does not claim skills are useless. It suggests we measure them before trusting them.",
+     "sha": "280f0687039b06e4",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "Skill registries have grown faster than anyone can judge them, and the one placebo-controlled trial of popular Claude Code skills found most of them did no better than neutral text.\n\nVercel's skills.sh registry reached one million agent skills in seven months, with 280 million installs recorded [1]. With that many choices, picking a skill is now the hard part.\n\n## What the trial found\n\nThe trial tested 9 popular Claude Code skills on 15 public tasks [2]. Two beat the placebo, at a Holm-adjusted p=0.049. One did worse than the placebo. Six showed no measurable difference [2].\n\nSo of nine popular skills, six were indistinguishable from the placebo and one was worse. Only two showed a benefit, and that result sits just under the usual 0.05 threshold.\n\n## Skills that compete with each other\n\nA second problem is overlap. An arXiv preprint mined 20,947 repositories and found 822,109 candidate similar-skill pairs [3]. The same paper notes that the model chooses between similar skills by name and description alone [3].\n\nThat means two skills with close descriptions can compete, and the choice between them rests on a short piece of text, not on how well either one works.\n\n## A local check\n\nThe idea on the card is a local tool that does two things for the skills a person has installed. It tests each skill against a placebo of equal length, and it flags description overlap between skills. This would apply a known vetting pattern, the placebo control, to a registry that has outgrown manual review.\n\nPacks make the need easier to see. One recent post offers a Claude Code pack of 21 skills with a supervisor pattern, installable through the plugin marketplace, the skills CLI, or a manual copy [4]. Installing 21 skills at once is easy. Knowing which of them help, and which collide with skills already installed, is not.\n\nThe card says the theme comes from 745 distinct stories across 50 sources, with none supplying more than 70%. The sources here do not say how large the placebo trial's effects were, or whether the 822,109 candidate pairs actually cause conflicts in use.",
+     "draft": "Skill registries have grown faster than anyone can judge them, and the one placebo-controlled trial of popular Claude Code skills found most of them did no better than neutral text.\n\nVercel's skills.sh registry reached one million agent skills in seven months, with 280 million installs recorded [1]. With that many choices, picking a skill is now the hard part.\n\n## What the trial found\n\nThe trial tested 9 popular Claude Code skills on 15 public tasks [2]. Two beat the placebo, at a Holm-adjusted p=0.049. One did worse than the placebo. Six showed no measurable difference [2].\n\nSo of nine popular skills, six were indistinguishable from the placebo and one was worse. Only two showed a benefit, and that result sits just under the usual 0.05 threshold.\n\n## Skills that compete with each other\n\nA second problem is overlap. An arXiv preprint mined 20,947 repositories and found 822,109 candidate similar-skill pairs [3]. The same paper notes that the model chooses between similar skills by name and description alone [3].\n\nThat means two skills with close descriptions can compete, and the choice between them rests on a short piece of text, not on how well either one works.\n\n## A local check\n\nThe idea on the card is a local tool that does two things for the skills a person has installed. It tests each skill against a placebo of equal length, and it flags description overlap between skills. This would apply a known vetting pattern, the placebo control, to a registry that has outgrown manual review.\n\nPacks make the need easier to see. One recent post offers a Claude Code pack of 21 skills with a supervisor pattern, installable through the plugin marketplace, the skills CLI, or a manual copy [4]. Installing 21 skills at once is easy. Knowing which of them help, and which collide with skills already installed, is not.\n\nThe card says the theme comes from 745 distinct stories across 50 sources, with none supplying more than 70%. The sources here do not say how large the placebo trial's effects were, or whether the 822,109 candidate pairs actually cause conflicts in use.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "aaa6024904682873",
+     "model": "claude-sonnet-5-5"
+    }
+   },
+   "toot": {
+    "old": {
+     "text": "Idea: test community Claude Code skills against a placebo to see if they actually help, and check them for conflicts with each other. With a registry of a million skills, choosing among them is the bottleneck.",
+     "sha": "ba9a028ce9ee3a42",
+     "model": "claude-sonnet-5-5"
+    },
+    "new": {
+     "text": "A registry of one million skills makes choosing among them the bottleneck. The idea: placebo-controlled effectiveness checks and conflict checks for community Claude Code skills.",
+     "draft": "A registry of one million skills makes choosing among them the bottleneck. The idea: placebo-controlled effectiveness checks and conflict checks for community Claude Code skills.",
+     "rounds": 0,
+     "changed": [],
+     "sha": "c67b82a9e7234163",
+     "model": "claude-sonnet-5-5"
+    }
+   }
+  }
+ },
+ "judge": {
+  "brief-26-1": {
+   "blog": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "A leads with the owner's view and makes the same caveats about the 96% figure in a tight, natural voice, while B pads with templated headers, a speculative question list and a stock 'worth watching' close, and never states the owner's view.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B leads with the owner's view and the concrete factory result, then says why it matters, while A just restates the press release, 'most capable' line included.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-25-2": {
+   "blog": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "A gives the facts plainly and adds only a fair caveat, while B pads them with headers, explanations the facts don't support, and filler like 'The interesting part is' and 'What I find worth watching'.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "A reads more smoothly and naturally, while B's choppy fragments, unclear subject in 'and did a 360-degree jump,' and tacked-on closing line that repeats the simulation point make it clunkier without adding much.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-24-1": {
+   "blog": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "A covers the same facts tightly and plainly, while B pads with headers, repetition, filler explanations (e.g., 'Sharpa Wave hands, which is the dexterous hardware used') and stock phrasing like 'the honest reading is this.'",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "B states the same facts in cleaner, more natural prose, while A's tacked-on 'the costly human kind' explains what this reader already knows and reads as an awkward aside.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-23-1": {
+   "blog": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "A gives the same facts tightly and flags its one opinion as its own, while B pads them out with headers, repetition, a stock closing line, and guesses like the ministry's intent behind the 20-day window that the facts don't support.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B adds the key detail that the rule reaches beyond humanoids to industrial and service robots and states the owner's view in a plain first-person voice, while A is accurate but flat and leaves out both.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-22-1": {
+   "blog": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "A gives the same facts plainly and briefly and flags the one real gap, while B pads them with headers, hedged speculation about who benefits and a link to the China story, and adds a loose gloss like 'in the clear, at least in part' that the facts don't support.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "Both share the same core facts, but A ends with a concrete extra fact (China blocking SoftBank's ABB Robotics deal), while B ends with a vague stakes line that an informed reader would already infer.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-21-1": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B gives the same facts cleanly, while A pads them with headers, repeated hedging, stock phrases like 'worth keeping in mind', and speculation the facts don't support, such as robot makers becoming strategic assets.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "tie",
+    "order": "old-new",
+    "why": "The drafts are nearly identical and equally accurate, with only trivial wording differences (\"SoftBank\" vs \"SoftBank Group\", \"confirmed it\" vs \"confirmed the block\", \"worried\" vs \"feared\") that don't meaningfully change readability or precision.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-20-1": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B gives the same facts and caveats plainly with no padding, while A over-explains basics to an informed reader, wraps the post in stock headers and hedges, and adds claims the facts don't support, such as what glove data captures and how the bottleneck would shift.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "B is more specific (Beijing-based, 'world action model') and keeps the self-reported and robot-data caveats without A's closing line, which claims the result shows what human video alone achieves even though the pretraining included robot data.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-19-1": {
+   "blog": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "A gives the facts plainly and flags what the item doesn't say in one line, while B pads the same thin facts with headers, a speculative bullet list, hedging and stock closers like \"I'll be curious to see how it plays out.\"",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "Both drafts state the standard accurately, but A also says why it matters, whether multi-vendor fleets can share a site without custom integration, which the facts support and a reader following the topic would want.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-18-4": {
+   "blog": {
+    "winner": "new",
+    "order": "new-old",
+    "why": "A gives the same facts plainly and briefly, while B pads them with section headers, repeated hedging about what the item doesn't say, and generic commentary on stairs and rescue that adds no information.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B keeps the facts tight and adds the organizers' link to rescue and inspection work, which tells a follower why the race matters, while A stops at the raw result.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "brief-17-2": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B gives the same facts plainly and accurately, while A pads them with headers, filler and speculation the facts don't support, such as the claim that the humanoid race is 'less Western than it is often presented'; B's only flaw is a stray '[1]' citation with no source.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "B reads naturally and cleanly attributes everything to the roundup, while A ends on a fragmentary, summary-like sentence ('Shows where funding went...') that reads as filler.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-160": {
+   "blog": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "Draft B is tighter, but it opens with an invented first-person anecdote ('bitten twice this year') that the facts don't support, while Draft A stays carefully within what the sources say and flags its own limits, apart from one unsourced stat.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B opens with the owner's own experience of being bitten twice, which sounds like a real person, and it makes the same specific point about trackers. A reads more impersonal, though it explains the mechanism a bit more clearly.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-159": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B is tighter and more concrete, with the 1-in-12 framing and a plain explanation of constrained decoding, while A carries filler and pipeline artifacts like \"the card found\" and a padded \"Why it may matter\" section.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "Both make the same points, but A hedges the 'only public measurement' claim with 'that we know of' while B asserts it as fact, which the facts don't support.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-158": {
+   "blog": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "Draft A is tighter, but it adds an unsupported claim about 471 stories from 50 sources that the facts never mention, while Draft B, though wordier and padded with headers, stays within what the sources say.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B names the actual benchmark tracks (textual, coding, multimodal) from the facts, which makes the gap concrete, while A says the same thing more vaguely; both overreach a little by asserting the tracks measure recall.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-157": {
+   "blog": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "Draft B reads more like a person with a real opinion, but its central thesis that voice prompts change weekly and the graph would rot appears nowhere in the facts, while Draft A stays within the sources and is honest about their limits (the nine-agent sample, OSWorld being a different setting).",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "Both drafts read naturally and skip the specific nine-of-nine audit, but B asserts without support that voice prompts change weekly and the graph would rot, while A claims nothing beyond the facts.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-156": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B is tighter and more insightful, noting that a version tracker or CVE scanner would miss all three cases and that Portainer's successor is a limited tier while Smartlook's is a different tool, though it states the unsourced autumn-2026 timing and source convergence more flatly than A, which hedges but pads and has a typo.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "Both are nearly identical and equally free of hype, but B's 'a watcher that reads your compose file' explains the mechanism more plainly and reads more naturally than A's clipped 'Idea: a compose-file watcher'.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-155": {
+   "blog": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "B reads like a person explaining the idea, with useful framing and sensible caveats (the PR is unfinished, no accuracy or latency figures), while A is choppy and stilted and has a grammar slip, though B does add a few details not in the facts, such as the specific topics the sources were watched for.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "The drafts are nearly identical and neither uses the specific examples in the facts, but B says the same thing more tightly and its 'Standard LLM serving' framing is a bit more precise than A's broader claim.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-154": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B opens directly on the idea and links the sources to Gaynor's by-construction point in plain terms, while A twice refers to an unexplained \"card\" and pads itself with framing, though B's closing line just repeats the audit fact.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "Both say the same thing, but A names the tool as a linter and keeps the hypothetical 'would' consistent, while B shifts from 'could' to 'flags' and reads as if the tool already exists.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-153": {
+   "blog": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "B reads like a person weighing the evidence: it notes that the sources show the problem rather than the fix and flags the unmeasured market claim, while A is terser but repeats \"The idea is,\" states the competition claim as fact, and drops in source-count metadata without comment.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "old-new",
+    "why": "Neither draft uses the concrete numbers in the facts, but A says plainly what the limit protects against (one runaway agent flooding review queues and CI), while B states the idea without saying why it matters.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-152": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B is tighter and sounds more like a person with a view, and it ends on concrete open questions (sample size, which tasks fail), while A hedges at length, leaks the internal word 'card', and pads with speculative payoff claims like hours-to-seconds and a 'modest signal'.",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "B is tighter and hedges correctly ('usually needs a GPU'), while A adds claims the facts don't support ('many people now', 'cheap to try', 'before any fine-tuning'); neither uses specifics like the 94.25% Banking77 result.",
+    "model": "claude-opus-5-5"
+   }
+  },
+  "card-151": {
+   "blog": {
+    "winner": "new",
+    "order": "old-new",
+    "why": "B opens with the finding, gives specific readings such as p=0.049 sitting just under 0.05, and is tighter with less padding than A's reflective coda, though both lean on unsupported 'card' claims (A's 'the only one of its kind', B's 'the one placebo-controlled trial', and both drafts' 745-stories figure).",
+    "model": "claude-opus-5-5"
+   },
+   "toot": {
+    "winner": "old",
+    "order": "new-old",
+    "why": "B explains the idea in plain words (does a skill actually help, and does it clash with others), while A just repeats the compressed jargon of the title.",
+    "model": "claude-opus-5-5"
+   }
+  }
+ },
+ "meta": {
+  "at": "2026-11-13T00:17:16Z",
+  "provider": "claude_code",
+  "models": {
+   "reason": "claude-sonnet-5-5",
+   "judge": "claude-opus-5-5"
+  },
+  "calls": 173,
+  "cost_usd": 0.0,
+  "equiv_usd": 2.244,
+  "budget_usd": 2.75,
+  "stopped": "stopped at $0.51 of $0.50",
+  "seed": 29,
+  "runs": [
+   {
+    "at": "2026-11-13T00:08:38Z",
+    "provider": "claude_code",
+    "models": {
+     "reason": "claude-sonnet-5-5",
+     "judge": "claude-opus-5-5"
+    },
+    "calls": 141,
+    "cost_usd": 0.0,
+    "equiv_usd": 1.7356,
+    "budget_usd": 2.25,
+    "stopped": null,
+    "seed": 13
+   },
+   {
+    "at": "2026-11-13T00:17:16Z",
+    "provider": "claude_code",
+    "models": {
+     "reason": "claude-sonnet-5-5",
+     "judge": "claude-opus-5-5"
+    },
+    "calls": 32,
+    "cost_usd": 0.0,
+    "equiv_usd": 0.5084,
+    "budget_usd": 0.5,
+    "stopped": "stopped at $0.51 of $0.50",
+    "seed": 29,
+    "only": [
+     "brief-17-2:toot",
+     "brief-18-4:blog",
+     "brief-18-4:toot",
+     "brief-19-1:toot",
+     "brief-20-1:toot",
+     "brief-21-1:toot",
+     "brief-22-1:toot",
+     "brief-23-1:toot",
+     "brief-24-1:toot",
+     "brief-25-2:toot",
+     "brief-26-1:blog",
+     "brief-26-1:toot",
+     "card-151:toot",
+     "card-152:toot",
+     "card-153:toot",
+     "card-154:toot",
+     "card-155:toot",
+     "card-156:toot",
+     "card-157:blog",
+     "card-157:toot",
+     "card-158:toot",
+     "card-159:toot",
+     "card-160:toot"
+    ],
+    "redraft": [
+     "brief-18-4:blog",
+     "brief-26-1:blog",
+     "card-157:blog"
+    ]
+   }
+  ]
+ }
+}

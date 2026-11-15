@@ -1,0 +1,66 @@
+/* The shared "kranto" look on the server's own pages, loaded after style.css only when
+   kranto.page is mounted at /brb/ (brb.enabled). It maps kranto's tokens onto the palette
+   of kranto.page's kranto.css (the v4 palette from the logo, UI-v4.md section 1) and draws the shared header: five tabs, the service state and
+   one Pause button. A full restyle of these pages (rows, boxes, labels) is later work. */
+:root {
+  --bg: #f6f5ff; --panel: #fdfdff; --ink: #1c1c4b; --muted: #55578a; --faint: #e3e3f6;
+  --line: #d3d3ee; --accent: #3d44d4; --accent-soft: #e9ebff; --good: #1a7346;
+  --warn: #8f5a00; --bad: #b9342a;
+  --b-subtle: #e9ebff; --b-inset: #e4e3f7; --b-btn: #fdfdff; --b-btn-border: #c6c7e6;
+  --b-blue: #3d44d4; --b-amber: #8f5a00; --b-amber-wash: #fff3da; --b-primary: #3d44d4;
+  --b-primary-text: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=light]) {
+    --bg: #0b0b2a; --panel: #0b0b2a; --ink: #ececfb; --muted: #a9abd4; --faint: #222254;
+    --line: #2c2c62; --accent: #aeb6ff; --accent-soft: #1b1f5c; --good: #8fe0b4;
+    --warn: #ffd27f; --bad: #ffa39a;
+    --b-subtle: #12123a; --b-inset: #1b1b48; --b-btn: #1b1b48; --b-btn-border: #3a3a74;
+    --b-blue: #aeb6ff; --b-amber: #ffd27f; --b-amber-wash: #3d2e0c; --b-primary: #aeb6ff;
+    --b-primary-text: #0b0b2a;
+  }
+}
+/* dark chosen under Settings › Appearance, whatever the OS says (static/theme.js) */
+:root[data-theme=dark] {
+  --bg: #0b0b2a; --panel: #0b0b2a; --ink: #ececfb; --muted: #a9abd4; --faint: #222254;
+  --line: #2c2c62; --accent: #aeb6ff; --accent-soft: #1b1f5c; --good: #8fe0b4;
+  --warn: #ffd27f; --bad: #ffa39a;
+  --b-subtle: #12123a; --b-inset: #1b1b48; --b-btn: #1b1b48; --b-btn-border: #3a3a74;
+  --b-blue: #aeb6ff; --b-amber: #ffd27f; --b-amber-wash: #3d2e0c; --b-primary: #aeb6ff;
+  --b-primary-text: #0b0b2a;
+}
+body { font-size: 14px; font-variant-numeric: tabular-nums; }
+button.primary { background: var(--b-primary); border-color: var(--b-primary); color: var(--b-primary-text); }
+.panel { border-radius: 6px; }
+
+header.hd { background: var(--b-subtle); border-bottom: 1px solid var(--line); }
+header.hd .wrap { max-width: 1216px; margin: 0 auto; padding: 0 24px; }
+.hd-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 14px !important; padding-bottom: 8px !important; }
+.hd-top .brand { font-weight: 600; font-size: 16px; color: var(--ink); }
+.hd-top .sub2 { color: var(--muted); font-size: 12px; }
+.hd-top .grow { flex: 1; }
+.hd-state { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; }
+.hd form { display: inline; margin: 0; }
+.hd .btn { font: inherit; font-size: 12px; font-weight: 500; line-height: 20px; padding: 2px 10px; border: 1px solid var(--b-btn-border);
+  border-radius: 6px; background: var(--b-btn); color: var(--ink); cursor: pointer; }
+.hd .btn:hover { background: var(--b-inset); }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { display: flex; align-items: center; gap: 6px; padding: 7px 10px 9px; color: var(--ink); border-bottom: 2px solid transparent; white-space: nowrap; font-size: 14px; }
+.tab:hover { text-decoration: none; background: var(--b-inset); border-radius: 6px 6px 0 0; }
+.tab[aria-current=page] { font-weight: 600; border-bottom-color: var(--ink); }
+.counter { font-size: 12px; font-weight: 500; background: var(--b-inset); border-radius: 10px; padding: 0 7px; line-height: 18px; }
+.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.i.spin { animation: spin 1.1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .i.spin { animation: none; } }
+.c-blue { color: var(--b-blue); } .c-amber { color: var(--b-amber); }
+.flash { border: 1px solid var(--b-amber); background: var(--b-amber-wash); border-radius: 6px; padding: 10px 16px; margin: 16px auto 0; max-width: 1088px; }
+.subnav { display: flex; margin-bottom: 16px; flex-wrap: wrap; }
+.subnav a { padding: 4px 14px; border: 1px solid var(--b-btn-border); margin-left: -1px; color: var(--ink); font-size: 13px; font-weight: 500; }
+.subnav a:first-child { border-radius: 6px 0 0 6px; margin-left: 0; } .subnav a:last-child { border-radius: 0 6px 6px 0; }
+.subnav a[aria-current=page] { background: var(--b-inset); font-weight: 600; }
+.subnav a:hover { text-decoration: none; background: var(--b-subtle); }
+/* a long address or command in a step breaks where it must, so a phone never scrolls sideways */
+main li, main p, main code { overflow-wrap: anywhere; }
+@media (max-width: 700px) { header.hd .wrap { padding: 0 16px; } .tab { padding: 11px 10px 12px; } }

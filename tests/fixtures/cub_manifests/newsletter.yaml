@@ -1,0 +1,106 @@
+# The owner's first cub: news → a newsletter issue, sent only after the
+# owner's press, in dry mode first. Installed from a local folder, so trust: owner (set by Kranto).
+schema: 1
+api: cub/1
+id: newsletter
+name: local/newsletter
+version: 1.0.0
+bears: ">=0.5,<0.7"
+title: Newsletter
+says: Monday's issue from the week's News briefs, assembled item by item from what the briefs say, for you to read and send through your newsletter platform.
+entry: main.py
+requirements: null
+
+reads: [topics, briefs]
+events:
+  subscribe:
+    - {kind: brief.published, min_trust: first-party}      # pulled at the weekly run; no push handler
+    - {kind: ticket.resolved, min_trust: core, method: on_resolved}   # the core's answer to our tickets, pushed
+  publish: [newsletter.drafted]
+jobs:
+  - kind: newsletter.weekly
+    method: compose
+    every_hours: 168
+    at: "08:00"
+    days: [mon]
+    when: newsletter.enabled
+    purpose: newsletter_intro
+    deadline_s: 300
+    says: "Monday 08:00: composes the issue from the week's briefs and files a ticket to send it"
+actions:
+  - kind: newsletter.compose
+    title: Compose an issue
+    method: compose_now
+    doors: [ui, cli]
+    fields:
+      - {key: briefs, label: From these briefs, kind: choice, read: brief_choices, required: true}
+      - {key: intro, label: Intro, kind: enum, choices: [plain, warm], required: false}
+      - {key: subject, label: Subject, kind: text, required: false}
+  - kind: newsletter.redraft
+    title: Redraft
+    method: redraft
+    doors: [ui, cli]
+    subjects: [newsletter_issue]
+    fields:
+      - {key: intro, label: Intro, kind: enum, choices: [plain, warm]}
+provides: [issues, rows, count, brief_choices]
+requests: [send.newsletter]
+broker:
+  newsletter: [emails.create_draft, emails.get, drafts.list]
+http: {hosts: []}
+model: {tiers: [reason], purposes: [newsletter_intro], monthly_usd: 2}
+search: []
+storage: own
+settings:
+  keys:
+    newsletter.enabled: {type: bool, default: true, words: "the weekly issue"}
+    newsletter.topics: {type: list, default: [], words: "topic ids to include (empty: every topic News is on for)"}
+    newsletter.intro: {type: enum, default: plain, choices: [plain, warm], words: "the intro's tone"}
+    newsletter.max_items: {type: int, default: 12, lo: 3, hi: 30, words: "items an issue at most"}
+    newsletter.subject_prefix: {type: str, default: "This week", words: "the subject's first words"}
+  sensitive: []
+  per_topic: []
+ui:
+  kind: send
+  glyph: mail
+  tile: {line: "Monday's issue from the week's briefs", count: count, words: "waits for Send", tone: wait}
+  today_rows:
+    - {kind: issue, read: rows, group: needs_you, primary: send.newsletter, card: issue}
+  lists:
+    - id: issues
+      word: Issues
+      read: issues
+      card: issue
+      groups: [{key: waiting, word: Waits for you}, {key: sent, word: Sent}, {key: closed, word: Declined or expired}]
+      count: waiting
+  forms:
+    - id: compose
+      word: Compose
+      submit: newsletter.compose
+      fields:
+        - {key: briefs, label: From these briefs, kind: choice, read: brief_choices, required: true}
+        - {key: intro, label: Intro, kind: enum, choices: [plain, warm]}
+        - {key: subject, label: Subject, kind: text}
+      cost: "about $0.01: one reason-tier call for the intro"
+      says: An issue from the briefs you pick; every item is a brief's item, verbatim.
+  cards:
+    issue:
+      title: subject
+      lines: [intro]
+      fields:
+        - {key: date, label: Date, kind: date}
+        - {key: briefs, label: Briefs, kind: list}
+        - {key: item_count, label: Items, kind: number}
+        - {key: where, label: Draft, kind: text}
+        - {key: state, label: State, kind: text}
+      actions: [newsletter.redraft]
+      origin: cites
+spend: {purposes: [newsletter_intro], caps: {}}
+telemetry: {counters: {newsletter.issues: [0, 10000]}}
+evals: [newsletter.tests]
+grades:
+  newsletter_issue: [[off_topic, off topic], [too_long, too long], [wrong_item, an item said something the brief did not]]
+docs:
+  page: README.md
+  glossary: {Issue: "One newsletter: an intro and the week's brief items, sent through your newsletter platform after your press."}
+  words: {newsletter.enabled: "The weekly issue"}

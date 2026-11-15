@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: filer
+title: Filer
+says: Drafts a post and asks to file it in Sanity.
+broker:
+  sanity: [documents.draft, documents.get, drafts.list]
+requests: [draft.sanity]
+jobs:
+  - {kind: filer.draft, method: draft, every_hours: 24}
+storage: none

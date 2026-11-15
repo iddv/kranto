@@ -1,0 +1,61 @@
+{
+ "TENETS": {
+  "version": "TENETS-22676ff5",
+  "evaluated": "2026-10-18",
+  "scorecard": "scorecards/2026-10-18-watching-v1-claude-haiku-5-5-baseline-0.3.88.md"
+ },
+ "card": {
+  "version": "card-47d34724",
+  "evaluated": "skipped: live search's prior art: one added block, the dated results and their rules, or the sentence that no search ran; the eval set's replay has no search results to render it with, so kranto eval ideas against the 0.3.88 baseline (scorecards/2026-10-18-ideas-v1-claude-sonnet-5-5-baseline-0.3.88.md) is due once a set carries them; measured meanwhile by the real runs on a copy of live (.REPORT.md)"
+ },
+ "explain": {
+  "evaluated": "skipped: locked when the lock began; on request only, no eval stage measures it",
+  "version": "explain-006d413c"
+ },
+ "judge": {
+  "version": "judge-0373eea6",
+  "evaluated": "2026-10-18",
+  "scorecard": "scorecards/2026-10-18-watching-v1-claude-haiku-5-5-baseline-0.3.88.md"
+ },
+ "name": {
+  "evaluated": "skipped: locked when the lock began; no eval stage measures cluster names yet",
+  "version": "name-be4209e1"
+ },
+ "news": {
+  "version": "news-087552e4",
+  "evaluated": "skipped: one sentence of the why rule changed: it named the item's \"Kranto on\" and the model opened most why lines with \"Kranto on\"; now it names what the item changes and never opens with \"Kranto on\"; no news eval set yet; afk news eval's code checks cover citations and readability"
+ },
+ "news_article": {
+  "version": "news_article-6a161540",
+  "evaluated": "skipped: the radar's block left with the radar (A2, \u00a73.1 cut 2, 2026-11-13): block 6 and its one rule removed, nothing added; the article's checks, citations and the planted instruction are code and tested; no article eval set yet"
+ },
+ "resolve": {
+  "version": "resolve-25351701",
+  "evaluated": "skipped: live search's second look at failed lines: one added placeholder; measured by SD's resolve_check, not a scorecard"
+ },
+ "rollup": {
+  "evaluated": "skipped: locked when the lock began; no eval stage measures compaction",
+  "version": "rollup-a6f4d82b"
+ },
+ "scout": {
+  "version": "scout-8a495e8f",
+  "evaluated": "skipped: live search grounding: the eval set's free replay has no search results to render it with; measured instead by the real runs on a copy of live (.REPORT.md); its first scorecard is kranto eval discovery"
+ },
+ "screen": {
+  "version": "screen-f0e11eac",
+  "evaluated": "2026-10-18",
+  "scorecard": "scorecards/2026-10-18-watching-v1-claude-haiku-5-5-baseline-0.3.88.md"
+ },
+ "screen_batch": {
+  "evaluated": "skipped: locked when the lock began; short posts are not in set v1",
+  "version": "screen_batch-26ea036c"
+ },
+ "verify": {
+  "evaluated": "skipped: locked when the lock began; its first scorecard is kranto eval ideas",
+  "version": "verify-8a9369a8"
+ },
+ "xai_search": {
+  "evaluated": "skipped: locked when the lock began; off until an xAI key is set",
+  "version": "xai_search-4658191c"
+ }
+}

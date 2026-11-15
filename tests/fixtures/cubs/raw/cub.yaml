@@ -1,0 +1,18 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: raw
+title: Raw
+says: Writes the protocol by hand to break it.
+events: {publish: [raw.said]}
+jobs:
+  - {kind: raw.in_flight, method: in_flight, every_hours: 24, deadline_s: 30}
+  - {kind: raw.calls, method: calls, every_hours: 24, deadline_s: 60}
+  - {kind: raw.logs, method: logs, every_hours: 24, deadline_s: 60}
+  - {kind: raw.no_newline, method: no_newline, every_hours: 24, deadline_s: 30}
+  - {kind: raw.long_line, method: long_line, every_hours: 24, deadline_s: 30}
+  - {kind: raw.not_json, method: not_json, every_hours: 24, deadline_s: 30}
+  - {kind: raw.probes, method: probes, every_hours: 24, deadline_s: 30}
+  - {kind: raw.no_result, method: no_result, every_hours: 24, deadline_s: 30}
+storage: none

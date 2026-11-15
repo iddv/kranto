@@ -1,0 +1,11 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: refused
+title: Refused
+says: Calls the model once and lets Kranto's refusal end its run.
+model: {tiers: [judge], purposes: [refused], monthly_usd: 1}
+jobs:
+  - {kind: refused.weekly, method: weekly, every_hours: 168, deadline_s: 60}
+storage: none

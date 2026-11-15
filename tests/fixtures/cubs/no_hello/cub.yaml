@@ -1,0 +1,10 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: no_hello
+title: No hello
+says: Greets in its own words and waits.
+jobs:
+  - {kind: no_hello.wait, method: wait, every_hours: 24}
+storage: none

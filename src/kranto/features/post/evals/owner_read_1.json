@@ -1,0 +1,70 @@
+{
+ "about": "The owner's blind read of round 1 (2026-11-13): five posts, the old writer and the prose engine of round 1, his pick and the gist of his words. The round-2 checker's fixtures and the rubric judge's check.",
+ "posts": [
+  {
+   "post": 1,
+   "item": "brief-24-1",
+   "site": "blog",
+   "old": "## What happened\n\nAmazon FAR's Dex-Hands team has shown a system called Pick Anything. It is a single policy that grasped 66 objects. The setup uses a stereo camera head and Sharpa Wave hands, and it has no wrist cameras.\n\nA researcher says the policy was trained on video and reinforcement learning (RL), with zero teleoperation data. That detail comes from a researcher's account, so it is worth treating as a claim until a fuller write-up is available.\n\n## Why teleoperation data is the sticking point\n\nTeleoperation data means a person remotely controls a robot hand while the system records what happens. Those recordings can then be used to teach the robot. It is a common way to get demonstrations, but it is costly, because it takes human time and operator effort for every example.\n\nThe item frames the result as bearing on one question: can dexterous grasping be trained without that expensive human data? If a policy can learn from video and RL instead, the cost of building up training data could look quite different.\n\n## What stands out in the setup\n\nTwo hardware choices are worth noticing. First, the policy uses a stereo camera head, which is a pair of cameras mounted together to see the scene. Second, there are no wrist cameras. Many grasping setups put a camera near the hand to see the object up close. Doing without one means the policy is working from the head view alone, at least as described.\n\nThe hands are Sharpa Wave hands, which is the dexterous hardware used in the demonstration.\n\n## What we don't know yet\n\nThe item is short, and a lot is missing. It does not say how reliably the policy grasped each of the 66 objects, how those objects were chosen, or whether they were seen during training. It does not describe the video data used, how the RL was set up, or how the result compares with approaches that rely on teleoperation.\n\nSo the honest reading is this: one team showed one policy handling 66 objects, and a researcher says no teleoperation data was involved. Whether that holds up across other objects, hands, and settings is something I would want to see in the details.\n\nIt is a small but interesting data point on whether the human-demonstration bottleneck is as firm as it seems.",
+   "new": "Amazon FAR's Dex-Hands team has shown Pick Anything, a single policy that grasps 66 objects. It uses a stereo camera head and Sharpa Wave hands, with no wrist cameras.\n\nA researcher says the policy was trained on video and reinforcement learning (RL), with zero teleoperation data. Teleoperation means a person remotely controls the robot to record examples for it to learn from.\n\nThat matters because collecting teleoperation data for dexterous hands is costly. If a policy can learn to grasp from video and RL alone, that cost drops out of the training process.\n\nThe sources give no details beyond this: no success rates, and no description of how the 66 objects were chosen or tested.",
+   "page": {
+    "A": "new",
+    "B": "old"
+   },
+   "owner_pick": "neither",
+   "owner_words": "Sections like a template, all about the same length; \"the honest reading\" and \"sources give no details\" read like AI safety: just say \"a user on X said\". We should not assume our readers are morons."
+  },
+  {
+   "post": 2,
+   "item": "brief-21-1",
+   "site": "blog",
+   "old": "## What happened\n\nChina's foreign investment security review office has prohibited SoftBank Group's acquisition of ABB's robotics division. The deal was valued at roughly $5.375 billion. ABB has confirmed the block.\n\n## The stated worry\n\nAccording to the Financial Times, regulators were concerned that robotics data would end up overseas and be used to train AI models. That is the reported reason, and the item does not say more about which data regulators had in mind or how it would have moved across borders. It is worth keeping in mind that this comes from the FT's reporting rather than from a detailed public explanation.\n\n## Why it may matter\n\nMost of the conversation about AI training data has focused on text, images and video. This case points to something different: the data produced by robots, which are machines that operate in the physical world. If regulators see that kind of data as valuable for training AI, then a company that makes robots, and the information flowing through them, starts to look like a strategic asset and not just a manufacturing business.\n\nThe item frames the block as a sign that data concerns over AI training can stop cross-border robotics deals. That seems a fair reading of what happened here, though a single decision does not tell us how consistently such concerns will be applied elsewhere.\n\n## What I'd watch\n\nA few open questions come to mind, and the item does not answer them:\n\n- What happens to ABB's robotics division now that the sale has been blocked?\n- Will other robotics acquisitions face similar scrutiny from regulators in China or elsewhere?\n- Will companies begin to treat the data their machines generate as something that needs to be protected in a deal?\n\nFor now, the plain facts are these: a multibillion-dollar sale was stopped, the seller confirmed it, and the reported reason was about data and AI. It is a small but concrete example of AI training data becoming a matter of national security review, not only a matter of commerce.",
+   "new": "China's foreign investment security review office has prohibited SoftBank Group's acquisition of ABB's robotics division, a deal worth roughly $5.375B. ABB confirmed the block.\n\nThe Financial Times reports that regulators feared robotics data would go overseas to train AI models. That is the reason given in the report; the item does not say more about what data was at issue or how it would have been used.\n\nThe case shows how concerns over data used for AI training can stop a cross-border robotics deal.",
+   "page": {
+    "A": "new",
+    "B": "old"
+   },
+   "owner_pick": "old",
+   "owner_words": "Same issues as post 1. I like \"what I'd watch for\": predictions are spicy, people interact with them. We can be controversial or make bold claims."
+  },
+  {
+   "post": 3,
+   "item": "card-158",
+   "site": "blog",
+   "old": "## The idea\n\nAgents are gaining long-term memory, and in many products that memory is shared across users. The idea on the table is a cross-user leakage test suite that a team runs in CI against its own memory store before release. The comparison is to row-level-security tests in databases: you don't trust the isolation, you check it, every time.\n\n## What the sources show\n\nThree things point in this direction.\n\nFirst, memory tooling is growing. One open-source project, ContextMemory, is a memory gateway for llama.cpp and vLLM that keeps session state as editable markdown files behind an OpenAI-compatible API [2]. Another post describes the AML CYCLE 2 benchmark for long-term agent memory, with Textual, Coding and Multimodal tracks, each with its own result table [3].\n\nSecond, those benchmark tracks, as described, measure recall. They ask how well an agent remembers. The card's observation is that they do not ask whether memory stays on the right side of a user boundary [3].\n\nThird, there is a preprint on cross-user credential leakage through shared long-term agent memory. It proposes a three-stage audit that separates exposure, behavior and state [1]. In plain terms, the audit asks three different questions: did a foreign credential reach the prompt, did the agent act on it, and did the other account actually change?\n\nThe test suite idea is to package that audit as something runnable. The sources describe the audit itself, not a finished test suite, so the packaging is a proposal rather than an existing product.\n\n## Why the three stages matter\n\nSplitting the check into stages is useful because the failures differ. A credential showing up in a prompt is a leak, but it may be harmless if the agent ignores it. An agent that uses it is worse. An account that changes as a result is the real damage. A single pass/fail test would blur these together, while three separate signals tell a team where its isolation is breaking down.\n\n## Why it may matter\n\nIf shared memory becomes a standard part of multi-user agents, isolation becomes a property teams need to verify, not assume. Recall benchmarks can show a memory system is good at remembering and still say nothing about whether it remembers the wrong person's secrets. A suite run before each release would turn the preprint's audit into routine practice, in the way database teams already treat access rules.\n\n## Open questions\n\nThe sources do not say how such a suite would be built, what attack cases it would include, or how well it would work against real memory stores. Those are the things worth finding out. The gap itself, recall measured and isolation not, seems clear enough to be worth a closer look.",
+   "new": "Shared memory for multi-user agents has benchmarks for recall but none, in the sources here, for isolation between users. The idea: package a preprint's audit as a test suite and run it in CI.\n\nMemory tooling is multiplying. ContextMemory is an open-source memory gateway for llama.cpp and vLLM. It keeps session state as editable markdown files behind an OpenAI-compatible API [2]. A Show HN post describes the AML CYCLE 2 benchmark for long-term agent memory, with Textual, Coding and Multimodal tracks, each with a result table [3]. Those tracks measure recall. They do not measure whether one user's data reaches another.\n\nThat gap is what an arXiv preprint on cross-user credential leakage through shared long-term agent memory addresses [1]. It proposes a three-stage audit that separates three things:\n\n- **Exposure:** a foreign credential reaches the prompt.\n- **Behavior:** the agent acts on it.\n- **State:** the other account changes.\n\nThe split matters because the stages are different failures. A credential in the prompt is a leak even if the agent ignores it. A credential the agent uses is worse. A change in the other account's state is the damage itself [1].\n\nThe proposal is to turn this audit into a runnable test suite. A team adding shared memory to a multi-user agent would run it against its own store before release, much like row-level-security tests. Those tests check that a database query can't return another user's rows, and this suite would check the same boundary for memory.\n\nThe card also notes that this theme shows up across 471 distinct stories from 50 sources, none supplying more than 70% of them. It describes the theme as one that independent sources converged on, not one with a single origin.\n\nThe sources don't say whether the preprint ships code or what its test cases look like. Turning the audit into a suite would start there.",
+   "page": {
+    "A": "new",
+    "B": "old"
+   },
+   "owner_pick": "old",
+   "owner_words": "Too long. \"Three things point in this direction.\" and \"First, …\": listing the number of things is boring. Why is this interesting? The first sentence should come with a claim, a hypothesis or a theory that the sources then support."
+  },
+  {
+   "post": 4,
+   "item": "brief-19-1",
+   "site": "toot",
+   "old": "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers working in the same facility.",
+   "new": "A3 has published ISO 21423:2026, developed by ISO Technical Committee 299. It sets common communication requirements for AGVs, AMRs and similar systems from different suppliers in one facility. It Kranto on whether multi-vendor fleets can share a site without custom integration.",
+   "page": {
+    "A": "old",
+    "B": "new"
+   },
+   "owner_pick": "neither",
+   "owner_words": "Just stating facts - zzzzz"
+  },
+  {
+   "post": 5,
+   "item": "brief-20-1",
+   "site": "toot",
+   "old": "Beijing-based LiberAI announced Liber-0, a world action model pretrained on over 2.2 million hours of human video and glove-recorded motion. It reports 36.0% overall success across 600 zero-shot trials. Self-reported, and pretraining also included robot data.",
+   "new": "LiberAI announced Liber-0, pretrained on over 2.2 million hours of human video and glove-recorded motion. It self-reports 36.0% success in 600 zero-shot trials, but pretraining included robot data. It shows how far human video, not robot demos, gets on unseen manipulation tasks.",
+   "page": {
+    "A": "new",
+    "B": "old"
+   },
+   "owner_pick": "neither",
+   "owner_words": "More zzzz - why should I care!? We want to drive engagement, not just share facts."
+  }
+ ]
+}

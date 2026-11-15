@@ -1,0 +1,84 @@
+// https://docs.x.com/x-api/lists/get-list-posts (GetListsPostsResponse), read 2026-10-17
+// Written to the schema by hand; not from a real call (README.md).
+{
+  "data": [
+    {
+      "id": "1849100000000000010",
+      "text": "RT @someone: Microgrids in rural Kenya now beat grid extension on cost",
+      "created_at": "2026-10-16T12:00:00.000Z",
+      "conversation_id": "1849100000000000010",
+      "edit_history_post_ids": ["1849100000000000010"],
+      "referenced_posts": [{"type": "retweeted", "id": "1849100000000000001"}],
+      "public_metrics": {"repost_count": 0, "reply_count": 0, "like_count": 0, "quote_count": 0,
+                         "bookmark_count": 0, "impression_count": 0}
+    },
+    {
+      "id": "1849100000000000009",
+      "text": "This is the clearest write-up of CRDT sync I have read https://t.co/q1",
+      "created_at": "2026-10-16T11:00:00.000Z",
+      "conversation_id": "1849100000000000009",
+      "edit_history_post_ids": ["1849100000000000008", "1849100000000000009"],
+      "entities": {"urls": [{"start": 55, "end": 78, "url": "https://t.co/q1",
+                             "expanded_url": "https://x.com/i/status/1849100000000000002",
+                             "display_url": "x.com/i/status/18491..."}]},
+      "referenced_posts": [{"type": "quoted", "id": "1849100000000000002"}],
+      "public_metrics": {"repost_count": 12, "reply_count": 3, "like_count": 140,
+                         "quote_count": 2, "bookmark_count": 30, "impression_count": 9000}
+    },
+    {
+      "id": "1849100000000000007",
+      "text": "A long thread opener about local-first software that goes past 280 characters ...",
+      "note_post": {
+        "text": "A long thread opener about local-first software that goes past 280 characters, because the case for keeping data on the device is more than one tweet: offline use, privacy, latency, and ownership all point the same way. Here is the paper: https://t.co/p2",
+        "entities": {"urls": [{"start": 236, "end": 259, "url": "https://t.co/p2",
+                               "expanded_url": "https://www.inkandswitch.com/local-first/",
+                               "unwound_url": "https://www.inkandswitch.com/local-first/",
+                               "display_url": "inkandswitch.com/local-first/"}]}
+      },
+      "created_at": "2026-10-16T10:00:00.000Z",
+      "conversation_id": "1849100000000000007",
+      "edit_history_post_ids": ["1849100000000000007"],
+      "public_metrics": {"repost_count": 40, "reply_count": 5, "like_count": 300,
+                         "quote_count": 4, "bookmark_count": 90, "impression_count": 20000}
+    },
+    {
+      "id": "1849100000000000006",
+      "text": "@someone agreed, and the sync engine is the hard part",
+      "created_at": "2026-10-16T09:00:00.000Z",
+      "conversation_id": "1849100000000000005",
+      "edit_history_post_ids": ["1849100000000000006"],
+      "referenced_posts": [{"type": "replied_to", "id": "1849100000000000005"}],
+      "public_metrics": {"repost_count": 0, "reply_count": 0, "like_count": 1, "quote_count": 0,
+                         "bookmark_count": 0, "impression_count": 50}
+    }
+  ],
+  "includes": {
+    "posts": [
+      {
+        "id": "1849100000000000001",
+        "text": "Microgrids in rural Kenya now beat grid extension on cost https://t.co/m1",
+        "created_at": "2026-10-16T08:00:00.000Z",
+        "conversation_id": "1849100000000000001",
+        "edit_history_post_ids": ["1849100000000000001"],
+        "entities": {"urls": [{"start": 57, "end": 80, "url": "https://t.co/m1",
+                               "expanded_url": "https://example.org/microgrids",
+                               "display_url": "example.org/microgrids"}]},
+        "public_metrics": {"repost_count": 80, "reply_count": 9, "like_count": 410,
+                           "quote_count": 6, "bookmark_count": 70, "impression_count": 50000}
+      },
+      {
+        "id": "1849100000000000002",
+        "text": "How we built offline sync with CRDTs, in detail https://t.co/c1",
+        "created_at": "2026-10-15T08:00:00.000Z",
+        "conversation_id": "1849100000000000002",
+        "edit_history_post_ids": ["1849100000000000002"],
+        "entities": {"urls": [{"start": 48, "end": 71, "url": "https://t.co/c1",
+                               "expanded_url": "https://example.org/crdt-sync",
+                               "display_url": "example.org/crdt-sync"}]},
+        "public_metrics": {"repost_count": 20, "reply_count": 4, "like_count": 200,
+                           "quote_count": 10, "bookmark_count": 60, "impression_count": 30000}
+      }
+    ]
+  },
+  "meta": {"result_count": 4}
+}

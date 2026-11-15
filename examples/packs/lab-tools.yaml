@@ -1,0 +1,36 @@
+# Tools for biology labs.
+#
+# Checked 2026-09-26: a fresh workspace with these sources ran ingest
+# with the tier-1 judge and default settings: 52 observations, $0.0053 each.
+# 40 of them, drawn at random, were graded blind against the topic
+# description: 37 on-topic (a method, instrument, protocol, editing tool or
+# lab software was the subject), 2 adjacent and 1 off-topic (all three from
+# BioTechniques, the one news source here). The sources this pack listed
+# before gave 3 observations on the same day, none on-topic.
+#
+# Cell Reports Methods and the two Nature journals each published 8-9 items in
+# the two weeks before the check, the Addgene blog 3 in the month. Hackaday's
+# laboratory tag (open lab hardware) is an archive that grows a few times a
+# year; a first run backfills its 7 latest posts.
+#
+# Removed after the same check: HN searches "lab automation" (0 items) and
+# "CRISPR" (clinical and discovery news), STAT (paywalled pharma news, 0 of 18
+# kept), Asterisk (1 of 18 kept), Opentrons releases (alpha tags without
+# notes, 0 of 10 kept). arXiv q-bio.QM returned nothing on the check date
+# (arXiv feeds are empty at weekends), so it was not measured and is left
+# out. Tried and not kept: HardwareX (its ScienceDirect feed carries no
+# abstract, 1 of 40 kept) and the GOSH forum (mostly event logistics, 2 of 26
+# kept).
+topics:
+  - name: Lab tools
+    description: >
+      How biology gets done at the bench and how that is changing: lab
+      automation, open hardware, CRISPR and other editing tools, protocols,
+      and software that makes experiments cheaper, faster or reproducible.
+    sources:
+      - {kind: rss, value: "https://www.cell.com/cell-reports-methods/inpress.rss"}
+      - {kind: rss, value: "https://www.nature.com/nmeth.rss"}
+      - {kind: rss, value: "https://www.nature.com/nprot.rss"}
+      - {kind: rss, value: "https://hackaday.com/tag/laboratory/feed/"}
+      - {kind: rss, value: "https://blog.addgene.org/rss.xml"}
+      - {kind: rss, value: "https://www.biotechniques.com/feed/"}

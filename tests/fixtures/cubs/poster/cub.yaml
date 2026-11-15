@@ -1,0 +1,14 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: poster
+title: Poster
+says: Drafts an issue and a post, and asks to send them.
+broker:
+  buttondown: [emails.create_draft, emails.get, drafts.list, newsletter.get]
+  mastodon: [statuses.draft, drafts.list, account.get, instance.limits]
+requests: [send.buttondown, post.mastodon]
+jobs:
+  - {kind: poster.draft, method: draft, every_hours: 24}
+storage: none

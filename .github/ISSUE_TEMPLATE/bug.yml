@@ -1,0 +1,58 @@
+name: Bug
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Remove API keys, delivery URLs and personal data from everything you paste. Security problems go to the Security tab, not here.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Commands and config (`kranto.yaml`, keys removed).
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `afk --version`, or the commit you run.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: afk doctor
+      description: Output of `afk doctor --skip-embedder`.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: The run status and error from the Health page or `afk status`, and any alarm from `afk messages --kind alarm`.
+      render: text
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you run it
+      options:
+        - Kranto (one app with the page)
+        - afk from a clone or pip install
+        - Docker
+        - other
+    validations:
+      required: true

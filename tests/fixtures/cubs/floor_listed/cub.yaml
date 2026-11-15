@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: floor_listed
+title: Floor listed
+says: Listens to gen.thing from listed up.
+events:
+  subscribe:
+    - {kind: gen.thing, min_trust: listed}
+jobs:
+  - {kind: floor_listed.look, method: look, every_hours: 24}
+storage: none

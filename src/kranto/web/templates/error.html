@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Something went wrong{% endblock %}
+{% block content %}
+<h1>Something went wrong</h1>
+<p>Kranto could not answer this page. Nothing you keep in Kranto was changed.</p>
+<p class="mono">Kranto {{ version }} · error {{ error_id }}</p>
+<p><a class="btn" href="{{ again }}">Try again</a>
+   <a class="btn" href="{{ send }}">Send this error</a>
+   <a class="btn" href="{{ github }}" target="_blank" rel="noopener noreferrer">Open on GitHub</a></p>
+<p class="muted">Send this error opens Kranto's Feedback with the report below; Open on GitHub opens GitHub's new-issue page with it filled in, and you press Submit there. Exactly this is sent, nothing else:</p>
+<pre class="mono">{{ title }}
+
+{{ body }}</pre>
+{% endblock %}

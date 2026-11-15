@@ -1,0 +1,13 @@
+# gitleaks's own rules, with one narrow exception.
+[extend]
+useDefault = true
+
+# The privacy page's example of a telemetry day (docs/privacy/what-kranto-sends.md, written by
+# kranto.telemetry.docs) names OTLP attributes ("key": "kranto.ms_p50"); a name is not a key.
+# Only such a line, only in that file.
+[[allowlists]]
+description = "OTLP attribute names in the privacy page's example"
+condition = "AND"
+paths = ['''^docs/privacy/what-kranto-sends\.md$''']
+regexTarget = "line"
+regexes = ['''^\s*"key": "kranto\.[a-z0-9_.]+",?\s*$''']

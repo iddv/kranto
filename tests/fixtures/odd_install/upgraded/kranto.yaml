@@ -1,0 +1,382 @@
+# the server workspace configuration.
+# Secrets are read from the environment variable named in llm.api_key_env,
+# which may also be set in a .env file next to this one.
+
+llm:
+  # Which provider the tiers use: openrouter, anthropic (the Claude API, its key in
+  # ANTHROPIC_API_KEY), openai_compat (any OpenAI-compatible endpoint), or claude_code (your
+  # Claude Code login; shares your plan's usage windows). Left out: openai_compat with the
+  # endpoint below. Settings › Watching and Welcome write it.
+  # provider: openrouter
+  # Any OpenAI-compatible chat completions endpoint.
+  base_url: https://openrouter.ai/api/v1
+  api_key_env: OPENROUTER_API_KEY
+  # "provider": use the cost the provider reports per call (OpenRouter does).
+  # "table": use the pricing table below. A model with no known cost is refused.
+  cost_source: provider
+  # Settings › Watching › Models in Kranto UI writes these. A "provider/" prefix routes the call
+  # through the endpoint's provider (OpenRouter's names); a bare name goes to the endpoint as is.
+  models:
+    judge: anthropic/claude-haiku-5.5     # tier 1: judges every item that passes the prefilter
+    reason: anthropic/claude-sonnet-5.5   # tier 2: scout, explain, idea cards
+  # USD per million tokens, used when cost_source is "table".
+  pricing: {}
+  timeout_seconds: 60
+  max_retries: 3
+  # Ceilings on a reply's length, per call (tokens; only what is written is paid for). A
+  # reply cut off at its ceiling is asked again once with twice the room before it counts
+  # as a failure. Defaults: judge 3000, judge_gathered 4000, screen 1000, card 8000,
+  # verify 4000, scout 8000, resolve 8000, explain 3000, rollup 2000, name 1000. Set any
+  # of them here.
+  max_tokens: {}
+  # pricing, when cost_source is "table": {model: {input_per_mtok: 1.0, output_per_mtok: 5.0}}.
+  # One tier on another provider: tiers: {reason: {provider: anthropic, model: ...}}.
+  # The Claude API (provider anthropic): its key's variable, one prompt-cache breakpoint on the
+  # system prompt, and per call (screen, judge, name) schema-enforced replies and the thinking
+  # effort (low, medium, high; unset: the model's default). 'afk provider replay' measures both.
+  # anthropic: {api_key_env: ANTHROPIC_API_KEY, base_url: https://api.anthropic.com,
+  #             cache: true, structured: {}, effort: {}}
+  # Claude Code's login (provider claude_code): per call a JSON schema for the reply, sandbox:
+  # true runs 'claude -p' in bubblewrap (no tools either way), one call's limit, and the empty
+  # folder calls run in (default <home>/data/claude-cwd).
+  # claude_code: {structured: {}, sandbox: false, timeout_seconds: 180, cwd: ""}
+
+budget:
+  # The watcher's monthly budget (USD): model calls stop when it is reached. null: no cap,
+  # the default (the owner's rule: spend is uncapped unless a cap is set; a $10 default
+  # stopped gathering mid-month at a normal week's volume, #8). Settings › Spend in the
+  # Kranto UI writes it.
+  monthly_usd: null
+  # Fraction of the monthly budget at which the health page starts warning.
+  alarm_fraction: 0.8
+
+ingest:
+  every_hours: 3
+  max_items_per_source: 10
+  # The gate: an item is kept when its signal (the judge's three ratings multiplied) is at
+  # least this. It belongs to the judge model: Haiku 4.5 was calibrated at 0.20; on 160 live
+  # items (2026-10-08) Haiku 5.5 rated about four times lower, and 0.03 matched 4.5's keeps
+  # best (86% agreement). Settings › Watching › Models sets the judge and this together.
+  signal_threshold: 0.03
+  # Items whose embedding similarity to every topic they could serve is below
+  # this are skipped without an LLM call. Calibration (nomic, 2026-09-24):
+  # on-topic items scored 0.55-0.74, an off-topic HN front page had median 0.505.
+  # The prefilter is a cost saver, not a quality judge, so it errs toward recall...
+  prefilter_min_similarity: 0.50
+  # ...except for this fraction, sampled at random, which keeps the library
+  # from collapsing onto the wording of your topics.
+  exploration_fraction: 0.05
+  # HN link posts and RSS items with under 300 characters of body that pass the
+  # prefilter get the linked page fetched and its main text (up to 4000
+  # characters) judged instead. Costs up to about 1000 more input tokens per item.
+  fetch_full_text: true
+  # On a source's first run the per-source cap is this instead, once, so a new
+  # topic starts with some history. HN query sources reach back backfill_days
+  # (a source parameter, default 14). Values below max_items_per_source have no effect.
+  backfill_items: 40
+  # Items published longer ago than this are recorded as stale and never judged:
+  # an old or since-removed post is not news (0 turns the check off).
+  max_age_days: 30
+
+fetch:
+  # Polite fetching. One request at a time per host, at least this many seconds apart
+  # (end of one to start of the next); hosts lists hosts that ask for more (arXiv's
+  # three seconds is built in).
+  min_gap_seconds: 1.0
+  hosts: {}
+  # A 429 or 503 waits for the server's Retry-After, else backs off exponentially with
+  # jitter; a timeout backs off too. Waits up to max_wait_seconds are retried in the
+  # request, at most retries times; a longer one defers the source (Paced, retrying
+  # at ...). Paced is never a failure and never marks a run degraded.
+  retries: 2
+  max_wait_seconds: 30
+  # A source that fails this many runs in a row (a 404, a feed that does not parse)
+  # backs off by itself, failing_backoff_hours doubling per further failure up to
+  # failing_backoff_max_hours, and shows under Needs you: fix it or remove it.
+  failing_after_runs: 3
+  failing_backoff_hours: 24
+  failing_backoff_max_hours: 168
+
+stories:
+  # One voice must not count as many. Before an item is judged, its title
+  # and the start of its body are compared with what was judged in the last
+  # window_days (word shingles, MinHash; no model call). Similarity is the
+  # estimated share of shingles two texts have in common (Jaccard, 0 to 1).
+  window_days: 30
+  # At or above this an item from another source is the same text (a
+  # crosspost): it is consumed as near_duplicate without a model call. The
+  # same applies within one source to an item posted again within
+  # same_source_days. On 138 labelled pairs from Parallax's items, every
+  # pair at 0.9 or more under these rules was the same story.
+  skip_at: 0.9
+  # From here up to skip_at, an item from another source is judged as usual
+  # and, if kept, joins the earlier item's story: movement, bursts, idea
+  # candidates and the cross-source rule count it once.
+  link_at: 0.5
+  same_source_days: 3
+  # Source ids whose items are never matched with each other: feeds whose items
+  # share a template (prediction markets, release notes, status bots). Sources
+  # whose items mostly look alike are detected without this list.
+  templated_sources: []
+
+map:
+  every_hours: 24
+
+ideas:
+  # Idea cards are generated after a new map, at most this many per run, each
+  # costing one tier-2 call plus one tier-1 verification call.
+  every_hours: 24
+  max_cards_per_run: 4
+  # Project topics (topics the page created for its projects): skip leaves their
+  # themes out of the candidates; cards lets them be carded like any other.
+  project_topics: skip
+
+strike:
+  # The gate that decides which candidates interrupt you. Each origin scores on
+  # its own scale, so each has its own absolute threshold:
+  #   card:  product of the five fitness ratings, each in [0, 1]. 0.15 needs
+  #          ratings averaging about 0.68 (geometric mean); all-0.5 cards score 0.03.
+  #   burst: 1 - q, where q is the BH-corrected binomial q-value. Burst candidates
+  #          already need q < 0.05 (score > 0.95); 0.99 asks for q < 0.01.
+  min_card_score: 0.15
+  min_burst_score: 0.99
+  # min_watch_score: retired with watches; a file that still has it loads, and nothing reads it.
+  # No second strike about the same subject (a lineage) within this many days.
+  refractory_days: 7
+  # At most this many strikes in any rolling seven days, across all subjects.
+  max_per_week: 2
+  # No strikes until the library has this many map snapshots behind it, and its
+  # first map is at least warmup_days old.
+  warmup_snapshots: 2
+  warmup_days: 3
+
+retention:
+  # Observations older than this many days are compacted: clustered with the
+  # rest of their week into rollups (a name, a short summary, keywords, source
+  # mix and up to five links), then removed together with the model calls that
+  # hold their source's raw text. Trends in the map survive; the text does not.
+  # 0 keeps observations forever.
+  default_days: 90
+  # Per source kind (rss, hackernews, reddit, arxiv, bluesky, mastodon, github,
+  # youtube, producthunt, stackexchange, x, parallax), e.g. {reddit: 30}. x is kept 30
+  # days unless set here (stored X posts have to track X's; a default you may raise). A single
+  # source can be set with 'afk sources retention ID DAYS' or on its page;
+  # newsletter publications added from the catalog are kept 30 days. youtube is
+  # capped at 30 days (YouTube's policies for API data): more is refused.
+  # parallax (an archive imported with 'afk import parallax') is kept forever
+  # unless set here: its observations are older than default_days when imported.
+  by_kind: {}
+  # How often compaction runs under 'afk serve' (after the snapshot).
+  every_hours: 24
+
+activity:
+  # What Kranto is doing, recorded as it goes (Settings › System › Activity): each run's
+  # marks (started, how far it is, ended) are kept this many days, then removed by
+  # compaction with a purge record. The runs themselves are kept as before.
+  keep_days: 30
+  # At most this many marks in all; the oldest go first (also with a purge record).
+  max_rows: 20000
+
+look:
+  # Look before judging. Each item that passes the prefilter is first
+  # screened: a short tier-1 call asks whether it is potentially worth a closer
+  # look (lenient; what it drops is recorded as screened_out with its reason).
+  # For items that pass, what is one step away is gathered (no model call): the
+  # Hacker News discussion, pages the item and its comments link to, repositories
+  # it names. The judge then reads the item with that material, and may keep
+  # gathered sources that hold up as observations of their own, linked to the
+  # item. false: every item goes straight to the judge, as before #84.
+  enabled: true
+  # Per item: pages linked from the item and its comments, and repositories.
+  max_links: 2
+  max_repos: 1
+  # Comments read from a Hacker News thread for its discussion.
+  max_comments: 20
+  # Characters of each gathered source the judge reads.
+  gathered_chars: 2000
+  # Wall-clock seconds for one item's gathering, and for any one request in it.
+  item_seconds: 30
+  request_seconds: 15
+  # Items gathered for in one ingest run; items past it are judged without
+  # gathering (the run's summary counts them), so a run's length stays bounded.
+  max_per_run: 40
+  # GitHub's public API allows 60 requests an hour per address; each repository
+  # read costs two.
+  max_repo_lookups: 10
+  # Reddit comments come from the post's public feed, paced like every Reddit
+  # request (one a minute). Off: see RESPONSIBLE_USE.md before turning it on.
+  reddit_comments: false
+  # Short posts (X, Bluesky, Mastodon; under 600 characters, no comments) are screened this
+  # many to one call: the screen's instructions are most of a short post's call. 1: one
+  # call per item, as for every other kind.
+  screen_batch: 20
+
+deep_dive:
+  # A deep dive gathers what is one step from an existing observation (its
+  # discussion, linked pages, named repositories), judges each with the tier-1
+  # judge, and keeps what passes as new observations linked to it. Since
+  # #84, items are looked at before they are judged, so deep dives are only
+  # queued by hand: 'afk deepdive add ID', then 'afk deepdive run'. enabled
+  # schedules the deepdive job under 'afk serve' to work that queue. The job
+  # stops for the day once deep dives have spent daily_usd (out of the monthly
+  # budget; null: no daily cap).
+  enabled: false
+  # Unused since #84 (nothing is queued by signal any more); accepted so
+  # existing configurations still load.
+  min_signal: 0.5
+  daily_usd: 0.05
+  every_hours: 3
+  max_per_run: 10
+  # Per deep dive: pages linked from the item and its comments, and repositories.
+  max_links: 3
+  max_repos: 2
+  # Comments read from a Hacker News thread for its discussion.
+  max_comments: 20
+  # Reddit comments come from the post's public feed, paced like every Reddit
+  # request (one a minute). Off: see RESPONSIBLE_USE.md before turning it on.
+  reddit_comments: false
+  # A deep dive that keeps failing is given up after this many attempts.
+  max_attempts: 3
+  # Queued deep dives older than this are dropped (a thread goes quiet); ones
+  # queued by hand are not.
+  max_queue_days: 7
+
+notify:
+  # Apprise URLs (https://github.com/caronc/apprise/wiki), e.g. "mailto://...",
+  # "ntfy://...", "tgram://...". Needs: pip install 'kranto[notify]'.
+  # Empty means nothing leaves this machine; messages stay on the Health page
+  # and in the Atom feed at /feed.xml. URLs usually carry tokens: prefer
+  # listing them (space or comma separated) in the environment variable named
+  # by urls_env, which may be set in the .env file next to this one.
+  urls: []
+  urls_env: KRANTO_NOTIFY_URLS
+  # Used to build links (grade this strike, open an observation) in delivered messages.
+  base_url: http://127.0.0.1:8765
+  # The weekly heartbeat: sent even when nothing struck, so quiet is not mistaken for broken.
+  heartbeat_every_hours: 168
+  # Optional healthchecks.io-style URL, fetched after every ingest run that is ok or degraded.
+  heartbeat_ping_url: null
+
+brb:
+  # the page's builds UI at /brb/ (needs the page installed in this environment). It can
+  # start paid builds and make repos public, so it is only mounted when the server is
+  # bound to loopback. root: the task folder it lists (default: the loop's tasks_dir);
+  # loop_home: the build loop's home (default: $KRANTO_LOOP_HOME, else ~/kranto-loop; a kranto home
+  # sets its own loop/); harness: what runs a build (claude-code).
+  enabled: false
+
+connections:
+  # Sources read with your own account (Settings › Sources › Accounts): Mastodon,
+  # Bluesky, GitHub, YouTube, Product Hunt and Stack Exchange. Only read-only
+  # scopes are asked for. Tokens are kept encrypted in data/secrets/ (mode 0600),
+  # never in this file, the library or an export. Needs: pip install
+  # 'kranto[connections]'. On by default; 'enabled: false' turns connected
+  # accounts off (their sources then report Needs login).
+  # github_client_id: the client id of a GitHub OAuth app you registered with
+  # device flow enabled (no secret). Turns on "Sign in with GitHub"; without it,
+  # GitHub is connected with a pasted fine-grained token.
+
+x:
+  # X as a source, read with your own X developer app (Settings › Sources › Accounts › X). X bills
+  # your developer account per post read ($0.005; your own bookmarks and likes $0.001), so
+  # kranto reads only what it will judge, and every read is counted on Settings › Spend.
+  # monthly_usd: X sources wait until next month once this month's reads reach it; null: no
+  # cap, the default. A list's or your home timeline's posts a run, one account's, a
+  # search's (searches run once a day), bookmarks and likes once a day.
+  monthly_usd: null
+  posts_per_fetch: 20
+  profile_per_fetch: 10
+  search_results: 10
+  search_every_hours: 24
+  owned_every_hours: 24
+  # An account's own threads (a post and its author's replies) joined into one item.
+  read_threads: true
+  # Kept posts checked for deletion once a week, at most this many (0: off).
+  recheck_days: 7
+  recheck_max: 100
+  # Whether the scout may propose X searches and accounts while X is connected, and how many
+  # a run (each proposal is checked with one fetch of 10 posts, about $0.05).
+  scout: true
+  scout_max_proposals: 5
+
+search:
+  # Live web search for the callers that ask what exists, what is new or what is prior art
+  # (the scout, idea cards, the weekly editor, the research desk). provider: exa | brave |
+  # tavily | anthropic | none. exa with no EXA_API_KEY in the .env uses Exa's free mode
+  # (rate-limited, no account); a key (a free Exa account has $10 of credit a month) gives you
+  # your own limits. brave and tavily need BRAVE_API_KEY or TAVILY_API_KEY. anthropic uses the
+  # watcher's Claude API key ($10 per 1,000 searches plus tokens). none: every caller says "no
+  # live search: results are from model memory and may be stale".
+  provider: exa
+  # Hacker News (Algolia), GitHub (your connection when there is one) and arXiv: always free.
+  free: true
+  # The same query from any caller within this many hours is answered from the cache
+  # (titles, links, dates and snippets only).
+  cache_hours: 24
+  # "Recent" in every grounded prompt: results dated in the last this many weeks.
+  recent_weeks: 12
+  # Searches pause for the month once paid searches reach this many USD; null: no cap.
+  monthly_usd: null
+  # Per caller: on, or off (that caller says "no live search" and runs from memory).
+  callers:
+    scout: on
+    cards: on
+    editor: on
+    research: agent
+    resolve: failed_lines
+    pitch: on
+    evolve: on
+    # sites without a feed, watched through live search (a "Live search" source)
+    sources: on
+
+telemetry:
+  # Usage reports (docs/privacy/what-kranto-sends.md). local: counted on this machine and
+  # never sent, until you answer the question (kranto setup, Welcome or Settings › Privacy & access).
+  # off: nothing is counted. basic: one report a day with no identifier. detailed: the same
+  # with a random id you can reset. Nothing is sent without an endpoint, and this release
+  # has none by default. DO_NOT_TRACK=1 or KRANTO_TELEMETRY=off in the environment win.
+  mode: local
+
+parallax:
+  # An archive imported from Parallax ('afk import parallax', 'afk import
+  # parallax-dispatches'): its observations are browsable in the Library under
+  # their "(Parallax)" sources and count in the map, but are never new on Today
+  # and never arrivals in the map's movement.
+  # topic_match: 0 keeps the archive out of every topic's views (its sources have
+  # no topic). Above 0, a topic's evidence also lists archive observations at
+  # least this similar to the topic (cosine; the prefilter uses 0.50), worked out
+  # when the page is read: nothing is stored, so setting it back to 0 is instant.
+  topic_match: 0
+  # Whether the map's own idea runs may cite archive observations. Off: a card's
+  # evidence is the library's own reading, and the archive's ideas arrive as the
+  # dispatch cards.
+  card_evidence: false
+  # Whether the page's automatic intake may take cards made from your dispatches.
+  # Off: they wait in Ideas until you press Build.
+  dispatch_auto_intake: false
+
+update:
+  # Updates ('kranto update', Settings › System). channel: stable (releases), rc (prereleases
+  # too) or main (each repo's main, from git). check_every_hours: 0 never checks. download:
+  # stage a new release's wheels as soon as it is seen. auto: off (you press Restart to update)
+  # or idle (inside quiet_window, local time, when nothing runs). keep_backups: the update
+  # backups and wheel sets kept. token_env_file: a 0600 file with GH_TOKEN= for a private repo
+  # on a machine without a gh login. source: github-releases, or git for the main channel.
+  # repo: the release repository.
+  channel: stable
+  check_every_hours: 24
+  download: true
+  auto: "off"
+  quiet_window: "03:00-06:00"
+  keep_backups: 3
+
+api:
+  # Every change made through the page or the API needs a kranto token (~/.config/kranto/tokens:
+  # the page's sign-in cookie, or Authorization: Bearer), and the token says who acted. false:
+  # the old way, by the request's origin; kranto doctor warns about it.
+  require_token: true
+
+# Sections other parts of Kranto own, each checked by its owner and empty by default:
+# features (news:, invest:, radar: and later ones: see docs/features.md and each feature's
+# page), shell: (the home page's arrangement) and cubs: (the cubs' switches and limits:
+# docs/cubs.md).

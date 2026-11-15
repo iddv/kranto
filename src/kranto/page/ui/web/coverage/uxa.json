@@ -1,0 +1,3837 @@
+{
+ "about": "the coverage matrix (INVENTORY.md), as built it and walked it (in both layouts until open-source wave 1 cut Classic): every row of the inventory and where it is among the doors' pages, which both layouts draw (shell.layout: new, the default, and classic). A row is checked by src/lib/app/coverage.test.ts, in each layout (the route draws, its words are on the page, a sheet row's object opens, an old route lands where the row says; in the classic layout the page also lights an entry of the navigator) and tests/page/test_uxa_coverage.py (every route is in nodes.json with a page, every action's words are in the component that draws it). kind: page (find: words on the page), sheet (the route opens an object: the sheet in the new layout, the pane in the classic one), action (has: the words in the file 'in'), key, setting, api, state. fate: kept, merged, moved, default (a default and a place to change it), kept-not-dropped (proposed a drop; the owner decides), new (added since), removed (the owner retired it: its row says what it was, and its old routes land where the row says; WT, 2026-10-23: watches), changed (kept in its place, drawn the one way: STD, 2026-10-23).",
+ "rows": [
+  {
+   "id": "A1-hello",
+   "inv": "A1",
+   "what": "the splash: Set up Kranto",
+   "kind": "page",
+   "at": "hello",
+   "find": [
+    "Set up Kranto"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A1-welcome",
+   "inv": "A1",
+   "what": "setup step 1: Which model reads for you? (a model key, or the Claude Code login)",
+   "kind": "page",
+   "at": "welcome",
+   "find": [
+    "Step 1 of 4: Model"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A1-welcome-topics",
+   "inv": "A1",
+   "what": "setup step 2: First topic",
+   "kind": "page",
+   "at": "welcome/topics",
+   "find": [
+    "First topic"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A1-welcome-building",
+   "inv": "A1",
+   "what": "setup step 3: Building",
+   "kind": "page",
+   "at": "welcome",
+   "fate": "removed",
+   "old": "welcome/building"
+  },
+  {
+   "id": "A1-welcome-publishing",
+   "inv": "A1",
+   "what": "setup step 4: Publishing",
+   "kind": "page",
+   "at": "welcome",
+   "fate": "removed",
+   "old": "welcome/publishing"
+  },
+  {
+   "id": "A1-welcome-repos",
+   "inv": "A1",
+   "what": "welcome/repos redirects to Publishing",
+   "kind": "page",
+   "old": "welcome/repos",
+   "at": "welcome",
+   "fate": "removed"
+  },
+  {
+   "id": "A1-home",
+   "inv": "A1",
+   "what": "the home",
+   "kind": "page",
+   "at": "home",
+   "fate": "kept"
+  },
+  {
+   "id": "A1-overview",
+   "inv": "A1",
+   "what": "overview redirects to the home",
+   "kind": "page",
+   "old": "overview",
+   "at": "home",
+   "fate": "kept"
+  },
+  {
+   "id": "A2-today",
+   "inv": "A2",
+   "what": "Today: every row that waits on you",
+   "kind": "page",
+   "old": "today",
+   "at": "needs",
+   "find": [
+    "Needs you",
+    "Mark all seen"
+   ],
+   "fate": "merged"
+  },
+  {
+   "id": "A2-today-digest",
+   "inv": "A2",
+   "what": "Today's digest per topic",
+   "kind": "page",
+   "at": "watch",
+   "find": [
+    "Topics",
+    "Add topic"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "A2-today-edition",
+   "inv": "A2",
+   "what": "Today's weekly editor edition",
+   "kind": "page",
+   "at": "ideas",
+   "fate": "removed",
+   "old": "ideas/editor"
+  },
+  {
+   "id": "A2-arrange",
+   "inv": "A2",
+   "what": "Arrange the home",
+   "kind": "page",
+   "at": "home?arrange=1",
+   "fate": "kept"
+  },
+  {
+   "id": "A2-review",
+   "inv": "A2",
+   "what": "Review: this week's queue",
+   "kind": "page",
+   "old": "review",
+   "at": "ideas/review",
+   "find": [
+    "Review"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A2-news",
+   "inv": "A2",
+   "what": "News",
+   "kind": "page",
+   "old": "news",
+   "at": "news",
+   "fate": "kept"
+  },
+  {
+   "id": "A3-topics",
+   "inv": "A3",
+   "what": "Topics list",
+   "kind": "page",
+   "old": "topics",
+   "at": "watch",
+   "find": [
+    "Your topics"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A3-topics-new",
+   "inv": "A3",
+   "what": "Add topic",
+   "kind": "page",
+   "at": "topics/new",
+   "fate": "kept"
+  },
+  {
+   "id": "A3-topic",
+   "inv": "A3",
+   "what": "a topic (Watch is topic-first: its page, with Sources, Evidence and Map under it)",
+   "kind": "page",
+   "old": "topics/1",
+   "at": "watch/topic/1",
+   "fate": "kept",
+   "find": [
+    "Clinics"
+   ]
+  },
+  {
+   "id": "A3-topic-evidence",
+   "inv": "A3",
+   "what": "a topic's Evidence",
+   "kind": "page",
+   "old": "topics/1/evidence",
+   "at": "watch/topic/1/evidence",
+   "fate": "moved",
+   "find": [
+    "Clinics › Evidence"
+   ]
+  },
+  {
+   "id": "A3-topic-themes",
+   "inv": "A3",
+   "what": "a topic's Themes (its Map)",
+   "kind": "page",
+   "old": "topics/1/themes",
+   "at": "watch/topic/1/map",
+   "find": [
+    "Clinics › Map"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "A3-topic-ideas",
+   "inv": "A3",
+   "what": "a topic's Ideas",
+   "kind": "page",
+   "old": "topics/1/ideas",
+   "at": "ideas?topic=1",
+   "find": [
+    "Ideas of"
+   ],
+   "fate": "merged"
+  },
+  {
+   "id": "A3-topic-builds",
+   "inv": "A3",
+   "what": "a topic's Builds",
+   "kind": "page",
+   "old": "topics/1/builds",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "A3-topic-sources",
+   "inv": "A3",
+   "what": "a topic's Sources",
+   "kind": "page",
+   "old": "topics/1/sources",
+   "at": "watch/topic/1/sources",
+   "find": [
+    "Clinics › Sources"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "A3-topic-watches",
+   "inv": "A3",
+   "what": "a topic's Watches: watches retired (WT); the old page opens the topic",
+   "kind": "page",
+   "old": "topics/1/watches",
+   "at": "watch/topic/1",
+   "find": [
+    "Clinics"
+   ],
+   "fate": "removed"
+  },
+  {
+   "id": "A3-topic-map",
+   "inv": "A3",
+   "what": "a topic's Map: its themes, the map over them with the other topics' dimmed (WT)",
+   "kind": "page",
+   "at": "watch/topic/1/map",
+   "find": [
+    "Clinics › Map"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-watch-sources-q",
+   "inv": "A3",
+   "what": "the old ?topic= form of Sources lands on the topic's Sources (WT)",
+   "kind": "page",
+   "old": "watch/sources?topic=1",
+   "at": "watch/topic/1/sources",
+   "find": [
+    "Clinics › Sources"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-watch-evidence-q",
+   "inv": "A3",
+   "what": "the old ?topic= form of Evidence lands on the topic's Evidence (WT)",
+   "kind": "page",
+   "old": "watch/evidence?topic=1",
+   "at": "watch/topic/1/evidence",
+   "find": [
+    "Clinics › Evidence"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-watch-map-q",
+   "inv": "A3",
+   "what": "the old ?topic= form of Map lands on the topic's Map (WT)",
+   "kind": "page",
+   "old": "watch/map?topic=1",
+   "at": "watch/topic/1/map",
+   "find": [
+    "Clinics › Map"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-watch-watches-q",
+   "inv": "A3",
+   "what": "a topic's old Watches address (watch/watches?topic=) lands on the topic (WT)",
+   "kind": "page",
+   "old": "watch/watches?topic=1",
+   "at": "watch/topic/1",
+   "find": [
+    "Clinics"
+   ],
+   "fate": "removed"
+  },
+  {
+   "id": "A3-all-evidence",
+   "inv": "A3",
+   "what": "All topics' Evidence, a choice in the topic switcher (WT)",
+   "kind": "page",
+   "at": "watch/evidence",
+   "find": [
+    "All topics › Evidence"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B2-topic-switch",
+   "inv": "B2",
+   "what": "the crumb's topic switcher: another topic or All topics, the same page (WT)",
+   "kind": "action",
+   "at": "watch/topic/1/sources",
+   "in": "shell/PageHead.svelte",
+   "has": [
+    "topic-switch",
+    "All topics"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-library",
+   "inv": "A3",
+   "what": "Library › Observations (All topics' Evidence)",
+   "kind": "page",
+   "old": "library",
+   "at": "watch/evidence",
+   "find": [
+    "All topics › Evidence",
+    "The compacted weeks (rollups) ›"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A3-library-o",
+   "inv": "A3",
+   "what": "an observation",
+   "kind": "sheet",
+   "old": "library/o/665",
+   "at": "watch/evidence?sel=o665",
+   "object": "observation",
+   "fate": "kept"
+  },
+  {
+   "id": "A3-library-map",
+   "inv": "A3",
+   "what": "the Map (All topics')",
+   "kind": "page",
+   "old": "library/map",
+   "at": "watch/map",
+   "fate": "kept",
+   "find": [
+    "All topics › Map"
+   ]
+  },
+  {
+   "id": "A3-library-clusters",
+   "inv": "A3",
+   "what": "Clusters list",
+   "kind": "page",
+   "old": "library/clusters",
+   "at": "watch/map",
+   "fate": "merged"
+  },
+  {
+   "id": "A3-library-cluster",
+   "inv": "A3",
+   "what": "a theme",
+   "kind": "sheet",
+   "old": "library/clusters/3",
+   "at": "watch/map?sel=c3",
+   "object": "theme",
+   "fate": "kept"
+  },
+  {
+   "id": "A3-library-rollups",
+   "inv": "A3",
+   "what": "Rollups",
+   "kind": "page",
+   "old": "library/rollups",
+   "at": "watch/evidence?group=rollups",
+   "find": [
+    "the compacted weeks"
+   ],
+   "fate": "merged"
+  },
+  {
+   "id": "A3-library-watches",
+   "inv": "A3",
+   "what": "All watches: watches retired (WT); the old page opens Watch's Topics",
+   "kind": "page",
+   "old": "library/watches",
+   "at": "watch",
+   "fate": "removed",
+   "find": [
+    "Your topics"
+   ]
+  },
+  {
+   "id": "A3-library-watches-new",
+   "inv": "A3",
+   "what": "New watch: watches retired (WT); the old page opens Watch's Topics",
+   "kind": "page",
+   "at": "watch",
+   "fate": "removed",
+   "old": "library/watches/new",
+   "find": [
+    "Your topics"
+   ]
+  },
+  {
+   "id": "A3-sources",
+   "inv": "A3",
+   "what": "Settings › Sources (All topics' Sources)",
+   "kind": "page",
+   "old": "settings/sources",
+   "at": "watch/sources",
+   "fate": "moved",
+   "find": [
+    "All topics › Sources"
+   ]
+  },
+  {
+   "id": "A3-sources-new",
+   "inv": "A3",
+   "what": "Add source",
+   "kind": "page",
+   "at": "settings/sources/new",
+   "fate": "kept"
+  },
+  {
+   "id": "A3-source",
+   "inv": "A3",
+   "what": "a source",
+   "kind": "sheet",
+   "old": "settings/sources/4",
+   "at": "watch/sources?sel=s4",
+   "object": "source",
+   "fate": "kept"
+  },
+  {
+   "id": "A3-connection",
+   "inv": "A3",
+   "what": "an account",
+   "kind": "sheet",
+   "old": "settings/connections/x",
+   "at": "settings/watching?sel=nx",
+   "object": "connection",
+   "fate": "moved"
+  },
+  {
+   "id": "A3-settings-topics",
+   "inv": "A3",
+   "what": "settings/topics redirects",
+   "kind": "page",
+   "old": "settings/topics",
+   "at": "watch/sources",
+   "fate": "kept"
+  },
+  {
+   "id": "A3-settings-connections",
+   "inv": "A3",
+   "what": "settings/connections lands on Watching, where the logins sources are read with are",
+   "kind": "page",
+   "old": "settings/connections",
+   "at": "settings/watching",
+   "fate": "moved"
+  },
+  {
+   "id": "A3-settings-watches",
+   "inv": "A3",
+   "what": "settings/watches redirects (watches retired, WT)",
+   "kind": "page",
+   "old": "settings/watches",
+   "at": "watch",
+   "fate": "removed"
+  },
+  {
+   "id": "A4-ideas",
+   "inv": "A4",
+   "what": "Ideas › Cards",
+   "kind": "page",
+   "at": "ideas",
+   "find": [
+    "Ideas"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A4-ideas-new",
+   "inv": "A4",
+   "what": "New idea",
+   "kind": "page",
+   "at": "ideas",
+   "fate": "removed",
+   "old": "ideas/new"
+  },
+  {
+   "id": "A4-idea",
+   "inv": "A4",
+   "what": "an idea",
+   "kind": "sheet",
+   "old": "ideas/i1",
+   "at": "ideas?sel=ii1",
+   "object": "idea",
+   "fate": "kept"
+  },
+  {
+   "id": "A4-changes",
+   "inv": "A4",
+   "what": "the Changes chip (project change ideas) left with projects (C3); the address draws Ideas",
+   "kind": "page",
+   "at": "ideas?changes=1",
+   "fate": "removed"
+  },
+  {
+   "id": "A4-editor",
+   "inv": "A4",
+   "what": "the weekly editor's pick",
+   "kind": "page",
+   "at": "ideas",
+   "fate": "removed",
+   "old": "ideas/editor"
+  },
+  {
+   "id": "A5-builds",
+   "inv": "A5",
+   "what": "Builds",
+   "kind": "page",
+   "old": "builds",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "A5-build",
+   "inv": "A5",
+   "what": "a build",
+   "kind": "page",
+   "old": "builds/plots",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "A5-build-section",
+   "inv": "A5",
+   "what": "a section of a build's page (its full page)",
+   "kind": "page",
+   "at": "home",
+   "fate": "removed",
+   "old": "builds/plots/checks"
+  },
+  {
+   "id": "A5-build-run",
+   "inv": "A5",
+   "what": "Build N",
+   "kind": "page",
+   "at": "home",
+   "fate": "removed",
+   "old": "builds/plots/build/1"
+  },
+  {
+   "id": "A5-build-run-logs",
+   "inv": "A5",
+   "what": "the log of Build N",
+   "kind": "page",
+   "at": "home",
+   "fate": "removed",
+   "old": "builds/plots/build/1/logs"
+  },
+  {
+   "id": "A5-projects",
+   "inv": "A5",
+   "what": "Projects",
+   "kind": "page",
+   "old": "projects",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "A5-project",
+   "inv": "A5",
+   "what": "a project",
+   "kind": "page",
+   "old": "projects/p1",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "A5-project-section",
+   "inv": "A5",
+   "what": "a project's full page",
+   "kind": "page",
+   "at": "home",
+   "fate": "removed",
+   "old": "projects/p1/overview"
+  },
+  {
+   "id": "A5-repos",
+   "inv": "A5",
+   "what": "Settings › Publishing › Maintenance › Repositories",
+   "kind": "page",
+   "at": "home",
+   "fate": "removed",
+   "old": "build/repos"
+  },
+  {
+   "id": "A5-repo",
+   "inv": "A5",
+   "what": "an added repo",
+   "kind": "page",
+   "old": "settings/maintenance?sel=eadopt:o/r",
+   "at": "settings?sel=eadopt:o/r",
+   "fate": "removed"
+  },
+  {
+   "id": "A5-chat",
+   "inv": "A5",
+   "what": "chat routes redirect",
+   "kind": "page",
+   "old": "chat/new",
+   "at": "home",
+   "fate": "kept"
+  },
+  {
+   "id": "A6-news-today",
+   "inv": "A6",
+   "what": "News: the latest briefs",
+   "kind": "page",
+   "at": "news",
+   "fate": "kept"
+  },
+  {
+   "id": "A6-news-earlier",
+   "inv": "A6",
+   "what": "a brief in full: its page (STD D-4; the sheet retired)",
+   "kind": "page",
+   "old": "news?sel=f1",
+   "at": "news/b/1",
+   "find": [
+    "A day's stories"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "A6-news-topics",
+   "inv": "A6",
+   "what": "News per topic: on, off, Brief now",
+   "kind": "page",
+   "at": "news/topics",
+   "fate": "kept"
+  },
+  {
+   "id": "A6-news-earlier-articles",
+   "inv": "A6",
+   "what": "News › Earlier: one row a day",
+   "kind": "action",
+   "at": "news/earlier",
+   "in": "features/news/NewsEarlier.svelte",
+   "has": [
+    "One row a day",
+    "Show all"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A6-cub",
+   "inv": "A6",
+   "what": "a cub's page",
+   "kind": "page",
+   "at": "cub/digest",
+   "fate": "kept"
+  },
+  {
+   "id": "A6-cubs",
+   "inv": "A6",
+   "what": "Cubs: the cub shop's Available and Made by Kranto (cubs.developer); Installed and Approvals are Post",
+   "kind": "page",
+   "at": "cubs/available",
+   "fate": "changed"
+  },
+  {
+   "id": "A6-cubs-tab",
+   "inv": "A6",
+   "what": "a Cubs section: the shop's (cubs.developer)",
+   "kind": "page",
+   "at": "cubs/available",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-settings",
+   "inv": "A7",
+   "what": "Settings' Overview",
+   "kind": "page",
+   "at": "settings",
+   "find": [
+    "Settings",
+    "Advanced",
+    "Posting"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A7-watching",
+   "inv": "A7",
+   "what": "Settings › Watching",
+   "kind": "page",
+   "at": "settings/watching",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-building",
+   "inv": "A7",
+   "what": "Settings › Building (the rules folded under Advanced)",
+   "kind": "page",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "A7-prompts",
+   "inv": "A7",
+   "what": "Settings › Prompts (Advanced)",
+   "kind": "page",
+   "at": "settings/prompts",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-tools",
+   "inv": "A7",
+   "what": "Settings › Build tools (Advanced)",
+   "kind": "page",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/tools"
+  },
+  {
+   "id": "A7-publishing",
+   "inv": "A7",
+   "what": "Settings › Publishing",
+   "kind": "page",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/publishing"
+  },
+  {
+   "id": "A7-home",
+   "inv": "A7",
+   "what": "Settings › Home and feed: gone with the home's arrangement; its address lands on the Overview",
+   "kind": "page",
+   "old": "settings/home",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-home-switches",
+   "inv": "A7",
+   "what": "the home's caps and Arrange: gone, the home has one order; its address is the Overview",
+   "kind": "page",
+   "at": "settings/system",
+   "find": [
+    "Updates"
+   ],
+   "fate": "removed"
+  },
+  {
+   "id": "A7-spend",
+   "inv": "A7",
+   "what": "Settings › Spend",
+   "kind": "page",
+   "at": "settings/spend",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-privacy",
+   "inv": "A7",
+   "what": "Settings › Privacy & access",
+   "kind": "page",
+   "at": "settings/privacy",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-system",
+   "inv": "A7",
+   "what": "Settings › System",
+   "kind": "page",
+   "at": "settings/system",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-appearance",
+   "inv": "A7",
+   "what": "Settings › Appearance",
+   "kind": "page",
+   "at": "settings/appearance",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-accounts",
+   "inv": "A7",
+   "what": "Settings › Accounts: split into Watching (the sites) and Posting (the rest)",
+   "kind": "page",
+   "at": "settings/posting",
+   "find": [
+    "Posting",
+    "Newsletter"
+   ],
+   "fate": "moved",
+   "old": "settings/accounts"
+  },
+  {
+   "id": "A7-posting",
+   "inv": "A7",
+   "what": "Settings › Posting (new): the accounts a draft is sent with, what Kranto writes",
+   "kind": "page",
+   "at": "settings/posting",
+   "find": [
+    "Posting",
+    "A newsletter",
+    "What Kranto writes"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A7-r-keys",
+   "inv": "A7",
+   "what": "settings/keys redirects",
+   "kind": "page",
+   "old": "settings/keys",
+   "at": "settings/watching?sel=ekey",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-r-models",
+   "inv": "A7",
+   "what": "settings/models redirects",
+   "kind": "page",
+   "old": "settings/models",
+   "at": "settings/watching?sel=erole:afk:judge",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-r-rules",
+   "inv": "A7",
+   "what": "settings/rules redirects",
+   "kind": "page",
+   "old": "settings/rules",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-r-mcp",
+   "inv": "A7",
+   "what": "settings/mcp redirects",
+   "kind": "page",
+   "old": "settings/mcp",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-r-capabilities",
+   "inv": "A7",
+   "what": "settings/capabilities redirects",
+   "kind": "page",
+   "old": "settings/capabilities",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-r-plugins",
+   "inv": "A7",
+   "what": "settings/plugins redirects",
+   "kind": "page",
+   "old": "settings/plugins",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-r-maintenance",
+   "inv": "A7",
+   "what": "settings/maintenance redirects",
+   "kind": "page",
+   "old": "settings/maintenance",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-r-github",
+   "inv": "A7",
+   "what": "settings/github: GitHub left with the build factory (C3); it lands on the Overview",
+   "kind": "page",
+   "old": "settings/github",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-r-projects",
+   "inv": "A7",
+   "what": "settings/projects redirects",
+   "kind": "page",
+   "old": "settings/projects",
+   "at": "settings",
+   "fate": "removed"
+  },
+  {
+   "id": "A7-r-updates",
+   "inv": "A7",
+   "what": "settings/updates redirects",
+   "kind": "page",
+   "old": "settings/updates",
+   "at": "settings/system",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-r-health",
+   "inv": "A7",
+   "what": "settings/health redirects",
+   "kind": "page",
+   "old": "settings/health",
+   "at": "settings/system",
+   "fate": "kept"
+  },
+  {
+   "id": "A7-r-learning",
+   "inv": "A7",
+   "what": "settings/learning redirects to Settings › System › Your grades",
+   "kind": "page",
+   "old": "settings/learning",
+   "at": "settings/grades",
+   "find": [
+    "Your grades"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A7-r-access",
+   "inv": "A7",
+   "what": "settings/access redirects",
+   "kind": "page",
+   "old": "settings/access",
+   "at": "settings/privacy",
+   "fate": "kept"
+  },
+  {
+   "id": "B1-search",
+   "inv": "B1",
+   "what": "the search box (the palette)",
+   "kind": "action",
+   "at": "home",
+   "fate": "kept",
+   "in": "shell/Header.svelte",
+   "has": [
+    "Search ideas, evidence, sources…"
+   ]
+  },
+  {
+   "id": "B1-pause",
+   "inv": "B1",
+   "what": "Pause / Resume (no dialog with the doors: Resume in its flash)",
+   "kind": "action",
+   "at": "home",
+   "in": "shell/Header.svelte",
+   "has": [
+    "Resume",
+    "Pause"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B1-gear-theme",
+   "inv": "B1",
+   "what": "⚙ Settings and ◐ theme",
+   "kind": "action",
+   "at": "home",
+   "in": "shell/Header.svelte",
+   "has": [
+    "⚙",
+    "◐"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B1-signin",
+   "inv": "B1",
+   "what": "Sign in (once, dismissable)",
+   "kind": "action",
+   "at": "needs",
+   "in": "shell/ListHead.svelte",
+   "has": [
+    "Sign in",
+    "Dismiss the sign-in line for this session"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B1-undo",
+   "inv": "B1",
+   "what": "Undo in the flash",
+   "kind": "action",
+   "at": "needs",
+   "in": "shell/ListHead.svelte",
+   "has": [
+    "Undo"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B1-update",
+   "inv": "B1",
+   "what": "the update: Try again, Restart to update, How to update",
+   "kind": "action",
+   "at": "needs",
+   "fate": "kept",
+   "in": "pages/front/Needs.svelte",
+   "has": [
+    "Try again",
+    "Restart to update",
+    "How to update"
+   ]
+  },
+  {
+   "id": "B1-keys",
+   "inv": "B1",
+   "what": "? keys",
+   "kind": "action",
+   "at": "needs",
+   "in": "shell/StatusBar.svelte",
+   "has": [
+    "? keys"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B1-layout",
+   "inv": "B1",
+   "what": "the navigator's layout commands, while the tree is the frame (brb alone)",
+   "kind": "action",
+   "at": "settings/appearance?sel=elayout",
+   "in": "lib/app/commands.ts",
+   "has": [
+    "Layout: expand the navigator",
+    "Layout: reset the column widths"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B1-tree",
+   "inv": "B1",
+   "what": "the navigator's tree: the drawer (☰) on a narrow screen, and brb alone (Classic cut, open-source wave 1)",
+   "kind": "action",
+   "at": "settings/appearance?sel=elayout",
+   "in": "lib/app/chrome.ts",
+   "has": [
+    "classicTree"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B1-tabbar",
+   "inv": "B1",
+   "what": "the phone's four doors and the console",
+   "kind": "action",
+   "at": "home",
+   "in": "shell/doors.ts",
+   "has": [
+    "News",
+    "Ideas",
+    "Watch",
+    "Post"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-add-topic",
+   "inv": "B2",
+   "what": "Add topic (name, suggestions, scout, tick, Add another)",
+   "kind": "action",
+   "at": "topics/new",
+   "in": "pages/welcome/AddTopic.svelte",
+   "has": [
+    "Open the topic",
+    "Watch these"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-scout",
+   "inv": "B2",
+   "what": "Scout more",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicCard.svelte",
+   "has": [
+    "Scout more"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-pause-topic",
+   "inv": "B2",
+   "what": "Pause topic / Resume topic",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicCard.svelte",
+   "has": [
+    "Pause topic",
+    "Resume topic"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-open-topic",
+   "inv": "B2",
+   "what": "Open the topic",
+   "kind": "action",
+   "at": "watch?sel=t1",
+   "in": "pages/topics/TopicCard.svelte",
+   "has": [
+    "Open the topic"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-add-source",
+   "inv": "B2",
+   "what": "Add source (a kind form)",
+   "kind": "action",
+   "at": "watch/sources",
+   "in": "pages/settings/SourcesList.svelte",
+   "has": [
+    "Add source"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-describe",
+   "inv": "B2",
+   "what": "Describe what to add",
+   "kind": "action",
+   "at": "settings/sources/new",
+   "in": "pages/settings/DescribePane.svelte",
+   "has": [
+    "Describe"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-approve-dismiss",
+   "inv": "B2",
+   "what": "Approve / Dismiss a proposed source",
+   "kind": "action",
+   "at": "watch/sources",
+   "in": "pages/settings/SrcLine.svelte",
+   "has": [
+    "Approve",
+    "Dismiss"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-watch-these",
+   "inv": "B2",
+   "what": "Watch these (the ticked proposals)",
+   "kind": "action",
+   "at": "watch/topic/1/sources",
+   "in": "pages/topics/TopicSources.svelte",
+   "has": [
+    "Watch these"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-retire",
+   "inv": "B2",
+   "what": "Retire / Watch again",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "Retire",
+    "Watch again"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-fetch",
+   "inv": "B2",
+   "what": "Fetch now",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "Fetch now"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-mute",
+   "inv": "B2",
+   "what": "Mute, Unmute",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "Mute"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-retention",
+   "inv": "B2",
+   "what": "Retention per source (Save, Default)",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "Retention",
+    "Default"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-archive",
+   "inv": "B2",
+   "what": "Archive (an imported source): 0.4.10's code has no Archive; an imported source is retired like any other, Retire in its sheet",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "Retire"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-replace-key",
+   "inv": "B2",
+   "what": "Replace the key",
+   "kind": "action",
+   "at": "settings/watching",
+   "in": "pages/settings/KeyField.svelte",
+   "has": [
+    "Replace the key"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-accounts",
+   "inv": "B2",
+   "what": "Connect / Disconnect / Test / Reconnect (accounts)",
+   "kind": "action",
+   "at": "settings/watching",
+   "in": "pages/settings/ConnectionsPane.svelte",
+   "has": [
+    "Disconnect",
+    "Test",
+    "Reconnect"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "B2-grades",
+   "inv": "B2",
+   "what": "▲ ▼ grade an observation or an idea card (themes, sources, builds, messages and News no longer); why chips",
+   "kind": "action",
+   "at": "watch/evidence",
+   "in": "ui/Grade.svelte",
+   "has": [
+    "Grade "
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "B2-mark-seen",
+   "inv": "B2",
+   "what": "Mark all seen",
+   "kind": "action",
+   "at": "needs",
+   "in": "pages/front/NeedsPage.svelte",
+   "has": [
+    "Mark all seen"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-watch-this",
+   "inv": "B2",
+   "what": "Watch this (from an observation or a theme): watches retired (WT)",
+   "kind": "sheet",
+   "at": "watch/evidence?sel=o665",
+   "fate": "removed",
+   "object": "observation"
+  },
+  {
+   "id": "B2-new-watch",
+   "inv": "B2",
+   "what": "New watch, Retire a watch, Search the library for this: watches retired (WT)",
+   "kind": "page",
+   "at": "watch",
+   "fate": "removed"
+  },
+  {
+   "id": "B2-build-map",
+   "inv": "B2",
+   "what": "Map now",
+   "kind": "action",
+   "at": "watch/map",
+   "in": "pages/library/MapList.svelte",
+   "has": [
+    "Map now"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-show-on-map",
+   "inv": "B2",
+   "what": "Show on the map",
+   "kind": "action",
+   "at": "watch/map?sel=c3",
+   "in": "pages/library/ThemePane.svelte",
+   "has": [
+    "Show on the map"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-open-original",
+   "inv": "B2",
+   "what": "Open original ↗, Remove this post",
+   "kind": "action",
+   "at": "watch/evidence?sel=o665",
+   "in": "pages/library/ObsPane.svelte",
+   "has": [
+    "Open original",
+    "Remove this post"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-explain",
+   "inv": "B2",
+   "what": "Explain (an observation, a cluster)",
+   "kind": "action",
+   "at": "watch/evidence?sel=o665",
+   "in": "pages/library/ObsPane.svelte",
+   "has": [
+    "Explain"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B2-read-now",
+   "inv": "B2",
+   "what": "Read sources now (Run ingest now)",
+   "kind": "action",
+   "at": "watch",
+   "in": "pages/watch/Topics.svelte",
+   "has": [
+    "Read sources now"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B3-new-idea",
+   "inv": "B3",
+   "what": "New idea (Scope it, Save, Save and build; was Add and build, Add only)",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed",
+   "old": "ideas/new"
+  },
+  {
+   "id": "B3-build",
+   "inv": "B3",
+   "what": "Build (send to the pitch)",
+   "kind": "action",
+   "at": "ideas?sel=ii1",
+   "fate": "removed"
+  },
+  {
+   "id": "B3-pass-later",
+   "inv": "B3",
+   "what": "Pass, Later",
+   "kind": "action",
+   "at": "ideas?sel=ii1",
+   "in": "pages/ideas/verbs.ts",
+   "has": [
+    "Pass",
+    "Later"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B3-pitch-again",
+   "inv": "B3",
+   "what": "Pitch again, Build anyway, Close",
+   "kind": "action",
+   "at": "ideas?sel=ii1",
+   "fate": "removed"
+  },
+  {
+   "id": "B3-claude",
+   "inv": "B3",
+   "what": "Open in Claude Code",
+   "kind": "action",
+   "at": "ideas?sel=ii1",
+   "in": "lib/app/route.ts",
+   "has": [
+    "Open in Claude Code"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B3-research",
+   "inv": "B3",
+   "what": "Research",
+   "kind": "action",
+   "at": "ideas?sel=ii1",
+   "fate": "removed"
+  },
+  {
+   "id": "B3-review-keys",
+   "inv": "B3",
+   "what": "Review: this week's cards, 1 2 0, chips, Skip (no builds, no 3)",
+   "kind": "action",
+   "at": "ideas/review",
+   "in": "pages/review/ReviewCard.svelte",
+   "has": [
+    "Skip, ask next week"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "B3-read-again",
+   "inv": "B3",
+   "what": "Read the queue again",
+   "kind": "action",
+   "at": "ideas/review",
+   "in": "pages/review/ReviewPane.svelte",
+   "has": [
+    "Read the queue again"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B3-bulk",
+   "inv": "B3",
+   "what": "Select / bulk grade: removed by the owner (D-3; proposed it, D-5)",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "B3-editor",
+   "inv": "B3",
+   "what": "Editor: Build, Agree, Not this one, Later, You missed…, Run the editor now",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed",
+   "old": "ideas/editor"
+  },
+  {
+   "id": "B3-editor-run",
+   "inv": "B3",
+   "what": "Run the editor now",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed",
+   "old": "ideas/editor"
+  },
+  {
+   "id": "B4-ask",
+   "inv": "B4",
+   "what": "Ask for changes",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-retry",
+   "inv": "B4",
+   "what": "Retry, Build again, Resume Build N",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-publish",
+   "inv": "B4",
+   "what": "Make public",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-anyway",
+   "inv": "B4",
+   "what": "Publish despite the holds",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-reject-accept",
+   "inv": "B4",
+   "what": "Reject, Accept",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-stop",
+   "inv": "B4",
+   "what": "Stop round, Cancel build",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-close",
+   "inv": "B4",
+   "what": "Close (why)",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-answer",
+   "inv": "B4",
+   "what": "Answer the question",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-suspect",
+   "inv": "B4",
+   "what": "Suspect this check, Re-check",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-wording",
+   "inv": "B4",
+   "what": "Save wording",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "builds/plots/wording"
+  },
+  {
+   "id": "B4-repo-links",
+   "inv": "B4",
+   "what": "Open repo ↗, Open issues ↗, New issue",
+   "kind": "action",
+   "at": "home?sel=bplots",
+   "fate": "removed",
+   "old": "build?sel=bplots"
+  },
+  {
+   "id": "B4-files",
+   "inv": "B4",
+   "what": "README, Files, the log, the timeline",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "builds/plots/files"
+  },
+  {
+   "id": "B4-decide",
+   "inv": "B4",
+   "what": "Decide (scope), Accept: Kranto fixes it, Not now, Never",
+   "kind": "action",
+   "at": "home?sel=jp1",
+   "fate": "removed",
+   "old": "build/projects?sel=jp1"
+  },
+  {
+   "id": "B4-evolve",
+   "inv": "B4",
+   "what": "Check for ideas now",
+   "kind": "action",
+   "at": "home?sel=jp1",
+   "fate": "removed",
+   "old": "build/projects?sel=jp1"
+  },
+  {
+   "id": "B4-charter",
+   "inv": "B4",
+   "what": "Edit charter, Redraft charter, Use this version",
+   "kind": "action",
+   "at": "home?sel=jp1",
+   "fate": "removed",
+   "old": "build/projects?sel=jp1"
+  },
+  {
+   "id": "B4-review-pr",
+   "inv": "B4",
+   "what": "Review pull request ↗",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "projects/p1/work"
+  },
+  {
+   "id": "B4-project-settings",
+   "inv": "B4",
+   "what": "a project's Settings (overrides)",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "projects/p1/settings"
+  },
+  {
+   "id": "B4-project-repos",
+   "inv": "B4",
+   "what": "Add source (a project's repos)",
+   "kind": "action",
+   "at": "home?sel=jp1",
+   "fate": "removed",
+   "old": "build/projects?sel=jp1"
+  },
+  {
+   "id": "B4-fix",
+   "inv": "B4",
+   "what": "Fix this, Fix CI, Try again, Set up / Fix AGENTS.md",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "build/repos"
+  },
+  {
+   "id": "B4-repos",
+   "inv": "B4",
+   "what": "Add a repo, Pick from GitHub, Confirm, Pause, Resume, Remove from maintenance, Save profile, Ask Kranto to change this repo, Edit policy ↗",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "build/repos"
+  },
+  {
+   "id": "B4-pick",
+   "inv": "B4",
+   "what": "Pick from GitHub, Edit policy ↗",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "build/repos"
+  },
+  {
+   "id": "B4-corpus",
+   "inv": "B4",
+   "what": "See the diff (the corpus note)",
+   "kind": "action",
+   "at": "needs",
+   "fate": "removed"
+  },
+  {
+   "id": "B5-news-switch",
+   "inv": "B5",
+   "what": "News on/off per topic, Brief now",
+   "kind": "action",
+   "at": "news/topics",
+   "in": "features/news/NewsTopics.svelte",
+   "has": [
+    "Brief now",
+    "News for "
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-news-grade",
+   "inv": "B5",
+   "what": "▲ ▼ an item of a brief: removed (D-1: its observations are graded)",
+   "kind": "action",
+   "at": "news",
+   "fate": "removed"
+  },
+  {
+   "id": "B5-news-deep-dive",
+   "inv": "B5",
+   "what": "Deep dive now: an article for one item (asks first)",
+   "kind": "action",
+   "at": "news/i/1/0",
+   "in": "features/news/StoryPage.svelte",
+   "has": [
+    "Write the full story"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B5-news-article-grade",
+   "inv": "B5",
+   "what": "an article: the idea in it (D-1: no ▲ ▼)",
+   "kind": "action",
+   "at": "news/a/1",
+   "fate": "changed",
+   "in": "features/news/StoryPage.svelte",
+   "has": [
+    "An idea in it ·"
+   ]
+  },
+  {
+   "id": "B5-cub-card",
+   "inv": "B5",
+   "what": "a cub's object (its manifest's card): Approve through its one dialog, its head's actions",
+   "kind": "action",
+   "at": "cub/digest",
+   "in": "features/cub/CubPage.svelte",
+   "has": [
+    "openAsk",
+    "headActions"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-cub",
+   "inv": "B5",
+   "what": "a cub's actions, forms, Settings, the button of what it asks",
+   "kind": "action",
+   "at": "cub/digest",
+   "in": "features/cub/CubPage.svelte",
+   "has": [
+    "askVerb"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-cub-controls",
+   "inv": "B5",
+   "what": "live / dry, Stop, Update, Remove",
+   "kind": "action",
+   "at": "cub/digest",
+   "in": "features/cub/CubControls.svelte",
+   "has": [
+    "Live",
+    "Practice"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-add-cub",
+   "inv": "B5",
+   "what": "Add a cub (Read it, the manifest in words, Install in dry mode)",
+   "kind": "action",
+   "at": "cubs/available",
+   "in": "features/cub/AddCub.svelte",
+   "has": [
+    "Install"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-check-manifest",
+   "inv": "B5",
+   "what": "Check a manifest",
+   "kind": "action",
+   "at": "cubs/available",
+   "in": "features/cub/CubsPage.svelte",
+   "has": [
+    "Check a manifest"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-build-me",
+   "inv": "B5",
+   "what": "Build me a cub: the home has no cubs since open-source wave 2",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "B5-cub-switch",
+   "inv": "B5",
+   "what": "a cub on or off from the shop's Installed (cubs.developer)",
+   "kind": "action",
+   "at": "cubs/available",
+   "in": "features/cub/CubsPage.svelte",
+   "has": [
+    "data-cub-switch"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-ticket",
+   "inv": "B5",
+   "what": "An ask's one dialog: its verb · Cancel · Details (SEND: Decline left with the plain dialog)",
+   "kind": "action",
+   "at": "needs",
+   "in": "features/cub/AskDialog.svelte",
+   "has": [
+    "Details"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B5-arrange",
+   "inv": "B5",
+   "what": "Arrange: the home is one fixed order since open-source wave 2",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "B6-key",
+   "inv": "B6",
+   "what": "Test and save / use / replace a key",
+   "kind": "action",
+   "at": "settings/watching",
+   "in": "pages/settings/KeyField.svelte",
+   "has": [
+    "Test and save"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-logins",
+   "inv": "B6",
+   "what": "Check again (logins); Keep / Forget the Claude token",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "B6-save",
+   "inv": "B6",
+   "what": "Save and Back to the default (every field)",
+   "kind": "action",
+   "at": "settings",
+   "in": "ui/SaveBar.svelte",
+   "has": [
+    "Back to the default"
+   ],
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "B6-models",
+   "inv": "B6",
+   "what": "model selects",
+   "kind": "action",
+   "at": "settings/watching",
+   "in": "pages/settings/ModelsPane.svelte",
+   "has": [
+    "Save"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-ingest",
+   "inv": "B6",
+   "what": "Run ingest now, Resume now",
+   "kind": "action",
+   "at": "settings/system",
+   "in": "pages/settings/HealthPane.svelte",
+   "has": [
+    "Run ingest now",
+    "Resume now"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-updates",
+   "inv": "B6",
+   "what": "Check for updates, Restart to update, Roll back, How to update",
+   "kind": "action",
+   "at": "settings/system",
+   "fate": "kept",
+   "in": "pages/settings/UpdatesPane.svelte",
+   "has": [
+    "Roll back",
+    "How to update"
+   ]
+  },
+  {
+   "id": "B6-access",
+   "inv": "B6",
+   "what": "Add an agent, Rotate, Revoke",
+   "kind": "action",
+   "at": "settings/privacy",
+   "in": "pages/settings/AccessPane.svelte",
+   "has": [
+    "Rotate",
+    "Revoke"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-usage",
+   "inv": "B6",
+   "what": "Usage reports choice",
+   "kind": "action",
+   "at": "settings/privacy",
+   "in": "pages/settings/UsageChoice.svelte",
+   "has": [
+    "Local only"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-appearance",
+   "inv": "B6",
+   "what": "Theme, looks, Custom (Save and use)",
+   "kind": "action",
+   "at": "settings/appearance",
+   "in": "pages/settings/AppearancePane.svelte",
+   "has": [
+    "Save and use"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-prompts",
+   "inv": "B6",
+   "what": "Prompts: Save, Reset, Use this version, Preview",
+   "kind": "action",
+   "at": "settings/prompts",
+   "in": "pages/settings/PromptsPane.svelte",
+   "has": [
+    "Reset",
+    "Use this version",
+    "Preview"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-tools",
+   "inv": "B6",
+   "what": "Build tools: Install, Update, Remove",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/tools"
+  },
+  {
+   "id": "B6-github",
+   "inv": "B6",
+   "what": "GitHub: Link an app you made, Use this code, Choose repositories →, Remove Kranto's app…",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/publishing"
+  },
+  {
+   "id": "B6-maint-settings",
+   "inv": "B6",
+   "what": "Maintenance settings (polling, triage, fixes, identity)",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/publishing"
+  },
+  {
+   "id": "B6-projects-settings",
+   "inv": "B6",
+   "what": "Projects settings (kranto-wide)",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/publishing"
+  },
+  {
+   "id": "B6-caps",
+   "inv": "B6",
+   "what": "Spend caps, one list",
+   "kind": "action",
+   "at": "settings/spend",
+   "in": "pages/settings/SpendList.svelte",
+   "has": [
+    "Caps"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-home-switch",
+   "inv": "B6",
+   "what": "the caps (the layout is Appearance's)",
+   "kind": "action",
+   "at": "settings/system?sel=ecaps",
+   "in": "pages/settings/ShellPane.svelte",
+   "has": [
+    "Rows at most",
+    "shell.needs_cap"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "B6-editor-switch",
+   "inv": "B6",
+   "what": "the weekly editor's switch and keys",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "B6-rules",
+   "inv": "B6",
+   "what": "Build rules (34 fields) under Advanced",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "B6-service",
+   "inv": "B6",
+   "what": "Service (read-only)",
+   "kind": "action",
+   "at": "settings/system",
+   "in": "pages/settings/ServiceList.svelte",
+   "has": [
+    "Service"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "B6-learning",
+   "inv": "B6",
+   "what": "Your grades (once Learning): what your grades changed; Open the issue ↗ on a lesson",
+   "kind": "action",
+   "at": "settings/system",
+   "fate": "removed"
+  },
+  {
+   "id": "C-watching",
+   "inv": "C",
+   "what": "Watching's keys (provider, key, models, reading, live search)",
+   "kind": "setting",
+   "at": "settings/watching",
+   "in": "pages/settings/WatchingList.svelte",
+   "has": [
+    "Watching"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "C-building",
+   "inv": "C",
+   "what": "Building's keys (logins, rules, editor, models)",
+   "kind": "setting",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "C-find-key",
+   "inv": "C",
+   "what": "⌘K finds a setting by name or dotted key",
+   "kind": "setting",
+   "at": "settings",
+   "in": "lib/app/commands.ts",
+   "has": [
+    "settingsFound"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "C-prompts",
+   "inv": "C",
+   "what": "Prompts (each prompt Kranto sends a model)",
+   "kind": "setting",
+   "at": "settings/prompts",
+   "fate": "kept",
+   "in": "pages/settings/PromptsList.svelte",
+   "has": [
+    "Prompts"
+   ]
+  },
+  {
+   "id": "C-tools",
+   "inv": "C",
+   "what": "Build tools' keys",
+   "kind": "setting",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/tools"
+  },
+  {
+   "id": "C-publishing",
+   "inv": "C",
+   "what": "Publishing's keys (rules, maintenance, projects)",
+   "kind": "setting",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/publishing"
+  },
+  {
+   "id": "C-home-feed",
+   "inv": "C",
+   "what": "the shell's pins, hidden and caps: read and ignored by the home since open-source wave 2",
+   "kind": "setting",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "C-spend",
+   "inv": "C",
+   "what": "the nine caps",
+   "kind": "setting",
+   "at": "settings/spend",
+   "in": "pages/settings/caps.ts",
+   "has": [
+    "usd"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "C-privacy",
+   "inv": "C",
+   "what": "usage reports, agents' tokens",
+   "kind": "setting",
+   "at": "settings/privacy",
+   "in": "pages/settings/PrivacyList.svelte",
+   "has": [
+    "Usage reports"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "C-system",
+   "inv": "C",
+   "what": "automatic updates, channel",
+   "kind": "setting",
+   "at": "settings/system",
+   "in": "pages/settings/UpdatesList.svelte",
+   "has": [
+    "Channel"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "C-appearance",
+   "inv": "C",
+   "what": "theme, look, custom colours",
+   "kind": "setting",
+   "at": "settings/appearance",
+   "in": "pages/settings/AppearanceList.svelte",
+   "has": [
+    "Theme"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "C-news",
+   "inv": "C",
+   "what": "News's keys (generated) and per topic",
+   "kind": "setting",
+   "at": "news/topics",
+   "in": "features/news/NewsTopics.svelte",
+   "has": [
+    "cadence"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "C-cubs",
+   "inv": "C",
+   "what": "a cub's keys and the core's per-cub keys: its Settings page",
+   "kind": "setting",
+   "at": "settings/toot",
+   "in": "pages/settings/FeaturePage.svelte",
+   "has": [
+    "role=\"switch\""
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "D-go",
+   "inv": "D",
+   "what": "g h g w g i g n g s, g t (Needs you), g r, g l, g 1…9",
+   "kind": "key",
+   "at": "home",
+   "fate": "kept",
+   "in": "lib/keys.json",
+   "has": [
+    "\"g h\"",
+    "\"g t\"",
+    "\"g r\"",
+    "\"g l\"",
+    "\"g 1…9\""
+   ]
+  },
+  {
+   "id": "D-find",
+   "inv": "D",
+   "what": "/ ⌘K esc",
+   "kind": "key",
+   "at": "home",
+   "in": "lib/keys.json",
+   "has": [
+    "\"/\"",
+    "\"⌘K\"",
+    "\"esc\""
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "D-move",
+   "inv": "D",
+   "what": "j k ⇧j ⇧k o tab enter [ ] .",
+   "kind": "key",
+   "at": "home",
+   "in": "lib/keys.json",
+   "has": [
+    "\"j\"",
+    "\"k\"",
+    "\"o\"",
+    "\"enter\"",
+    "\"[\"",
+    "\".\""
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "D-ticks",
+   "inv": "D",
+   "what": "x ⇧x ⌘a: removed with the bulk bar",
+   "kind": "key",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "D-grade",
+   "inv": "D",
+   "what": "1 2 0 a–f n",
+   "kind": "key",
+   "at": "ideas/review",
+   "in": "lib/keys.json",
+   "has": [
+    "\"1\"",
+    "\"0\"",
+    "\"a–f\"",
+    "\"n\""
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "D-decide",
+   "inv": "D",
+   "what": "b p l c r a s z ⇧a ?",
+   "kind": "key",
+   "at": "home",
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "D-queue",
+   "inv": "D",
+   "what": "the queue's keys",
+   "kind": "key",
+   "at": "ideas/review",
+   "in": "lib/keys.json",
+   "has": [
+    "QUEUE_KEYS"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-counts",
+   "inv": "E",
+   "what": "the home's and the doors' counts",
+   "kind": "api",
+   "at": "home",
+   "in": "lib/app/chrome.ts",
+   "has": [
+    "doorFacts"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-topics",
+   "inv": "E",
+   "what": "topics: list, one, add, status, scout",
+   "kind": "api",
+   "at": "watch",
+   "in": "pages/topics/topicedit.ts",
+   "has": [
+    "/status",
+    "pauseTopic"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-sources",
+   "inv": "E",
+   "what": "sources: list, add, approve, status, fetch, mute, retention, describe",
+   "kind": "api",
+   "at": "watch/sources",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "/retention"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-accounts",
+   "inv": "E",
+   "what": "accounts: list, test, disconnect, sign-in",
+   "kind": "api",
+   "at": "settings/watching",
+   "in": "pages/settings/connections.ts",
+   "has": [
+    "/api/connections"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "E-observations",
+   "inv": "E",
+   "what": "observations, explain, seen",
+   "kind": "api",
+   "at": "watch/evidence",
+   "in": "pages/library/library.ts",
+   "has": [
+    "/api/observations"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-map",
+   "inv": "E",
+   "what": "map, clusters, rollups, archive",
+   "kind": "api",
+   "at": "watch/map",
+   "in": "pages/library/map.svelte.ts",
+   "has": [
+    "/api/map"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-watches",
+   "inv": "E",
+   "what": "watches (/api/watches): retired with them (WT)",
+   "kind": "page",
+   "at": "watch",
+   "fate": "removed"
+  },
+  {
+   "id": "E-grades",
+   "inv": "E",
+   "what": "grades and feedback",
+   "kind": "api",
+   "at": "ideas/review",
+   "in": "ui/grades.svelte.ts",
+   "has": [
+    "/api/feedback"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-review",
+   "inv": "E",
+   "what": "the review queue",
+   "kind": "api",
+   "at": "ideas/review",
+   "in": "pages/review/review.ts",
+   "has": [
+    "/api/review/queue"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-search",
+   "inv": "E",
+   "what": "search",
+   "kind": "api",
+   "at": "home",
+   "in": "shell/Palette.svelte",
+   "has": [
+    "/api/search"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-news",
+   "inv": "E",
+   "what": "News: briefs, toggle, write now",
+   "kind": "api",
+   "at": "news",
+   "in": "features/news/news.ts",
+   "has": [
+    "briefs.get",
+    "topic_rows"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-tickets",
+   "inv": "E",
+   "what": "what the cubs ask (SEND: Tickets became Approvals)",
+   "kind": "api",
+   "at": "post",
+   "old": "cubs/tickets",
+   "in": "features/ask.ts",
+   "has": [
+    "/api/asks"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-shell",
+   "inv": "E",
+   "what": "the shell's arrangement",
+   "kind": "api",
+   "at": "home?arrange=1",
+   "in": "features/shell.ts",
+   "has": [
+    "/api/shell"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-pause",
+   "inv": "E",
+   "what": "pause, resume, run a job now",
+   "kind": "api",
+   "at": "home",
+   "in": "lib/app/data.ts",
+   "has": [
+    "/pause",
+    "/resume"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "E-maintain",
+   "inv": "E",
+   "what": "maintenance: repos, repo, act",
+   "kind": "api",
+   "at": "home",
+   "fate": "removed",
+   "old": "build/repos"
+  },
+  {
+   "id": "E-term",
+   "inv": "E",
+   "what": "Open in Claude Code",
+   "kind": "api",
+   "at": "home",
+   "in": "term/api.ts",
+   "has": [
+    "api/term"
+   ],
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "F-loading",
+   "inv": "F",
+   "what": "loading a list",
+   "kind": "state",
+   "at": "watch",
+   "in": "ui/Loading.svelte",
+   "has": [
+    "Loading"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "F-empty",
+   "inv": "F",
+   "what": "nothing yet (the mark, one sentence)",
+   "kind": "state",
+   "at": "needs",
+   "fate": "kept",
+   "in": "pages/front/Needs.svelte",
+   "has": [
+    "Nothing needs you. Kranto keeps watching."
+   ]
+  },
+  {
+   "id": "F-nothing-selected",
+   "inv": "F",
+   "what": "Nothing selected: gone in the new layout (the classic one's pane says what the page is about)",
+   "kind": "state",
+   "at": "home",
+   "in": "lib/app/route.ts",
+   "has": [
+    "!w.object && !w.focus && frameNew"
+   ],
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "F-signin",
+   "inv": "F",
+   "what": "Not signed in: once, dismissable",
+   "kind": "state",
+   "at": "needs",
+   "in": "shell/ListHead.svelte",
+   "has": [
+    "Not signed in"
+   ],
+   "fate": "kept"
+  },
+  {
+   "id": "A7-layout",
+   "inv": "A7",
+   "what": "Settings › Appearance: the theme; one layout, New (Classic cut, open-source wave 1)",
+   "kind": "page",
+   "at": "settings/appearance",
+   "find": [
+    "Theme"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "B6-layout",
+   "inv": "B6",
+   "what": "Layout: New or Classic (cut in open-source wave 1, D-2: one layout; an old link says so)",
+   "kind": "action",
+   "at": "settings/appearance?sel=elayout",
+   "fate": "removed"
+  },
+  {
+   "id": "B1-layout-switch",
+   "inv": "B1",
+   "what": "⌘K: Switch to the classic layout (cut in open-source wave 1, D-2)",
+   "kind": "action",
+   "at": "needs",
+   "fate": "removed"
+  },
+  {
+   "id": "C-layout",
+   "inv": "C",
+   "what": "shell.layout: kept as the file says; classic reads as New (open-source wave 1)",
+   "kind": "setting",
+   "at": "settings/appearance?sel=elayout",
+   "in": "features/shell.ts",
+   "has": [
+    "shell.layout"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "A6-cub-later",
+   "inv": "A6",
+   "what": "a cub installed later: its page, and its row under Cubs in the drawer's tree",
+   "kind": "page",
+   "at": "cub/toot",
+   "fate": "new"
+  },
+  {
+   "id": "B3-con-built",
+   "inv": "B3",
+   "what": "an idea's line says what was built from it, and where it ranks and why (no build grade)",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "A3-con-topic-ideas",
+   "inv": "A3",
+   "what": "a topic's ideas, filtered by the card's own topics",
+   "kind": "api",
+   "at": "ideas?topic=1",
+   "in": "pages/ideas/IdeasList.svelte",
+   "has": [
+    "topic-only",
+    "All topics"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B2-con-cited-by",
+   "inv": "B2",
+   "what": "an observation's sheet: Cited by, the cards and briefs that cite it",
+   "kind": "action",
+   "at": "watch/evidence?sel=o665",
+   "in": "pages/library/ObsPane.svelte",
+   "has": [
+    "Cited by"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B3-con-tickets",
+   "inv": "B3",
+   "what": "an idea's Asked of you: what cubs asked on it, in its Details",
+   "kind": "action",
+   "at": "ideas?sel=ii1",
+   "fate": "removed"
+  },
+  {
+   "id": "B5-con-ticket-from",
+   "inv": "B5",
+   "what": "an ask's Details say the idea or trend it rests on",
+   "kind": "action",
+   "at": "post",
+   "in": "features/cub/AskDialog.svelte",
+   "has": [
+    "b.ideas"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B5-con-topic-picker",
+   "inv": "B5",
+   "what": "a cub's setting of type topics is one picker of your topics",
+   "kind": "setting",
+   "at": "post",
+   "in": "pages/settings/FeaturePane.svelte",
+   "has": [
+    "TopicPicker"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B2-con-source-grades",
+   "inv": "B2",
+   "what": "a source's sheet: Your grades, and the source rule's word (no Read less suggestion)",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "Your grades",
+    "removalWords"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "B5-con-idea-from-brief",
+   "inv": "B5",
+   "what": "News: New idea from this..., and a brief's ideas",
+   "kind": "action",
+   "at": "news",
+   "fate": "removed"
+  },
+  {
+   "id": "B2-con-watch-topic",
+   "inv": "B2",
+   "what": "a watch belonged to a topic or to all topics: watches retired (WT); the old page opens the topic",
+   "kind": "page",
+   "at": "watch/topic/1",
+   "fate": "removed",
+   "find": [
+    "Clinics"
+   ]
+  },
+  {
+   "id": "B3-con-stars",
+   "inv": "B3",
+   "what": "an idea's line: the stars its repo earned (CON D-5)",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "C-con-topic-words",
+   "inv": "C",
+   "what": "pitch.topic_words: a pitch names the topic it came from (CON D-2)",
+   "kind": "setting",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "B2-con-card-theme",
+   "inv": "B2",
+   "what": "a theme's sheet: Card it now... (CON D-1)",
+   "kind": "action",
+   "at": "watch/map",
+   "in": "pages/library/ThemePane.svelte",
+   "has": [
+    "card-theme",
+    "Card it now"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B6-check-palette",
+   "inv": "B6",
+   "what": "⌘K: Check for updates, and Update Kranto when one is ready (the owner, 2026-10-22)",
+   "kind": "action",
+   "at": "settings",
+   "in": "lib/app/commands.ts",
+   "has": [
+    "Check for updates",
+    "Update Kranto"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B6-check-version",
+   "inv": "B6",
+   "what": "the version, pressable: Kranto 0.5.10 · Check for updates, with the answer in words where it was pressed (the status bar, Settings' Overview, Settings › System › Updates)",
+   "kind": "action",
+   "at": "settings",
+   "in": "pages/settings/VersionCheck.svelte",
+   "has": [
+    "Check for updates",
+    "Restart to update"
+   ],
+   "fate": "new",
+   "find": [
+    "Kranto 0.3.74 · Check for updates"
+   ]
+  },
+  {
+   "id": "B6-check-failing",
+   "inv": "B6",
+   "what": "the header's pill: Can't check for updates: … once the check has failed for more than two days",
+   "kind": "action",
+   "at": "settings",
+   "in": "lib/app/chrome.ts",
+   "has": [
+    "Can't check for updates"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-fb-header",
+   "inv": "B1",
+   "what": "Feedback: a bug, an idea or a question, as an issue on Kranto's GitHub, from you (FB)",
+   "kind": "action",
+   "at": "home",
+   "in": "shell/Header.svelte",
+   "has": [
+    "hd-feedback",
+    "Feedback"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-fb-palette",
+   "inv": "B1",
+   "what": "⌘K: Send feedback (FB)",
+   "kind": "action",
+   "at": "home",
+   "in": "lib/app/commands.ts",
+   "has": [
+    "Send feedback"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-fb-sheet",
+   "inv": "B1",
+   "what": "the Feedback sheet: the kind, one box, Include details shown before sending, File it or Open on GitHub (FB)",
+   "kind": "action",
+   "at": "home",
+   "in": "ui/Feedback.svelte",
+   "has": [
+    "What happened, or what would you like?",
+    "Include details",
+    "Open on GitHub ↗",
+    "File it",
+    "GitHub can't be reached"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-fb-confirm",
+   "inv": "B1",
+   "what": "File it's confirm: the exact title, labels, body and repository (FB)",
+   "kind": "action",
+   "at": "home",
+   "in": "ui/FeedbackConfirm.svelte",
+   "has": [
+    "File this issue on",
+    "Title",
+    "Labels",
+    "Body"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-fb-tell-us",
+   "inv": "B1",
+   "what": "a red line's Tell us: the sheet prefilled with the error (FB)",
+   "kind": "action",
+   "at": "home",
+   "in": "shell/ListHead.svelte",
+   "has": [
+    "flash-tell",
+    "Tell us"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-fb-toast",
+   "inv": "B1",
+   "what": "a red toast's Tell us (FB)",
+   "kind": "action",
+   "at": "home",
+   "in": "ui/Toast.svelte",
+   "has": [
+    "toast-tell",
+    "Tell us"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-safe-unreadable",
+   "inv": "B1",
+   "what": "a row a list could not read: one line under the head, Couldn't read this <thing>, its name and error id, with Send this error (SAFE, RCA A3/B3)",
+   "kind": "state",
+   "at": "home",
+   "in": "ui/Unreadables.svelte",
+   "has": [
+    "unreadable",
+    "Send this error"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-safe-failed",
+   "inv": "B1",
+   "what": "a failed read that carries an error's id: the version, the id, Try again and Send this error (SAFE, RCA B3)",
+   "kind": "state",
+   "at": "home",
+   "in": "ui/Failed.svelte",
+   "has": [
+    "Try again",
+    "Send this error"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-safe-fix-send",
+   "inv": "B1",
+   "what": "Activity's Failing row: Send this error, the failure's report (SAFE, RCA B3)",
+   "kind": "action",
+   "at": "activity",
+   "in": "pages/activity/Activity.svelte",
+   "has": [
+    "Send this error"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "C-fb-overview",
+   "inv": "C",
+   "what": "Settings › Overview: Feedback › Send feedback (the list, both layouts; the classic pane too) (FB)",
+   "kind": "action",
+   "at": "settings",
+   "in": "pages/settings/OverviewList.svelte",
+   "has": [
+    "Send feedback",
+    "feedback: \"1\""
+   ],
+   "fate": "new",
+   "find": [
+    "Send feedback"
+   ]
+  },
+  {
+   "id": "C-fb-repo",
+   "inv": "C",
+   "what": "feedback.repo: where Feedback files (iddv/kranto unless set) (FB)",
+   "kind": "setting",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "E-fb-issue",
+   "inv": "E",
+   "what": "GET api/feedback/issue (where and how it can send) and POST (File it, the page's caller only) (FB)",
+   "kind": "api",
+   "at": "home",
+   "in": "ui/feedback.ts",
+   "has": [
+    "api/feedback/issue"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "F-fb-help",
+   "inv": "F",
+   "what": "?feedback=1 on any address opens the sheet (the help page's Send feedback) (FB)",
+   "kind": "state",
+   "at": "home",
+   "in": "App.svelte",
+   "has": [
+    "feedback=1",
+    "openFeedback"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B2-ted-topic-edit",
+   "inv": "B2",
+   "what": "Edit a topic from its page: the sheet with its name, description, sources and settings",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicCard.svelte",
+   "has": [
+    "Edit",
+    "editTopic"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B2-ted-topic-edit-row",
+   "inv": "B2",
+   "what": "Edit on a topic's row in Watch › Topics; Archived topics with Restore",
+   "kind": "action",
+   "at": "watch",
+   "in": "pages/watch/Topics.svelte",
+   "has": [
+    "Edit",
+    "Archived",
+    "Restore"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B2-ted-topic-sheet",
+   "inv": "B2",
+   "what": "the topic's sheet: Description (what it feeds), its sources as the topic's own rows (Remove, Add a source from your library, each at once with Undo), its switches, Save with Undo, Archive",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicEdit.svelte",
+   "has": [
+    "Description",
+    "the idea cards written from this topic read them",
+    "Remove",
+    "<TopicSourceRows {t} mode=\"edit\" {close} />",
+    "News brief",
+    "Archive",
+    "Save"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B2-ted-topic-archive",
+   "inv": "B2",
+   "what": "Archive (with Undo, no confirm) and Restore on a topic's page",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicCard.svelte",
+   "has": [
+    "Archive",
+    "Restore",
+    "archiveTopic"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B3-ted-scope",
+   "inv": "B3",
+   "what": "New idea's Scope it: one sentence (and a topic) becomes a draft idea card citing your library; edit any part; Save, or Save and build whose confirm says it skips the gate",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed",
+   "old": "ideas/new"
+  },
+  {
+   "id": "B3-ted-owner-idea",
+   "inv": "B3",
+   "what": "an idea you wrote says so: because owner, its card, its evidence, its topic",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "A4-ted-new-idea-head",
+   "inv": "A4",
+   "what": "New idea in the Ideas head in both layouts, and n on Ideas",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "A1-ted-home-new-idea",
+   "inv": "A1",
+   "what": "New idea on the home: builds are off, and the home is one fixed order",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed"
+  },
+  {
+   "id": "B2-ted-topic-new-idea",
+   "inv": "B2",
+   "what": "New idea in <topic>… on a topic's page and its menu",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "fate": "removed"
+  },
+  {
+   "id": "B1-ted-palette-new-idea",
+   "inv": "B1",
+   "what": "⌘K: New idea (listed as an entry point)",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "A3-src-topic-section",
+   "inv": "A3",
+   "what": "a topic's page: Sources is its first section, proposals first, the five that keep the most, All N › to its Sources",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicSourceRows.svelte",
+   "has": [
+    "id=\"ov-sources\"",
+    "that keep the most",
+    "id=\"ov-sources-all\""
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-facts-link",
+   "inv": "A3",
+   "what": "a topic's Facts: the sources' number links to its Sources; Best sources retired (the owner's O-2)",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicCard.svelte",
+   "has": [
+    "id=\"topic-sources-link\"",
+    "watched · "
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-topic-page",
+   "inv": "A3",
+   "what": "a topic's Sources: <topic> › Sources (WT), its facts in one line, Add source to <topic>, Edit the topic, Watched and Wildcards with their meaning beside the heading",
+   "kind": "action",
+   "at": "watch/topic/1/sources",
+   "in": "pages/topics/TopicSources.svelte",
+   "has": [
+    "› Sources",
+    "id=\"topic-sources-facts\"",
+    "Add source to ",
+    "Edit the topic"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-chips",
+   "inv": "A3",
+   "what": "Watch › Sources by topic: All, each of your topics with its watched count, No topic",
+   "kind": "action",
+   "at": "watch/sources",
+   "fate": "new",
+   "in": "pages/watch/TopicChips.svelte",
+   "has": [
+    "Sources by topic",
+    "No topic"
+   ]
+  },
+  {
+   "id": "A3-src-row-topics",
+   "inv": "A3",
+   "what": "a source's row names the topics it feeds; on a topic's rows, what else it also feeds",
+   "kind": "action",
+   "at": "watch/sources",
+   "in": "pages/settings/SrcLine.svelte",
+   "has": [
+    "topicWords(s, here?.id)"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-sheet-topics",
+   "inv": "A3",
+   "what": "a source's sheet: its kind line counts its topics; Topics is its first section, each topic with its watched sources and kept items, Remove from <topic>, Add to another topic; Account links Settings › Accounts",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "fate": "removed"
+  },
+  {
+   "id": "A3-src-remove-from-topic",
+   "inv": "A3",
+   "what": "Remove from <topic> on a topic's rows (⋯) and its sheet: this topic only, one press, the toast names what it still feeds, Undo; Mute, Read less and Retire say their reach (the owner's O-1)",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/settings/sourceverbs.ts",
+   "has": [
+    "Remove from ${here.name}",
+    "It still feeds ",
+    "everywhere: all ${n} topics",
+    "It has no other topic: Kranto stops reading it (as Retire)"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-edit-rows",
+   "inv": "A3",
+   "what": "Edit › Sources draws the topic's own rows: Remove visible, Approve and Dismiss, Add a source from your library, Add source, Scout more",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "in": "pages/topics/TopicSourceRows.svelte",
+   "has": [
+    "mode === \"edit\"",
+    "Add a source from your library",
+    "Add source",
+    "Scout more"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-add-to-topic",
+   "inv": "A3",
+   "what": "Add source from a topic: Add source to <topic> from the first press, a lede, All sources of <topic> as the way back; the catalog's account words",
+   "kind": "action",
+   "at": "settings/sources/new",
+   "in": "pages/settings/SourcesList.svelte",
+   "has": [
+    "Add source to ${forTopic.name}",
+    "Pick a kind, give it an address or a search, Preview, then Add.",
+    "All sources of ${forTopic.name}"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-proposal-topic",
+   "inv": "A3",
+   "what": "a proposal says the topic it was proposed for (a wildcard that it is unrelated to it), proposed wildcards under Proposed",
+   "kind": "action",
+   "at": "watch/sources",
+   "in": "pages/settings/sources.svelte.ts",
+   "has": [
+    "for ${f.name}",
+    "unrelated, may carry its patterns",
+    "export const listGroup"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A2-src-needs-project-proposals",
+   "inv": "A2",
+   "what": "Needs you: one row for the project topics' proposed sources, to Watch › Sources' Proposed; the Sources subnav counts every topic's proposals (the owner's O-3)",
+   "kind": "action",
+   "at": "needs",
+   "fate": "new",
+   "in": "pages/front/Needs.svelte",
+   "has": [
+    "projectProposed(t)",
+    "sel=\"pproj\"",
+    "project topic"
+   ]
+  },
+  {
+   "id": "A3-src-words",
+   "inv": "A3",
+   "what": "the source groups in the owner's words: Proposed, Watched, Wildcards, No topic, Retired, Could not be fetched, Imported labels, each with its meaning (the owner's O-5)",
+   "kind": "action",
+   "at": "watch/sources",
+   "in": "pages/settings/sources.svelte.ts",
+   "has": [
+    "\"Watched\"",
+    "\"No topic\"",
+    "\"Could not be fetched\"",
+    "\"Imported labels\""
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "A3-src-sheet-tokens",
+   "inv": "A3",
+   "what": "a source's sheet: Tokens this month, what judging its items cost",
+   "kind": "action",
+   "at": "watch/sources?sel=s4",
+   "in": "pages/settings/SourcePane.svelte",
+   "has": [
+    "Tokens this month",
+    "spend_month"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B4-src-why-here",
+   "inv": "B4",
+   "what": "an observation's sheet names the topics its source feeds and why it is in them",
+   "kind": "action",
+   "at": "watch/evidence",
+   "in": "pages/library/ObsPane.svelte",
+   "has": [
+    "its only topic",
+    "Why here",
+    "its source feeds "
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "B1-src-palette-sources",
+   "inv": "B1",
+   "what": "⌘K: <topic> › Sources, Evidence and Map for every topic, and Watch › All topics › each",
+   "kind": "action",
+   "at": "watch",
+   "in": "lib/app/commands.ts",
+   "has": [
+    "WATCH_PAGES",
+    "the sources this topic reads",
+    "Watch › All topics › "
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "ACT-activity",
+   "inv": "ACT",
+   "what": "Activity: what runs, what waits on you, what is failing, what comes next, what ran",
+   "kind": "page",
+   "at": "activity",
+   "find": [
+    "What Kranto is doing"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "ACT-indicator",
+   "inv": "ACT",
+   "what": "the top bar's one item for both lanes: Quiet · next, N running, Paused, N failed",
+   "kind": "action",
+   "at": "home",
+   "in": "shell/ActivityIndicator.svelte",
+   "has": [
+    "hd-activity",
+    "#/activity"
+   ],
+   "fate": "merged"
+  },
+  {
+   "id": "ACT-stop",
+   "inv": "ACT",
+   "what": "Stop a running run at its next step, with Undo (Activity, its trace)",
+   "kind": "action",
+   "at": "activity",
+   "in": "pages/activity/Activity.svelte",
+   "has": [
+    "api/activity/stop",
+    "Stop"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "ACT-fix",
+   "inv": "ACT",
+   "what": "Needs you › Fix: a kind failing twice in a row or for two days, once",
+   "kind": "action",
+   "at": "needs",
+   "fate": "new",
+   "in": "pages/front/Needs.svelte",
+   "has": [
+    "actFix",
+    "Failing"
+   ]
+  },
+  {
+   "id": "ACT-runline",
+   "inv": "ACT",
+   "what": "a page's own line: a topic's reading, a cub's job, the update check",
+   "kind": "action",
+   "at": "cub/digest",
+   "in": "ui/RunLine.svelte",
+   "has": [
+    "Watch ›",
+    "What happened ›"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "ACT-key",
+   "inv": "ACT",
+   "what": "g a: Activity",
+   "kind": "key",
+   "at": "activity",
+   "in": "lib/keys.json",
+   "has": [
+    "\"g a\""
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-head-watch",
+   "inv": "B1",
+   "what": "the one head on watch's page: its glyph and title, one facts line, the subnav's words; #page-head once",
+   "kind": "page",
+   "at": "watch",
+   "find": [
+    "Watch",
+    "Topics"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-head-ideas",
+   "inv": "B1",
+   "what": "the one head on ideas's page: its glyph and title, one facts line, the subnav's words; #page-head once",
+   "kind": "page",
+   "at": "ideas",
+   "find": [
+    "Ideas",
+    "Cards",
+    "Review"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-head-build",
+   "inv": "B1",
+   "what": "the one head on build's page: its glyph and title, one facts line, the subnav's words; #page-head once",
+   "kind": "page",
+   "at": "home",
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "STD-head-news",
+   "inv": "B1",
+   "what": "the one head on news's page: its glyph and title, one facts line, the subnav's words; #page-head once",
+   "kind": "page",
+   "at": "news",
+   "find": [
+    "News",
+    "Today",
+    "Earlier"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-head-settings",
+   "inv": "B1",
+   "what": "the one head on settings's page: its glyph and title, one facts line, the subnav's words; #page-head once",
+   "kind": "page",
+   "at": "settings",
+   "find": [
+    "Settings",
+    "Overview",
+    "Watching"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-head-needs",
+   "inv": "B1",
+   "what": "the one head on needs's page: its glyph and title, one facts line, the subnav's words; #page-head once",
+   "kind": "page",
+   "at": "needs",
+   "find": [
+    "Needs you",
+    "Mark all seen"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-head-activity",
+   "inv": "B1",
+   "what": "the one head on activity's page: its glyph and title, one facts line, the subnav's words; #page-head once",
+   "kind": "page",
+   "at": "activity",
+   "find": [
+    "What Kranto is doing"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-head-verbs",
+   "inv": "B1",
+   "what": "the head's verbs: at most one primary, Stop, ⋯ and the gear to the door's settings",
+   "kind": "action",
+   "at": "home",
+   "in": "shell/PageHead.svelte",
+   "has": [
+    "page-gear",
+    "primary",
+    "More",
+    "stop"
+   ],
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "STD-states",
+   "inv": "B1",
+   "what": "one Failed: the words, Try again, Tell us",
+   "kind": "state",
+   "at": "home",
+   "in": "ui/Failed.svelte",
+   "has": [
+    "Try again",
+    "Tell us",
+    "Could not read"
+   ],
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "STD-settings-features",
+   "inv": "F",
+   "what": "Settings' Features group: every feature and cub, each to its own page",
+   "kind": "page",
+   "at": "settings",
+   "find": [
+    "Features",
+    "Digest",
+    "Toot the pick"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-settings-first-party",
+   "inv": "F",
+   "what": "Settings › Digest: On and off, its groups, Spend, About (a first-party feature)",
+   "kind": "page",
+   "at": "settings/digest",
+   "find": [
+    "On and off",
+    "Digest",
+    "Spend",
+    "About"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-settings-toot",
+   "inv": "F",
+   "what": "Settings › Toot the pick: a cub's page with the core's keys (its keys left the cub's sheet)",
+   "kind": "page",
+   "at": "settings/toot",
+   "find": [
+    "On and off",
+    "Toot the pick",
+    "The core's keys",
+    "May add rows to Needs you"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-settings-sheet",
+   "inv": "F",
+   "what": "a key's form on Settings › <Feature>: Save with Undo, Back to the default, by hand shown",
+   "kind": "action",
+   "at": "settings/digest",
+   "in": "pages/settings/FeaturePane.svelte",
+   "has": [
+    "SaveBar",
+    "Back to the default",
+    "TopicPicker",
+    "written by hand"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-settings-gear-news",
+   "inv": "F",
+   "what": "the gear in News's head lands on Settings › News",
+   "kind": "action",
+   "at": "news",
+   "in": "lib/app/heads.ts",
+   "has": [
+    "gear: \"settings/news\""
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-cub-settings-redirect",
+   "inv": "F",
+   "what": "a cub's Settings sheet is its Settings page (D-2)",
+   "kind": "page",
+   "old": "cub/toot?sel=settings",
+   "at": "settings/toot",
+   "find": [
+    "Toot the pick"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-cub-about-redirect",
+   "inv": "F",
+   "what": "a cub's About is on its Settings page: what it may do, Look for an update, Remove",
+   "kind": "page",
+   "old": "cub/toot?sel=about",
+   "at": "settings/toot?sel=eabout",
+   "find": [
+    "About",
+    "What it may do"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-activity-settings",
+   "inv": "F",
+   "what": "the runs' marks kept: Settings › System › Activity (left the Activity page)",
+   "kind": "setting",
+   "at": "settings/system",
+   "find": [
+    "Runs' marks are kept"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-editor-settings",
+   "inv": "F",
+   "what": "the Weekly editor's keys: Settings › Building (the Editor page says where)",
+   "kind": "action",
+   "at": "settings",
+   "fate": "removed",
+   "old": "settings/building"
+  },
+  {
+   "id": "STD-news-settings-words",
+   "inv": "F",
+   "what": "News's off state links to Settings › News (the page that did not exist)",
+   "kind": "action",
+   "at": "news",
+   "in": "features/news/NewsToday.svelte",
+   "has": [
+    "#/settings/news",
+    "Settings › News"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-watch-read-now",
+   "inv": "A2",
+   "what": "Read sources now under Watch's ⋯ (the head's other verbs:)",
+   "kind": "action",
+   "at": "watch",
+   "in": "pages/watch/Topics.svelte",
+   "has": [
+    "Read sources now",
+    "more:"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-toolbar-no-primary",
+   "inv": "B1",
+   "what": "Add topic and New idea are the head's one primary, never the toolbar's",
+   "kind": "page",
+   "at": "watch",
+   "find": [
+    "Add topic"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-toolbar-no-primary-ideas",
+   "inv": "B1",
+   "what": "New idea: Ideas' head",
+   "kind": "action",
+   "at": "ideas",
+   "fate": "removed"
+  },
+  {
+   "id": "STD-toolbar-no-primary-build",
+   "inv": "B1",
+   "what": "New idea: Build's head",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "STD-row-edit-hidden",
+   "inv": "A2",
+   "what": "a topic's Edit, Pause and Archive under its row's ⋯ (hover) and in its sheet",
+   "kind": "action",
+   "at": "watch",
+   "in": "pages/watch/Topics.svelte",
+   "has": [
+    "RowMore",
+    "Edit",
+    "Pause topic",
+    "Archive"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-topic-one-head",
+   "inv": "A2",
+   "what": "a topic's page has one head: its name, facts, Edit, ⋯ (Add source, Scout more, New idea, Pause, Archive)",
+   "kind": "page",
+   "at": "watch/topic/1",
+   "find": [
+    "Clinics",
+    "Edit"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-topic-head-verbs",
+   "inv": "A2",
+   "what": "the topic's ⋯: Add source, Scout more, New idea in it, Pause, Archive",
+   "kind": "action",
+   "at": "watch/topic/1",
+   "fate": "removed"
+  },
+  {
+   "id": "STD-builds-rows",
+   "inv": "B4",
+   "what": "Builds' rows are Row in Group (one row anatomy)",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "build"
+  },
+  {
+   "id": "STD-projects-no-open",
+   "inv": "B4",
+   "what": "a project row: Decide while it asks; the row itself opens it",
+   "kind": "action",
+   "at": "home",
+   "fate": "removed",
+   "old": "build/projects"
+  },
+  {
+   "id": "STD-brief-page",
+   "inv": "A6",
+   "what": "Earlier's old sel=f<id> lands on the brief's page",
+   "kind": "page",
+   "old": "news/earlier?sel=f5",
+   "at": "news/b/5",
+   "find": [
+    "A day's stories"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-brief-page-sections",
+   "inv": "A6",
+   "what": "the brief's page: Items, Earlier, Ideas from this brief, About this brief",
+   "kind": "action",
+   "at": "news/b/5",
+   "fate": "removed"
+  },
+  {
+   "id": "STD-item-page",
+   "inv": "A6",
+   "what": "a news item opens its own page: the headline, the two sentences, why, its sources readable, New idea from this",
+   "kind": "action",
+   "at": "news/i/5/0",
+   "fate": "removed"
+  },
+  {
+   "id": "STD-article-frame",
+   "inv": "A6",
+   "what": "an article's address lands on its story's page (one page a story)",
+   "kind": "page",
+   "at": "news/a/1",
+   "find": [
+    "A story"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-news-no-obs",
+   "inv": "A6",
+   "what": "Today's stories: one line each, the open one's headline a link to its page, its outlets readable (never [obs N])",
+   "kind": "action",
+   "at": "news",
+   "in": "features/news/NewsToday.svelte",
+   "has": [
+    "storyHref(b.id, n)",
+    "outletsLine(x.sources)",
+    "Why it matters ·"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "STD-news-topics-rows",
+   "inv": "A6",
+   "what": "News › Topics: Row with News's switch; how often and the hour in its sheet",
+   "kind": "action",
+   "at": "news/topics",
+   "in": "features/news/NewsTopics.svelte",
+   "has": [
+    "<Row",
+    "role=\"switch\"",
+    "TOPIC_SEL"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "STD-news-topic-sheet",
+   "inv": "A6",
+   "what": "a News topic's sheet: on or off, how often, the hour, Brief now",
+   "kind": "action",
+   "at": "news/topics",
+   "in": "features/news/NewsTopicPane.svelte",
+   "has": [
+    "nt-cadence",
+    "nt-hour",
+    "Brief now"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-head-cubs",
+   "inv": "C",
+   "what": "Post under the shell's one head: Post, its facts line, ⚙",
+   "kind": "page",
+   "at": "post",
+   "find": [
+    "Post"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "STD-head-cub-first-party",
+   "inv": "C",
+   "what": "a first-party cub's page under the shell's one head: its trust, its words, Log, the gear",
+   "kind": "page",
+   "at": "cub/digest",
+   "find": [
+    "Digest",
+    "Log"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "STD-head-cub-toot",
+   "inv": "C",
+   "what": "Toot the pick's page under the shell's one head: its trust, its words, Log, the gear (opened on one of its drafts: the cub's bare page lands on Post once a draft has its own sheet,)",
+   "kind": "page",
+   "at": "cub/toot?sel=draft:1",
+   "find": [
+    "Toot the pick",
+    "Log"
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "STD-cub-sheet",
+   "inv": "C",
+   "what": "a cub's object in the shell's one sheet (the pane in Classic), never a sheet of its own",
+   "kind": "sheet",
+   "at": "cub/toot?sel=odraft:1",
+   "object": "sel",
+   "fate": "moved"
+  },
+  {
+   "id": "STD-issue-page",
+   "inv": "C",
+   "what": "an object you read opens as a page (open: page): its text drawn as text, Confirm at its top",
+   "kind": "action",
+   "at": "cub/toot",
+   "in": "features/cub/CubObjectPage.svelte",
+   "has": [
+    "Confirm",
+    "<Md text={text}",
+    "slice(0, 200000)"
+   ],
+   "fate": "new"
+  },
+  {
+   "id": "STD-empty-words",
+   "inv": "C",
+   "what": "a cub's list says its own words when empty (ui.lists[].empty), else \"Nothing here yet.\"",
+   "kind": "action",
+   "at": "cub/toot",
+   "in": "features/cub/CubPage.svelte",
+   "has": [
+    "list.empty || \"Nothing here yet.\""
+   ],
+   "fate": "changed"
+  },
+  {
+   "id": "STD-cub-head-verbs",
+   "inv": "C",
+   "what": "a cub's head: its one primary (ui.primary), Stop, ⋯ (Update to…), the gear; no Settings or About button",
+   "kind": "action",
+   "at": "cub/digest",
+   "in": "features/cub/CubPage.svelte",
+   "has": [
+    "cub-update-ready",
+    "gear: \"settings/\" + f.id"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "STD-cubs-sheet",
+   "inv": "C",
+   "what": "Add a cub and Check a manifest in the shell's one sheet",
+   "kind": "action",
+   "at": "cubs/available",
+   "in": "features/cub/CubsPane.svelte",
+   "has": [
+    "AddCub",
+    "Check a manifest first"
+   ],
+   "fate": "moved"
+  },
+  {
+   "id": "GRD-needs-remove",
+   "inv": "B2",
+   "what": "Needs you: Remove a source your downvotes recommend removing (the house confirm), or Keep it",
+   "kind": "action",
+   "at": "needs",
+   "fate": "removed"
+  },
+  {
+   "id": "GRD-your-grades",
+   "inv": "A7",
+   "what": "Settings › System › Your grades: your grades, the cards they moved, the next ideas run's themes, the sources",
+   "kind": "action",
+   "at": "settings/system",
+   "fate": "removed"
+  },
+  {
+   "id": "GRD-rank-why",
+   "inv": "B3",
+   "what": "an idea's Why this: where it ranks and the grades it rests on",
+   "kind": "action",
+   "at": "ideas?sel=ii1",
+   "fate": "removed"
+  },
+  {
+   "id": "S2-post",
+   "inv": "A6",
+   "what": "Post: drafts waiting, Sent, the accounts, earlier drafts",
+   "kind": "page",
+   "at": "post",
+   "in": "pages/post/PostPage.svelte",
+   "has": [
+    "Drafts waiting",
+    "Sent",
+    "Accounts",
+    "Earlier drafts"
+   ],
+   "fate": "new"
+  }
+ ]
+}

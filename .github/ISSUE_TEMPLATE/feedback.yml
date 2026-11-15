@@ -1,0 +1,14 @@
+name: Feedback from Kranto
+description: A bug, an idea or a question sent with Feedback in the app, filled in by it
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: This came from Feedback in Kranto, which showed you all of it before filling it in here. Read it once more, paste a screenshot if it helps, then submit. Security problems go to the Security tab, not here.
+  # id body: the app's link fills it (?template=feedback.yml&title=…&body=…)
+  - type: textarea
+    id: body
+    attributes:
+      label: Feedback
+    validations:
+      required: true

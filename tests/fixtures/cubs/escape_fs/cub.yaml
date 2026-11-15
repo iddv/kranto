@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: escape_fs
+title: Escape the files
+says: Tries to read what is not its own.
+jobs:
+  - {kind: escape_fs.probe, method: probe, every_hours: 24}
+settings:
+  keys:
+    escape_fs.paths: {type: list, default: []}
+storage: none

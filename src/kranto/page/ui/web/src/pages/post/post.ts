@@ -1,0 +1,61 @@
+// Post: one page, #/post, from the server's one read GET /api/post (web/post_api.py,
+// the P1): the drafts that wait (a draft's ask has no time limit), what was sent, the three
+// accounts, and the earlier drafts. Plain data and words, so the tests read them without a page.
+import { href, matchRoute } from "../../lib/router";
+import type { Post, PostAccount, PostDraft, PostFailed } from "../../api/afk.gen";
+import type { About } from "../../features/post/post";
+
+export type { Post, PostAccount, PostDraft, PostFailed };
+export const POST_API = "/api/post";
+
+/** where a draft opens: its sheet (#/post/d/<id>, the P2 adds the route), else the cub's page
+ * with the draft's object selected, as today */
+export function draftHref(d: Pick<PostDraft, "id" | "cub" | "ref">): string {
+  if (matchRoute(["post", "d", String(d.id)])) return href(`post/d/${d.id}`);
+  return href("cub/" + d.cub, { sel: "o" + d.ref });
+}
+/** whether a draft opens in the page's sheet route (else the ask's own dialog opens it) */
+export const hasSheet = (): boolean => !!matchRoute(["post", "d", "1"]);
+
+/** a sent post's line: the platform's own words, else what happened, else "Sent" */
+export const sentLine = (d: PostDraft): string => d.note || d.said || "Sent";
+
+/** an account's state in words: "connected as …", "needs signing in again", "not set" */
+export function accountWords(a: PostAccount): string {
+  if (a.state === "connected") return a.account ? `connected as ${a.account}` : a.platform ? `connected on ${a.platform}` : "connected";
+  if (a.state === "needs_login") return "needs signing in again";
+  return "not set";
+}
+/** where an account is connected or changed: the newsletter platform's sheet on Settings ›
+ * Posting, a posting account's own sign-in page */
+export function accountHref(a: PostAccount): string {
+  if (a.key === "newsletter") return href("settings/posting", { sel: "enl" });
+  // Mastodon here is the account Kranto posts from (mastodon_post), never the read-only one that
+  // watches a timeline (7, Codex 4)
+  return href("settings/connections/" + (a.key === "blog" ? "sanity" : a.key === "mastodon" ? "mastodon_post" : a.key));
+}
+
+/** a failed Write a post's line: "Write a blog post about ‹title› failed", its reason under it */
+export function failedTitle(f: Pick<PostFailed, "as" | "title">): string {
+  const what = f.as === "toot" ? "a short post" : "a blog post";
+  return `Write ${what} about ${f.title || "this"}: no draft`;
+}
+/** what a failed write was about, as Write a post's question knows it (Try again asks the same) */
+export function failedAbout(f: Pick<PostFailed, "about" | "title">): About {
+  const m = /^card:(\d+)$/.exec(f.about), b = /^brief:(\d+):(\d+)$/.exec(f.about);
+  if (m) return { card: Number(m[1]), title: f.title || "", sources: 0 };
+  if (b) return { brief: Number(b[1]), n: Number(b[2]) - 1, title: f.title || "", sources: 0 };
+  return { week: true, title: "this week's news", sources: 0 };
+}
+/** the accounts connected (the group's count: "Accounts 3" with none connected read as three) */
+export const connectedCount = (accounts: PostAccount[]): number => accounts.filter((a) => a.state === "connected").length;
+/** the waiting draft a ticket asks to send, when its account is not connected: then the home's
+ * one thing and Needs you say Open (its page, with Copy and Download), never Send ( *  they offered Send for a draft whose page said "Connect an account to send"); null otherwise */
+export function unsendable(p: Pick<Post, "drafts"> | null | undefined, ticket: number | null | undefined): PostDraft | null {
+  if (ticket == null || !p) return null;
+  const d = (p.drafts || []).find((x) => x.ticket === ticket);
+  return d && d.account === false ? d : null;
+}
+/** "Monday's issue", "from #143": the fact the read gives, else none (its kind is the row's mark;
+ * the cub's name, "by examplecom", is never a fact: G4) */
+export const draftFact = (d: PostDraft): string => d.fact || "";

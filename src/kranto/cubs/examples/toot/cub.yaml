@@ -1,0 +1,115 @@
+# The owner's second cub: the weekly editor's pick → a Mastodon post the
+# owner approves. Installed from a local folder (trust: owner). Practice first: the draft is in
+# Kranto; an approval in practice posts nothing. 1.2.1: its words name a verb with no "…".
+# 1.3.0 (SEND): a practiced post is in its own group, never with the posted ones. 1.3.1 (Kranto
+# 0.6): a post waits until you answer it; what a newer one replaced is under Earlier drafts.
+# 1.4.0 (Kranto 0.6, Q-3): a short post about any card, when you ask (Write a post); the
+# editor's daily pick finds nothing while builds are off and leaves with them.
+# 1.5.0: written through Kranto's prose engine (your voice card, the floor, a check and
+# a fix of only the lines that read like AI); toot.tone moved into the voice card.
+# 1.6.0: your angle (one sentence) opens the post on the reader's interest;
+# none writes a plain summary and says so.
+schema: 1
+api: cub/1
+id: toot
+name: local/toot
+version: 1.6.0
+bears: ">=0.5.19,<0.7"
+title: Short posts
+says: Writes a short post about an idea card for your Mastodon account, which you read, copy, or approve before it goes out.
+entry: main.py
+requirements: null
+
+reads: [ideas, topics]
+events:
+  subscribe:
+    - {kind: ticket.resolved, min_trust: core, method: on_resolved}
+  publish: [toot.drafted]
+jobs:
+  - kind: toot.weekly
+    method: draft_pick
+    every_hours: 24
+    at: "09:00"
+    when: toot.enabled
+    purpose: toot_caption
+    deadline_s: 180
+    says: "daily at 09:00: when the weekly editor nominated a card since the last post, drafts a post for your approval"
+actions:
+  - kind: toot.draft
+    title: Draft a post
+    method: draft_card
+    doors: [ui, cli]
+    fields:
+      - {key: idea, label: From this card, kind: choice, read: idea_choices, required: true}
+      - {key: tone, label: Tone, kind: enum, choices: [plain, playful]}
+      - {key: link, label: Add the card's link, kind: bool}
+      - {key: angle, label: "Your angle (optional)", kind: text, hint: "one sentence: why it interests you. The post makes this claim, prediction or question; none writes a plain summary"}
+  - kind: toot.redraft
+    title: Redraft
+    method: redraft
+    doors: [ui, cli]
+    subjects: [toot_post]
+    fields:
+      - {key: tone, label: Tone, kind: enum, choices: [plain, playful]}
+provides: [posts, rows, count, idea_choices]
+requests: [post.mastodon]
+broker:
+  mastodon: [statuses.draft, drafts.list, account.get, instance.limits]
+http: {hosts: []}
+model: {tiers: [reason], purposes: [toot_caption], monthly_usd: 1}
+search: []
+storage: own
+settings:
+  keys:
+    toot.enabled: {type: bool, default: true, words: "a post per editor's pick"}
+    toot.tone: {type: enum, default: plain, choices: [plain, playful], words: "moved into your voice card (Kranto’ prose profile: docs/prose.md); read once", advanced: true}
+    toot.visibility: {type: enum, default: public, choices: [public, unlisted, private], words: "who sees the post", group: The post}
+    toot.language: {type: str, default: en, words: "the post's language (ISO 639-1)", group: The post}
+    toot.link: {type: bool, default: false, words: "add a link to the card (your Kranto is on loopback: off unless you host it)", advanced: true}
+  sensitive: []
+  per_topic: []
+ui:
+  kind: post
+  glyph: pen
+  primary: draft
+  tile: {line: "Short posts about your ideas, for you to approve", count: count, words: "waits for Post", tone: wait}
+  today_rows:
+    - {kind: post, read: rows, group: needs_you, primary: post.mastodon, card: post}
+  lists:
+    - id: drafts
+      word: Drafts
+      read: posts
+      card: post
+      groups: [{key: waiting, word: Waits for you, tone: wait}, {key: posted, word: Posted, tone: good}, {key: practiced, word: "Practiced: not posted", tone: quiet}, {key: closed, word: Earlier drafts, tone: quiet}]
+      count: waiting
+      empty: "No post yet. Choose Write a post on an idea card, or Draft a post here."
+  forms:
+    - id: draft
+      word: Draft a post
+      submit: toot.draft
+      fields:
+        - {key: idea, label: From this card, kind: choice, read: idea_choices, required: true}
+        - {key: tone, label: Tone, kind: enum, choices: [plain, playful]}
+        - {key: link, label: Add the card's link, kind: bool}
+        - {key: angle, label: "Your angle (optional)", kind: text, hint: "one sentence: why it interests you. The post makes this claim, prediction or question; none writes a plain summary"}
+      cost: "about $0.005: one reason-tier call (and a short fix if a line reads like AI)"
+  cards:
+    post:
+      title: text
+      lines: []
+      fields:
+        - {key: idea_title, label: Card, kind: text}
+        - {key: chars, label: Characters, kind: number}
+        - {key: visibility, label: Visibility, kind: text}
+        - {key: state, label: State, kind: text}
+      actions: [toot.redraft]
+      origin: cites
+spend: {purposes: [toot_caption], caps: {}}
+telemetry: {counters: {toot.posts: [0, 10000]}}
+evals: [toot.tests]
+grades:
+  toot_post: [[off_topic, off topic], [overclaims, says more than the card], [bad_tone, wrong tone]]
+docs:
+  page: README.md
+  glossary: {Post: "A short Mastodon status drafted from an idea card; posted only after your approval."}
+  words: {toot.enabled: "A post per editor's pick"}

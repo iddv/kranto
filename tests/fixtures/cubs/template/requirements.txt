@@ -1,0 +1,4 @@
+# A cub's own packages: exact pins with hashes, one per line, installed once by Kranto when you
+# install the cub (uv pip install --require-hashes --only-binary :all:). Make it with
+#   uv pip compile requirements.in --generate-hashes -o requirements.txt
+# and set `requirements: requirements.txt` in cub.yaml. Most cubs need none.

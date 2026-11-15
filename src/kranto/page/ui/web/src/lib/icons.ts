@@ -1,0 +1,32 @@
+// The page's icons (UI-v4.md 1.4, DESIGN-v3.md section 4): 16 px SVGs drawn from these tables,
+// by the shell's Icon component and the old page's icon(). A shape is [tag, attributes].
+export type Shape = [string, Record<string, string | number>];
+
+export const ICON: Record<string, Shape[]> = {
+  queued: [["circle", { cx: 8, cy: 8, r: 6, "stroke-dasharray": "2.6 2.1" }]],
+  running: [["circle", { cx: 8, cy: 8, r: 6, opacity: .3 }], ["path", { d: "M8 2a6 6 0 0 1 6 6" }]],
+  started: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M6.6 5.3v5.4L10.9 8z" }]],
+  ready: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M8 11V5.4M5.6 7.7 8 5.3l2.4 2.4" }]],
+  held: [["path", { d: "M8 1.4 14.6 8 8 14.6 1.4 8Z" }], ["path", { d: "M8 5v3.4M8 10.8v.1" }]],
+  failed: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M5.9 5.9l4.2 4.2M10.1 5.9l-4.2 4.2" }]],
+  public: [["circle", { cx: 8, cy: 8, r: 7, class: "f" }], ["path", { d: "M5 8.3l2 2 4-4.3", class: "k" }]],
+  closed: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M3.8 12.2 12.2 3.8" }]],
+  open: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["circle", { cx: 8, cy: 8, r: 1.6, class: "f" }]],
+  accepted: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M5 8h5.6M8.4 5.7 10.7 8l-2.3 2.3" }]],
+  skipped: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M5.2 8h5.6" }]],
+  waiting: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M8 4.6V8l2.4 1.6" }]],
+  paused: [["circle", { cx: 8, cy: 8, r: 6.2 }], ["path", { d: "M6.5 5.6v4.8M9.5 5.6v4.8" }]],
+  check: [["path", { d: "M3.2 8.6l3 3 6.4-6.8" }]],
+  x: [["path", { d: "M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6" }]],
+  warn: [["path", { d: "M8 2.2 14.6 13.6H1.4Z" }], ["path", { d: "M8 6.4v3M8 11.6v.1" }]],
+  dot: [["circle", { cx: 8, cy: 8, r: 2.4, class: "f" }]],
+  file: [["path", { d: "M4 1.8h5.2L12.6 5v9.2H4Z" }], ["path", { d: "M9 2v3.2h3.4" }]],
+  note: [["path", { d: "M2.5 3h11v8h-6l-3 2.6V11h-2Z" }]],
+  chat: [["path", { d: "M2.5 3h11v8h-6l-3 2.6V11h-2Z" }], ["path", { d: "M5.5 6h5M5.5 8.3h3.4" }]],
+  tool: [["path", { d: "M3 13l5.2-5.2M9.6 3.2a2.8 2.8 0 0 1 3.5 3.5l-2 .4-1.9-1.9Z" }]],
+  search: [["circle", { cx: 7, cy: 7, r: 4.4 }], ["path", { d: "M10.3 10.3 13.8 13.8" }]],
+  today: [["circle", { cx: 8, cy: 8, r: 2.8 }], ["path", { d: "M8 1.6v1.8M8 12.6v1.8M1.6 8h1.8M12.6 8h1.8M3.5 3.5l1.3 1.3M11.2 11.2l1.3 1.3M3.5 12.5l1.3-1.3M11.2 4.8l1.3-1.3" }]],
+  book: [["path", { d: "M2.5 3.2c2-.8 3.8-.6 5.5.8v9.6c-1.7-1.4-3.5-1.6-5.5-.8Z" }], ["path", { d: "M13.5 3.2c-2-.8-3.8-.6-5.5.8v9.6c1.7-1.4 3.5-1.6 5.5-.8Z" }]],
+  gear: [["circle", { cx: 8, cy: 8, r: 2.2 }], ["path", { d: "M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6l1.4 1.4M11 11l1.4 1.4M3.6 12.4 5 11M11 5l1.4-1.4" }]],
+  project: [["path", { d: "M2 4.5h4.2l1.4 1.5H14v7.5H2Z" }], ["circle", { cx: 11, cy: 9.8, r: 1.4, class: "f" }]],
+};

@@ -1,0 +1,103 @@
+# The owner's second cub: the weekly editor's pick → a Mastodon post the
+# owner approves. Installed from a local folder (trust: owner). Dry mode first: the draft is in
+# Kranto; the press, while dry, posts nothing.
+schema: 1
+api: cub/1
+id: toot
+name: local/toot
+version: 1.0.0
+bears: ">=0.5,<0.7"
+title: Toot the pick
+says: Turns the weekly editor's pick into a short post for your Mastodon account, which you read and approve before it goes out.
+entry: main.py
+requirements: null
+
+reads: [ideas, topics]
+events:
+  subscribe:
+    - {kind: ticket.resolved, min_trust: core, method: on_resolved}
+  publish: [toot.drafted]
+jobs:
+  - kind: toot.weekly
+    method: draft_pick
+    every_hours: 24
+    at: "09:00"
+    when: toot.enabled
+    purpose: toot_caption
+    deadline_s: 180
+    says: "daily at 09:00: when the weekly editor nominated a card since the last post, drafts a post and files a ticket"
+actions:
+  - kind: toot.draft
+    title: Draft a post
+    method: draft_card
+    doors: [ui, cli]
+    fields:
+      - {key: idea, label: From this card, kind: choice, read: idea_choices, required: true}
+      - {key: tone, label: Tone, kind: enum, choices: [plain, playful]}
+      - {key: link, label: Add the card's link, kind: bool}
+  - kind: toot.redraft
+    title: Redraft
+    method: redraft
+    doors: [ui, cli]
+    subjects: [toot_post]
+    fields:
+      - {key: tone, label: Tone, kind: enum, choices: [plain, playful]}
+provides: [posts, rows, count, idea_choices]
+requests: [post.mastodon]
+broker:
+  mastodon: [statuses.draft, drafts.list, account.get, instance.limits]
+http: {hosts: []}
+model: {tiers: [reason], purposes: [toot_caption], monthly_usd: 1}
+search: []
+storage: own
+settings:
+  keys:
+    toot.enabled: {type: bool, default: true, words: "a post per editor's pick"}
+    toot.tone: {type: enum, default: plain, choices: [plain, playful], words: "the post's tone"}
+    toot.visibility: {type: enum, default: public, choices: [public, unlisted, private], words: "who sees the post"}
+    toot.language: {type: str, default: en, words: "the post's language (ISO 639-1)"}
+    toot.link: {type: bool, default: false, words: "add a link to the card (your Kranto is on loopback: off unless you host it)"}
+  sensitive: []
+  per_topic: []
+ui:
+  kind: post
+  glyph: pen
+  tile: {line: "The editor's pick as a post you approve", count: count, words: "waits for Post", tone: wait}
+  today_rows:
+    - {kind: post, read: rows, group: needs_you, primary: post.mastodon, card: post}
+  lists:
+    - id: drafts
+      word: Drafts
+      read: posts
+      card: post
+      groups: [{key: waiting, word: Waits for you}, {key: posted, word: Posted}, {key: closed, word: Declined or expired}]
+      count: waiting
+  forms:
+    - id: draft
+      word: Draft a post
+      submit: toot.draft
+      fields:
+        - {key: idea, label: From this card, kind: choice, read: idea_choices, required: true}
+        - {key: tone, label: Tone, kind: enum, choices: [plain, playful]}
+        - {key: link, label: Add the card's link, kind: bool}
+      cost: "about $0.005: one reason-tier call"
+  cards:
+    post:
+      title: text
+      lines: []
+      fields:
+        - {key: idea_title, label: Card, kind: text}
+        - {key: chars, label: Characters, kind: number}
+        - {key: visibility, label: Visibility, kind: text}
+        - {key: state, label: State, kind: text}
+      actions: [toot.redraft]
+      origin: cites
+spend: {purposes: [toot_caption], caps: {}}
+telemetry: {counters: {toot.posts: [0, 10000]}}
+evals: [toot.tests]
+grades:
+  toot_post: [[off_topic, off topic], [overclaims, says more than the card], [bad_tone, wrong tone]]
+docs:
+  page: README.md
+  glossary: {Post: "A short Mastodon status drafted from an idea card; posted only after your press."}
+  words: {toot.enabled: "A post per editor's pick"}

@@ -1,0 +1,13 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: letter
+title: Letter
+says: Drafts a newsletter issue and asks to send it, through whichever platform is connected.
+broker:
+  newsletter: [emails.create_draft, emails.get, drafts.list, newsletter.get]
+requests: [send.newsletter]
+jobs:
+  - {kind: letter.draft, method: draft, every_hours: 24}
+storage: none

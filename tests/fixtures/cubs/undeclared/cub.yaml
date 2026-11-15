@@ -1,0 +1,11 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: undeclared
+title: Undeclared
+says: Calls what its manifest does not list.
+events: {publish: [undeclared.said]}
+jobs:
+  - {kind: undeclared.probe, method: probe, every_hours: 24}
+storage: none

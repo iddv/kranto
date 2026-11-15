@@ -1,0 +1,13 @@
+{
+  "name": "kranto",
+  "owner": {"name": "kranto", "url": "https://github.com/iddv/kranto"},
+  "description": "Kranto's own plugin for Claude Code: its verbs as tools and a skill that says how to use them.",
+  "plugins": [
+    {
+      "name": "kranto",
+      "source": "./src/kranto/plugin",
+      "description": "Kranto on this machine: every press of its pages as tools, under your ladder, and a skill that says how to use them. Needs Kranto installed (kranto mcp on your PATH).",
+      "category": "productivity"
+    }
+  ]
+}

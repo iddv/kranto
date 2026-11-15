@@ -1,0 +1,20 @@
+# Broad sources: general feeds linked to no topic. Every source here was
+# fetched and parsed with the server's own HTTP client on 2026-09-24; each
+# returned items published in the preceding week.
+#
+# Broad sources skip the topic prefilter, so every new item they publish
+# reaches the judge (at most ingest.max_items_per_source per source per run).
+# That is the point: they keep the library from narrowing onto the wording of
+# your topics. It is also the cost: with 8 sources, the default cap of 10 and
+# a run every 3 hours, the upper bound is 640 judge calls a day, and busy
+# feeds (HN front page, Ars Technica) come closest to their cap. Retire the
+# ones you do not want, or raise ingest.every_hours.
+sources:
+  - {kind: hackernews, value: front}
+  - {kind: rss, value: "https://www.quantamagazine.org/feed/"}
+  - {kind: rss, value: "https://feeds.arstechnica.com/arstechnica/index"}
+  - {kind: rss, value: "https://restofworld.org/feed/latest/"}
+  - {kind: rss, value: "https://www.construction-physics.com/feed"}
+  - {kind: rss, value: "https://marginalrevolution.com/feed"}
+  - {kind: rss, value: "https://knowablemagazine.org/rss"}
+  - {kind: rss, value: "https://www.worksinprogress.news/feed"}

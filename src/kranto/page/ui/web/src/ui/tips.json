@@ -1,0 +1,63 @@
+{
+  "activity.failing": {
+    "text": "Said once, here and in Needs you: at the second failure in a row or after two days; gone at its next good run.",
+    "docs": "activity"
+  },
+  "activity.recent": {
+    "text": "The last day; the hourly re-checks and the usage reports, one line a kind.",
+    "docs": "activity"
+  },
+  "signin": {
+    "text": "Run kranto open on the machine Kranto runs on and open the link it prints (it works for 10 minutes), or paste its code here. Agents never sign in here: they send their own token.",
+    "docs": "access"
+  },
+  "sources.topic": {
+    "text": "Items are compared with the topic before any model call; only those similar enough are judged. A source with no topic skips that and costs more."
+  },
+  "models.gate": {
+    "text": "Items at or above this signal are kept. Each judge rates on its own scale, so the gate is saved with its model.",
+    "docs": true
+  },
+  "keys.model": {
+    "text": "Judging items, the scout and idea cards go through the provider chosen here: the Claude API, OpenRouter or another OpenAI-compatible endpoint. The key is tested with one request that runs no model.",
+    "docs": true
+  },
+  "sources.access": {
+    "text": "The labels say how: public, as any browser would read it; with an account you connect under Connections, read-only; or not offered, with the reason."
+  },
+  "library.clusters": {
+    "text": "Themes of the latest map. A cluster's number means something within one map; its lineage follows it across maps."
+  },
+  "rollups": {
+    "text": "Past their retention age, each week's observations are kept as one rollup.",
+    "docs": true
+  },
+  "news": {
+    "text": "A short brief per topic, off until you turn it on for one: what happened since the last brief, each item cited to an observation your watchers kept or a dated search result, never to the model's memory. One call a topic a day, at its hour."
+  },
+  "ideas.score": {
+    "text": "The product of the card's five ratings."
+  },
+  "library.movement": {
+    "text": "Excess: the change in share not explained by which sources were running. New: arrivals since the previous map against what the per-source rates predict; q is a one-sided binomial test corrected across this map's clusters."
+  },
+  "grading": {
+    "text": "Card grades steer what ranks first: cards like one you graded useful rank higher, cards like one you graded not useful lower.",
+    "docs": true
+  },
+  "connections": {
+    "text": "Only read-only scopes are ever asked for; nothing is posted, starred, followed or changed.",
+    "docs": true
+  },
+  "updates": {
+    "text": "An update backs up, installs, restarts and checks itself, and rolls back on its own if the new version does not come up.",
+    "docs": true
+  },
+  "access": {
+    "text": "Every press, MCP tool and agent request carries a token; Kranto acts as that token's owner, whatever the request claims.",
+    "docs": true
+  },
+  "topics.sentence": {
+    "text": "Written for a reader who has never heard of it. Kranto match every item they read against this sentence."
+  }
+}

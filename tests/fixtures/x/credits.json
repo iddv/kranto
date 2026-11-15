@@ -1,0 +1,4 @@
+// https://docs.x.com/x-api/fundamentals/post-cap ("requests will fail" at a zero balance), read 2026-10-17
+// Written by hand in the API's problem shape; X documents no exact body (README.md).
+{"title": "CreditsDepleted", "type": "about:blank", "status": 402,
+ "detail": "Your enrolled account does not have any credits to fulfill this request."}

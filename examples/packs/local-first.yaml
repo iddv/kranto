@@ -1,0 +1,14 @@
+# Local-first software: sources checked to fetch on 2026-09-24.
+topics:
+  - name: Local-first software
+    description: >
+      Software that keeps working offline and keeps the user's data on their
+      own devices: CRDTs, sync engines, conflict resolution, and the products
+      and business models built on them.
+    sources:
+      - {kind: hackernews, value: local-first}
+      - {kind: hackernews, value: CRDT}
+      - {kind: rss, value: "https://www.inkandswitch.com/index.xml"}
+      - {kind: rss, value: "https://localfirst.fm/feed.xml"}
+      - {kind: rss, value: "https://github.com/automerge/automerge/releases.atom"}
+      - {kind: rss, value: "https://github.com/yjs/yjs/releases.atom"}

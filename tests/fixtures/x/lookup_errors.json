@@ -1,0 +1,22 @@
+// https://docs.x.com/x-api/posts/lookup/integrate (a multi-post lookup where one is gone), read 2026-10-17
+// Written to the documented shape by hand; not from a real call (README.md).
+{
+  "data": [
+    {
+      "id": "1849100000000000007",
+      "text": "A long thread opener about local-first software",
+      "edit_history_post_ids": ["1849100000000000007"]
+    }
+  ],
+  "errors": [
+    {
+      "value": "1849100000000000009",
+      "detail": "Could not find tweet with ids: [1849100000000000009].",
+      "title": "Not Found Error",
+      "resource_type": "tweet",
+      "parameter": "ids",
+      "resource_id": "1849100000000000009",
+      "type": "https://api.twitter.com/2/problems/resource-not-found"
+    }
+  ]
+}

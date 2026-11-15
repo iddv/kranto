@@ -1,0 +1,11 @@
+schema: 1
+api: cub/1
+version: 1.0.0
+
+id: net_private
+title: A private address
+says: Fetches a declared name that is not public.
+http: {hosts: [internal.example]}
+jobs:
+  - {kind: net_private.probe, method: probe, every_hours: 24}
+storage: none

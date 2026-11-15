@@ -1,0 +1,23 @@
+# A cub for the runtime's tests: each handler does one thing a test can see.
+schema: 1
+api: cub/1
+id: echo
+version: 1.0.0
+title: Echo
+says: Answers what it is asked, for Kranto's tests.
+reads: [topics]
+events:
+  subscribe:
+    - {kind: ticket.resolved, min_trust: core, method: on_resolved}
+  publish: [echo.said]
+jobs:
+  - {kind: echo.tick, method: tick, every_hours: 1}
+  - {kind: echo.boom, method: boom, every_hours: 24}
+  - {kind: echo.slow, method: slow, every_hours: 24, deadline_s: 10}
+  - {kind: echo.noisy, method: noisy, every_hours: 24}
+  - {kind: echo.ask, method: ask, every_hours: 24}
+  - {kind: echo.leak, method: leak, every_hours: 24}
+actions:
+  - {kind: echo.say, title: Say, method: say, fields: [{key: text, label: Text}]}
+provides: [count]
+storage: own

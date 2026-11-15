@@ -1,0 +1,133 @@
+# Kranto's blog writer (made general from the owner's examplecom cub): a post about an idea
+# card, a news item, a week of briefs, or your own markdown, written for your site in your tone.
+# It ends in a draft on Post, which you copy, download, or (with a Sanity account) file in Sanity
+# as a draft and publish there yourself. Kranto adds it the first time you choose Write a post as a
+# blog post; trust owner, like the newsletter and toot cubs. Practice first: an approval files
+# nothing until you turn it on. No scheduled job: every post is one you ask for.
+# 1.2.0: your angle (one sentence) drives the post: its first sentence, its
+# stance, what it leaves out; 120 to 200 words, no fixed sections. None: a plain summary.
+schema: 1
+api: cub/1
+id: blog
+name: local/blog
+version: 1.2.0
+bears: ">=0.5.19,<0.8"
+title: Blog posts
+says: Writes a blog post about an idea, a news item or a week of briefs, for you to read, copy or download, and file in Sanity if you have it.
+entry: main.py
+requirements: null
+
+reads: [topics, briefs, ideas]
+events:
+  subscribe:
+    - {kind: ticket.resolved, min_trust: core, method: on_resolved}
+  publish: [blog.drafted]
+jobs: []
+actions:
+  - kind: blog.draft_card
+    title: Write a post about an idea
+    method: draft_card
+    doors: [ui, cli]
+    fields:
+      - {key: card, label: The idea card's number, kind: int, required: true}
+      - {key: angle, label: "Your angle (optional)", kind: text, hint: "one sentence: why it interests you. The post makes this claim, prediction or question; none writes a plain summary"}
+  - kind: blog.draft_item
+    title: Write a post about a news item
+    method: draft_item
+    doors: [ui, cli]
+    fields:
+      - {key: brief, label: The brief, kind: int, required: true}
+      - {key: item, label: Its item (from 1), kind: int, required: true}
+      - {key: angle, label: "Your angle (optional)", kind: text, hint: "one sentence: why it interests you. The post makes this claim, prediction or question; none writes a plain summary"}
+  - kind: blog.draft_week
+    title: Write a post about this week's news
+    method: draft_week
+    doors: [ui, cli]
+    fields:
+      - {key: topic, label: Topic (optional; every topic when empty), kind: choice, read: topic_choices}
+      - {key: angle, label: "Your angle (optional)", kind: text, hint: "one sentence: why it interests you. The post makes this claim, prediction or question; none writes a plain summary"}
+  - kind: blog.draft_markdown
+    title: Keep this markdown as a draft
+    method: draft_markdown
+    doors: [ui, cli]
+    fields:
+      - {key: markdown, label: Markdown, kind: markdown, required: true, hint: "a # Title line, then the post"}
+  - kind: blog.redraft
+    title: Redraft
+    method: redraft
+    doors: [ui, cli]
+    subjects: [blog_post]
+provides: [posts, rows, count, topic_choices]
+requests: [draft.sanity]
+broker:
+  sanity: [documents.draft, documents.get, drafts.list]
+http: {hosts: []}
+model: {tiers: [reason], purposes: [blog_post], monthly_usd: 5}
+search: []
+storage: own
+settings:
+  keys:
+    blog.site: {type: str, default: "my blog", words: "your site's name, as a post names it", group: The post}
+    blog.tone: {type: str, default: "plain and curious, no hype", words: "moved into your voice card (Kranto’ prose profile: docs/prose.md); read once", advanced: true}
+    blog.tags: {type: str, default: "", words: "tags every post carries, comma-separated", group: The post}
+    blog.week_days: {type: int, default: 7, lo: 1, hi: 31, words: "how many days of briefs a week's post reads", advanced: true}
+  sensitive: []
+  per_topic: []
+ui:
+  kind: post
+  glyph: pen
+  primary: card
+  tile: {line: "Blog posts, drafted for you to copy or file", count: count, words: "wait for you", tone: wait}
+  today_rows:
+    - {kind: post, read: rows, group: needs_you, primary: draft.sanity, card: post}
+  lists:
+    - id: posts
+      word: Posts
+      read: posts
+      card: post
+      groups: [{key: waiting, word: Waits for you, tone: wait}, {key: filed, word: In Sanity, tone: good}, {key: closed, word: Earlier drafts, tone: quiet}]
+      count: waiting
+      empty: "No post yet. Choose Write a post on an idea or a news item."
+  forms:
+    - id: card
+      word: About an idea
+      submit: blog.draft_card
+      fields:
+        - {key: card, label: The idea card's number, kind: int, required: true}
+      cost: "about $0.03: one reason-tier call (and a short fix if a line reads like AI)"
+      says: A post about the card, in your voice, with its sources linked.
+    - id: week
+      word: This week's news
+      submit: blog.draft_week
+      fields:
+        - {key: topic, label: Topic (optional), kind: choice, read: topic_choices}
+      cost: "about $0.01: one reason-tier call for the opening"
+      says: The week's briefs; every item is a brief's item, verbatim.
+    - id: markdown
+      word: Your own markdown
+      submit: blog.draft_markdown
+      fields:
+        - {key: markdown, label: Markdown, kind: markdown, required: true}
+      cost: "free: no model call"
+      says: Your post as written, kept as a draft.
+  cards:
+    post:
+      title: title
+      lines: [excerpt]
+      open: page
+      body: body_markdown
+      fields:
+        - {key: origin, label: From, kind: text}
+        - {key: words, label: Words, kind: number}
+        - {key: state, label: State, kind: text}
+      actions: [blog.redraft]
+      origin: cites
+spend: {purposes: [blog_post], caps: {}}
+telemetry: {counters: {blog.posts: [0, 10000]}}
+evals: [blog.tests]
+grades:
+  blog_post: [[off_topic, off topic], [wrong_claim, says something the sources do not]]
+docs:
+  page: README.md
+  glossary: {Draft: "A post Kranto holds for you to copy, download, or file in Sanity as a draft; Kranto never publishes it."}
+  words: {blog.site: "Your site's name", blog.tone: "Tone (moved into your voice card)"}
