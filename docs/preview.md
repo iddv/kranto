@@ -27,8 +27,9 @@ reaches Kranto you use. It never touches your Kranto's folders, and it is never 
    window stays open. Close the window to close the tunnel.
 2. Open the link in your PC's browser. The status bar (on a phone, the strip above the doors)
    says **"Preview: a copy of your data from 11 November. Nothing is posted; no update or usage
-   report goes out."** (Welcome's Test and save still asks the model's provider whether a key
-   works: that is how a key is checked.)
+   report goes out."** A key pasted on the preview (Welcome's, a writer's, live search's) is
+   not tested or kept: testing it would send a request to its provider, so the page says so
+   instead. Put a model key in the copy's `.env` yourself if you want it to read.
 3. Use it. Whatever you do there changes only the copy.
 
 To see **"While you were away"** on the copy, run `kranto-preview away` (in that same window) and

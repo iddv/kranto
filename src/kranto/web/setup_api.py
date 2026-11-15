@@ -166,8 +166,13 @@ class SetupAPI:
 
     def _choose(self, name: str, key: str | None, base_url: str | None,
                 terms: bool = False) -> dict:
-        """providers.choose, then the running server takes the new provider and key."""
+        """providers.choose, then the running server takes the new provider and key. A
+        preview tests no key (``preview.NO_KEY_TEST``: the test is a request to the provider);
+        Claude Code's check is this machine's own and still runs."""
+        from .. import preview
         cfg = self.rt.cfg
+        if name != "claude_code" and preview.enabled(cfg.root):
+            raise setup.SetupError(preview.NO_KEY_TEST)
         result = providers.choose(cfg.root, name, key=key, base_url=base_url, terms=terms)
         if result["ok"]:
             llm_cfg = config_mod.load(cfg.root, dotenv=False).llm

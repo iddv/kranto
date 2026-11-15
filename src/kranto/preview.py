@@ -21,6 +21,10 @@ the
 5. ``/api/status`` carries ``preview`` (the status bar's sentence and the copy's date);
 6. ``kranto serve`` refuses to start with the switch on when its home or loop home is the live
    install's, or its port is live's (``refusal``).
+7. a key pasted on the page is never tested or kept (``NO_KEY_TEST``): the watcher's
+   (``web/setup_api``, a provider that takes a key), a writer's OpenAI key
+   (``web/prose_api.writer_key``) and the live search's (``web/websearch_api``); testing one is
+   a request to its provider.
 """
 
 from __future__ import annotations
@@ -37,6 +41,9 @@ from . import legacy, product
 
 ENV = "KRANTO_PREVIEW"
 NOTHING_SENT = "This is the preview: nothing is sent"
+# a key pasted on a preview is never tested: the test is a request to the provider (line 7)
+NO_KEY_TEST = ("This is the preview: a key is not tested or kept here, because testing it "
+               "sends a request to the provider. Nothing was sent. Set keys on your own install.")
 LIVE_PORT = 8765
 # the unit live runs as: an install from before the rename keeps its old unit
 LIVE_UNITS = (legacy.UNIT, product.UNIT)

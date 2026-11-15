@@ -165,6 +165,22 @@ def test_the_key_is_tested_kept_in_env_and_never_echoed(workspace, endpoint, cap
     assert not list(rt.cfg.root.glob(".env.*.tmp"))
 
 
+def test_a_preview_tests_no_key_and_says_so(workspace, endpoint, monkeypatch):
+    """A preview sent a made-up key to the provider to test it: a key test is a request to the
+    provider, so a preview makes none, keeps nothing, and says so in words."""
+    from kranto import preview
+    rt, web, _ = workspace
+    monkeypatch.setenv(preview.ENV, "1")
+    key = fake_key()
+    for path, body in (("/api/setup/key", {"key": key}),
+                       ("/api/setup/provider", {"provider": "openrouter", "key": key})):
+        r = web.post(path, json=body)
+        assert r.status_code == 400, r.text
+        assert r.json()["error"] == preview.NO_KEY_TEST and key not in r.text
+    assert endpoint["fake"].seen == []                     # nothing left this machine
+    assert not (rt.cfg.root / ".env").exists() and not rt.llm.has_key
+
+
 def test_a_refused_key_is_not_kept(workspace, endpoint, caplog):
     rt, web, _ = workspace
     key = fake_key()

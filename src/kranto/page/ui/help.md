@@ -536,8 +536,8 @@ On the preview (a second Kranto built from a branch, on a copy of your data, `kr
 Kranto's `docs/preview.md`) this is the status bar's first cell, and on the phone a strip above
 the doors. There nothing is posted: an approval says "This is the preview: nothing is sent", no
 kind can be turned live, no report or update goes out, and Check for updates says updates are off.
-A model key's test still asks its provider (that is how a key is checked). Every other install
-never shows it.
+A key pasted there is not tested or kept (testing it would send a request to its provider):
+the page says so. Every other install never shows it.
 
 **Healthy, Degraded or Paused, and why.** The status bar's first word (and the home's line, in
 both layouts and on the phone) is Kranto's health. When it is not Healthy, the words after it say
