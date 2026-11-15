@@ -117,7 +117,8 @@ A post Kranto posts directly (Bluesky, Mastodon, Threads, LinkedIn) can go at an
 choose: in its dialog choose **Schedule**, pick the day and time (your own clock), and say yes.
 
 - **Nothing goes without that yes.** Kranto keeps your yes for those words and that time; the
-  draft moves to **Scheduled** on Post ("Goes Monday 16 Nov, 09:00 · Bluesky").
+  draft moves to **Scheduled** on Post, its row saying when and where ("Mon 16 Nov, 09:00 ·
+  Bluesky").
 - **Move or cancel it until then.** Cancel on its row (or its page) and nothing is sent: the
   draft waits on Post again. Change the time from its page (the same dialog). To change its
   words, cancel first: an edited draft is a new draft and needs a new yes.
@@ -133,8 +134,8 @@ I posted it (Open) is always now: you post it in the site yourself.
 ## What each site gives back
 
 Once a day for two weeks after a post Kranto sent, then once a week until it is two months old,
-Kranto reads its numbers and shows them on Sent ("Posted to Bluesky · 4 replies, 9 reposts, 31
-likes"). Never the text of anyone's reply: counts only. Read live on 14 November 2026:
+Kranto reads its numbers and shows them on Sent, after where it went ("Bluesky · 4 replies, 9
+reposts, 31 likes"; a post you posted yourself reads "X · posted by you"). Never the text of anyone's reply: counts only. Read live on 14 November 2026:
 
 | Site | What Kranto reads | With what |
 |---|---|---|
