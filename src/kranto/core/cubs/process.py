@@ -104,6 +104,7 @@ class CubProcess:
         self.host_said: str | None = None      # the host's last refusal in a request (its words)
         self.cgroup: Path | None = None
         self.oom_kills = 0
+        self._parent_oom: int | None = None    # the parent's count at the last read of the scope
         self.hello_result: dict = {}
         self.dead = False
 
@@ -242,14 +243,32 @@ class CubProcess:
             time.sleep(0.25)
         self._read_oom()
 
-    def _read_oom(self) -> None:
+    @staticmethod
+    def _oom_count(cgroup: Path) -> int | None:
+        """The ``oom_kill`` count in a cgroup's ``memory.events``; None when unreadable."""
         try:
-            for line in (self.cgroup / "memory.events").read_text().splitlines():
+            for line in (cgroup / "memory.events").read_text().splitlines():
                 name, _, value = line.partition(" ")
                 if name == "oom_kill":
-                    self.oom_kills = max(self.oom_kills, int(value))
+                    return int(value)
         except (OSError, ValueError, TypeError):
-            pass
+            return None
+        return None
+
+    def _read_oom(self) -> bool:
+        """Read the scope's count; False when the scope is gone. The parent's count (its
+        ``memory.events`` is hierarchical: it counts the scope's kills too) is read just before,
+        and kept only when the scope's read worked, for ``_crashed`` to compare."""
+        if self.cgroup is None:
+            return False
+        parent = self._oom_count(self.cgroup.parent)
+        n = self._oom_count(self.cgroup)
+        if n is None:
+            return False
+        self.oom_kills = max(self.oom_kills, n)
+        if parent is not None:
+            self._parent_oom = parent
+        return True
 
     # -- a request ------------------------------------------------------------------------------
 
@@ -262,8 +281,13 @@ class CubProcess:
                 self.kill()
                 code = self.proc.returncode
         self.dead = True
-        if self.cgroup is not None:
-            self._read_oom()
+        if self.cgroup is not None and not self._read_oom() and self._parent_oom is not None:
+            # the scope was collected as its process ended, often before its last count could
+            # be read; the parent counted the same kill, so a rise there since the scope's last
+            # read (a quarter second at most before the end) is this scope's OOM kill
+            now = self._oom_count(self.cgroup.parent)
+            if now is not None and now > self._parent_oom:
+                self.oom_kills = max(self.oom_kills, now - self._parent_oom)
         shown = 128 - code if code is not None and code < 0 else code
         # "memory" only when the scope counted an OOM kill. An exit 137 it did not count is a
         # SIGKILL from elsewhere as likely (Toot's "memory" failure of 2026-10-21 was an
