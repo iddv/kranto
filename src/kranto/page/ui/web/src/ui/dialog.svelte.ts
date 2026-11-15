@@ -14,6 +14,9 @@ interface Shown {
   props: Record<string, unknown>;
   wide: boolean;
   n: number;
+  /** the address it opened at: going to another page closes it (it stayed open over the next
+   * page, "Decline this draft?" over Settings) */
+  at: string;
 }
 export const dlg = $state<{ now: Shown | null }>({ now: null });
 let n = 0;
@@ -21,7 +24,7 @@ const box = (): HTMLDialogElement | null => document.getElementById("dlg") as HT
 
 /** comp in the dialog with props (wide: the ? sheet, a charter's text) */
 export function openDialog<P extends Record<string, unknown>>(comp: Component<P & DialogProps>, props: P, o: { wide?: boolean } = {}): void {
-  dlg.now = { comp: comp as unknown as Shown["comp"], props, wide: !!o.wide, n: ++n };
+  dlg.now = { comp: comp as unknown as Shown["comp"], props, wide: !!o.wide, n: ++n, at: location.hash };
   flushSync(); // drawn now: its fields can be read and focused at once
   const d = box();
   if (!d || d.open) return;
@@ -33,6 +36,11 @@ export function closeDialog(): void {
   if (d && typeof d.close === "function" && d.open) d.close();
   else d?.removeAttribute("open");
   dlg.now = null;
+}
+/** the address changed (a link, Back, a key): a dialog opened at another address closes, so it
+ * never stands over a page it was not about; one opened just after its own move stays */
+export function moved(): void {
+  if (dlg.now && dlg.now.at !== location.hash) closeDialog();
 }
 /** esc closed it (the browser's own close): what it drew goes, unless another dialog opened since */
 export function closed(): void {
