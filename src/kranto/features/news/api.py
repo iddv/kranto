@@ -202,11 +202,11 @@ def latest(ctx: Any, params: dict[str, Any]) -> dict[str, Any]:
 
 def failed_line(ctx: Any, r: Any) -> dict[str, Any]:
     """A failed brief as Today's one line under the good one: when, why in the owner's words
-    (``model_trouble``: the provider's own trouble, said with where it is fixed), and the
-    page's route that fixes it."""
-    from kranto import model_trouble
+    (the context's ``model_trouble``: the provider's own trouble, said with where it is fixed),
+    and the page's route that fixes it."""
     error = r["error"] or ""
-    t = model_trouble.said(error, model_trouble.provider_of(getattr(ctx, "rt", None)))
+    say = getattr(ctx, "model_trouble", None)
+    t = say(error) if callable(say) else None
     why = t["words"] if t else (error.split(": ", 1)[-1][:200] or "no reason was given")
     return {"id": r["id"], "created_at": r["created_at"], "why": why,
             "fix": t["fix"] if t else None}

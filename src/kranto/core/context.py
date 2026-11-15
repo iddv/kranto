@@ -242,6 +242,13 @@ class FeatureContext:
     def cfg(self) -> Any:
         return self.rt.cfg
 
+    def model_trouble(self, error: Any) -> dict[str, Any] | None:
+        """A model's error in the owner's words for the provider in use (``model_trouble.said``:
+        ``{words, fix, key}``), or None when it is no model trouble Kranto knows. A feature
+        says a failed run this way without reaching past its context."""
+        from .. import model_trouble
+        return model_trouble.said(error, model_trouble.provider_of(self.rt))
+
     def now(self) -> datetime:
         return self.clock()
 
