@@ -7,7 +7,7 @@ import { answering, count, settle, stub } from "../../pages/testing.svelte";
 import { closeDialog } from "../../ui/dialog.svelte";
 import DraftSheet from "./DraftSheet.svelte";
 import WritePostDialog from "./WritePostDialog.svelte";
-import { aboutKey, aboutLine, downloadHref, followWrite, sheetPath, WRITING, type PostSheet } from "./post";
+import { aboutKey, aboutLine, downloadHref, followWrite, keptWords, sheetPath, WRITING, type PostSheet } from "./post";
 import { TOAST } from "../../ui/toast.svelte";
 
 afterEach(() => closeDialog());
@@ -255,6 +255,34 @@ describe("editing a draft", () => {
     expect(L.say).toHaveBeenCalledWith("Saved. The send that waited for your yes was withdrawn.");
     expect(location.hash).toBe("#/post/d/6");
     done();
+  });
+
+  it("keeps words typed into Edit through another page, Back or a reload, until Save or Cancel", async () => {
+    stub().api.mockImplementation(async () => ({ flags: [], verdict: "Reads natural" }));
+    answering({ [sheetPath(5)]: sheet({ can_edit: true, edit: { title: "T", body: "Intro." } }) });
+    const one = show(DraftSheet, { id: 5 });
+    await settle();
+    one.target.querySelector<HTMLButtonElement>("#draft-edit")!.click();
+    flushSync();
+    const body = one.target.querySelector<HTMLTextAreaElement>("#draft-edit-body")!;
+    body.value = "Intro, and my own new line.";
+    body.dispatchEvent(new Event("input", { bubbles: true }));
+    flushSync();
+    expect(keptWords(5)?.body).toBe("Intro, and my own new line.");
+    one.done();                                            // another page, Back, a reload
+    const two = show(DraftSheet, { id: 5 });
+    await settle();
+    flushSync();
+    expect(two.target.querySelector<HTMLTextAreaElement>("#draft-edit-body")?.value).toBe("Intro, and my own new line.");
+    expect(two.target.querySelector("#draft-edit-back")?.textContent).toContain("Your words from before are back");
+    two.target.querySelector<HTMLButtonElement>("#draft-cancel")!.click();
+    flushSync();
+    expect(keptWords(5)).toBeNull();
+    two.done();
+    const three = show(DraftSheet, { id: 5 });
+    await settle();
+    expect(three.target.querySelector("#draft-editor")).toBeNull();
+    three.done();
   });
 
   it("a flag's words and its fix are spaced: “names a person · aim the wit…”", async () => {

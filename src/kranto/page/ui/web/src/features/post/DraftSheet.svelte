@@ -29,7 +29,7 @@
   import DraftEditor from "./DraftEditor.svelte";
   import ProseFlags from "./ProseFlags.svelte";
   import { siteOf } from "./prose";
-  import { copyText, downloadHref, editPath, partsText, sheetPath, type PostEdited, type PostSheet } from "./post";
+  import { copyText, downloadHref, editPath, keepWords, keptWords, partsText, sheetPath, type KeptWords, type PostEdited, type PostSheet } from "./post";
   import { cancelHour } from "../../pages/post/post";
 
   // titled: the sheet's own title (off on the draft's page, whose head has it)
@@ -41,6 +41,22 @@
   const s = $derived(c?.data || null);
   let all = $state(false);
   let editing = $state(false);
+  // words typed into Edit and not saved (another page, Back, a reload): Edit opens again with
+  // them, once the draft is read and can still be edited
+  let kept = $state<KeptWords | null>(null);
+  let looked = $state<string | null>(null);
+  $effect(() => {
+    if (!s || looked === String(s.id)) return;
+    looked = String(s.id);
+    const k = keptWords(s.id);
+    if (k && s.can_edit && s.group === "waiting") {
+      kept = k;
+      editing = true;
+    } else {
+      kept = null;
+      if (k) keepWords(s.id, null);              // the draft moved on: its old words are not offered
+    }
+  });
   // the draft as drawn: its "# Title" line left out (the head says it); Copy and Download keep it
   const parts = $derived(s ? s.markdown.split(/\n{2,}/).filter((p, i) => !(i === 0 && p.trim() === `# ${s.title}`)) : []);
   const folded = $derived(!all && parts.length > 4);
@@ -124,7 +140,7 @@
     <p class="muted small" id="draft-facts">{facts}</p>
     {#if s.siblings?.length}<p class="muted small" id="draft-siblings">{#each s.siblings as x, i (x.id)}{#if i}{" · "}{/if}{#if String(x.id) === String(s.id)}<b>{x.word || x.site}{x.state === "sent" ? " ✓" : ""}</b>{:else}<a href={href(`post/d/${x.id}`)}>{(x.word || x.site) + (x.state === "sent" ? " ✓" : "")}</a>{/if}{/each}</p>{/if}
     {#if editing}
-      <DraftEditor {s} close={() => (editing = false)} saved={moved} />
+      <DraftEditor {s} {kept} close={() => { editing = false; kept = null; }} saved={(to) => { kept = null; moved(to); }} />
     {:else}
       {#if short && posts.length}
         <div class="draft-text" id="draft-text">

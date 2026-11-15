@@ -243,7 +243,9 @@ box of markdown; a short post is a box with its count, red past the site's limit
 what reads like AI, underlined with its plain fix, with **Fix them** (it rewrites only those
 words; nothing is kept until you choose Save). **Save** keeps your words as the draft that waits
 (it is "edited by you"); the original stays under Earlier drafts, and "Start again from the
-original" brings its words back. A send that was waiting for your yes is withdrawn first, and the
+original" brings its words back. Words you typed and did not save are kept in this browser tab:
+go to another page, go Back or reload, and Edit opens again with them (**Cancel** forgets
+them). A send that was waiting for your yes is withdrawn first, and the
 page says so. When your assistant (over `kranto mcp`, the console or an agent) asks to change a
 draft's words, nothing changes until you approve it in Needs you; the draft then says "edited by
 your assistant (mcp)", never "edited by you", and still waits for your yes before it goes. In
