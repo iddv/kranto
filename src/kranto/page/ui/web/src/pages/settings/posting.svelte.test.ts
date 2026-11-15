@@ -59,6 +59,20 @@ describe("Settings › Posting › Sites you post to", () => {
     done();
   });
 
+  it("draws LinkedIn, which has no Open, as posted directly: Connect and no switch", async () => {
+    stub();
+    hosted();
+    const li = site("linkedin", "LinkedIn", { ways: ["direct"], can_direct: true, direct: true, connection: "linkedin_post", limit: 3000 });
+    answering({ [POSTING_API]: { ...POSTING, sites: [li] }, [NEWSLETTER_API]: NL });
+    const { target, done } = await draw(PostingList, at());
+    await settle();
+    const row = target.querySelector("[aria-labelledby=post-sites] li.row")!;
+    expect(row.querySelector(".c-meta")?.textContent).toBe("Kranto posts after your yes, connect an account");
+    expect(row.querySelector("[data-act=post-direct]")).toBeNull();
+    expect(row.querySelector("[data-act=post-connect]")?.getAttribute("href")).toBe("#/settings/connections/linkedin_post");
+    done();
+  });
+
   it("says how a site posts", () => {
     expect(siteLine(site("bluesky", "Bluesky", { direct: true, account: "@me.bsky.social" }))).toBe("opens Bluesky with the draft ready · Kranto posts after your yes, as @me.bsky.social");
     expect(siteLine(site("bluesky", "Bluesky", { direct: true }))).toBe("opens Bluesky with the draft ready · Kranto posts after your yes, connect an account");

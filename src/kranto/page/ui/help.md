@@ -403,9 +403,10 @@ the post opens on it. **Skip** writes without one: the draft then only says what
 **Short posts** go to the sites people use, in one of two ways only. **Open in Bluesky** (or X,
 Threads, Mastodon) opens the site's own box with the post written; you post it there yourself, and back
 here **I posted it** moves it to Sent as "posted by you" (Kranto sends nothing). Where you switched
-a site to **Post directly** (Bluesky and Mastodon, with their posting account connected), **Post to
-Bluesky** sits beside Open and posts it after your yes in the confirm dialog. Open always comes
-first. Your own site comes first too: with your blog connected, Write a post writes the blog post,
+a site to **Post directly** (Bluesky, Mastodon and Threads, with their posting account
+connected), **Post to Bluesky** sits beside Open and posts it after your yes in the confirm
+dialog. Open always comes first. LinkedIn has no Open, so it is offered only as Post directly,
+with your own LinkedIn app's token. Your own site comes first too: with your blog connected, Write a post writes the blog post,
 and each short post is written from its words and links to it; with no blog, a short post links to
 the card's source. Each site's version is written for that site (Bluesky's 300 characters, X's 280
 with the link counted as 23), and each says how much of its limit it uses. Copy gives you the
@@ -416,8 +417,8 @@ words on any draft. On the preview Open is off and says nothing is posted.
 Settings has seven pages, in the order you set kranto up: **Watching** (the model key and
 provider, the model for each job, how often kranto reads, live search, and the logins some
 sources are read with), **Posting** (the sites you post short posts to, one line each, with
-**Post directly** where Kranto can post after your yes; **Add a site**, where Substack and
-LinkedIn are listed under "Not possible today" with why; your blog; the newsletter; how you
+**Post directly** where Kranto can post after your yes; **Add a site**, where Substack is listed
+under "Not possible today" with why; your blog; the newsletter; how you
 write), **Assistant**,
 **Spend**, **Privacy**, **System** (updates, the service, recent runs, your grades) and
 **Appearance**. **Advanced**, folded, has Prompts (every prompt Kranto sends a model, with your

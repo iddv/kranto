@@ -36,7 +36,8 @@ def test_the_console_may_write_short_posts_and_nothing_is_sent(rt, monkeypatch):
         assert client.post("/api/post/write", json={"about": "week", "as": "short"}
                            ).status_code == 400
         read = client.get("/api/post/sites").json()
-        assert {s["id"] for s in read["sites"]} == {"bluesky", "mastodon", "x", "threads"}
+        assert {s["id"] for s in read["sites"]} == {"bluesky", "mastodon", "x", "threads",
+                                                     "linkedin"}
         r = client.post("/api/post/sites", json={"sites": ["substack"]})
         assert r.status_code == 400 and "Substack" in r.json()["error"]
         assert client.post("/api/post/sites", json={"sites": ["x"]}).status_code == 200

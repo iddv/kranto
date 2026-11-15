@@ -39,6 +39,8 @@ from ..core.cubs.brokers.social import FILER
 PURPOSE = "post_social"
 PROMPT_VERSION = "post-social@1"
 MAX_PARTS = 3
+# the sites where Kranto, posting directly, attaches the link card it builds (title, teaser)
+CARDS = ("bluesky", "linkedin")
 
 TASK = (
     "Write a {name} post{about}. {shape} Open on the angle: a claim, a prediction or a "
@@ -238,7 +240,7 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
     else:
         extras.append({"key": "link", "words": "No link: the card has no source address",
                        "drop": False})
-    if choice.direct and site.id == "bluesky" and m.card:
+    if choice.direct and site.id in CARDS and m.card:
         extras.append({"key": "card", "words": f"Link card: {m.card.get('title') or m.link}",
                        "drop": False})
     if removed:
@@ -262,7 +264,7 @@ def file_variant(store, choice: sites_mod.Choice, v: dict[str, Any], m: Material
         "parts": [{"text": p} for p in parts], "text": text, "link": m.link,
         "link_to": m.link_to, "extras": v["extras"], "prose": v["prose"],
         "language": language, "blog_draft": m.blog_draft}
-    if choice.direct and site.id == "bluesky" and m.card:
+    if choice.direct and site.id in CARDS and m.card:
         content["card"] = m.card
     if site.id == "mastodon":
         content["visibility"] = "public"
@@ -274,6 +276,8 @@ def file_variant(store, choice: sites_mod.Choice, v: dict[str, Any], m: Material
         fields: dict[str, Any] = {"draft_ref": d["ref"], "site": site.id, "text": text}
     elif kind == "post.bluesky":
         fields = {"draft_ref": d["ref"], "text": text, "parts": len(parts), "language": language}
+    elif kind in ("post.linkedin", "post.threads"):
+        fields = {"draft_ref": d["ref"], "text": text}
     else:                              # post.mastodon
         fields = {"draft_ref": d["ref"], "text": text, "visibility": "public",
                   "language": language}

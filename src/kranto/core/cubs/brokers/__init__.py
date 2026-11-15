@@ -13,18 +13,21 @@ from __future__ import annotations
 from ... import tickets
 from .base import Op, performer
 from .bluesky import BlueskyAdapter
+from .linkedin import LinkedInAdapter
 from .mastodon import MastodonAdapter
 from .newsletter import adapters as _newsletter_adapters
 from .newsletter import register_kinds as _newsletter_kinds
 from .sanity import SanityAdapter
 from .sanity import register_kind as _sanity_kind
 from .social import register_kinds as _social_kinds
+from .threads import ThreadsAdapter
 
 _newsletter_kinds()
 _sanity_kind()
 _social_kinds()
 ADAPTERS: dict = {**_newsletter_adapters(), "mastodon": MastodonAdapter(),
-                  "sanity": SanityAdapter(), "bluesky": BlueskyAdapter()}
+                  "sanity": SanityAdapter(), "bluesky": BlueskyAdapter(),
+                  "linkedin": LinkedInAdapter(), "threads": ThreadsAdapter()}
 
 __all__ = ["ADAPTERS", "Op", "call", "grantable"]
 

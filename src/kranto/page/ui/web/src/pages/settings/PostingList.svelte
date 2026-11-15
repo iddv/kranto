@@ -40,6 +40,9 @@
 {#snippet siteEnd(s: PostingSite)}
   {#if s.needs === "instance" && !s.instance}
     <form class="inline" onsubmit={(e) => { e.preventDefault(); savePosting(e.currentTarget.querySelector("input"), { instance: server }, "Saved: Open goes to your server."); }}><input type="text" class="sm" id="posting-server" placeholder="Your server" aria-label="Your Mastodon server" bind:value={server} /></form>
+  {:else if s.can_direct && !s.ways.includes("open")}
+    <!-- a site with no Open (LinkedIn) is posted directly or not at all: Connect, no switch -->
+    {#if !s.account && s.connection}<a class="btn sm" data-act="post-connect" href={href("settings/connections/" + s.connection)}>Connect</a>{/if}
   {:else if s.can_direct}
     <label class="inline small"><input type="checkbox" data-act="post-direct" data-site={s.id} checked={s.direct} onchange={(e) => savePosting(e.currentTarget, { direct: { [s.id]: e.currentTarget.checked } }, e.currentTarget.checked ? (s.account ? `Kranto posts to ${s.name} after your yes.` : `Connect ${s.name} (posting) so Kranto can post there.`) : `${s.name}: Open only.`)} /> Post directly</label>
     {#if s.direct && !s.account && s.connection}{" "}<a class="small" data-act="post-connect" href={href("settings/connections/" + s.connection)}>Connect</a>{/if}

@@ -50,6 +50,8 @@ from .bluesky import BlueskyProvider
 from .bluesky_post import INFO as BLUESKY_POST_INFO
 from .bluesky_post import BlueskyPostProvider
 from .github import GitHubProvider
+from .linkedin_post import INFO as LINKEDIN_POST_INFO
+from .linkedin_post import LinkedInPostProvider
 from .mastodon import MastodonProvider
 from .mastodon_post import MastodonPostProvider
 from .oauth import OAuthError
@@ -58,6 +60,8 @@ from .reddit import RedditProvider
 from .sanity import INFO as SANITY_INFO
 from .sanity import SanityProvider
 from .secret import Secret
+from .threads_post import INFO as THREADS_POST_INFO
+from .threads_post import ThreadsPostProvider
 from .vault import Vault, VaultError, crypto_available
 from .x import XProvider
 from .youtube import YouTubeProvider
@@ -320,6 +324,8 @@ PROVIDER_INFO = [
                 {"key": "token", "label": "Access token", "secret": True}],
      "sources": []},
     BLUESKY_POST_INFO,
+    LINKEDIN_POST_INFO,
+    THREADS_POST_INFO,
     SANITY_INFO,
 ]
 INFO = {p["key"]: p for p in PROVIDER_INFO}
@@ -393,6 +399,8 @@ class Connections:
             "x": XProvider(http, self),
             "mastodon_post": MastodonPostProvider(http, self),
             "bluesky_post": BlueskyPostProvider(http, self),
+            "linkedin_post": LinkedInPostProvider(http, self),
+            "threads_post": ThreadsPostProvider(http, self),
             "sanity": SanityProvider(http, self),
             **{key: cls(http, self) for key, cls in REGISTERED.items()},
         }
