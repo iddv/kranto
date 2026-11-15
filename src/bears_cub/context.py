@@ -287,16 +287,21 @@ class Prose:
             limits=limits, features=features))
 
     def check(self, text: str, *, site: str | None = None, kind: str | None = None,
-              limits: dict | None = None, take: str | None = None) -> dict:
+              limits: dict | None = None, take: str | None = None,
+              sources: str | None = None) -> dict:
+        """``sources``: the material the text was written from (the card's or the item's words);
+        with it, a person's name or a handle the material does not have is flagged
+        (``salt.person``). SDK 1.4; a host before it refuses the key."""
         return self._ctx._call("prose.check", self._params(
-            text=str(text), site=site, kind=kind, limits=limits, take=take))
+            text=str(text), site=site, kind=kind, limits=limits, take=take,
+            sources=None if sources is None else str(sources)))
 
     def revise(self, text: str, flags: list | None = None, *, purpose: str, tier: str,
                site: str | None = None, kind: str | None = None, limits: dict | None = None,
-               take: str | None = None) -> dict:
+               take: str | None = None, sources: str | None = None) -> dict:
         return self._ctx._call("prose.revise", self._params(
             text=str(text), flags=flags, purpose=purpose, tier=tier, site=site, kind=kind,
-            limits=limits, take=take))
+            limits=limits, take=take, sources=None if sources is None else str(sources)))
 
 
 class Http:
