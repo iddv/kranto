@@ -134,6 +134,23 @@ ROWS = r"""() => {
 }"""
 
 
+def test_a_tall_dialog_keeps_its_title_and_buttons_in_view(browser, page_base):
+    """The keys sheet at 1400 × 900 opened scrolled to its Close, its title above the screen."""
+    page = browser.new_page(viewport={"width": 1400, "height": 900})
+    PageAfk(topics=["Clinics"]).install(page)
+    _owner(page)
+    page.goto(f"{page_base}/#/needs")
+    until(page, "document.documentElement.dataset.ui === 'svelte'", 15)
+    page.keyboard.press("?")
+    until(page, "document.querySelector('#dlg-t')?.textContent === 'Keyboard shortcuts'", 10)
+    page.wait_for_timeout(200)
+    box = page.evaluate("""() => { const t = document.querySelector('#dlg-t').getBoundingClientRect();
+      const f = document.querySelector('#dlg .dlg-f').getBoundingClientRect();
+      return { top: t.top, bottom: f.bottom, vh: innerHeight }; }""")
+    assert box["top"] >= 0 and box["bottom"] <= box["vh"] + 0.5, box
+    page.close()
+
+
 @pytest.mark.parametrize("width,height", [(1400, 900), (390, 844)])
 def test_post_rows_say_when_where_and_why(browser, page_base, width, height):
     ctx = browser.new_context(viewport={"width": width, "height": height}, timezone_id="Europe/London",
