@@ -202,7 +202,11 @@ jobs:
         run: >
           bwrap --unshare-all --die-with-parent --new-session --ro-bind / / --proc /proc
           unshare --user --map-current-user --pid --fork --mount --mount-proc true
+      # on GitHub's runner setup-uv would save its cache after the job, and it refuses
+      # UV_CACHE_DIR's relative path; this job keeps no cache
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
       - run: uv sync --locked --extra dev --extra connections --extra mcp
       - name: the cub runtime's security plan and failure modes
         run: >
