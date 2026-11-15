@@ -37,7 +37,7 @@ export function closeDialog(): void {
   else d?.removeAttribute("open");
   dlg.now = null;
 }
-/** the page changed (a link, Back, a key): a dialog opened on another page closes, so it never
+/** The page changed (a link, Back, a key): a dialog opened on another page closes, so it never
  * stands over a page it was not about; one opened just after its own move stays, and a change of
  * selection on the same page (?sel=) keeps it. The shell's own route change closes it too, from
  * its second page on; this holds from the first. */

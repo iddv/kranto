@@ -26,7 +26,7 @@
   let title = $state(back ? back.title : first.title);
   let body = $state(back ? back.body : first.body);
   let parts = $state(back && back.parts.length ? back.parts : first.parts);
-  // the words differ from the draft's: kept in this tab as they are typed, and a reload asks first
+  // the words differ from the draft's: kept in this browser as they are typed, and a reload asks first
   const dirty = $derived(title !== first.title || body !== first.body || JSON.stringify(parts) !== JSON.stringify(first.parts));
   $effect(() => {
     const id = untrack(() => s.id);

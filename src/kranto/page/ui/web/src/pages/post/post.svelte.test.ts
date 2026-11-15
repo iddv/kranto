@@ -169,7 +169,7 @@ describe("Post with short posts", () => {
     expect(dueShort(new Date(2026, 10, 16, 9, 0).toISOString(), now)).toBe("09:00");
     expect(dueShort(new Date(2026, 10, 17, 9, 0).toISOString(), now)).toBe("Tue");
     expect(dueShort(new Date(2026, 11, 1, 9, 0).toISOString(), now)).toBe("1 Dec");
-    // the server's words when the time does not read, and the site after them
+    // The server's words when the time does not read, and the site after them
     expect(dueWhen({ due: null, due_words: "Tuesday 17 Nov, 09:00", site_word: "Bluesky" })).toBe("Tuesday 17 Nov, 09:00 · Bluesky");
     expect(dueWhen({ due: new Date(2026, 10, 17, 9, 0).toISOString(), due_words: null, site_word: "Bluesky" })).toBe("Tue 17 Nov, 09:00 · Bluesky");
   });
