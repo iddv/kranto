@@ -15,7 +15,7 @@ set -euo pipefail
 
 TAG="${1:?usage: fresh_install.sh vX.Y.Z[-devN] DIR}" DIR="${2:?usage: fresh_install.sh TAG DIR}"
 : "${PORT:?set PORT (served on 127.0.0.1)}"
-REPO="${REPO:-iddv/kranto}"
+REPO="${REPO:-$(python3 "$(dirname "$0")/names.py" repo)}"
 VERSION="${TAG#v}" VERSION="${VERSION/-rc/rc}" VERSION="${VERSION/-dev/.dev}"
 GH_DIR="${GH_CONFIG_DIR:-$HOME/.config/gh}"
 rm -rf "$DIR/home" "$DIR/dl"
@@ -35,7 +35,7 @@ fresh() {   # a command in the fresh HOME: nothing of this shell's environment b
 }
 fresh sh "$DIR/dl/install.sh" --version "$TAG" --no-setup > "$DIR/install.log" 2>&1 || {
   echo "install.sh failed (see $DIR/install.log)"; exit 1; }
-fresh kranto --version | grep -q "^kranto $VERSION " || {
+[ "$(fresh kranto --version | head -n 1 | awk '{print $2}')" = "$VERSION" ] || {
   echo "kranto --version is not $VERSION: $(fresh kranto --version 2>&1)"; exit 1; }
 grep -q "SHA256SUMS\|: OK" "$DIR/install.log" || { echo "install.sh checked no hashes"; exit 1; }
 

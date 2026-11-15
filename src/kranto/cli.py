@@ -1680,3 +1680,7 @@ def main(argv: list[str] | None = None, *, runtime_factory=None) -> int:
     except (config_mod.ConfigError, CLIError, ValueError) as exc:
         print(f"afk: {exc}", file=sys.stderr)
         return 2
+
+
+if __name__ == "__main__":   # python -m kranto.cli
+    sys.exit(main())

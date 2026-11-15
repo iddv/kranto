@@ -558,13 +558,13 @@ without the three pitches (the schema-1 data dumps) are listed, not carded.
 
 **A hotfix**. A fix's pull request is open (its test in it):
 
-    scripts/release/hotfix.sh the server 332 --dry-run      # says what it would do; changes nothing
-    scripts/release/hotfix.sh the server 332                # merge, nightly cut, update, read back
-    scripts/release/hotfix.sh the server 332 --stable       # and the fix for stable installs
+    scripts/release/hotfix.sh kranto 332 --dry-run      # says what it would do; changes nothing
+    scripts/release/hotfix.sh kranto 332                # merge, nightly cut, update, read back
+    scripts/release/hotfix.sh kranto 332 --stable       # and the fix for stable installs
 
 It sets its own PATH (`~/.local/bin` first: a non-interactive ssh lacks it), merges with
 `merge_when_green.sh` and the repo's required jobs (never `--admin`, never a skipped job), cuts
-with `cut_local.sh --must-include <repo>@<merge commit>` (a nightly build; `rc_check.sh` on it
+with `cut_local.sh --must-include kranto@<merge commit>` (a nightly build; `rc_check.sh` on it
 on `HOTFIX_RC_PORT` when `decide.py` asks, and the build withdrawn if that fails), runs `kranto
 update --to <tag> --yes` here, and reads back `kranto --version` and the release's commit list,
 which must hold the merge commit. With `--stable` it then finds the stable line (`release/X.Y`;
@@ -588,13 +588,29 @@ ones named, the settings that stay off on stable, and the health checks that blo
 (a rollback of the build, a new error still occurring, `doctor --routes`, the odd installs).
 It never promotes by itself, and nothing counts days. The owner actions **Promote to stable** in
 Needs you; the action writes `update/promote.json` and starts the gate's unit, which clones
-main, cuts `vX.Y.0` held from the build's commits (making `release/X.Y` in both repos), runs
+main, cuts `vX.Y.0` held from the build's commit (making `release/X.Y`), runs
 `rc_check.sh` against the latest stable and releases it; a failure leaves it held, with a row
 saying where it stopped. `gate.py status` says the candidate, each check's reading and what it
 could not read; `gate.py known SIGNATURE --reason WHY` lifts an error the operator has looked
 at; `gate.py withdraw TAG --reason WHY` withdraws a nightly; `gate.py promote --now --tag
 vX.Y.Z --reason WHY` releases a held stable at once (a fix, or the operator's word). Every
 promotion is a line in `~/.local/state/kranto-release/gate.jsonl`.
+
+**The two release shapes.** Every release is cut from one checkout of the one repository
+(public.toml's `repo`) and published there. `cut_local.sh --shape final` (the default) builds
+one wheel, `kranto-V-py3-none-any.whl`, with `SHA256SUMS` and a `manifest.json` of
+`"shape": 2`; `install.sh` and the update helper install it as the uv tool `kranto`, which puts
+`kranto` and the old command on PATH. `--shape compat` builds the one nightly that crosses an
+install made before the rename over: the three wheels its old update helper installs, under the
+old names (`scripts/release/compat_wheels.py`: the real code without commands, an empty
+distribution, and a meta-package carrying both commands), with `"shape": 1` and the pins that
+helper compares. `guards.py shape` holds the order, at the cut and again in `publish.py`: a
+final release is refused until the release before it is `v0.7.0-dev1` or newer (it carries the
+helper for both shapes), and a compat release is refused once a final one exists. `rc_check.sh`
+checks the crossing from the old install's own release with `PREV_REPO=<its repository>` and,
+to start from a copy of a real home (by `scripts/preview/copy_live.py`'s rules: no secrets, no
+`.env`), `--home-copy <home>`; `--dry-run` says what it would run. CI's `install` job (not a
+required check yet) builds the final wheel, installs it into a scratch HOME and serves it.
 
 **Where it runs.** The operator's instances run on an always-on server, not the
 operator's PC: one checkout of the repository (after a merge: `git pull`,

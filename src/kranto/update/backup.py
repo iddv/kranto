@@ -22,10 +22,12 @@ from .. import paths
 
 
 def tool_dir(user_home: Path | None = None) -> Path:
-    """The uv tool environment ``kranto`` lives in (``$UV_TOOL_DIR``/kranto)."""
+    """The uv tool environment Kranto lives in (``$UV_TOOL_DIR``/kranto, or the old tool on an
+    install that has not crossed yet)."""
+    from .apply import tool_env_of
     base = os.environ.get("UV_TOOL_DIR")
-    return (Path(base) if base else
-            Path(user_home or Path.home()) / ".local" / "share" / "uv" / "tools") / "kranto"
+    return tool_env_of(Path(base) if base else
+                       Path(user_home or Path.home()) / ".local" / "share" / "uv" / "tools")
 
 
 def table_counts(db: Path) -> dict[str, int]:

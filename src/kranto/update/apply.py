@@ -49,13 +49,29 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 
-NAMES = ("kranto", "kranto.page")
-WHEEL = re.compile(r"^(kranto|kranto.page)-([^-]+)-py3-none-any\.whl$")
-EXTRAS = "connections,notify"
-REPOS = {"kranto": "iddv/kranto", "kranto.page": "iddv/kranto"}
-
 if sys.version_info < (3, 10):  # noqa: UP036 - the helper runs on the system Python
     raise SystemExit("the kranto update helper needs Python 3.10 or newer")
+
+try:
+    from .. import legacy, product
+except ImportError:      # the copy under <home>/update/, which launch puts beside these two
+    import legacy  # type: ignore[no-redef]
+    import product  # type: ignore[no-redef]
+
+# A release has one of two shapes. ``final``: one wheel, the distribution ``kranto``, installed
+# as the uv tool ``kranto``. ``compat``: the three wheels an install made before the rename
+# knows (its helper installs nothing else), installed as its old tool; it exists for one
+# release, the one that crosses such an install over, and its helper (this one) then moves
+# the install to the final shape: stop, uninstall the old tool, install ``kranto``.
+FINAL_DIST = product.DIST
+COMPAT = legacy.COMPAT_DISTS                      # (the meta-package, the server, the page)
+NAMES = (FINAL_DIST, *COMPAT)
+SHAPES = {"final": (FINAL_DIST,), "compat": COMPAT}
+TOOLS = {"final": product.DIST, "compat": legacy.TOOL}
+COMPAT_EXTRAS = ("mcp",)                           # the old meta-package's only extra
+WHEEL = re.compile(r"^([A-Za-z0-9_.]+)-([^-]+)-py3-none-any\.whl$")
+EXTRAS = "connections,notify"
+REPOS = {FINAL_DIST: product.REPO}
 
 
 class SetError(Exception):
@@ -146,28 +162,45 @@ def read_sums(path: Path) -> dict[str, str]:
 
 
 def wheels_in(folder: Path, version: str | None = None) -> dict[str, Path]:
-    """{distribution: wheel} for Kranto wheels in ``folder`` (at ``version`` if given)."""
+    """{distribution: wheel} for Kranto's wheels in ``folder`` (at ``version`` if given)."""
     out = {}
     for w in sorted(Path(folder).glob("*.whl")):
         m = WHEEL.match(w.name)
-        if m and (version is None or m[2] == version):
+        if m and m[1] in NAMES and (version is None or m[2] == version):
             out[m[1]] = w
     return out
 
 
+def shape_of(found: dict[str, Path] | set[str] | list[str]) -> str:
+    """``final`` (the one wheel) or ``compat`` (the three old ones), for a verified set."""
+    return "final" if FINAL_DIST in found else "compat"
+
+
+def pins_for(shape: str, version: str) -> dict[str, str]:
+    """What a set's manifest pins: the final wheel, or the old pair the old helper compares."""
+    if shape == "final":
+        return {FINAL_DIST: version}
+    return {legacy.COMPAT_SERVER: version, legacy.COMPAT_PAGE: version}
+
+
 def verify_set(folder: Path, version: str) -> dict[str, Path]:
-    """The three wheels of ``version`` in ``folder``, checked: every hash matches
-    ``SHA256SUMS``, the manifest (when there is one) names the same version, pins and hashes,
-    and the set is exactly Kranto, the server and the page. Raises ``SetError`` otherwise."""
+    """The wheels of ``version`` in ``folder``, checked: the set is exactly one shape (the one
+    ``kranto`` wheel, or the three old ones), every hash matches ``SHA256SUMS``, and the
+    manifest (when there is one) names the same version, the shape's pins and the same hashes.
+    Raises ``SetError`` otherwise."""
     folder = Path(folder)
-    stray = [w.name for w in folder.glob("*.whl") if not WHEEL.match(w.name)
-             or WHEEL.match(w.name)[2] != version]
+    stray = []
+    for w in folder.glob("*.whl"):
+        m = WHEEL.match(w.name)
+        if not m or m[1] not in NAMES or m[2] != version:
+            stray.append(w.name)
     if stray:
         raise SetError(f"unexpected wheels in the set: {', '.join(sorted(stray))}")
     found = wheels_in(folder, version)
-    if set(found) != set(NAMES):
-        raise SetError(f"the set for {version} must be exactly {', '.join(NAMES)}; found "
-                       f"{', '.join(sorted(found)) or 'nothing'}")
+    if set(found) not in [set(names) for names in SHAPES.values()]:
+        raise SetError(f"the set for {version} must be the one {FINAL_DIST} wheel or exactly "
+                       f"{', '.join(COMPAT)}; found {', '.join(sorted(found)) or 'nothing'}")
+    shape = shape_of(found)
     sums_path = folder / "SHA256SUMS"
     if not sums_path.is_file():
         raise SetError("SHA256SUMS is missing")
@@ -181,79 +214,101 @@ def verify_set(folder: Path, version: str) -> dict[str, Path]:
             m = json.loads(mpath.read_text())
         except ValueError as exc:
             raise SetError(f"manifest.json does not parse: {exc}") from exc
+        if not isinstance(m, dict):
+            raise SetError("manifest.json is not an object")
         if m.get("version") != version:
             raise SetError(f"manifest.json is for {m.get('version')}, not {version}")
-        if m.get("pins") != {"kranto": version, "kranto.page": version}:
+        if m.get("shape") is not None and m.get("shape") != (2 if shape == "final" else 1):
+            raise SetError(f"manifest.json says shape {m.get('shape')}; the wheels are {shape}")
+        if m.get("pins") != pins_for(shape, version):
             raise SetError(f"manifest.json pins {m.get('pins')}, not {version}")
-        listed = {w.get("name"): w.get("sha256") for w in m.get("wheels") or []}
+        listed = {w.get("name"): w.get("sha256") for w in m.get("wheels") or []
+                  if isinstance(w, dict)}
         for w in found.values():
             if listed.get(w.name) != sums[w.name]:
                 raise SetError(f"manifest.json disagrees with SHA256SUMS on {w.name}")
     return found
 
 
-def _kranto_req(extras) -> str:
-    """``kranto`` or ``kranto[mcp]``: the meta-package with the extras it was installed with."""
+def _req(name: str, extras) -> str:
+    """``name`` or ``name[a,b]``."""
     extras = sorted(set(extras or ()))
-    return "kranto" + (f"[{','.join(extras)}]" if extras else "")
+    return name + (f"[{','.join(extras)}]" if extras else "")
+
+
+def final_extras(kranto_extras=()) -> list[str]:
+    """The final wheel's extras: the defaults and whatever the install had (``mcp``)."""
+    return sorted({*EXTRAS.split(","), *(kranto_extras or ())})
 
 
 def install_args(found: dict[str, Path], kranto_extras=()) -> list[str]:
-    """The ``uv tool install`` arguments for a verified set (direct paths, never names). The
-    meta-package keeps its extras (``kranto[mcp] @ file:///…whl``)."""
-    kranto = (f"{_kranto_req(kranto_extras)} @ {Path(found['kranto']).resolve().as_uri()}"
-             if kranto_extras else str(found["kranto"]))
-    return ["--with-executables-from", "kranto,kranto.page",
-            "--with", str(found["kranto"]), "--with", str(found["kranto.page"]), kranto]
+    """The ``uv tool install`` arguments for a verified set (direct paths, never names), keeping
+    the extras the install had. ``final``: ``kranto[connections,mcp,notify] @ file:///…whl``,
+    the tool ``kranto``. ``compat``: the old helper's own line (the server and the page by
+    ``--with``, their commands too, the meta-package last), the old tool."""
+    if shape_of(found) == "final":
+        uri = Path(found[FINAL_DIST]).resolve().as_uri()
+        return [f"{_req(FINAL_DIST, final_extras(kranto_extras))} @ {uri}"]
+    meta, server, page = COMPAT
+    extras = [x for x in (kranto_extras or ()) if x in COMPAT_EXTRAS]
+    last = (f"{_req(meta, extras)} @ {Path(found[meta]).resolve().as_uri()}"
+            if extras else str(found[meta]))
+    return ["--with-executables-from", f"{server},{page}",
+            "--with", str(found[server]), "--with", str(found[page]), last]
 
 
 def git_requirements(commits: dict[str, str], extras: str = EXTRAS,
                      kranto_extras=()) -> list[str]:
-    """the server and the page at the spec's commits, as requirement lines. Kranto's ``mcp`` extra
-    needs the page's own ``mcp`` extra, so the pin keeps it."""
-    brb = "kranto.page[mcp]" if "mcp" in (kranto_extras or ()) else "kranto.page"
-    return [f"kranto[{extras}] @ git+https://github.com/{REPOS['kranto']}"
-            f"@{commits['kranto']}",
-            f"{brb} @ git+https://github.com/{REPOS['kranto.page']}@{commits['kranto.page']}"]
+    """``kranto`` at the spec's commit, as a requirement line (the ``main`` channel)."""
+    want = sorted({*extras.split(","), *(kranto_extras or ())} - {""})
+    return [f"{_req(FINAL_DIST, want)} @ git+https://github.com/{REPOS[FINAL_DIST]}"
+            f"@{commits[FINAL_DIST]}"]
 
 
 def git_install_args(commits: dict[str, str], extras: str = EXTRAS, *,
-                     overrides: Path, kranto_extras=()) -> list[str]:
-    """The ``uv tool install`` arguments for a git spec (the ``main`` channel's install).
-
-    The meta-package on ``main`` depends on the server and the page by git URL with no ref, so
-    pinning older commits with ``--with`` conflicts with it once ``main`` has moved on. The
-    commits go in an overrides file (``overrides``, written here), which replaces those
-    requirements."""
-    overrides = Path(overrides)
-    overrides.parent.mkdir(parents=True, exist_ok=True)
-    overrides.write_text("\n".join(git_requirements(commits, extras, kranto_extras)) + "\n")
-    kranto = commits.get("kranto") or commits["kranto"]
-    return ["--with-executables-from", "kranto,kranto.page", "--overrides", str(overrides),
-            f"{_kranto_req(kranto_extras)} @ git+https://github.com/{REPOS['kranto']}@{kranto}"
-            "#subdirectory=packages/kranto"]
+                     overrides: Path | None = None, kranto_extras=()) -> list[str]:
+    """The ``uv tool install`` arguments for a git spec (the ``main`` channel's install): one
+    distribution at one commit. (``overrides`` is accepted for older callers; one requirement
+    needs none.)"""
+    return git_requirements(commits, extras, kranto_extras)
 
 
 def receipt_extras(env: Path) -> list[str]:
-    """The extras ``kranto`` was installed with (``uv tool install "kranto[mcp] @ …"``), from the
-    tool's ``uv-receipt.toml``; an update keeps them."""
+    """The extras the tool's main package was installed with (``uv tool install
+    "kranto[mcp] @ …"``, or the old meta-package's), from its ``uv-receipt.toml``; an update
+    keeps them."""
     try:
         text = (Path(env) / "uv-receipt.toml").read_text()
     except OSError:
         return []
+    names = (FINAL_DIST, legacy.COMPAT_META)
     try:
         import tomllib
 
         reqs = (tomllib.loads(text).get("tool") or {}).get("requirements") or []
         for r in reqs:
-            if isinstance(r, dict) and r.get("name") == "kranto":
+            if isinstance(r, dict) and r.get("name") in names:
                 return sorted(str(x) for x in r.get("extras") or [])
         return []
     except ImportError:  # Python 3.10: the receipt's one-line inline table
-        m = re.search(r'\{\s*name\s*=\s*"kranto"\s*,\s*extras\s*=\s*\[([^\]]*)\]', text)
-        return sorted(re.findall(r'"([^"]+)"', m.group(1))) if m else []
+        for name in names:
+            m = re.search(r'\{\s*name\s*=\s*"' + re.escape(name)
+                          + r'"\s*,\s*extras\s*=\s*\[([^\]]*)\]', text)
+            if m:
+                return sorted(re.findall(r'"([^"]+)"', m.group(1)))
+        return []
     except ValueError:
         return []
+
+
+def tool_env_of(tool_dir: Path) -> Path:
+    """The uv tool environment this install lives in: ``kranto``, else the old tool when only
+    it exists (an install that has not crossed yet), else ``kranto`` (none yet)."""
+    tool_dir = Path(tool_dir)
+    for name in (TOOLS["final"], TOOLS["compat"]):
+        if (tool_dir / name).is_dir():
+            return tool_dir / name
+    return tool_dir / TOOLS["final"]
 
 
 # -- what an environment has installed ----------------------------------------------------------
@@ -288,25 +343,31 @@ def installed(env: Path | None = None) -> dict:
 
     ``{"version": Kranto's version, "versions": {name: version}, "channel": ..., "spec": ...}``
 
-    ``spec`` is what reinstalls it: ``{"kind": "wheels", "dir": ..., "version": ...}`` when
-    every distribution came from one folder of wheels; ``{"kind": "git", "commits": {name:
-    sha}, "extras": ...}`` when they came from git; ``{"kind": "local", ...}`` for an editable
-    or other install (it cannot be reinstalled by the helper). ``channel`` is the line the
-    installed wheels belong to (``stable`` or ``nightly``, by version: an install that chose
-    stable still runs its last nightly until the next promotion), ``main`` for git, ``dev``
-    otherwise."""
+    The shape is ``final`` when the ``kranto`` distribution is there, ``compat`` when the old
+    ones are (an install that has not crossed yet, or the crossing release itself); the
+    version is the one of the distribution that holds the code. ``spec`` is what reinstalls
+    it: ``{"kind": "wheels", "dir", "version", "shape", "tool"}`` when every distribution
+    came from one folder of wheels; ``{"kind": "git", "commits": {name: sha}, "extras", ...}``
+    when the final distribution came from git; ``{"kind": "local", ...}`` for an editable,
+    an old git install or anything else (the helper cannot reinstall it). ``channel`` is the
+    line the installed wheels belong to (``stable`` or ``nightly``, by version), ``main`` for
+    git, ``dev`` otherwise."""
     env = Path(env or sys.prefix)
     versions, urls = {}, {}
     for name in NAMES:
         d = _dist_info(env, name)
-        versions[name] = _metadata_version(d) if d else None
+        if d is None:
+            continue
+        versions[name] = _metadata_version(d)
         try:
-            urls[name] = json.loads((d / "direct_url.json").read_text()) if d else None
+            urls[name] = json.loads((d / "direct_url.json").read_text())
         except (OSError, ValueError):
             urls[name] = None
-    version = versions.get("kranto") or versions.get("kranto")
+    shape = "final" if FINAL_DIST in versions else "compat"
+    version = versions.get(FINAL_DIST) or versions.get(legacy.COMPAT_SERVER)
     kinds, commits, dirs = set(), {}, set()
-    for name, u in urls.items():
+    for name in SHAPES[shape]:
+        u = urls.get(name)
         if not u:
             kinds.add("unknown" if versions.get(name) else "missing")
             continue
@@ -319,13 +380,15 @@ def installed(env: Path | None = None) -> dict:
         else:
             kinds.add("local")
     if kinds == {"wheels"} and len(dirs) == 1:
-        spec = {"kind": "wheels", "dir": dirs.pop(), "version": version}
+        spec = {"kind": "wheels", "dir": dirs.pop(), "version": version, "shape": shape,
+                "tool": TOOLS[shape]}
         channel = line_of(version)
-    elif kinds == {"git"} and {"kranto", "kranto.page"} <= set(commits):
-        spec = {"kind": "git", "commits": commits, "extras": EXTRAS}
+    elif shape == "final" and kinds == {"git"} and commits.get(FINAL_DIST):
+        spec = {"kind": "git", "commits": commits, "extras": EXTRAS, "shape": shape,
+                "tool": TOOLS[shape]}
         channel = "main"
     else:
-        spec = {"kind": "local", "kinds": sorted(kinds)}
+        spec = {"kind": "local", "kinds": sorted(kinds), "shape": shape}
         channel = "dev"
     kranto_extras = receipt_extras(env)
     if kranto_extras and spec["kind"] in ("wheels", "git"):
@@ -446,14 +509,14 @@ def _run(cmd: list[str], env: dict | None = None, timeout: float = 120) -> \
 
 
 def cli_token(env: dict, unit: str) -> str | None:
-    """The command line's token (``the server/tokens.py``: ``~/.config/kranto/tokens/cli.token``,
-    ``tokens.<unit>`` for another unit, ``$KRANTO_TOKENS_DIR`` when set); None when there is
-    none (a server from before tokens takes the helper's writes without one)."""
+    """The command line's token (``kranto/tokens.py``: ``~/.config/kranto/tokens/cli.token``,
+    or the old config folder when only it exists; ``tokens.<unit>`` for another unit;
+    ``$KRANTO_TOKENS_DIR`` when set); None when there is none (a server from before tokens
+    takes the helper's writes without one)."""
     if env.get("KRANTO_TOKENS_DIR"):
         d = Path(env["KRANTO_TOKENS_DIR"]).expanduser()
     else:
-        name = "tokens" if unit == "kranto.service" else "tokens." + unit.removesuffix(".service")
-        d = Path(env.get("HOME") or Path.home()) / ".config" / "kranto" / name
+        d = legacy.unit_store("tokens", {**env, "KRANTO_UNIT": unit})
     try:
         return (d / "cli.token").read_text().strip() or None
     except OSError:
@@ -623,7 +686,7 @@ class Helper:
     /proc guard), ``sleep``, ``clock``, ``which``, ``free_bytes``."""
 
     def __init__(self, home: Path, to: str, *, when: str = "after-build", port: int = 8765,
-                 unit: str = "kranto.service", keep: int = 3, env: dict | None = None,
+                 unit: str | None = None, keep: int = 3, env: dict | None = None,
                  ignore_pids: set[int] | None = None,
                  run: Callable = _run, http: Callable = _http, procs: Callable = tool_processes,
                  sleep: Callable = time.sleep, clock: Callable = time.monotonic,
@@ -635,15 +698,21 @@ class Helper:
         self.to = to
         self.when = when
         self.port = port
-        self.unit = unit
         self.keep = keep
         self.env = dict(os.environ if env is None else env)
-        self.env.update(KRANTO_HOME=str(self.home), KRANTO_UNIT=unit)
+        legacy.adopt_env(self.env)            # a unit written before the rename names old ones
+        self.unit = unit or legacy.unit_name(self.env)
+        self.env.update(KRANTO_HOME=str(self.home), KRANTO_UNIT=self.unit)
+        # and under the old names: a version from before the rename (a rollback to it, or the
+        # crossing's first start) reads only those, and without them it would take the default
+        # unit and home, which may be another install's (the rehearsal on a copy found it)
+        old = legacy.ENV_PREFIXES[0]
+        self.env.update({old + "HOME": str(self.home), old + "UNIT": self.unit})
         user = Path(self.env.get("HOME") or Path.home())
         self.tool_dir = Path(self.env.get("UV_TOOL_DIR") or
                              user / ".local" / "share" / "uv" / "tools")
         self.bin_dir = Path(self.env.get("UV_TOOL_BIN_DIR") or user / ".local" / "bin")
-        self.tool_env = self.tool_dir / "kranto"
+        self.tool_env = tool_env_of(self.tool_dir)
         self.ignore = set(ignore_pids or ())
         self.run, self.http, self.procs = run, http, procs
         self.check_routes = check_routes
@@ -707,9 +776,15 @@ class Helper:
         return self.http(method, self.base + path, body)
 
     def guard(self) -> list[tuple[int, str]]:
-        roots = [str(self.tool_env) + "/"] + [str(self.bin_dir / n) for n in ("kranto", "afk",
-                                                                              "brb")]
+        roots = [str(self.tool_dir / t) + "/" for t in sorted(set(TOOLS.values()))]
+        roots += [str(self.bin_dir / n) for n in (product.COMMAND, *legacy.COMMANDS)]
         return self.procs(roots, self.ignore)
+
+    def cmd(self) -> str:
+        """The installed command: ``kranto``, else the old one (a version from before the
+        rename has only that; a broken link left by a swap does not count)."""
+        new = self.bin_dir / product.COMMAND
+        return str(new if new.exists() else self.bin_dir / legacy.COMMAND)
 
     def main_pid(self) -> int | None:
         r = self.systemctl("show", "-p", "MainPID", "--value", self.unit)
@@ -736,19 +811,25 @@ class Helper:
                     found = verify_set(Path(spec["dir"]), spec["version"])
                 except SetError as exc:
                     raise Refused(f"the previous set does not verify: {exc}") from exc
-                return {**spec, "args": install_args(found, extras)}
-            return {**spec, "args": git_install_args(spec["commits"],
-                                                     spec.get("extras") or EXTRAS,
-                                                     overrides=self.overrides,
-                                                     kranto_extras=extras)}
+                shape = shape_of(found)
+                return {**spec, "shape": shape, "tool": TOOLS[shape],
+                        "args": install_args(found, extras)}
+            if not (spec.get("commits") or {}).get(FINAL_DIST):
+                raise Refused("the previous version came from git in an older layout; "
+                              "the helper cannot reinstall it")
+            return {**spec, "shape": "final", "tool": TOOLS["final"],
+                    "args": git_install_args(spec["commits"], spec.get("extras") or EXTRAS,
+                                             kranto_extras=extras)}
         version = tag_version(self.to)
         folder = releases_dir(self.home) / self.to
         try:
             found = verify_set(folder, version)
         except SetError as exc:
             raise Refused(f"the staged set for {self.to} does not verify: {exc}") from exc
-        return {"kind": "wheels", "dir": str(folder), "version": version,
-                "args": install_args(found, current), "kranto_extras": current}
+        shape = shape_of(found)
+        return {"kind": "wheels", "dir": str(folder), "version": version, "shape": shape,
+                "tool": TOOLS[shape], "args": install_args(found, current),
+                "kranto_extras": current}
 
     def preconditions(self) -> dict:
         self.state("requested", detail="checking the preconditions")
@@ -811,7 +892,7 @@ class Helper:
     def backup(self) -> None:
         self.state("backing_up", detail="both databases, the configs and the unit")
         dest = self.home / "backups" / f"update-{_stamp()}-from-{self.old.get('version')}"
-        r = self.sh(str(self.bin_dir / "kranto"), "backup", str(dest), timeout=900)
+        r = self.sh(self.cmd(), "backup", str(dest), timeout=900)
         if r.returncode != 0:
             raise Refused(f"the backup failed: {(r.stderr or r.stdout).strip()[-300:]}")
         self.backup_dir = dest
@@ -847,8 +928,9 @@ class Helper:
         nothing."""
         r = self.sh("journalctl", "--user", "-u", self.unit, "--since", f"@{since}", "-o", "cat",
                     "--no-pager", "-q", timeout=30)
+        marks = tuple(f" {pkg}.stop stop: " for pkg in (product.DIST, legacy.OLD_PACKAGE))
         said = [line.split(" stop: ", 1)[1].strip() for line in (r.stdout or "").splitlines()
-                if " kranto.stop stop: " in line and ("done in" in line or "forced" in line)]
+                if any(m in line for m in marks) and ("done in" in line or "forced" in line)]
         return said[-1][:300] if said else None
 
     def stop_result(self, seconds: float, said: str | None = None) -> None:
@@ -880,17 +962,33 @@ class Helper:
             return
         self.log(f"WARNING: {self.st['warning']}")
 
-    def install(self, args: list[str], *, offline: bool = False, forward: bool = True) -> None:
+    def swap_out(self, tool: str) -> None:
+        """Uninstall every Kranto tool but ``tool`` before ``tool`` is installed (the crossing,
+        and its way back). Before, not after: uv's uninstall removes the commands of the same
+        names even when the other tool has since taken them over."""
+        for other in sorted(set(TOOLS.values()) - {tool}):
+            if (self.tool_dir / other).is_dir():
+                r = self.sh("uv", "tool", "uninstall", other, timeout=300)
+                if r.returncode != 0 and (self.tool_dir / other).is_dir():
+                    raise StepFailed(f"uv tool uninstall {other} failed: "
+                                     f"{(r.stderr or r.stdout).strip()[-300:]}")
+
+    def install(self, args: list[str], *, offline: bool = False, forward: bool = True,
+                tool: str | None = None) -> None:
+        if tool:
+            self.swap_out(tool)
         cmd = ["uv", "tool", "install", "--force", "--python", "3.12",
                *(["--offline"] if offline else []), *args]
         r = self.sh(*cmd, timeout=INSTALL_S)
+        if tool:
+            self.tool_env = self.tool_dir / tool
         if forward and "install" in self.fail:
             raise StepFailed("forced: install")
         if r.returncode != 0:
             raise StepFailed(f"uv tool install failed: {(r.stderr or r.stdout).strip()[-300:]}")
 
     def start(self) -> None:
-        r = self.sh(str(self.bin_dir / "kranto"), "up", "--no-browser", timeout=300)
+        r = self.sh(self.cmd(), "up", "--no-browser", timeout=300)
         if "start" in self.fail:
             raise StepFailed("forced: start")
         if r.returncode != 0:
@@ -908,13 +1006,16 @@ class Helper:
                              f"{want.get('version')} wheels")
         if want.get("kind") == "git" and any(
                 (have.get("spec") or {}).get("commits", {}).get(k) != v
-                for k, v in (want.get("commits") or {}).items() if k in ("kranto",
-                                                                        "kranto.page")):
+                for k, v in (want.get("commits") or {}).items() if k == FINAL_DIST):
             raise StepFailed("the installed commits are not the ones asked for")
-        r = self.sh(str(self.bin_dir / "kranto"), "--version", timeout=60)
+        if want.get("tool") and Path(have.get("env") or "").name != want["tool"]:
+            raise StepFailed(f"the tool is {Path(have.get('env') or '').name}, not "
+                             f"{want['tool']}")
+        r = self.sh(self.cmd(), "--version", timeout=60)
         if r.returncode != 0 or (have.get("version") or "?") not in (r.stdout or ""):
-            raise StepFailed(f"kranto --version says {(r.stdout or r.stderr).strip()[:120]}")
-        server_version = (have.get("versions") or {}).get("kranto")
+            raise StepFailed(f"{Path(self.cmd()).name} --version says "
+                             f"{(r.stdout or r.stderr).strip()[:120]}")
+        server_version = have.get("version")
         deadline = self.clock() + VERIFY_S
         status = None
         while self.clock() < deadline:
@@ -985,6 +1086,19 @@ class Helper:
         self.log("counts after: " + ("no table lower" if not lower else
                                      "LOWER: " + "; ".join(lower)))
 
+    def previous_install(self, spec: dict) -> tuple[list[str], str]:
+        """The ``uv tool install`` arguments and the tool for the install being replaced."""
+        extras = spec.get("kranto_extras") or ()
+        if spec.get("kind") == "wheels":
+            found = verify_set(Path(spec["dir"]), self.old["version"])
+            shape = shape_of(found)
+            return install_args(found, extras), TOOLS[shape]
+        if spec.get("kind") == "git" and (spec.get("commits") or {}).get(FINAL_DIST):
+            return (git_install_args(spec["commits"], spec.get("extras") or EXTRAS,
+                                     kranto_extras=extras), TOOLS["final"])
+        raise StepFailed(f"the previous install ({spec.get('kind')}) cannot be "
+                         "reinstalled by the helper")
+
     def rollback(self, reason: str) -> str:
         self.state("rolling_back", reason=reason, detail=f"putting {self.old.get('version')} back")
         spec = self.old.get("spec") or {}
@@ -993,25 +1107,20 @@ class Helper:
             if "rollback" in self.fail:
                 raise StepFailed("forced: rollback")
             self.systemctl("stop", self.unit, timeout=150)
-            extras = spec.get("kranto_extras") or ()
+            args, tool = self.previous_install(spec)
             if spec.get("kind") == "wheels":
-                found = verify_set(Path(spec["dir"]), self.old["version"])
                 try:
-                    self.install(install_args(found, extras), offline=True, forward=False)
+                    self.install(args, offline=True, forward=False, tool=tool)
                 except StepFailed:
-                    self.install(install_args(found, extras), forward=False)
-            elif spec.get("kind") == "git":
-                self.install(git_install_args(spec["commits"], spec.get("extras") or EXTRAS,
-                                              overrides=self.overrides, kranto_extras=extras),
-                             forward=False)
+                    self.install(args, forward=False, tool=tool)
             else:
-                raise StepFailed(f"the previous install ({spec.get('kind')}) cannot be "
-                                 "reinstalled by the helper")
-            r = self.sh(str(self.bin_dir / "kranto"), "up", "--no-browser", timeout=300)
+                self.install(args, forward=False, tool=tool)
+            r = self.sh(self.cmd(), "up", "--no-browser", timeout=300)
             if r.returncode != 0:
-                raise StepFailed(f"kranto up failed: {(r.stderr or r.stdout).strip()[-300:]}")
+                raise StepFailed(f"{Path(self.cmd()).name} up failed: "
+                                 f"{(r.stderr or r.stdout).strip()[-300:]}")
             back = installed(self.tool_env)
-            want = (self.old.get("versions") or {}).get("kranto")
+            want = self.old.get("version")
             deadline = self.clock() + VERIFY_S
             while True:
                 code, status = self.api("GET", "/api/status")
@@ -1036,25 +1145,33 @@ class Helper:
                                   "not touched")
 
     def manual_lines(self, spec: dict) -> str:
-        """The fallback by hand (RUNBOOK), for ``failed``."""
+        """The fallback by hand (RUNBOOK), for ``failed``: uninstall the other tool when the
+        update crossed shapes, reinstall the previous one, start it."""
+        tool = spec.get("tool") or TOOLS[spec.get("shape") or "final"]
         if spec.get("kind") == "wheels":
             found = wheels_in(Path(spec["dir"]), self.old.get("version"))
+            ok = set(found) in [set(n) for n in SHAPES.values()]
+            if ok:
+                tool = TOOLS[shape_of(found)]
             args = " ".join(f'"{a}"' if " " in a else a
                             for a in install_args(found, spec.get("kranto_extras") or ())) \
-                if len(found) == 3 else f"{spec['dir']}/*.whl"
-        elif spec.get("kind") == "git":
+                if ok else f"{spec['dir']}/*.whl"
+        elif spec.get("kind") == "git" and (spec.get("commits") or {}).get(FINAL_DIST):
             args = " ".join(f'"{a}"' if " " in a else a
                             for a in git_install_args(spec["commits"],
                                                       spec.get("extras") or EXTRAS,
-                                                      overrides=self.overrides,
                                                       kranto_extras=spec.get("kranto_extras")
                                                       or ()))
         else:
             args = "<the previous wheels or git spec>"
+        others = [t for t in sorted(set(TOOLS.values()) - {tool})
+                  if (self.tool_dir / t).is_dir()]
+        swap = "".join(f"uv tool uninstall {t}; " for t in others)
+        command = self.bin_dir / (product.COMMAND if tool == TOOLS["final"] else legacy.COMMAND)
         bk = f"; restore the databases from {self.backup_dir} only if the data is damaged" \
             if self.backup_dir else ""
-        return (f"by hand: systemctl --user stop {self.unit}; uv tool install --force --python "
-                f"3.12 {args}; {self.bin_dir / 'kranto'} up --no-browser{bk}")
+        return (f"by hand: systemctl --user stop {self.unit}; {swap}uv tool install --force "
+                f"--python 3.12 {args}; {command} up --no-browser{bk}")
 
     def prune(self) -> None:
         """Keep ``keep`` update backups and wheel sets, never the running or previous set."""
@@ -1114,7 +1231,7 @@ class Helper:
                                detail="nothing was installed; Kranto was started again")
         try:
             self.state("installing", detail=f"uv tool install {to}")
-            self.install(tgt["args"])
+            self.install(tgt["args"], tool=tgt.get("tool"))
             self.state("starting", detail="kranto up")
             self.start()
             self.state("verifying", detail="the new version answers, the lane ticks")
@@ -1136,7 +1253,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="vX.Y.Z or vX.Y.0-devN (a staged set) or previous")
     p.add_argument("--when", default="after-build", choices=("after-build", "now"))
     p.add_argument("--port", type=int, default=8765)
-    p.add_argument("--unit", default=os.environ.get("KRANTO_UNIT") or "kranto.service")
+    p.add_argument("--unit", default=None,
+                   help="the unit to restart (default: this install's own)")
     p.add_argument("--keep", type=int, default=3)
     p.add_argument("--ignore-pid", type=int, action="append", default=[])
     args = p.parse_args(argv)

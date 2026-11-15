@@ -1,9 +1,9 @@
 name: ci
 # Every pull request and every push to main. Each job runs on the runner the repository variable
 # RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, and for a run
-# started by hand with "hosted", on GitHub's own runner. The required checks are the eight jobs
-# below: test, fast, slow, browser, frontend, lint, gitleaks and sandbox. A skipped required job
-# is never green.
+# started by hand with "hosted", on GitHub's own runner. The required checks are eight of the jobs
+# below: test, fast, slow, browser, frontend, lint, gitleaks and sandbox (install is not required
+# yet). A skipped required job is never green.
 on:
   pull_request:
   push:
@@ -218,3 +218,53 @@ jobs:
           KRANTO_BWRAP_REQUIRED=1 KRANTO_TEST_REAL_CLAUDE="$(command -v claude || true)"
           .venv/bin/pytest -q -rs tests/page/test_term_sandbox.py tests/page/test_term_door.py
           tests/page/test_term_sources.py tests/page/test_print_call.py
+
+  # The release as a stranger installs it: the final wheel built by the release script (with a
+  # pretend version), installed with uv into a scratch HOME, both commands answering it, the
+  # server started on loopback ('kranto up --foreground': no systemd) and every page it serves
+  # read once. Not a required check yet.
+  install:
+    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 30
+    env:
+      VERSION: 0.0.1.dev0
+      TAG: v0.0.1-dev0
+      PORT: "8791"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: build the final wheel (scripts/release/build.sh)
+        run: SRC="$GITHUB_WORKSPACE" DIST="$RUNNER_TEMP/dist" bash scripts/release/build.sh --shape final
+      - name: install it into a scratch HOME
+        run: |
+          S="$RUNNER_TEMP/scratch"
+          mkdir -p "$S/home"
+          echo "S=$S" >> "$GITHUB_ENV"
+          dist="$(python3 scripts/release/names.py dist)"
+          HOME="$S/home" UV_TOOL_DIR="$S/home/tools" UV_TOOL_BIN_DIR="$S/home/bin" \
+            uv tool install --python 3.12 \
+            "$dist[connections,notify,mcp] @ file://$(ls "$RUNNER_TEMP/dist/$dist"-*.whl)"
+      - name: both commands answer the version
+        run: |
+          for c in "$(python3 scripts/release/names.py command)" "$(python3 scripts/release/names.py alias)"; do
+            got="$("$S/home/bin/$c" --version)"
+            echo "$c --version: $got"
+            [ "$(echo "$got" | awk '{print $2}')" = "$VERSION" ]
+          done
+      - name: serve on loopback, then doctor --routes
+        run: |
+          kr="$S/home/bin/$(python3 scripts/release/names.py command)"
+          export HOME="$S/home" KRANTO_HOME="$S/home/home"
+          "$kr" up --foreground --no-browser --port "$PORT" > "$S/serve.log" 2>&1 &
+          pid=$!
+          for _ in $(seq 1 90); do
+            curl -sf -o /dev/null "http://127.0.0.1:$PORT/api/status" && break
+            sleep 1
+          done
+          code=0
+          "$kr" doctor --routes --port "$PORT" || code=$?
+          kill "$pid" 2>/dev/null || true
+          wait "$pid" 2>/dev/null || true
+          [ "$code" = 0 ] || { tail -n 40 "$S/serve.log"; exit 1; }

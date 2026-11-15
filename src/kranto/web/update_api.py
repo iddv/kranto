@@ -154,13 +154,12 @@ class UpdateAPI:
         return None
 
     def _launch(self, to: str, when: str):
-        import os
-
+        from .. import legacy
         from ..update import launch as launch_mod
 
         try:
             started = launch_mod.launch(self.home, to, when=when, port=self.app.port or 8765,
-                                        unit=os.environ.get("KRANTO_UNIT") or "kranto.service",
+                                        unit=legacy.unit_name(),
                                         keep=check.settings(self.home).keep_backups)
         except launch_mod.LaunchError as exc:
             return _error(str(exc), 409)

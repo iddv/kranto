@@ -18,6 +18,8 @@ import os
 import sys
 from pathlib import Path
 
+from kranto import legacy
+
 from ..box import handoff
 from . import launch
 
@@ -32,10 +34,11 @@ def _term(loop_home=None):
 
 def env_files(home: Path, unit: str | None = None) -> list[Path]:
     """The files Kranto's unit loads (``EnvironmentFile=`` in its drop-ins), then
-    ``~/.config/kranto/claude.env``: where the unit's token is."""
-    unit = unit or os.environ.get("KRANTO_UNIT") or "kranto.service"
+    ``~/.config/kranto/claude.env``: where the unit's token is. On an install made before the
+    rename, its old unit and old config folder (``legacy``)."""
+    unit = unit or legacy.unit_name(user_home=home)
     out = []
-    d = home / ".config" / "systemd" / "user" / f"{unit}.d"
+    d = legacy.unit_dir(user_home=home) / f"{unit}.d"
     for conf in sorted(d.glob("*.conf")) if d.is_dir() else []:
         try:
             lines = conf.read_text(errors="replace").splitlines()
@@ -45,7 +48,7 @@ def env_files(home: Path, unit: str | None = None) -> list[Path]:
             k, _, v = ln.strip().partition("=")
             if k.strip() == "EnvironmentFile" and v.strip():
                 out.append(Path(v.strip().lstrip("-").replace("%h", str(home))).expanduser())
-    out.append(home / ".config" / "kranto" / "claude.env")
+    out.append(legacy.config_dir(home) / "claude.env")
     return list(dict.fromkeys(out))
 
 
