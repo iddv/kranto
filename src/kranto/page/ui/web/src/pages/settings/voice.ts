@@ -21,14 +21,16 @@ export interface Prose {
 
 /** the four Welcome asks too, then the rest under Advanced */
 export const MAIN_SWITCHES = ["length", "register", "opinions", "emoji"] as const;
-export const MORE_SWITCHES = ["hashtags", "links", "grade"] as const;
+export const MORE_SWITCHES = ["hashtags", "links", "grade", "salt", "salt_thin"] as const;
 export const SWITCH_LABELS: Record<string, string> = {
   length: "How long", register: "How formal", opinions: "Opinions", emoji: "Emoji",
   hashtags: "Hashtags", links: "Links", grade: "Reading level (school grade)",
+  salt: "Salt", salt_thin: "More salt on thin items",
 };
 const CHOICES: Record<string, string> = {
   "opinions:mine": "only mine", "opinions:suggest": "suggest one, marked for me",
   "hashtags:site": "as the site does", "links:post": "in the post", "links:reply": "in the first reply",
+  "salt:wry": "wry (understatement)", "salt:salty": "salty (a jab at the thing, never at a person)",
 };
 export const choiceWords = (k: string, v: string): string => CHOICES[`${k}:${v}`] || v;
 export const SITE_WORDS: Record<string, string> = {

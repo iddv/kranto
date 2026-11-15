@@ -43,9 +43,14 @@ SWITCHES: dict[str, tuple[str, ...]] = {
     "emoji": ("never", "sparingly"),
     "hashtags": ("never", "site"),
     "links": ("post", "reply"),
+    # round 3: how much wit and bite (plain until the owner says otherwise), and whether a thin
+    # item (few facts, a product note, a small tool) may take one step more
+    "salt": ("plain", "wry", "salty"),
+    "salt_thin": ("on", "off"),
 }
 SWITCH_DEFAULTS = {"length": "medium", "register": "neutral", "opinions": "mine",
-                   "emoji": "never", "hashtags": "site", "links": "post", "grade": 8}
+                   "emoji": "never", "hashtags": "site", "links": "post", "grade": 8,
+                   "salt": "plain", "salt_thin": "on"}
 SWITCH_WORDS = {
     "length": "how long: short, medium or long",
     "register": "how formal: casual, neutral or formal",
@@ -54,6 +59,10 @@ SWITCH_WORDS = {
     "hashtags": "hashtags: never, or as the site's template says",
     "links": "links: in the post, or in the first reply where the site prefers it",
     "grade": "reading level: a school grade, 8 by default",
+    "salt": "salt: plain, wry (understatement), or salty (a jab at the thing, never at a "
+            "person)",
+    "salt_thin": "more salt on thin items: a post about a thin item (few facts, a product note, "
+                 "a small tool) may go one step saltier",
 }
 STRICTNESS = ("off", "light", "strict")
 SITES = ("blog", "newsletter", "mastodon", "bluesky", "linkedin", "threads", "x", "substack")
@@ -62,6 +71,9 @@ WRITER_SITE = {"blog": "blog", "newsletter": "newsletter", "toot": "mastodon",
                # Kranto's own short-post writer (kranto.social): every site's variant; no model
                # is chosen for it by default (P-11 is the owner's)
                "social": "short"}
+# the providers a writer's own model may be on: the watcher's, and OpenAI's own API (a key the
+# person pastes, ``OPENAI_API_KEY``; a writer only, never the watcher's)
+WRITER_PROVIDERS = ("openrouter", "openai_compat", "anthropic", "claude_code", "openai")
 # the old tone keys, migrated once into the voice card's first line
 TONE_KEYS = (("blog", "tone", "On the blog"), ("toot", "tone", "On Mastodon"),
              ("newsletter", "intro", "In the newsletter"))
@@ -265,13 +277,12 @@ def clean_writers(raw) -> dict[str, dict[str, str]]:
     """The ``writers`` field as stored: each known writer's ``{provider, model}`` when both are
     text and the provider is one Kranto has; anything else (null, a list, an unknown writer or
     provider, an empty model) reads as unset."""
-    from ..config import PROVIDERS
     out: dict[str, dict[str, str]] = {}
     for w, v in (raw.items() if isinstance(raw, dict) else ()):
         if w not in WRITER_SITE or not isinstance(v, dict):
             continue
         prov, model = v.get("provider"), v.get("model")
-        if prov in PROVIDERS and isinstance(model, str) and model.strip():
+        if prov in WRITER_PROVIDERS and isinstance(model, str) and model.strip():
             out[w] = {"provider": prov, "model": model.strip()[:120]}
     return out
 
@@ -349,7 +360,6 @@ class ProfileError(ValueError):
 
 def _writers_changed(stored, wm) -> dict[str, dict[str, str]]:
     """``writer_model``'s change: writer -> ``{provider, model}``, or null for the tier's."""
-    from ..config import PROVIDERS
     if not isinstance(wm, dict):
         raise ProfileError("writer_model is an object: writer -> {provider, model} or null")
     writers = clean_writers(stored)
@@ -360,10 +370,10 @@ def _writers_changed(stored, wm) -> dict[str, dict[str, str]]:
             writers.pop(w, None)
             continue
         if (not isinstance(v, dict) or set(v) - {"provider", "model"}
-                or v.get("provider") not in PROVIDERS
+                or v.get("provider") not in WRITER_PROVIDERS
                 or not isinstance(v.get("model"), str) or not v["model"].strip()
                 or len(v["model"]) > 120):
-            raise ProfileError(f"writer_model for {w}: a provider ({', '.join(PROVIDERS)}) "
+            raise ProfileError(f"writer_model for {w}: a provider ({', '.join(WRITER_PROVIDERS)}) "
                                "and a model in that provider's names")
         writers[w] = {"provider": v["provider"], "model": v["model"].strip()}
     return writers

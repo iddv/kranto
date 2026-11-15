@@ -72,6 +72,9 @@ RULES: dict[str, tuple[str, str, str]] = {
                        "drop the template headings; let the angle carry the post"),
     "claim.restates": ("claim", "only restates the facts: why should the reader care?",
                        "say what you make of it: a claim, a prediction or a question"),
+    # round 3: salt jabs at the thing, never at a person
+    "salt.person": ("salt", "names a person the sources don't name",
+                    "aim the wit at the thing, not a person: cut the name"),
 }
 STRONG_WEIGHT, WEAK_WEIGHT, TEXT_WEIGHT, SITE_WEIGHT = 8, 4, 6, 10
 
@@ -106,15 +109,25 @@ _WORD = re.compile(r"[A-Za-z][A-Za-z'’-]*")
 def sentences(text: str) -> list[tuple[int, int]]:
     """Sentence spans (start, end), without the leading blanks; a heading or list line counts
     as its own sentence."""
-    out = []
+    raw: list[list[int]] = []
     for m in _SENT.finditer(text):
         s, e = m.start(), m.end()
         while s < e and text[s] in " \t":
             s += 1
         frag = text[s:e].strip()
-        if frag and _WORD.search(frag):
-            out.append((s, e))
-    return out
+        if not frag:
+            continue
+        # "2 a.m.", "e.g.", "U.S.": a full stop after an abbreviation, or one followed by a
+        # lower-case word on the same line, does not end the sentence
+        if raw and "\n" not in text[raw[-1][1]:s] and (
+                _ABBREV.search(text[raw[-1][0]:raw[-1][1]]) or re.match(r"[a-z,;)]", frag)):
+            raw[-1][1] = e
+            continue
+        raw.append([s, e])
+    return [(s, e) for s, e in raw if _WORD.search(text[s:e])]
+
+
+_ABBREV = re.compile(r"(?:\b[A-Za-z]\.|\b(?:e\.g|i\.e|vs|etc|Mr|Mrs|Ms|Dr|St|No|approx)\.)\s*\Z")
 
 
 def sentence_lengths(text: str) -> list[int]:
@@ -338,13 +351,15 @@ def site_length(text: str, unit: str) -> int:
 
 def check(text: str, site: str | None = None, profile: Profile | None = None, *,
           kind: str | None = None, limits: dict | None = None, take: str | None = None,
-          strictness: str | None = None) -> dict:
+          strictness: str | None = None, sources: str | None = None) -> dict:
     """``{score, verdict, flags[], counts, grade}`` for a piece of text.
 
     ``limits`` overrides the site's (SOCIAL passes its registry's: ``max_chars``, ``unit``,
     ``links``, ``hashtags``, ``max_words``). ``take`` is the person's own line for this piece,
     when given: with it (even empty) a first-person sentence that neither the take nor a sample
-    supports is flagged (P-5). ``strictness`` overrides the profile's."""
+    supports is flagged (P-5). ``strictness`` overrides the profile's. ``sources``: the
+    material the post was written from; with it, a person's name or a handle the material does
+    not have is flagged (``salt.person``: salt jabs at the thing, never at a private person)."""
     p = profile or default()
     level = strictness or p.strictness
     text = text or ""
@@ -375,6 +390,9 @@ def check(text: str, site: str | None = None, profile: Profile | None = None, *,
         if take is not None and p.switches.get("opinions", "mine") == "mine":
             for s, e in invented_first_person(text, [take, *(x.text for x in p.samples)]):
                 add("voice.invented_i", s, e, protect=False)
+    if sources is not None:
+        for s, e in people_not_in(text, sources):
+            add("salt.person", s, e, protect=False)
     _site(text, p, lim, add)
     flags.sort(key=lambda f: (f.start, f.end, f.rule))
     flags = _dedupe(flags)
@@ -399,6 +417,42 @@ def check(text: str, site: str | None = None, profile: Profile | None = None, *,
     return {"score": max(0, score), "verdict": verdict, "flags": [f.view() for f in flags],
             "counts": counts, "grade": grade(text), "words": words_in(text),
             "strictness": level, "site": site, "kind": kind}
+
+
+# a person's name: two or three capitalised words in a row (a middle initial allowed), or a
+# handle; the first word is not one a sentence or a heading often starts with
+_NAME = re.compile(r"(?<![\w@])(?:[A-Z][a-z'’-]+\s(?:[A-Z]\.\s)?[A-Z][a-z'’-]+"
+                   r"(?:\s[A-Z][a-z'’-]+)?|@[A-Za-z0-9_]{2,30}(?:@[\w.-]+)?)")
+_NOT_FIRST_WORDS = """The A An This That These Those My Our Your Their His Her Its If When
+While What Why How Who Where Which And But Or So Then Now Here There Every Each Some Most Many
+Few No Not One Two Three First Next Last In On At For From With Without By Of To As After Before
+Since Until Because Although Though Even Still Yet Just Only Also More Less Both Either Neither
+I We You They He She It Is Are Was Were Be Do Does Did Has Have Had Can Could Will Would Should
+May Might Must Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March
+April May June July August September October November December"""
+_NOT_FIRST = frozenset(_NOT_FIRST_WORDS.split())
+
+
+def people_not_in(text: str, sources: str) -> list[tuple[int, int]]:
+    """Spans of ``text`` that look like a person's name or a handle and that ``sources`` does
+    not contain (case-insensitive): a salty post may name the companies, products and public
+    sources its material names, and nobody else."""
+    have = " ".join(sources.split()).lower()
+    out = []
+    for m in _NAME.finditer(text):
+        name, start = m.group(0), m.start()
+        words = name.split()
+        if len(words) == 3 and (start == 0 or re.search(r"[.!?]\s+\Z", text[:start])):
+            # "Somewhere Dario Amodei": a sentence's first word is not part of the name
+            start += len(words[0]) + 1
+            name = " ".join(words[1:])
+        first = name.split()[0]
+        if not name.startswith("@") and first in _NOT_FIRST:
+            continue
+        if " ".join(name.split()).lower() in have:
+            continue
+        out.append((start, m.end()))
+    return out
 
 
 def _dedupe(flags: list[Flag]) -> list[Flag]:

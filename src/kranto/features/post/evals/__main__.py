@@ -1,5 +1,6 @@
-"""``python -m kranto.features.post.evals <export|read|round2|live> ...``: the prose eval's
-tools (``__init__``'s docstring says what each is for). ``export`` and ``read`` call no model."""
+"""``python -m kranto.features.post.evals <export|read|round2|round3|live> ...``: the prose
+eval's tools (``__init__``'s docstring says what each is for). ``export`` and ``read`` call no
+model."""
 
 from __future__ import annotations
 
@@ -13,6 +14,8 @@ USAGE = ("usage: python -m kranto.features.post.evals export --items <ids> --out
          "--key key.md [--index FILE] [--seed N]\n"
          "       python -m kranto.features.post.evals round2 --home HOME --out DIR "
          "[--budget 3]\n"
+         "       python -m kranto.features.post.evals round3 --home HOME --out DIR "
+         "[--budget 3] [--owner]\n"
          "       python -m kranto.features.post.evals live --home HOME [--budget 3]")
 
 
@@ -72,6 +75,9 @@ def main(argv: list[str] | None = None) -> int:
     if cmd == "round2":
         from . import round2
         return round2.main(rest)
+    if cmd == "round3":
+        from . import round3
+        return round3.main(rest)
     if cmd == "live":
         from . import live
         return live.main(rest)
