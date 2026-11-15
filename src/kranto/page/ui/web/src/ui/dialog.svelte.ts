@@ -37,10 +37,13 @@ export function closeDialog(): void {
   else d?.removeAttribute("open");
   dlg.now = null;
 }
-/** the address changed (a link, Back, a key): a dialog opened at another address closes, so it
- * never stands over a page it was not about; one opened just after its own move stays */
+/** the page changed (a link, Back, a key): a dialog opened on another page closes, so it never
+ * stands over a page it was not about; one opened just after its own move stays, and a change of
+ * selection on the same page (?sel=) keeps it. The shell's own route change closes it too, from
+ * its second page on; this holds from the first. */
+const pageOf = (h: string): string => h.split("?")[0]!.replace(/\/$/, "");
 export function moved(): void {
-  if (dlg.now && dlg.now.at !== location.hash) closeDialog();
+  if (dlg.now && pageOf(dlg.now.at) !== pageOf(location.hash)) closeDialog();
 }
 /** esc closed it (the browser's own close): what it drew goes, unless another dialog opened since */
 export function closed(): void {
