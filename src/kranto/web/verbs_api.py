@@ -35,6 +35,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Match, Route
 
 from .. import config as config_mod
+from ..core import changes as changes_mod
 from ..core import verbs
 from ..store import iso, utcnow
 from ..stored.prepared import PreparedFields, VerbsMirror
@@ -471,11 +472,20 @@ class VerbsAPI:
                 # word (the owner read "Press" and did not know what it meant); a locked
                 # kind (a key, consent) is approved in its own dialog only
                 d["button"] = button_words(d["title"])
-                d["says"] = v.says
                 d["ladder"] = v.ladder
                 d["locked"] = bool(verbs.choice_for(self.rt.cfg, v).locked)
             if not isinstance(d.get("subject_name"), str) or not d["subject_name"]:
                 d["subject_name"] = self._subject_name(d.get("subject_kind"), d.get("subject_id"))
+            if v is not None:
+                # what this press will change, in plain words: one sentence for Needs you's row
+                # (it was the verb's documentation: "samples (samples_add [{text, site}]…)") and
+                # every field with its new value for the Save dialog (a bundled field was left
+                # out of it)
+                sid = d.get("subject_id")
+                about = d["subject_name"] or (str(sid) if isinstance(sid, str | int) and
+                                              not isinstance(sid, bool) else None)
+                d["changes"] = changes_mod.changes(kind, d["fields"])
+                d["says"] = changes_mod.summary(kind, v.title, d["fields"], about)
             d["uuid"] = d.pop("prepared_uuid")
             out.append(d)
         return out

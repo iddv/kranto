@@ -5,7 +5,7 @@
 // hovering pauses it, and on time out nothing happens: the item stays in Needs you.
 import { afkStale, api, load } from "../lib/app/data";
 import { ApiError } from "../api/client";
-import { buttonOf, gone, plainTitle, PREPARED_API, type Prepared } from "../lib/prepared";
+import { buttonOf, dialogTitle, gone, plainTitle, PREPARED_API, type Prepared } from "../lib/prepared";
 import { drop } from "../lib/reads.svelte";
 import { app } from "../lib/shell.svelte";
 import type { VerbLine } from "../term/reflect.svelte";
@@ -79,7 +79,7 @@ export function openPrepared(p: Prepared): void {
     void actPrepared(p, "dismiss"); // nothing to read back: its one button puts it away
     return;
   }
-  openDialog(PreparedDialog, { p, title: `${plainTitle(p)}?`, okText: buttonOf(p), onOk: (_b: HTMLElement, close: () => void) => {
+  openDialog(PreparedDialog, { p, title: dialogTitle(p), okText: buttonOf(p), onOk: (_b: HTMLElement, close: () => void) => {
     close();
     return actPrepared(p, "approve");
   } });

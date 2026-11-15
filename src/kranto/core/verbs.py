@@ -16,9 +16,12 @@ then the route. The ladder applies to every caller that is not the owner pressin
 (``console``), a named agent (``agent``). For each ladder kind the owner picks **Do it**
 (``do``), **Ask me in the UI** (``ask``: the press is *prepared*, stored with its fields, and
 waits on the page and in Needs you for the owner's press) or **Never** (``never``), with
-exceptions per verb (``ask.ladder`` in ``kranto.yaml``). Three rows are locks no setting turns
+exceptions per verb (``ask.ladder`` in ``kranto.yaml``). Some rows are locks no setting turns
 (the owner's standing rules): a **credential** is never set by an assistant (made and pasted by
-the owner); a **house** confirm is the page's only.
+the owner); a **house** confirm is the page's only; a spending cap and how Kranto updates are
+the owner's (``lock="owner"``: always prepared). Some verbs wait by default whatever their
+kind's setting (``asks``: how you write, the models, Kranto's prompts), unless the owner chose
+for the verb itself.
 
 ``tests/test_parity.py`` keeps the table whole: no write route without a verb (or a reason on
 ``ROUTE_ALLOW``), every verb's route exists, the ladder is total and the locks hold.
@@ -53,6 +56,11 @@ LOCKS = {
     "credential": ("never", "a key, a token or a login is made and pasted by you, on the page"),
 }
 HOUSE_WHY = "this is confirmed on the page only (the house confirm)"
+# a spending cap and how Kranto updates itself are the owner's to set (the owner's standing
+# rules: every cap configurable by you; an update is your choice): an assistant may prepare the
+# change, never make it, under every ladder setting
+OWNER_WHY = ("a spending cap and how Kranto updates are yours to set: an assistant's change "
+             "waits for your yes on the page")
 CONSENT_WHY = ("sending usage reports is your consent: given by you on the page only "
                "(turning them off needs no approval: telemetry.off)")
 DOORS = ("ui", "cli", "mcp", "console", "agent")
@@ -128,10 +136,15 @@ class Verb:
     # fields of which the press needs at least one ("send keep_days or max_rows")
     one_of: tuple[str, ...] = ()
     # fields that, sent by an assistant, make the call wait for the owner's press whatever the
-    # kind's setting says (``prose.voice``: the voice card, the always-list, the disclosure
-    # lines put words in every later post); the owner's own choice for the verb still holds
+    # kind's setting says (``prose.learn``: an answer to a proposal changes how you write); the
+    # owner's own choice for the verb still holds
     ask_fields: tuple[str, ...] = ()
     ask_why: str = ""
+    # every call by an assistant waits for the owner's press whatever the kind's setting says
+    # (``prose.voice``: how you write; ``settings.models``: what a role costs; Kranto's
+    # prompts); the owner's own choice for the verb still holds (the owner's D1: until the owner
+    # says which settings an assistant may change without a yes, these wait)
+    asks: bool = False
 
     def needs_id(self) -> bool:
         if self.subjects:
@@ -162,6 +175,8 @@ def F(name: str, type: str = "line", says: str = "", required: bool = False,
     return Field(name, type, says, required, choices, lo=lo, hi=hi)
 
 
+PROMPT_WHY = ("Kranto's default for its prompts: they decide what Kranto keeps and writes, so "
+              "an assistant's change waits for you")
 ID_TOPIC = "the topic's id"
 ID_SOURCE = "the source's id"
 ID_CUB = "the cub's id"
@@ -358,10 +373,9 @@ CORE: tuple[Verb, ...] = (
     Verb("prose.voice", "Save", "Change the owner's prose profile: the voice card, samples "
          "(samples_add [{text, site}], samples_remove [ids]), the never, keep and always lists "
          "(never_add, never_remove, …), the switches (length, register, opinions, emoji, "
-         "hashtags, links, grade), the checker's strictness and rules_off, guides per site, "
-         "disclosure per site, or take (whether Write a post asks what they think). An assistant's "
-         "change to the voice card, the always-list or a disclosure line waits for the owner's "
-         "approval.",
+         "hashtags, links, grade, salt), the checker's strictness and rules_off, guides per "
+         "site, disclosure per site, or take (whether Write a post asks what they think). Every "
+         "change an assistant asks for waits for the owner's approval on the page.",
          "reversible", "POST", "/api/prose/voice",
          fields=(F("voice", "text", "the voice card, in plain words (at most 2,000 characters)"),
                  F("switches", "object", "length, register, opinions, emoji, hashtags, links, "
@@ -380,18 +394,22 @@ CORE: tuple[Verb, ...] = (
                  F("always_remove", "list", "entries to take off the always-list"),
                  F("samples_add", "list", "[{text, site}]: things the owner wrote"),
                  F("samples_remove", "list", "sample ids")),
-         ask_fields=("voice", "disclosure", "always_add", "always_remove"),
-         ask_why="Kranto's default for your voice card, your always-list and your disclosure "
-                 "lines: they shape every later post, so an assistant's change waits for you",
+         asks=True,
+         ask_why="Kranto's default for how you write: it shapes every later post, so an "
+                 "assistant's change waits for you",
          page="#/settings/posting"),
     Verb("prose.learn", "Learn", "Learn from the owner's edits: give a draft and the text they "
          "sent to get proposals for the never-list, the keep-list and the voice card; or answer "
-         "one (proposal, answer yes or no). Nothing changes without a yes.", "reversible",
+         "one (proposal, answer yes or no). Nothing changes without the owner's yes: an "
+         "assistant's answer waits for the owner on the page.", "reversible",
          "POST", "/api/prose/learn",
          fields=(F("draft", "text", "the draft as Kranto wrote it"),
                  F("sent", "text", "the text as the owner sent it"),
                  F("proposal", "line", "a proposal's id, to answer it"),
                  F("answer", "enum", "yes or no", choices=("yes", "no"))),
+         ask_fields=("answer",),
+         ask_why="Kranto's default for a learned rule: it changes how you write, so the yes is "
+                 "yours, on the page",
          one_of=("draft", "proposal"), page="#/settings/posting"),
     Verb("feedback.add", "Grade", "Grade an idea card or a piece of evidence: cards like it rank "
          "higher or lower, and a source with many downvotes is offered for removal (target idea "
@@ -439,8 +457,14 @@ CORE: tuple[Verb, ...] = (
          fields=(F("memory", "object", 'GB of MemoryMax (MemoryHigh is 1 GB under it), or "auto"',
                    True),),
          page="#/settings/system?sel=eservice-memory", undo="settings.service_memory"),
-    Verb("settings.models", "Save", "Which model each of Kranto's roles uses.", "reversible",
-         "POST", "/api/settings/models",
+    # a model choice changes what Kranto spends (the owner's D1, safe side: on the spend rung,
+    # and an assistant's change waits)
+    Verb("settings.models", "Save", "Which model each of Kranto's roles uses (a model choice "
+         "changes what Kranto spends: an assistant's change waits for the owner's approval).",
+         "spend", "POST", "/api/settings/models",
+         asks=True,
+         ask_why="Kranto's default for the model a role uses: it changes what Kranto spends, so "
+                 "an assistant's change waits for you",
          # gate is the judge's signal threshold, a number (PAR: it was typed bool, and the
          # route refuses true and false)
          fields=(F("role", "line", "the role (judge, reason, …)", True),
@@ -448,15 +472,21 @@ CORE: tuple[Verb, ...] = (
                  F("gate", "number", "the judge's signal threshold, above 0 and at most 1",
                    lo=0, hi=1)),
          page="#/settings/models", undo="settings.models"),
-    Verb("settings.spend", "Save", "Kranto's spending caps (null: no cap).", "spend", "POST",
-         "/api/settings/spend",
+    Verb("settings.spend", "Save", "Kranto's spending caps (null: no cap). Yours to set: an "
+         "assistant's change is prepared for your approval.", "spend", "POST",
+         "/api/settings/spend", lock="owner",
          fields=(F("monthly_usd", "usd", "watching's monthly cap"),
                  F("deep_dive_daily_usd", "usd", "the deep dives' daily slice"),
                  F("x_monthly_usd", "usd", "the X cap"),
                  F("search_monthly_usd", "usd", "the live search cap")),
          page="#/settings/spend", undo="settings.spend"),
-    Verb("settings.reading", "Save", "How often kranto reads, and whether deep dives run.",
-         "reversible", "POST", "/api/settings/reading",
+    # how often Kranto reads and whether deep dives run is what it spends (the safe side of D1)
+    Verb("settings.reading", "Save", "How often Kranto reads, and whether deep dives run (this "
+         "changes what Kranto spends: an assistant's change waits for the owner's approval).",
+         "spend", "POST", "/api/settings/reading",
+         asks=True,
+         ask_why="Kranto's default for how often it reads: it changes what Kranto spends, so an "
+                 "assistant's change waits for you",
          fields=(F("every_hours", "number", "hours between reads"),
                  F("deep_dive_enabled", "bool", "deep dives on or off")),
          one_of=("every_hours", "deep_dive_enabled"),
@@ -506,16 +536,20 @@ CORE: tuple[Verb, ...] = (
                  F("subject", "line", "the item to fill it from")),
          page="#/settings/prompts"),
     Verb("prompt.save", "Save", "Change one of Kranto's prompts (your additions or its template; "
-         "every version is kept).", "reversible", "POST", "/api/prompts/{pid}", subject="prompt",
+         "every version is kept). An assistant's change waits for the owner's approval.",
+         "reversible", "POST", "/api/prompts/{pid}", subject="prompt",
          fields=(F("additions", "text", "your additions"), F("template", "text", "the template"),
                  NOTE),
+         asks=True, ask_why=PROMPT_WHY,
          page="#/settings/prompts", undo="prompt.restore"),
     Verb("prompt.reset", "Reset", "Put a prompt back to Kranto's own (your versions are kept).",
          "reversible", "POST", "/api/prompts/{pid}/reset", subject="prompt", click="confirm",
+         asks=True, ask_why=PROMPT_WHY,
          page="#/settings/prompts", undo="prompt.restore"),
     Verb("prompt.restore", "Restore", "Bring back an earlier version of a prompt.",
          "reversible", "POST", "/api/prompts/{pid}/restore", subject="prompt",
-         fields=(F("version", "int", "the version", True), NOTE), page="#/settings/prompts"),
+         fields=(F("version", "int", "the version", True), NOTE),
+         asks=True, ask_why=PROMPT_WHY, page="#/settings/prompts"),
     Verb("prompt.note", "Note", "Write a note on a prompt's version.", "reversible", "POST",
          "/api/prompts/{pid}/versions/{n:int}/note", subject="prompt",
          fields=(F("n", "int", "the version", True), NOTE), page="#/settings/prompts"),
@@ -532,8 +566,9 @@ CORE: tuple[Verb, ...] = (
          "POST", "/api/update/cancel", page="#/settings/updates"),
     Verb("update.rollback", "Roll back", "Go back to the release before.", "destructive", "POST",
          "/api/update/rollback", click="confirm", page="#/settings/updates"),
-    Verb("update.settings", "Save", "How Kranto updates (the line, when).", "reversible", "POST",
-         "/api/update/settings",
+    Verb("update.settings", "Save", "How Kranto updates (the line, when). Yours to set: an "
+         "assistant's change is prepared for your approval.", "reversible", "POST",
+         "/api/update/settings", lock="owner",
          # the route's SETTABLE (PAR: hour was a field the route never read, and quiet_window
          # one it reads that no assistant could send)
          fields=(F("channel", "enum", "the line", choices=UPDATE_CHANNELS),
@@ -690,6 +725,10 @@ def _feature_ladder(action) -> str:
     return "outward" if action.click in ("confirm", "house") else "reversible"
 
 
+WORDS_WHY = ("Kranto's default for an assistant's own words for a post: they wait for you, as "
+             "an assistant's edit of a draft does")
+
+
 # the field a feature's action reads its subject's id from, by the subject's kind (PAR: the id
 # went nowhere, so News' Brief now said "no topic None" to every assistant)
 SUBJECT_FIELDS = {"topic": "topic_id"}
@@ -736,10 +775,15 @@ def feature_verbs() -> tuple[Verb, ...]:
             fields += tuple(f for f in FEATURE_FIELDS.get(a.kind, ())
                             if f.name not in {x.name for x in fields})
             subject = a.subjects[0] if a.subjects else "feature"
+            # an action that keeps the caller's own words as a post (a markdown field: the blog
+            # cub's Keep this markdown as a draft) follows post.edit's rule: what leaves Kranto,
+            # and an assistant's words wait for the owner's yes
+            words = not house and any(getattr(x, "kind", "") == "markdown" for x in a.fields)
             out.append(Verb(
                 kind=f"f.{a.kind}", title=a.title,
                 says=a.says or f"{a.title} ({getattr(f, 'title', fid)})",
-                ladder=_feature_ladder(a), method="POST",
+                ladder="outward" if words else _feature_ladder(a), method="POST",
+                asks=words, ask_why=WORDS_WHY if words else "",
                 path="/api/f/{feature}/act/{action}", subject=subject, fields=fields,
                 doors=PAGE_ONLY if house else EVERYONE, click=a.click,
                 page=f"#/{fid}" if fid in OWN_PAGES and not _is_cub(f) else f"#/cub/{fid}",
@@ -950,11 +994,14 @@ def choice_for(cfg, verb: Verb, fields: dict[str, Any] | None = None) -> Choice:
         return Choice("ask", True, CONSENT_WHY)
     if verb.lock == "ask":
         return Choice("ask", True, HOUSE_WHY)
+    if verb.lock == "owner":
+        return Choice("ask", True, OWNER_WHY)
     s = ladder_setting(cfg)
     by_verb = s["verbs"].get(verb.kind)
     if by_verb in CHOICES:
         return Choice(str(by_verb), False, f"your setting for {verb.title} ({verb.kind})")
-    if fields and verb.ask_fields and any(fields.get(f) is not None for f in verb.ask_fields):
+    if verb.asks or (fields and verb.ask_fields and
+                     any(fields.get(f) is not None for f in verb.ask_fields)):
         if s["kinds"].get(verb.ladder) == "never":
             return Choice("never", False, f"your setting for {kind_words(verb.ladder)}")
         return Choice("ask", False, verb.ask_why or "Kranto's default for this change")

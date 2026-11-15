@@ -6,7 +6,7 @@
   // action's own words; Cancel first.
   import DialogFrame from "./DialogFrame.svelte";
   import ReadBack from "./ReadBack.svelte";
-  import { keyFields, longFields, subjectOf, whoOf, type Prepared } from "../lib/prepared";
+  import { dialogSubject, keyFields, longFields, usesChanges, whoOf, type Prepared } from "../lib/prepared";
 
   let { p, title, okText, onOk, close }: {
     p: Prepared; title: string; okText: string; onOk: (btn: HTMLElement, close: () => void) => unknown; close: () => void;
@@ -15,7 +15,7 @@
 
 <DialogFrame {title} {okText} ok={(btn) => onOk(btn, close)} {close} details={"prep:" + p.uuid}>
   <p class="pd-who">{`Prepared by ${whoOf(p)}. Nothing happens until you choose ${okText}.`}</p>
-  <ReadBack subject={subjectOf(p)} keys={keyFields(p)} longs={longFields(p)} />
+  <ReadBack subject={dialogSubject(p)} keys={keyFields(p)} longs={longFields(p)} named={usesChanges(p)} />
 </DialogFrame>
 
 <style>

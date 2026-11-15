@@ -7,6 +7,14 @@
 
 export const PREPARED_API = "/api/prepared";
 
+/** one change a prepared press makes: its label and new value in words; ``long`` for a text the
+ * dialog draws as markdown */
+export interface Change {
+  label: string;
+  value: string;
+  long?: boolean;
+}
+
 export interface Prepared {
   uuid: string;
   verb: string;
@@ -22,8 +30,12 @@ export interface Prepared {
   created_at?: string | null;
   /** the action's own words for its button ("File issue"); the server 0.6.0.dev15+ */
   button?: string;
-  /** what it does, the verb's sentence */
+  /** what this press will change, in one plain sentence ("Change your voice card and set Salt
+   * to salty."); before the server said it, the verb's own sentence */
   says?: string;
+  /** every field the press will change, with its new value, in plain words (a nested field a
+   * line per entry): the Save dialog lists them all, so nothing bundled is left unsaid */
+  changes?: Change[];
   /** a locked kind (a key, consent): approved in its dialog only, never a toast */
   locked?: boolean;
   /** false when its verb left Kranto (C3: a build or project verb prepared before the cut): its
@@ -114,9 +126,19 @@ export function plainOf(p: Prepared): { title: string; subject: string; hide: st
   // an assistant's new words for a waiting draft: the words themselves are the dialog's body
   if (p.verb === "post.edit")
     return { title: "New words for a draft", subject: p.subject_id ? `draft #${p.subject_id}` : "a draft", hide: [] };
-  if (p.verb === "prose.voice" && typeof f.voice === "string")
-    return { title: "Change your voice card", subject: "how every later post is written", hide: [] };
   return null;
+}
+
+/** whether the dialog lists the server's ``changes`` (every field, in words): a server that
+ * sends them, an item still available, and a verb the page does not say in its own words */
+export const usesChanges = (p: Prepared): boolean => Array.isArray(p.changes) && !gone(p) && !plainOf(p);
+
+/** the server's one sentence for the change, without its full stop, when it gave one (servers
+ * with ``changes``); null before */
+function sentenceOf(p: Prepared): string | null {
+  if (!usesChanges(p)) return null;
+  const s = String(p.says || "").trim().replace(/\.$/, "");
+  return s || null;
 }
 /** the item's title in the page's words ("Pass", "Write a blog post"), else the server's */
 export const plainTitle = (p: Prepared): string => plainOf(p)?.title || p.title;
@@ -136,9 +158,28 @@ export function subjectOf(p: Prepared): string {
 
 /** what the row says, in one line: "File a Kranto issue: Needs you doesn't update live…" */
 export function lineOf(p: Prepared): string {
+  if (!plainOf(p)) {
+    const said = sentenceOf(p);
+    if (said) return said;
+  }
   const s = subjectOf(p), t = plainTitle(p);
   return s ? `${t}: ${s}` : t;
 }
+
+/** the row's second line: that nothing happens until the owner chooses its button (the change
+ * itself is the row's title; the verb's own documentation is never shown: it read "samples
+ * (samples_add [{text, site}] …)") */
+export const whyOf = (_p: Prepared, button: string): string => `Nothing happens until you choose ${button}.`;
+
+/** the Save dialog's title: the change as a question ("Change your voice card and set Salt to
+ * salty?"), else the action's own words */
+export function dialogTitle(p: Prepared): string {
+  const s = sentenceOf(p);
+  return s ? `${s}?` : `${plainTitle(p)}?`;
+}
+
+/** the dialog's one line under its title: none when the title says the change already */
+export const dialogSubject = (p: Prepared): string => (sentenceOf(p) ? "" : subjectOf(p));
 
 // where a factory issue goes (the page's chat.factory_repos defaults: Kranto's own, the watcher's)
 const FACTORY_REPOS: Record<string, string> = { kranto: "iddv/kranto", watcher: "iddv/kranto" };
@@ -147,6 +188,14 @@ const FACTORY_REPOS: Record<string, string> = { kranto: "iddv/kranto", watcher: 
 export function keyFields(p: Prepared): [string, string][] {
   const f = p.fields || {};
   const out: [string, string][] = [];
+  // the server's plain list of every change (a nested field a line per entry: Salt, a
+  // disclosure line), so the dialog never leaves a bundled field out
+  // (the verbs said in the page's own words, plainOf's, keep their own short list)
+  if (usesChanges(p)) {
+    for (const c of p.changes!) if (!c.long) out.push([c.label, c.value]);
+    if (p.page) out.push(["where", `shows on ${p.page}`]);
+    return out;
+  }
   const main = ["issue", "title", "name"].find((k) => shortValue(f[k]));
   const said = new Set(plainOf(p)?.hide || []);
   for (const [k, v] of Object.entries(f)) {
@@ -161,6 +210,7 @@ export function keyFields(p: Prepared): [string, string][] {
 
 /** the long texts (a factory issue's body): [label, markdown] */
 export function longFields(p: Prepared): [string, string][] {
+  if (usesChanges(p)) return p.changes!.filter((c) => c.long && c.value).map((c) => [c.label, c.value]);
   return Object.entries(p.fields || {}).filter(([, v]) => textOf(v) !== null && shortValue(v) === null && textOf(v) !== "").map(([k, v]) => [k, textOf(v)!]);
 }
 
