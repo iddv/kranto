@@ -12,7 +12,7 @@ import NewsToday from "./NewsToday.svelte";
 import NewsTopics from "./NewsTopics.svelte";
 import NewsTopicPane from "./NewsTopicPane.svelte";
 import NewsEarlier from "./NewsEarlier.svelte";
-import { LATEST, ROWS, articlePath, articlesPath, briefPagePath, minutesWords, outletOf, outletsLine, type Article, type Brief, type StoryIdea, type TopicRows } from "./news";
+import { LATEST, ROWS, articlePath, articlesPath, briefPagePath, ideaLabel, minutesWords, outletOf, outletsLine, type Article, type Brief, type StoryIdea, type TopicRows } from "./news";
 import { featurePath } from "../index";
 import { closeDialog, dlg } from "../../ui/dialog.svelte";
 
@@ -130,10 +130,28 @@ describe("News › Today: one line a story", () => {
     const { target, done } = await draw(NewsToday, where("news"));
     await settle();
     const open = target.querySelector("li.story.open")!;
-    expect(open.querySelector(".st-idea")?.textContent).toBe("Idea · #133 Failure-targeted data collection · waiting · and 2 more ›");
+    // rule 3: a card of the story's theme, said as such (never as made from the story)
+    expect(open.querySelector(".st-idea")?.textContent).toBe("An idea on the same theme · #133 Failure-targeted data collection · waiting · and 2 more ›");
     expect(open.querySelector(".st-idea a")?.getAttribute("href")).toBe("#/ideas/133");
     expect([...open.querySelectorAll(".st-verbs .btn")].map((b) => b.textContent)).not.toContain("Idea from this");
     done();
+  });
+
+  // Gemini 19: a card only on the same map theme read as "Idea from this"
+  it("says how a story's idea was found, on the brief's item and the story's page", async () => {
+    expect(ideaLabel(1)).toBe("Idea from this story");
+    expect(ideaLabel(2)).toBe("An idea that cites this story");
+    expect(ideaLabel(3)).toBe("An idea on the same theme");
+    for (const [rule, words] of [[1, "Idea from this story"], [2, "An idea that cites this story"], [3, "An idea on the same theme"]] as const) {
+      stub();
+      hosted();
+      const idea = { id: 133, title: "Failure-targeted data collection", state: "waiting", rule, more: 0 };
+      answering({ [briefPagePath(12)]: brief({ stories: stories({ "0": { idea } }) }), [ROWS]: rows(true) });
+      const { target, done } = await draw(StoryPage, where("news/i/12/0"));
+      await settle();
+      expect(target.querySelector("#story-idea")?.textContent?.startsWith(`${words} · #133`)).toBe(true);
+      done();
+    }
   });
 
   it("says when a new topic's first brief comes, and marks the first read's", async () => {

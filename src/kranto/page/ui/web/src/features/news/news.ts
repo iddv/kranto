@@ -129,6 +129,12 @@ export interface StoryIdea {
   /** brief:<id>:<item>, the item counted from 1 */
   story: string;
 }
+/** how a story's idea was found, said on the brief's item and the story's page (Gemini 19: a
+ * card only on the same map theme read as made from the story): rule 1 a card made from this
+ * story, 2 a card citing its evidence, 3 a card of its theme */
+export function ideaLabel(rule: number | null | undefined): string {
+  return rule === 1 ? "Idea from this story" : rule === 2 ? "An idea that cites this story" : "An idea on the same theme";
+}
 export interface Brief {
   id: number;
   /** each item's article, by the item's number as text (briefs.get and latest) */

@@ -289,8 +289,9 @@ the story whole: its summary, Why it matters (with the idea the full story found
 story's idea or Idea from this), the full story when there is one (What happened and its numbers,
 the rest under "Read on"), its sources (four shown, then all of them, "in your library ›" opening
 your own record of a line), and Next. **A story's idea** is chosen by rule, never by a model: a
-card made from the story, else a card citing one of its lines, else a card of the theme its lines
-sit in on the latest map. **Idea from this** writes one card on that theme (about 6 cents, it asks
+card made from the story ("Idea from this story"), else a card citing one of its lines ("An idea
+that cites this story"), else a card of the theme its lines sit in on the latest map ("An idea on
+the same theme"): the line says which. **Idea from this** writes one card on that theme (about 6 cents, it asks
 first); a story that is on no theme yet says why ("after tonight's map"). A card's page says
 which story is "In the news" for it.
 

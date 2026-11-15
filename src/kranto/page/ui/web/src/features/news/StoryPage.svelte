@@ -18,7 +18,7 @@
   import { ui } from "../../lib/shell.svelte";
   import NewsSources from "./NewsSources.svelte";
   import { writePost } from "../post/post";
-  import { ROWS, articlePath, briefPagePath, dayWords, deepDive, ideaFromThis, ideaHref, shortDay, storyHref, storyKey, type Article, type Brief, type Para, type TopicRows } from "./news";
+  import { ROWS, articlePath, briefPagePath, dayWords, deepDive, ideaFromThis, ideaHref, ideaLabel, shortDay, storyHref, storyKey, type Article, type Brief, type Para, type TopicRows } from "./news";
 
   let { view }: { view: View } = $props();
   const host = $derived(!!ui.facts?.header.host);
@@ -112,7 +112,7 @@
         <div class="why-box" id="story-why">
           {#if x.why}<p>{x.why}</p>{/if}
           {#if art?.idea_seed}<p class="small"><strong>An idea in it ·</strong> {art.idea_seed}</p>{/if}
-          {#if s?.idea}<p class="small" id="story-idea">Idea · <a href={ideaHref(s.idea.id)}>{`#${s.idea.id} ${s.idea.title}`}</a>{s.idea.state ? ` · ${s.idea.state}` : ""}{s.idea.more ? ` · and ${s.idea.more} more` : ""}</p>{/if}
+          {#if s?.idea}<p class="small" id="story-idea">{ideaLabel(s.idea.rule)} · <a href={ideaHref(s.idea.id)}>{`#${s.idea.id} ${s.idea.title}`}</a>{s.idea.state ? ` · ${s.idea.state}` : ""}{s.idea.more ? ` · and ${s.idea.more} more` : ""}</p>{/if}
           <p class="acts">
             {#if !s?.idea && s?.theme}<button type="button" class="btn sm" id="story-idea-from" onclick={(e) => ideaFromThis(e.currentTarget, s, hint)}>Idea from this</button>{/if}
             <a class="btn sm quiet" href={href("ideas", { topic: String(b.topic_id) })}>{`Ideas from ${name} ›`}</a>

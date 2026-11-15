@@ -22,7 +22,7 @@
   import { IDEAS_API } from "../../pages/ideas/cards";
   import { HOME_API, type HomeAnswer } from "../home";
   import type { Snippet } from "svelte";
-  import { LATEST, ROWS, briefPagePath, clock, earlyWords, deepDive, ideaFromThis, ideaHref, longDay, minutesWords, okArticle, outletsDays, outletsLine, storyHref, storyKey, storyWords, whyNothingRuns, failedTryLine, fixPlace, type Brief, type BriefItem, type Latest, type TopicRows } from "./news";
+  import { LATEST, ROWS, briefPagePath, clock, earlyWords, deepDive, ideaFromThis, ideaHref, ideaLabel, longDay, minutesWords, okArticle, outletsDays, outletsLine, storyHref, storyKey, storyWords, whyNothingRuns, failedTryLine, fixPlace, type Brief, type BriefItem, type Latest, type TopicRows } from "./news";
 
   // bid: one brief's own day (#/news/b/<id>,), drawn in Today's layout
   let { view, bid = "", details }: { view: View; bid?: string; details?: Snippet<[Brief]> } = $props();
@@ -129,7 +129,7 @@
         <p class="st-body">{x.body}</p>
         {#if x.why}<p class="why"><strong>Why it matters ·</strong> {x.why}</p>{/if}
         <p class="muted small st-src">{outletsDays(x.sources)}</p>
-        {#if s?.idea}<p class="small st-idea">Idea · <a href={ideaHref(s.idea.id)}>{`#${s.idea.id} ${shortName(s.idea.title)}`}</a>{s.idea.state ? ` · ${s.idea.state}` : ""}{#if s.idea.more}{" · "}<a href={href("ideas", { topic: String(b.topic_id) })}>{`and ${s.idea.more} more ›`}</a>{/if}</p>{/if}
+        {#if s?.idea}<p class="small st-idea">{ideaLabel(s.idea.rule)} · <a href={ideaHref(s.idea.id)}>{`#${s.idea.id} ${shortName(s.idea.title)}`}</a>{s.idea.state ? ` · ${s.idea.state}` : ""}{#if s.idea.more}{" · "}<a href={href("ideas", { topic: String(b.topic_id) })}>{`and ${s.idea.more} more ›`}</a>{/if}</p>{/if}
         <p class="acts st-verbs">
           {#if art}<a class="btn sm" href={storyHref(b.id, n)} data-act="read">{`Read the story · ${art.minutes} min`}</a>{:else if (x.observation_ids || []).length}<button type="button" class="btn sm" data-act="full-story" onclick={(e) => deepDive(e.currentTarget, b.id, n, x.headline)}>Write the full story</button>{/if}
           <button type="button" class="btn sm" data-act="write" onclick={() => writePost({ brief: b.id, n, title: x.headline, sources: x.sources.filter((q) => q.url).length })}>Write a post</button>
