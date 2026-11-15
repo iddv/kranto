@@ -78,7 +78,7 @@ prepared (each in one sentence; only the owner approves them, on the page), the 
 sources, the sources failing or to remove, what waits for a grade, warnings and messages, with
 one sentence (`said`) for all of it. `kranto_outcomes` answers "why did my Write a
 post not happen": the jobs that wrote no draft, newest first, each with its reason. A verb whose
-press only starts work (Write a post, Brief now) answers "started, not finished yet" and where its
+action only starts work (Write a post, Brief now) answers "started, not finished yet" and where its
 result will show, never "done"; Write a post waits up to 25 seconds for its draft and then says
 what happened (the draft waits on Post, or why none was written).
 `kranto_incidents` answers "why does Kranto say my key is refused" and "why is Kranto degraded": the
