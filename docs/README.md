@@ -15,6 +15,7 @@ Every page in this repository, by what you are trying to do.
 | [memory.md](memory.md) | How much memory Kranto uses, its caps, and how to change them |
 | [activity.md](activity.md) | What Kranto is doing: every background run recorded as it goes, Stop, failures said once, the activity read and its settings |
 | [prose.md](prose.md) | How Kranto writes your posts: your voice card and samples, the floor against AI tells, the checker, the fix, learning from your edits, and the API |
+| [posting.md](posting.md) | Posting: your own site first, then the sites people use; Open or Post directly, which sites and why, how a short post is written, what to connect |
 | [assistant.md](assistant.md) | Use Kranto from your own Claude Code (the plugin) or Codex: one install line each, what each gets |
 | [verbs.md](verbs.md) | Everything you can do, as one table for every caller: the console, your own Claude Code or Codex, an agent; what an assistant may do by itself (the ladder) and the locks |
 | [GLOSSARY.md](GLOSSARY.md) | The words Kranto uses, in the app and in both repositories |

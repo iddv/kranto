@@ -463,6 +463,103 @@ SITE = re.compile(os.environ.get("KRANTO_ACCEPT_SITE", r"example\.?com"), re.I)
 HREFS = "() => [...document.querySelectorAll('a')].map((a) => a.getAttribute('href') || '')"
 
 
+# Settings' page links and the crumbs, as SOC-7 leaves them out: (words, controls)
+SETTINGS_CHROME = r"""(root) => {
+  const el = document.querySelector(root) || document.body;
+  const names = new Set(['Home', 'Settings', '?', 'Overview', 'Watching', 'Posting', 'Assistant',
+    'Spend', 'Privacy & access', 'System', 'Appearance']);
+  const ctl = [...el.querySelectorAll('a[href], button')].filter((e) =>
+    e.getClientRects().length > 0 && names.has((e.textContent || '').trim()));
+  const words = ctl.map((e) => (e.textContent || '').split(/\s+/).filter((w) => /\w/.test(w))
+    .length).reduce((a, b) => a + b, 0);
+  return { words, controls: ctl.length };
+}"""
+
+
+def social_lines(p: Preview) -> list[Result]:
+    """SOCIAL's lines (short posts for the sites people use), as the owner's note of 13 November
+    changes them: two ways only (Open, or post directly after a yes), Open first, Substack and
+    LinkedIn not offered, no "copy and open" anywhere, the preview refuses every send. GETs
+    only: a line that needs a write (a model answer, a ticked site) says so and is skipped."""
+    out = []
+    ctx, pg = p.page(NEW)
+    got = p.api(pg, "/api/post/sites")
+    offered = got.get("sites") or []
+    gone = {g.get("id"): g for g in got.get("not_offered") or []}
+    out.append(ok("SOC-0", "every site Kranto offers opens first; none is copy and open",
+                  bool(offered) and all((s.get("ways") or [""])[0] == "open" for s in offered)
+                  and all(set(s.get("ways") or []) <= {"open", "direct"} for s in offered),
+                  ", ".join(f"{s.get('name')}: {' or '.join(s.get('ways') or [])}"
+                            for s in offered)))
+    out.append(ok("SOC-6", "Substack and LinkedIn are not offered as drafts, each with its reason",
+                  all(gone.get(k, {}).get("why") for k in ("substack", "linkedin")),
+                  "; ".join(f"{k}: {gone.get(k, {}).get('why')}"
+                            for k in ("substack", "linkedin"))))
+    post = p.api(pg, "/api/post")
+    short = [d for d in post.get("drafts") or [] if d.get("kind") == "short"]
+    p.go(pg, "#/post")
+    words = _text(pg, "#app")
+    p.go(pg, "#/settings/posting")
+    words += _text(pg, "#app")
+    c = pg.evaluate(COUNT, _root(pg))
+    # the page's own content: the crumbs and Settings' eight page links (the same on every
+    # Settings page, counted by COUNT settings) are left out of SOC-7's budget
+    chrome = pg.evaluate(SETTINGS_CHROME, _root(pg))
+    own = {**c, "words": c["words"] - chrome["words"],
+           "controls": c["controls"] - chrome["controls"]}
+    ticked = sum(1 for s in offered if s.get("ticked"))
+    out.append(ok("SOC-7", f"Settings › Posting fits: 80 words or fewer, 7 controls or fewer "
+                  f"({ticked} sites ticked on this copy; Settings' own links left out)",
+                  own["words"] <= 80 and own["controls"] <= 7, _counted(own), count=c,
+                  chrome=chrome))
+    add = pg.query_selector("#posting-add")
+    sheet = ""
+    if add:
+        add.click()
+        pg.wait_for_timeout(600)
+        sheet = _text(pg, "#dlg") if pg.query_selector("#dlg") else ""
+    out.append(ok("SOC-6 page", "Add a site lists the rest and, under Not possible today, "
+                  "Substack with its reason", "Not possible today" in sheet and "Substack" in sheet,
+                  sheet[:160] or "no Add a site"))
+    words += sheet
+    out.append(ok("SOC no copy", "no page offers copy and open", "copy and open" not in
+                  words.lower(), "none" if "copy and open" not in words.lower() else "found"))
+    p.go(pg, "#/settings/toot")
+    landed = pg.url.split("#")[-1]
+    out.append(ok("SOC redirect", "my old address for the toot's settings lands on Posting",
+                  landed.startswith("/settings/posting"), landed))
+    if short:
+        d = p.api(pg, f"/api/post/d/{short[0]['id']}")
+        out.append(ok("SOC-2", "a short post's parts are each within the site's limit, its "
+                      "siblings named", all(x.get("used", 0) <= (d.get("limit") or {}).get(
+                          "max", 0) for x in d.get("parts") or []) and bool(d.get("siblings")),
+                      f"{d.get('site')}: " + ", ".join(str(x.get("used"))
+                                                       for x in d.get("parts") or [])))
+        p.go(pg, f"#/post/d/{short[0]['id']}")
+        btn = pg.query_selector("#draft-open")
+        off = btn is not None and (btn.get_attribute("aria-disabled") == "true"
+                                   or btn.get_attribute("disabled") is not None)
+        out.append(ok("SOC-4", "Open is the first button; on the preview it is off and says "
+                      "nothing is posted", off and "nothing is posted" in _text(pg, "#draft-sheet"),
+                      _text(pg, "#draft-verbs")[:120]))
+    else:
+        out.append(skip("SOC-2", "a short post's parts within the site's limit",
+                        "no short post on this copy (it needs a model answer)"))
+        out.append(skip("SOC-4", "Open first, off on the preview", "no short post on this copy"))
+    ctx.close()
+    out.append(skip("SOC-1", "Write a post › Short posts: one row naming the sites",
+                    "needs a model key (the angles and the write); the scratch install's real "
+                    "write is in the report"))
+    out.append(skip("SOC-3", "an edit of a short post waits", "a write on the copy"))
+    out.append(skip("SOC-5", "Post to Bluesky on the preview says nothing is posted",
+                    "a connected posting account on the copy (tests: test_social.py)"))
+    out.append(skip("SOC-11", "the console writes short posts; nothing is sent", "a model answer "
+                    "(tests: test_social_routes.py)"))
+    out.append(skip("SOC-12", "I posted it records posted by you, nothing sent",
+                    "a write on the copy (tests: test_social.py)"))
+    return out
+
+
 def tfix_lines(p: Preview) -> list[Result]:
     """The copy: A's items a page shows without a press, and B's words where a stranger meets
     them (? keys, ⌘K, Settings › Prompts, the site cub's name)."""
@@ -492,9 +589,11 @@ def tfix_lines(p: Preview) -> list[Result]:
                   str(gear)))
     hrefs = pg.evaluate(HREFS)
     masto = [h for h in hrefs if "connections/mastodon" in h]
+    # Post's accounts are one line to Settings › Posting since short posts (SOCIAL): no
+    # Mastodon link on Post is fine, and any there must be the posting one
     out.append(ok("TFIX-7", "Post's Mastodon Connect leads to the posting connection",
-                  bool(masto) and all(h.endswith("mastodon_post") for h in masto),
-                  ", ".join(masto)))
+                  all(h.endswith("mastodon_post") for h in masto),
+                  ", ".join(masto) or "accounts on Settings › Posting"))
     site = SITE.findall(_text(pg, "#app"))
     p.go(pg, "#/settings/posting")
     hrefs = pg.evaluate(HREFS)
@@ -1355,12 +1454,13 @@ def counts(p: Preview) -> list[Result]:
         both = {k: sheet[k] + q[k] for k in ("words", "controls", "primaries")}
         # the D4 was 180 words and 12 controls; the question then gained PROSE's "What do you
         # think?" (P-1: a field) and, while no voice is set, the "Set up how you write ›"
-        # (a link): 190 and 14 (decisions/LOG.md,)
+        # (a link): 190 and 14; then the angle step (SOCIAL, PROSE's rule 4): three proposed
+        # sentences, each a button you can read before choosing, and Skip: 220 and 18
         out.append(
             ok(
                 "COUNT card (fix 10, D4)",
-                "a card's sheet with Write a post's question: 190 words, 14 controls, 2 primaries",
-                both["words"] <= 190 and both["controls"] <= 14 and both["primaries"] <= 2,
+                "a card's sheet with Write a post's question: 220 words, 18 controls, 2 primaries",
+                both["words"] <= 220 and both["controls"] <= 18 and both["primaries"] <= 2,
                 f"card #{card['id']}: {_counted(both)}",
                 sheet=sheet,
                 question=q,
@@ -1878,6 +1978,8 @@ def main(argv: list[str] | None = None) -> int:
                 results.append(copy)
             if want("counts"):
                 results += counts(p)
+            if want("social"):
+                results += social_lines(p)
             if want("tfix"):
                 results += tfix_lines(p)
             if want("arch"):

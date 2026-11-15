@@ -4,9 +4,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { Facts } from "../../lib/app";
 import { ui } from "../../lib/shell.svelte";
-import { answering, draw, settle, stub, where } from "../testing.svelte";
+import { answering, count, draw, settle, stub, where } from "../testing.svelte";
 import PostPage from "./PostPage.svelte";
-import { accountHref, accountWords, connectedCount, failedAbout, failedTitle, POST_API, sentLine, type Post, type PostDraft } from "./post";
+import { accountHref, accountWords, connectedCount, draftFact, failedAbout, failedTitle, POST_API, sentLine, sitesWords, whereLine, type Post, type PostDraft } from "./post";
 import { mount, unmount } from "svelte";
 import AboutWhatDialog from "../../features/post/AboutWhatDialog.svelte";
 import { aboutKey, aboutLine, WEEK } from "../../features/post/post";
@@ -25,6 +25,7 @@ const POST: Post = {
   accounts: [{ key: "newsletter", word: "Newsletter", state: "not set", account: null, platform: null },
     { key: "mastodon", word: "Mastodon", state: "not set", account: null, platform: null },
     { key: "blog", word: "Blog", state: "not set", account: null, platform: null }],
+  sites: { line: "No sites chosen for short posts yet.", ticked: 0 },
   failed: [],
 };
 
@@ -47,9 +48,11 @@ describe("Post", () => {
     expect(target.querySelectorAll(".btn.primary").length).toBe(1);                 // the newest draft's Open
     expect(target.querySelector("[aria-labelledby=post-drafts] .btn.primary")?.textContent).toBe("Open");
     expect(target.querySelector("[aria-labelledby=post-sent]")?.textContent).toContain("Nothing sent yet.");
+    // the accounts are one line and one control, whatever the number of sites
     const acc = target.querySelector("[aria-labelledby=post-accounts]")!;
-    expect([...acc.querySelectorAll(".r-title")].map((x) => x.textContent)).toEqual(["Newsletter", "Mastodon", "Blog"]);
-    expect([...acc.querySelectorAll(".btn")].map((x) => x.textContent)).toEqual(["Connect", "Connect", "Connect"]);
+    expect([...acc.querySelectorAll(".r-title")].map((x) => x.textContent)).toEqual(["Where posts go"]);
+    expect([...acc.querySelectorAll(".btn")].map((x) => [x.textContent, x.getAttribute("href")])).toEqual([["Sites", "#/settings/posting"]]);
+    expect(acc.textContent).toContain("No sites chosen for short posts yet. Blog: not set. Newsletter: not set.");
     expect(acc.textContent).toContain("optional: every draft can be copied without one");
     // earlier drafts are there, folded
     expect(target.querySelector("[aria-labelledby=post-earlier]")?.classList.contains("folded")).toBe(true);
@@ -103,10 +106,38 @@ describe("Post", () => {
     expect(box.textContent).toContain("no model key is set");
     expect([...box.querySelectorAll(".btn")].map((x) => x.textContent)).toEqual(["Settings › Watching", "Try again", "Dismiss"]);
     expect(box.querySelector("a.btn")?.getAttribute("href")).toBe("#/settings/watching");
-    expect(target.querySelector("[aria-labelledby=post-accounts]")?.textContent).toContain("0 of 3");
     done();
     expect(failedAbout(failed[0]!)).toEqual({ card: 160, title: "Fixed-task canary", sources: 0 });
     expect(failedTitle({ as: "toot", title: null })).toBe("Write a short post about this: no draft");
+    expect(failedTitle({ as: "short", title: "Robots" })).toBe("Write short posts about Robots: no draft");
     expect(connectedCount(POST.accounts)).toBe(0);
+  });
+});
+
+describe("Post with short posts", () => {
+  const sites = [{ id: 21, site: "bluesky", word: "Bluesky", state: "sent" }, { id: 22, site: "mastodon", word: "Mastodon", state: "waiting" },
+    { id: 23, site: "x", word: "X", state: "waiting" }, { id: 24, site: "threads", word: "Threads", state: "waiting" }];
+  const short = draft(22, { cub: "social", kind: "short", word: "short posts", title: "Robots learn to grasp", fact: "from #143", site: "mastodon",
+    site_word: "Mastodon", write: "wabc", way: "open", sites, verb: "I posted it" });
+
+  it("draws one row a write, naming its sites with a tick on those sent, and one Open", async () => {
+    const { target, done } = await page({ ...POST, drafts: [short], sent: [draft(21, { cub: "social", kind: "short", site: "bluesky", site_word: "Bluesky", note: "posted by you", ticket: null })],
+      sites: { line: "Bluesky, Mastodon, X and Threads open in the site, with the draft filled in.", ticked: 4 } });
+    const rows = target.querySelectorAll("[aria-labelledby=post-drafts] li.row");
+    expect(rows.length).toBe(1);
+    expect(rows[0]!.querySelector(".c-meta")?.textContent).toBe("from #143 · Bluesky ✓ · Mastodon · X · Threads");
+    expect(rows[0]!.querySelectorAll("[data-act=post-open]").length).toBe(1);
+    expect(target.querySelector("[aria-labelledby=post-sent] .c-meta")?.textContent).toBe("Posted to Bluesky · posted by you");
+    expect(target.querySelector("[aria-labelledby=post-accounts]")?.textContent).toContain("Bluesky, Mastodon, X and Threads open in the site");
+    expect(target.textContent).not.toMatch(/copy and open/i);
+    // Post's budget with one write of four sites waiting: 173 words, 12 controls
+    const c = count(target, "post, one write of four sites waiting");
+    expect(c.words, JSON.stringify(c)).toBeLessThanOrEqual(173);
+    expect(c.controls, JSON.stringify(c)).toBeLessThanOrEqual(12);
+    expect(c.primaries, JSON.stringify(c)).toBeLessThanOrEqual(2);
+    done();
+    expect(sitesWords(short)).toBe("Bluesky ✓ · Mastodon · X · Threads");
+    expect(draftFact(draft(1))).toBe("Monday's issue");
+    expect(whereLine({ ...POST, sites: { line: "X opens in the site.", ticked: 1 } })).toBe("X opens in the site. Blog: not set. Newsletter: not set.");
   });
 });

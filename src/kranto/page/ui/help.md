@@ -384,25 +384,41 @@ terminal) looks now. `cubs.auto_update: false` in `kranto.yaml` makes every upda
 ## Post {#post}
 
 Post (`#/post`, the fourth door) is where what Kranto writes for you waits: **Drafts waiting**,
-one line a draft (newsletter, blog post or short post; its title; one fact, like "Monday's
-issue"; its age; **Open**); **Sent**, one line a post with where it went; **Accounts**, the
-Newsletter, Mastodon and Blog accounts, each "not set" or "connected as …" with Connect or Change
-(all optional: every draft can be copied without one); and **Earlier drafts**, folded (an issue a
-newer one replaced, one you declined), each still openable. A draft waits until you have seen it:
-it leaves Drafts waiting only when it is sent, declined, or replaced by the next one of its
-series. **Open** shows the draft with Send (the same dialog as anywhere), Copy, Download and
-Decline; nothing is sent until you choose Send. A draft with no account connected says Open
-wherever it waits (the home, Needs you), and its page offers Copy. **Write a post** in the head
-asks about what: this week's news (Write draft then writes it, and it waits here), or an idea
-(Ideas opens; a card's own Write a post writes about it). ⚙ is Settings › Posting. Old links to
-Cubs and its Approvals land here.
+one line a draft (newsletter, blog post or short posts; its title; one fact, like "Monday's
+issue"; for short posts the sites as words, "Bluesky ✓ · Mastodon · X", ✓ on those posted; its
+age; **Open**); **Sent**, one line a post with where it went; **Where posts go**, one line with
+**Sites** (Settings › Posting); and **Earlier drafts**, folded (an issue a newer one replaced, one
+you declined), each still openable. A draft waits until you have seen it: it leaves Drafts waiting
+only when it is sent, declined, or replaced by the next one of its series. **Open** shows the
+draft with Send (the same dialog as anywhere), Copy, Download and Decline; nothing is sent until
+you choose Send. **Write a post** in the head asks about what: this week's news (Write draft then
+writes it, and it waits here), or an idea (Ideas opens; a card's own Write a post writes about
+it). ⚙ is Settings › Posting. Old links to Cubs and its Approvals land here.
+
+**Write a post** asks one thing: "Why does this interest you? One sentence." Beside the box are
+three proposals (a claim, a prediction, a question); pick one, change it, or write your own, and
+the post opens on it. **Skip** writes without one: the draft then only says what the sources say.
+**As** is **Blog post** or **Short posts** for the sites you ticked in Settings › Posting.
+
+**Short posts** go to the sites people use, in one of two ways only. **Open in Bluesky** (or X,
+Threads, Mastodon) opens the site's own box with the post written; you post it there yourself, and back
+here **I posted it** moves it to Sent as "posted by you" (Kranto sends nothing). Where you switched
+a site to **Post directly** (Bluesky and Mastodon, with their posting account connected), **Post to
+Bluesky** sits beside Open and posts it after your yes in the confirm dialog. Open always comes
+first. Your own site comes first too: with your blog connected, Write a post writes the blog post,
+and each short post is written from its words and links to it; with no blog, a short post links to
+the card's source. Each site's version is written for that site (Bluesky's 300 characters, X's 280
+with the link counted as 23), and each says how much of its limit it uses. Copy gives you the
+words on any draft. On the preview Open is off and says nothing is posted.
 
 ## Settings {#settings}
 
 Settings has seven pages, in the order you set kranto up: **Watching** (the model key and
 provider, the model for each job, how often kranto reads, live search, and the logins some
-sources are read with), **Posting** (the accounts a draft is sent with, and what Kranto writes:
-each posting job's own settings, like the weekly issue's day and topics), **Assistant**,
+sources are read with), **Posting** (the sites you post short posts to, one line each, with
+**Post directly** where Kranto can post after your yes; **Add a site**, where Substack and
+LinkedIn are listed under "Not possible today" with why; your blog; the newsletter; how you
+write), **Assistant**,
 **Spend**, **Privacy**, **System** (updates, the service, recent runs, your grades) and
 **Appearance**. **Advanced**, folded, has Prompts (every prompt Kranto sends a model, with your
 additions or your own full text) and what your settings file switches on by hand (the cub shop).

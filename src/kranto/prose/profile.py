@@ -58,7 +58,10 @@ SWITCH_WORDS = {
 STRICTNESS = ("off", "light", "strict")
 SITES = ("blog", "newsletter", "mastodon", "bluesky", "linkedin", "threads", "x", "substack")
 # what each of Kranto's writers writes, as a site (the toot cub posts to Mastodon)
-WRITER_SITE = {"blog": "blog", "newsletter": "newsletter", "toot": "mastodon"}
+WRITER_SITE = {"blog": "blog", "newsletter": "newsletter", "toot": "mastodon",
+               # Kranto's own short-post writer (kranto.social): every site's variant; no model
+               # is chosen for it by default (P-11 is the owner's)
+               "social": "short"}
 # the old tone keys, migrated once into the voice card's first line
 TONE_KEYS = (("blog", "tone", "On the blog"), ("toot", "tone", "On Mastodon"),
              ("newsletter", "intro", "In the newsletter"))

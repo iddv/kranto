@@ -1,0 +1,22 @@
+{
+  "_source": "Hand-written from the AT Protocol's documented shapes: com.atproto.repo.createRecord (https://docs.bsky.app/docs/api/com-atproto-repo-create-record) and com.atproto.server.createSession (https://docs.bsky.app/docs/api/com-atproto-server-create-session), read 2026-11-13. Not yet a recorded real answer: the owner's first real send replaces nothing here, it adds a recorded file beside this one.",
+  "createRecord": {
+    "uri": "at://did:plc:fakefakefakefakefake0001/app.bsky.feed.post/3lfakepost0001",
+    "cid": "bafyreifakefakefakefakefakefakefakefakefakefakefakefake0001",
+    "commit": {"cid": "bafyreifakecommit0001", "rev": "3lfakerev0001"},
+    "validationStatus": "valid"
+  },
+  "createRecordReply": {
+    "uri": "at://did:plc:fakefakefakefakefake0001/app.bsky.feed.post/3lfakepost0002",
+    "cid": "bafyreifakefakefakefakefakefakefakefakefakefakefakefake0002",
+    "validationStatus": "valid"
+  },
+  "invalid": {"error": "InvalidRequest", "message": "Record/text must not be longer than 3000 graphemes"},
+  "expired": {"error": "ExpiredToken", "message": "Token has expired"},
+  "createSession": {
+    "did": "did:plc:fakefakefakefakefake0001",
+    "handle": "alice.example",
+    "email": null,
+    "active": true
+  }
+}

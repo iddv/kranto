@@ -21,4 +21,5 @@ calls a model or the network: `conftest.py` makes the home a temp dir and builds
 | `cub_manifests` | `test_manifest_schema` |
 | `evals` | `test_evals`, `test_eval_runs`, `test_evals_api`: a frozen eval set written by `scripts/dev/eval_fixtures.py` |
 | `odd_install` | `test_odd_install`, `scripts/dev/odd_install.py` and `odd_walk.sh`: an install with every stored value a writer can produce (null, empty, missing), and an upgraded one |
+| `social` | `test_social`: the sites' answers in their documented shapes (Bluesky's createRecord and createSession), each file naming its page and date |
 | `x` | `fake_x`, `test_x_sources`: X API answers |

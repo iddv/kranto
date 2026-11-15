@@ -29,8 +29,9 @@ PAGES = {
     "watching": ("WatchingList.svelte", "WatchingPane.svelte",
                  ["KeysList", "ModelsList", "WatchReadList", "SearchList", "ConnectionsList"],
                  ["KeysPane", "ModelsPane", "WatchReadPane", "SearchPane", "ConnectionsPane"]),
-    # open-source wave 2: the accounts a draft is sent with, what Kranto writes
-    "posting": ("PostingList.svelte", "AccountsPane.svelte", ["ConnectionsList"], ["ConnectionsPane", "NewsletterPane"]),
+    # open-source wave 2: the accounts a draft is sent with; short posts: the sites you post to
+    # (each posting account is reached from its site's row, the blog's and the newsletter's)
+    "posting": ("PostingList.svelte", "AccountsPane.svelte", [], ["ConnectionsPane", "NewsletterPane"]),
     "sources": ("SourcesList.svelte", "SourcesPagePane.svelte", [], ["ConnectionsPane", "SourcesPane"]),
     "prompts": ("PromptsList.svelte", "PromptsPane.svelte", [], []),
     "spend": ("SpendList.svelte", "SpendPane.svelte", [], []),
