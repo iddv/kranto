@@ -397,6 +397,9 @@ def change(cfg, store, body: dict) -> dict:
              "writer_model",
              "never_add", "never_remove", "keep_add", "keep_remove", "always_add",
              "always_remove", "samples_add", "samples_remove"}
+    # the owner's press of a change an assistant prepared carries the press's own
+    # ``confirm: true`` (``verbs_api._call``): the press, not a field of the profile
+    body = {k: v for k, v in body.items() if k != "confirm"}
     extra = sorted(set(body) - known)
     if extra:
         raise ProfileError(f"no {', '.join(extra)} in a voice change")
@@ -456,6 +459,16 @@ def change(cfg, store, body: dict) -> dict:
         if not isinstance(d, dict) or not all(isinstance(v, str) and len(v) <= 200
                                               for v in d.values()):
             raise ProfileError("disclosure is an object: site -> a line (\"\": off)")
+        # the same link filter as a post's words (``sites.scrub``): a disclosure line is added
+        # under the post by code, after the post's own words were filtered
+        from ..core.sites import scrub
+        d = dict(d)
+        for site, line in list(d.items()):
+            kept, gone = scrub(line, set())
+            if gone:
+                d[site] = kept
+                said.append(f"the web address taken off {site}'s disclosure line (a disclosure "
+                            "line carries no address)")
         row = replace(row, disclosure={**(row.disclosure or {}), **d})
         said.append("disclosure")
     if "take" in body:

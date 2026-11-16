@@ -356,14 +356,17 @@ def file(store: Store, *, cub: str, trust: str, granted: tuple[str, ...], kind: 
          fields: dict[str, Any], because: dict[str, Any] | None = None,
          subject: tuple[str, str | int] | None = None,
          run_uuid: str | None = None, per_day: int | None = None,
-         now: datetime | None = None, note: str | None = None, capped: bool = True) -> int:
+         now: datetime | None = None, note: str | None = None, capped: bool = True,
+         door: str | None = None) -> int:
     """File a ticket; its id. Refused when the filer was not granted the kind, the fields do
     not fit, a ``draft_ref`` is not the filer's draft, an open ticket with the same fields
     exists (409 with its id), or the day's cap is reached (429). ``per_day`` lowers, never
     raises, the kind's cap (``cubs.<id>.tickets_per_day``). ``note``: its first state's
     words (a draft offered again by the owner's click, ``core.asks.again``). ``capped``
     False: the owner's own edit of a waiting draft (``post.edit``), which replaces an ask the
-    cub filed and is not one more ask of the cub's, so the cub's daily cap does not count it."""
+    cub filed and is not one more ask of the cub's, so the cub's daily cap does not count it.
+    ``door``: its first state's door, when a person's or an assistant's action filed it (the
+    edit's: ``ui``, ``cli``, ``mcp``, ``console``, ``agent``); None for a cub's own ask."""
     kind_names()
     if canonical(kind) not in {canonical(k) for k in granted}:
         raise TicketError(f"{cub} may not request {kind}: its manifest does not list it", 403)
@@ -396,7 +399,7 @@ def file(store: Store, *, cub: str, trust: str, granted: tuple[str, ...], kind: 
             "expires_at": NEVER if spec.expires_hours is None
             else iso(now + timedelta(hours=spec.expires_hours)),
             "created_at": iso(now)})
-        _append_state(store, tid, OPEN, now=now, note=note)
+        _append_state(store, tid, OPEN, now=now, note=note, door=door)
         older = _replace_older(store, tid, cub=cub, kind=kind, subject=subject, now=now)
     events.core_publish(store, "ticket.filed", {"ticket_id": tid, "kind": kind, "cub": cub},
                         subject=("ticket", tid))

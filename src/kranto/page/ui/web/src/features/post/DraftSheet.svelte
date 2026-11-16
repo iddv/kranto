@@ -1,6 +1,6 @@
 <script lang="ts">
-  // A draft's sheet: its title, one facts line ("edited by you" once
-  // edited), the draft rendered and folded to its first lines ("Show all"), PROSE's flags under
+  // A draft's sheet: its title, one facts line (who edited it, once edited: "edited by
+  // you", "edited by your assistant (mcp)"), the draft rendered and folded to its first lines ("Show all"), PROSE's flags under
   // it (what reads like AI, each with its plain fix, and one line), then the verbs. With an account
   // and an ask that waits: Send (the primary; SEND's dialog, unchanged), Copy, Edit, Download,
   // Decline, Details. With none: Copy (the primary), Edit, Download, "Connect an account to send",
@@ -111,7 +111,7 @@
       });
     });
   }
-  const facts = $derived(s ? [s.word, s.fact, s.edited ? "edited by you" : "", rel(dt(s.at)), s.said || s.line].filter(Boolean).join(" · ") : "");
+  const facts = $derived(s ? [s.word, s.fact, s.edited ? s.edited_words || "edited" : "", rel(dt(s.at)), s.said || s.line].filter(Boolean).join(" · ") : "");
 </script>
 
 {#if !s}

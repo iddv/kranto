@@ -552,9 +552,12 @@ class VerbsAPI:
         # the page's dialog read the press back and the owner pressed it: that is the confirm a
         # route asks for (PAR: a sensitive setting, prepared, was then refused "needs the
         # confirm dialog's answer")
-        status, answer = await self._perform(verb, row.get("subject_id"), row["fields"],
-                                             identity, by="ui", skind=row.get("subject_kind"),
-                                             confirmed=True)
+        # the press is the owner's; what is pressed is the asker's (a route that records who
+        # wrote it, ``post.edit``, reads ``verbs.asked_by``)
+        with verbs.asked(asker):
+            status, answer = await self._perform(verb, row.get("subject_id"), row["fields"],
+                                                 identity, by="ui",
+                                                 skind=row.get("subject_kind"), confirmed=True)
         ok = 200 <= status < 400
         if ok:
             await run_in_threadpool(self._prepared_mark, row, "pressed")
@@ -634,7 +637,7 @@ class VerbsAPI:
                             "Building): your own assistant may read, not act", 403,
                             refusal="reads_only", page="#/settings/building", choice="never",
                             locked=False)
-        choice = verbs.choice_for(self.rt.cfg, verb)
+        choice = verbs.choice_for(self.rt.cfg, verb, fields)
         if choice.choice == "never":
             raise VerbError(f"{verb.title} ({verb.kind}) is off for assistants: "
                             f"{choice.why}. It is under Settings › Assistant "

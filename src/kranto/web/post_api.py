@@ -48,7 +48,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
-from ..core import asks, tickets
+from ..core import asks, tickets, verbs
 
 LINE = "Drafts wait here until you have seen them."
 LIMIT = 60                       # the newest drafts read; older ones are in the cubs' own pages
@@ -547,15 +547,45 @@ def editable(store, d: dict[str, Any], t: dict[str, Any] | None, group: str,
     return {"edit": edit, "can_edit": why is None, "cannot_edit": why,
             "limit": limit,
             "edited": content.get("edited") is True,
+            "edited_words": edited_words(content),
             "edited_from": edited_from if isinstance(edited_from, int) else None,
             "original_draft": _original_version(store, d)}
 
 
-def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dict[str, Any]:
-    """``POST /api/post/d/{id}/edit`` (``post.edit``): the owner's version of a waiting draft,
-    filed as the next draft of its series (above). ``{title?, body?}`` (a long post) or
+def edited_words(content: dict[str, Any]) -> str | None:
+    """Who edited a draft, in the page's words: "edited by you" (the page or the command
+    line), "edited by your assistant (mcp)" (any other door: ``kranto mcp``, the console, a
+    named agent), "edited" (a draft edited before Kranto recorded who: ``edited_by`` missing
+    or null), None (not edited)."""
+    if content.get("edited") is not True:
+        return None
+    by = content.get("edited_by")
+    if not isinstance(by, str) or not by:
+        return "edited"
+    door, _, who = by.partition(":")
+    if door in verbs.OWNER_DOORS:
+        return "edited by you"
+    where = {"mcp": "mcp", "console": "the console"}.get(door)
+    if door == "agent":
+        where = f"agent {who}" if who else "an agent"
+    return f"edited by your assistant ({where or door})"
+
+
+def editor_of(origin: str | None) -> str:
+    """Who an edit is by (``edited_by``): the assistant whose prepared edit the owner pressed
+    (``verbs.asked_by``), the assistant whose verb runs (``verbs.acting_by``), else the door the
+    request came through (``ui`` when none is known: the page)."""
+    return verbs.asked_by() or verbs.acting_by() or str(origin or "") or "ui"
+
+
+def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui",
+               by: str | None = None) -> dict[str, Any]:
+    """``POST /api/post/d/{id}/edit`` (``post.edit``): new words for a waiting draft, filed as
+    the next draft of its series (above). ``{title?, body?}`` (a long post) or
     ``{parts: [{text}]}`` (a short post: one part), or ``drop`` (an extra's key, when the draft
-    has extras). ``{id, ref, ticket, withdrew, say}``; a ``WriteError`` says what is wrong."""
+    has extras). ``by``: who wrote the words (``editor_of``; ``door`` when None), kept as the
+    new draft's ``edited_by`` and said on its ask. ``{id, ref, ticket, withdrew, say}``; a
+    ``WriteError`` says what is wrong."""
     from ..core.cubs.brokers.base import new_draft
     store = rt.store
     r = store.query_one("SELECT * FROM cub_drafts WHERE id = ?", (int(draft_id),))
@@ -576,7 +606,7 @@ def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dic
         raise WriteError(can["cannot_edit"], 409)
     assert t is not None                    # a waiting draft has its ask
     tkey, wkey = _shape(content)
-    new = {k: v for k, v in content.items() if k not in ("edited", "edited_from")}
+    new = {k: v for k, v in content.items() if k not in ("edited", "edited_from", "edited_by")}
     title, words, parts, drop = (body.get("title"), body.get("body"), body.get("parts"),
                                  body.get("drop"))
     if title is None and words is None and parts is None and drop is None:
@@ -610,7 +640,8 @@ def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dic
         if drop not in keys:
             raise WriteError(f"this draft has no extra {drop!r} that can be removed")
         new["extras"] = [e for e in extras if not (isinstance(e, dict) and e.get("key") == drop)]
-    new["edited"], new["edited_from"] = True, int(d["id"])
+    editor = str(by or door or "ui")
+    new["edited"], new["edited_from"], new["edited_by"] = True, int(d["id"]), editor
     from ..core import tickets as tk
     made = new_draft(store, cub=d["cub"], service=d["service"], content=new, run_uuid=None)
     fields = {**t["fields"], "draft_ref": made["ref"]}
@@ -624,7 +655,8 @@ def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dic
     try:
         tid = tk.file(store, cub=t["cub"], trust=t["trust"], granted=(t["kind"],),
                       kind=t["kind"], fields=fields, because=t["because"] or None,
-                      subject=subject, note="edited by you", capped=False)
+                      subject=subject, note=edited_words(new), capped=False,
+                      door=editor.partition(":")[0])
     except tk.TicketError as exc:
         raise WriteError(f"the edit could not wait for your yes: {exc}", exc.code) from None
     st = tk.state_of(store, t["id"])
@@ -634,7 +666,10 @@ def edit_draft(rt, draft_id: int, body: dict[str, Any], door: str = "ui") -> dic
         if old:
             tk.resolved(store, old, "expired")
     say = "Saved. The original draft is under Earlier drafts."
-    if withdrew:
+    if edited_words(new) != "edited by you":
+        say = (f"Saved, {edited_words(new)}: it waits on Post for your yes as before. The "
+               "original draft is under Earlier drafts.")
+    elif withdrew:
         say = ("Saved. The send that waited for your yes was withdrawn; this version waits "
                "instead. The original is under Earlier drafts.")
     if d["ref"] != made["ref"] and ":" in d["ref"] and not d["ref"].startswith("draft:"):
@@ -1010,7 +1045,14 @@ def posted_by_you(rt, draft_id: int, identity: dict[str, Any] | None) -> dict[st
         except tickets.TicketError as exc:
             raise WriteError(str(exc), exc.code) from None
     else:
-        tickets.append_state(store, t["id"], "done", door="ui", note=POSTED_BY_YOU)
+        # the check and the write in one transaction: a press of the confirm (which moves the
+        # same ask to ``confirmed`` in its own transaction) and this click cannot both win
+        with store.tx():
+            st = tickets.state_of(store, t["id"])
+            if not st or st["state"] != tickets.OPEN:
+                raise WriteError("this draft does not wait for you any more: it was answered "
+                                 "while you clicked", 409)
+            tickets.append_state(store, t["id"], "done", door="ui", note=POSTED_BY_YOU)
         done = tickets.get(store, t["id"])
         if done:
             tickets.resolved(store, done, "done")
@@ -1076,6 +1118,7 @@ def posting_read(store) -> dict[str, Any]:
                     "instance": row.instance if s.needs == "instance" else None,
                     "limit": s.limit, "unit": s.unit,
                     "disclose": disclose.get(s.id) is True,
+                    "waiting_direct": _waiting_direct(store, s.direct_kind),
                     # the words this site's posts end with when disclose is on: the person's
                     # own for the site (How you write), else Kranto's default
                     "disclosure_words": words_of(s.id),
@@ -1087,6 +1130,22 @@ def posting_read(store) -> dict[str, Any]:
     return {"sites": out, "not_offered": gone,
             "disclosure": f"Drafted with {product.NAME}.",
             "blog": _blog_state(store)}
+
+
+def _waiting_direct(store, kind: str | None) -> int:
+    """How many of the site's drafts still wait to be posted by Kranto (an open ask of its
+    direct kind, filed by the short-post writer). The switch is read when a draft is written, so
+    a draft written while Post directly was on still waits as a direct post after it is
+    switched off: Settings › Posting says so on the switch."""
+    if not kind:
+        return 0
+    from ..store import iso, utcnow
+    r = store.query_one(
+        "SELECT COUNT(*) AS n FROM cub_tickets t WHERE t.kind = ? AND t.cub = ? "
+        "AND t.expires_at > ? AND (SELECT s.state FROM cub_ticket_states s "
+        "WHERE s.ticket_id = t.id ORDER BY s.id DESC LIMIT 1) = ?",
+        (kind, SOCIAL, iso(utcnow()), tickets.OPEN))
+    return int(r["n"] or 0) if r else 0
 
 
 def _blog_state(store) -> dict[str, Any]:
@@ -1314,10 +1373,14 @@ class PostAPI:
         body = await _json_body(request)
         if body is None:
             return JSONResponse({"error": "expected a JSON object"}, status_code=400)
-        door = (request.scope.get(IDENTITY) or {}).get("origin") or "ui"
+        origin = (request.scope.get(IDENTITY) or {}).get("origin") or "ui"
+        # who wrote the words, read here (in the request's own context): the assistant whose
+        # prepared edit the owner pressed, an assistant's verb, or the door
+        by = editor_of(origin)
+        door = verbs.door_of({"origin": origin}) or "ui"
         try:
             out = await run_in_threadpool(edit_draft, self.rt, request.path_params["id"], body,
-                                          "ui" if door == "ui" else "cli")
+                                          door, by)
         except WriteError as exc:
             return JSONResponse({"error": exc.words}, status_code=exc.code)
         return JSONResponse(out)

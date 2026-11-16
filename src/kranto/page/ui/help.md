@@ -239,7 +239,11 @@ what reads like AI, underlined with its plain fix, with **Fix them** (it rewrite
 words; nothing is kept until you choose Save). **Save** keeps your words as the draft that waits
 (it is "edited by you"); the original stays under Earlier drafts, and "Start again from the
 original" brings its words back. A send that was waiting for your yes is withdrawn first, and the
-page says so. Write a post's question has one optional line, "What do you think?" (and, while How you write is not set up, a "Set up how you write" link): the post builds
+page says so. When your assistant (over `kranto mcp`, the console or an agent) asks to change a
+draft's words, nothing changes until you approve it in Needs you; the draft then says "edited by
+your assistant (mcp)", never "edited by you", and still waits for your yes before it goes. In
+the same way, an assistant's change to your voice card, the lines every post keeps or a
+disclosure line waits for your approval, and a disclosure line never carries a web address. Write a post's question has one optional line, "What do you think?" (and, while How you write is not set up, a "Set up how you write" link): the post builds
 on it and speaks for you only from it.
 
 **Settings › Posting › How you write** is your voice card (how you write, in plain words; Draft it

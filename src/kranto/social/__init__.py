@@ -222,6 +222,10 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
         out_parts.append(text)
     extras: list[dict[str, Any]] = []
     if disclose:
+        # a line stored before Kranto filtered it at save goes through the post's filter here
+        disclose, gone = sites_mod.scrub(disclose, set())
+        removed += gone
+    if disclose:
         last = out_parts[-1]
         room_last = first_room if len(out_parts) == 1 else site.limit
         if sites_mod.count(site, f"{last}\n\n{disclose}") <= room_last:
