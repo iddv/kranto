@@ -630,7 +630,7 @@ class CubRuntime:
                                              deadline_s=DEADLINES["action.run"], wait_s=30)
         except CubFailed as exc:
             self._host_row(cid, "action", "error", 0, None, exc.words)
-            words = "the cub did not answer in 30 s" if exc.kind == "deadline" else exc.words
+            words = "it did not answer in 30 s" if exc.kind == "deadline" else exc.words
             raise CubUnavailable(words, 502) from None
         self._host_row(cid, "action", "ok", ms, run_uuid, kind)
         for name in out.get("refresh") or []:

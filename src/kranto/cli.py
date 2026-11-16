@@ -1379,12 +1379,12 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", help="library size, spend, last run")
     p.set_defaults(func=cmd_status)
 
-    p = sub.add_parser("pause", help="pause watching: no model call until resumed (the page's "
-                                      "Pause pauses building too)")
+    p = sub.add_parser("pause", help="pause Kranto: no model call (reading, news, ideas, posts) "
+                                      "until resumed; the page's Pause is the same switch")
     p.add_argument("reason", nargs="?", default="paused from the command line")
     p.set_defaults(func=cmd_pause)
 
-    p = sub.add_parser("resume", help="resume watching")
+    p = sub.add_parser("resume", help="resume Kranto's model calls")
     p.set_defaults(func=cmd_resume)
 
     topics = sub.add_parser("topics", help="what you care about").add_subparsers(
@@ -1398,9 +1398,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="approve proposals whose items resemble the topic (median similarity "
                         "at or above the prefilter threshold)")
     p.add_argument("--kind", choices=library.TOPIC_KINDS, default="user",
-                   help="project: a topic gathered for one of the page's projects")
-    p.add_argument("--ref", help="a project topic's key, project:<id>; adding one whose ref "
-                                 "exists changes nothing")
+                   help="user: yours (the default); project: a kind an earlier install kept, "
+                        "for reading its old topics")
+    p.add_argument("--ref", help="an earlier install's topic key, project:<id>; adding one "
+                                 "whose key exists changes nothing")
     p.set_defaults(func=cmd_topics_add)
     p = topics.add_parser("scout", help="propose more sources for a topic")
     p.add_argument("topic_id", type=int)
@@ -1418,10 +1419,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_topics_archive)
     p = topics.add_parser("list", help="list active topics")
     p.add_argument("--kind", choices=(*library.TOPIC_KINDS, "all"), default="user",
-                   help="which topics: yours (default), project topics, or all")
+                   help="which topics: yours (default), an earlier install's (project), or all")
     p.set_defaults(func=cmd_topics_list)
 
-    srcs = sub.add_parser("sources", help="what the kranto watch").add_subparsers(
+    srcs = sub.add_parser("sources", help="the sources Kranto reads: what news, ideas and "
+                                          "posts are made from").add_subparsers(
         dest="sources_command", required=True
     )
     p = srcs.add_parser("add", help="add and approve a source")
@@ -1550,7 +1552,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--all", action="store_true", help="include cards with unsupported evidence")
     p.set_defaults(func=cmd_ideas_list)
     p = ideas_sub.add_parser("card", help="one card on one theme now (one call, about $0.06)")
-    p.add_argument("lineage", help="the theme's lineage id (afk map, the theme's sheet)")
+    p.add_argument("lineage", help="the theme's lineage id (on the theme's sheet in the map)")
     p.set_defaults(func=cmd_ideas_card)
     p = ideas_sub.add_parser("grade", help="record your verdict on a card")
     p.add_argument("idea_id", type=int)

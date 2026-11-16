@@ -113,7 +113,7 @@
     </Pane>
   {:else if cap}
     {@const c = detail?.data}
-    <Pane title={cap[1]} lede="What Kranto holds for this cub; empty is the cub's default by its trust (yours: no cap).">
+    <Pane title={cap[1]} lede="What Kranto holds for this feature; empty is the default for who made it (yours: no cap).">
       {#snippet kind()}<Glyph name={SET_ST.set[0]} colour={SET_ST.set[1]} word={SET_ST.set[2]} />{kindLine(f.title, "the core's keys")}{/snippet}
       {#snippet top()}
         <SettingField id="fs-cap" label={cap[1]} kind={cap[0] === "monthly_usd" ? "money" : "number"} value={typed ?? (cap[0] === "monthly_usd" ? text(c?.spend.cap_usd) : cap[0] === "calls_per_day" ? text(c?.spend.calls_per_day) : "")} input={(t) => (typed = t)} />

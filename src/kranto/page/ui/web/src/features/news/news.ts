@@ -20,6 +20,13 @@ export function whyNothingRuns(): { text: string; link: { href: string; w: strin
   }
   return null;
 }
+/** News's one line while the server runs no jobs (serve --no-scheduler; the status's scheduler:
+ * false): the briefs already written stay, and no new one comes until jobs run again */
+export const JOBS_OFF = "No new briefs are made while jobs are off.";
+export function jobsOff(): boolean {
+  const h = (app()?.host() || null) as { scheduler?: boolean } | null;
+  return !!h && h.scheduler === false;
+}
 /** the early first brief's line: written while the first read went on, from
  * the items kept by then; the first read's own brief takes its place when the read ends */
 export function earlyWords(b: { checks?: Record<string, unknown> | null }): string {

@@ -15,7 +15,7 @@
   import { go, href } from "../../lib/router";
   import { ui } from "../../lib/shell.svelte";
   import { features, featurePath, glyphOf, trustWord, type ListDecl } from "../index";
-  import { actionOf, askVerb, at, citesOf, cubHref, groupsOf, ticketOf } from "../cub";
+  import { actionOf, askVerb, at, citesOf, cubHref, groupsOf, POST_CRUMB, ticketOf } from "../cub";
   import { cubObjectAct, openAsk } from "../cubverbs";
   import { KIND_WASH } from "../../pages/settings/feature";
 
@@ -44,7 +44,7 @@
   const text = $derived(typeof body === "string" ? body.slice(0, 200000) : null);
   const tid = $derived(o ? ticketOf(o) : null);
   const cites = $derived(o && card?.origin ? citesOf(at(o, card.origin)) : []);
-  const base = $derived(f ? { crumb: [{ to: "cubs", w: "Cubs" }, { to: "cub/" + f.id, w: f.title }], glyph: glyphOf(f.manifest.ui.glyph), wash: KIND_WASH[f.manifest.ui.kind || ""] || "grey", trust: { w: trustWord(f.trust), cls: f.trust }, gear: "settings/" + f.id } : {});
+  const base = $derived(f ? { crumb: [POST_CRUMB, { to: "cub/" + f.id, w: f.title }], glyph: glyphOf(f.manifest.ui.glyph), wash: KIND_WASH[f.manifest.ui.kind || ""] || "grey", trust: { w: trustWord(f.trust), cls: f.trust }, gear: "settings/" + f.id } : {});
   const more = $derived.by((): MenuItem[] => {
     if (!f || !o || !card) return [];
     const out: MenuItem[] = [];
@@ -60,9 +60,9 @@
 </script>
 
 {#if !H || !fs}
-  <Page head={{ title: id, crumb: [{ to: "cubs", w: "Cubs" }] }}>{#snippet body()}{#if !H}<Empty text="Cubs come from the server, which is not hosting this page." />{:else}<Loading />{/if}{/snippet}</Page>
+  <Page head={{ title: id, crumb: [POST_CRUMB] }}>{#snippet body()}{#if !H}<Empty text="Features come from the server, which is not hosting this page." />{:else}<Loading />{/if}{/snippet}</Page>
 {:else if !f}
-  <Page head={{ title: id, crumb: [{ to: "cubs", w: "Cubs" }] }}>{#snippet body()}<Empty text={`There is no cub called ${id} on this Kranto.`} link={{ href: "#/cubs", w: "Cubs ›" }} />{/snippet}</Page>
+  <Page head={{ title: id, crumb: [POST_CRUMB] }}>{#snippet body()}<Empty text={`There is no feature called ${id} on this Kranto.`} link={{ href: "#/post", w: "Post ›" }} />{/snippet}</Page>
 {:else if !o}
   <Page head={{ ...base, title: f.title }}>{#snippet body()}{#if !data?.data}<Loading error={data?.error} what={list ? `its ${list.word.toLowerCase()}` : "it"} />{:else}<Empty text="That is not in its list any more." link={{ href: cubHref(f.id, { list: list?.id }), w: `${f.title} ›` }} />{/if}{/snippet}</Page>
 {:else}

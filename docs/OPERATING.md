@@ -10,7 +10,9 @@ Read alongside:
 - [DECISIONS.md](design/DECISIONS.md): why each mechanism exists, with the evidence behind it.
 - [DESIGN.md](design/DESIGN.md): the original plan, and section 8, what changed while building.
 
-Facts here were checked against the code on 2026-09-24. When they disagree
+Facts here were checked against the code on 2026-09-24, and again on 2026-11-16
+for what left the product (building software and everything that served it,
+Invest, the trend radar, the browser extension, deep dives). When they disagree
 with the code, the code is right: fix this file. Its file map is older than the
 code; CONTRIBUTING's "Where things are" is kept true by a test.
 
@@ -63,14 +65,29 @@ code; CONTRIBUTING's "Where things are" is kept true by a test.
                |
                v
             messages: strike | heartbeat (weekly) | alarm (any failed run, budget)
-               |  /feed.xml, Health page, and Apprise targets if configured
+               |  /feed.xml, Needs you and Health, and Apprise targets if configured
                v
             a person grades them: worth waking / not worth it / missed / ...
 ```
 
-Nothing in this picture acts on the world. The only outward effects are HTTP
-fetches of public sources, model calls, and messages to targets the operator
-configured.
+Nothing in this picture acts on the world. Beside it, on the same library:
+
+- **News** writes a short brief per topic each day, every line citing the
+  observations behind it ([news.md](news.md)).
+- **Post** drafts a post about a card, a brief or the owner's own text, in the
+  owner's voice, and sends it only after the owner's yes, through an account the
+  owner connected; with nothing connected the owner copies the text
+  ([posting.md](posting.md), [prose.md](prose.md)).
+- **The console** (the owner's own Claude Code beside every page, running as the
+  owner, unsandboxed) and **Open in Claude Code** (one session about one idea, in
+  its sandbox) work on the library through Kranto's verbs; what costs money or
+  shapes a post waits for the owner's yes ([verbs.md](verbs.md),
+  [threat-model.md](threat-model.md)).
+
+The only outward effects Kranto makes are HTTP fetches of public sources, model
+calls, messages to targets the operator configured, and the posts the owner
+approved. The console is the exception the threat model names: it can do what
+the owner can.
 
 ## 2. Code map
 
@@ -98,7 +115,7 @@ configured.
 | `scout.py`, `prompts/scout.md` | Topic to proposed sources (core and wildcard), each validated by fetching. |
 | `resolve.py`, `prompts/resolve.md` | A pasted list or description to proposed sources, each validated by fetching; approving them by id. |
 | `search.py` | Exact cosine search over an in-memory matrix fused (reciprocal rank) with FTS5/BM25 over `observations_fts`; off-topic line at 0.65. Rollups ranked separately (centroid plus `rollups_fts`). |
-| `websearch/` | Live web search: `Searcher.search(query, recency, kind)` over the `search.provider` backend (Exa's API with `EXA_API_KEY`, else Exa's free hosted MCP; or Anthropic's web search tool on the watcher's Claude API key) and the free three by kind (Hacker News, GitHub, arXiv); dated `Hit`s, `Results.block` (numbered, fenced), `cited`/`uncited`, `fetch` through `sources.HTTP`; the day cache `search_cache`, one `api_spend` row a request with its `caller`, `search.monthly_usd` pausing paid search; with nothing answering, "no live search: results are from model memory and may be stale". `GET /api/websearch`, `afk websearch`, the doctor's `search` line. Backends: Exa (default; free mode without `EXA_API_KEY`), Brave (`BRAVE_API_KEY`; never cached: its terms allow only transient storage), Tavily (`TAVILY_API_KEY`), Anthropic's tool; `similar()` is a described search (Exa's find-similar is deprecated). `sources/websearch_source.py`: the `websearch` source kind (catalog `web.search`), a site without a feed read as one site-restricted search a run through `websearch.current()`, caller `sources`. |
+| `websearch/` | Live web search: `Searcher.search(query, recency, kind)` over the `search.provider` backend (Exa's API with `EXA_API_KEY`, else Exa's free hosted MCP; or Anthropic's web search tool on the watcher's Claude API key) and the free three by kind (Hacker News, GitHub, arXiv); dated `Hit`s, `Results.block` (numbered, fenced), `cited`/`uncited`, `fetch` through `sources.HTTP`; the day cache `search_cache`, one `api_spend` row a request with its `caller`, `search.monthly_usd` pausing paid search; with nothing answering, "no live search: results are from model memory and may be stale". `GET /api/websearch`, `python -m kranto.cli websearch`, the doctor's `search` line. Backends: Exa (default; free mode without `EXA_API_KEY`), Brave (`BRAVE_API_KEY`; never cached: its terms allow only transient storage), Tavily (`TAVILY_API_KEY`), Anthropic's tool; `similar()` is a described search (Exa's find-similar is deprecated). `sources/websearch_source.py`: the `websearch` source kind (catalog `web.search`), a site without a feed read as one site-restricted search a run through `websearch.current()`, caller `sources`. |
 | `map/compute.py` | Clustering, quality against a structure null, lineage matching, keywords, density. |
 | `map/snapshot.py`, `map/bursts.py`, `map/read.py` | Taking a snapshot; new-arrival counts, Kleinberg bursts, BH q-values; read models for pages. |
 | `ideate/explain.py`, `ideate/cards.py` | Explanations (cached); idea-card selection, generation, citation verification. |
@@ -112,12 +129,15 @@ configured.
 | `launcher.py` | The `kranto` command (`up`, `serve`, `down`, `status`, `logs`, `doctor`, `adopt`, …). |
 | `progress.py` | "What is missing" messages for empty pages. |
 | `packs.py`, `importers.py`, `bundle.py`, `doctor.py` | Topic packs, Parallax import, static bundle export, preflight checks. |
-| `web/` | Starlette app: the JSON API and the host of the page (drawn at `/`; its files and calls under `/brb/`). the old page addresses redirect there; without the page they and `/` show an install notice (Kranto is one app, D5). The only Jinja pages left are the connection sign-in pages. |
+| `web/` | Starlette app: the JSON API and the host of the page (drawn at `/`; its own files, calls and terminal socket keep the internal prefix `/brb/`, and the bare `/brb/` address answers 308 to `/`). The old server page addresses redirect there; without the page they and `/` show an install notice (Kranto is one app). The only Jinja pages left are the connection sign-in pages. |
+| `features/news/` | News: the daily brief per topic, its articles and its eval ([news.md](news.md)). |
+| `prose/`, `social/`, `newsletter/` | How a post is written (voice, the floor, the checker, the fix; [prose.md](prose.md)), the short posts for each site, and the newsletter platforms a newsletter is sent through ([posting.md](posting.md), [newsletter.md](newsletter.md)). |
+| `page/` (a package of `kranto`) | The page: its server half (`ui/`, the web UI's source in `ui/web/`), the console and Open in Claude Code's terminals (`term/`, the sandbox in `box/`), `kranto mcp` (`mcp/`), traces (`trace/`) and its settings file `loop.yaml` (`settings/`); [ui.md](ui.md). |
 | `core/cubs/` | The cub runtime: `sandbox.py` (bubblewrap under a systemd user scope, else rlimits), `process.py` and `host.py` (one process a cub, `cub/1` over its pipes, every call checked and written to `cub_calls`), `runtime.py` (start on demand, idle stop, the pause rules, the reaper, the STOP file, recovery, the daily gc), `install.py` and `inspect.py` (add, update, stop, remove; the tree's checks, the findings, the words), `brokers/` (the newsletter, through whichever platform `kranto/newsletter/` has connected, and Mastodon, with the owner's connection), `settings.py` (the `cubs:` section, read again when kranto.yaml changes), `cli.py` (`kranto cub`), `views.py`. |
 | `bears_cub/` (a package of its own in `src/`) | The SDK a cub imports (and the `bears-cub-sdk` wheel): the decorators, `ctx`, the wire, `FakeHost` for tests, the template, `python -m bears_cub.check` and `.standard`. |
 | `cubs/examples/` | The reference cubs, `newsletter`, `toot` and `blog`, installed like any cub (`kranto paths examples`); Kranto adds `blog` itself the first time a post is asked for. |
 | `web/cubs_api.py` | `/api/cubs/*`: the list, one cub, fetch jobs, install, update, remove, live and dry, stop and resume, the log, the `cubs.*` settings. |
-| `cli.py`, `runtime.py` | The watcher's own command (`python -m kranto.cli`, written `afk` below) and object wiring. |
+| `cli.py`, `runtime.py` | The watcher's own command (`python -m kranto.cli`) and object wiring. |
 
 ## 3. Data
 
@@ -128,8 +148,9 @@ key that holds an object and `activity.json` is declared in `src/kranto/stored/`
 feature's in `features/<id>/stored.py`), and read and written only through it. The registry
 (`stored.COLUMNS`, `SETTINGS`, `FILES`) is the data model's list of shapes; a reader gets a
 typed value, and a value stored in another shape reads as the field's default (logged once as
-"stored data not as declared ... (stored-<signature>)"), never a crash. The page's `loop.db`
-has the same, in `src/kranto/page/stored/`. CONTRIBUTING's "Stored data" says how a shape changes.
+"stored data not as declared ... (stored-<signature>)"), never a crash. CONTRIBUTING's "Stored
+data" says how a shape changes. The page's own `loop.db` (in the home's `loop/`) was the build
+ledger; since builds left no part of Kranto adds rows to it, and `kranto archive` reads it ([archive.md](archive.md)).
 
 **Append-only, with one recorded way out.** Triggers reject UPDATE on every
 table except `settings` and `schema_meta`, always. They reject DELETE too,
@@ -144,10 +165,10 @@ observations and topics), status changes are events (`status_events`,
 counts (`grades`, and the older `verdicts`).
 
 **What is deleted, and when.** An observation is kept for its retention
-age: the latest `source_retention` override for its source (`afk sources
+age: the latest `source_retention` override for its source (`python -m kranto.cli sources
 retention ID DAYS`), else `retention.by_kind` for its source's kind, else
 `retention.default_days` (90); 0 means forever. Age is counted from
-`created_at`. Compaction (`afk compact`, and the `compact` job) takes every
+`created_at`. Compaction (`python -m kranto.cli compact`, and the `compact` job) takes every
 observation past its age, groups them by calendar week (Monday, UTC),
 clusters each week by k-means on the stored embeddings (k chosen as the map
 chooses it, at most one cluster per 5 observations; under 10 observations,
@@ -192,17 +213,17 @@ the number that had failed.
 |---|---|
 | `topics`, `sources`, `topic_sources`, `status_events` | What is watched and why; source validation JSON (incl. scout role `core`/`wildcard`, `discovered_from`). |
 | `topic_revisions`, `topic_source_events` (views `topics_now`, `topic_links`) | The owner's edits of a topic (migration 38): a topic keeps its id; each edit of its name or description is a `topic_revisions` row (the embedding made again from the new words, `changed`, `by` the door it came through: `ui`, `chat`, `mcp`, `cli`), the newest counting; a source added to or removed from one topic is a `topic_source_events` row (`link`, `unlink`), the newest of a pair counting. Every reader goes through `topics_now` (a topic with its newest words) and `topic_links` (the pairs linked now), so a rename is seen everywhere at once. A source removed from its last topic is retired (`status_events`), never left in the broad lane. Archiving a topic is a status (`archived`): not read, off the lists, its evidence, themes and cards readable. Append-only. |
-| `run_marks` | A run's life as it goes (migration 39, ACT; `docs/activity.md`): `started` (the trigger, who, the subject, the process), `progress` (the stage in words, step of steps), `waiting` (it stopped for the owner, with the verb and the action), `stopping` (the owner clicked Stop), `ended` (its state), `dismissed` (the owner put a failing kind away). `runs` stays the end record and the scheduler's due-ness; a run's uuid is its `runs` row's, its model calls' and its marks'. Written by one buffered writer thread (`activity.py`); removed only through the recorded purge (`activity.keep_days`, `activity.max_rows`, at compaction). Migration 39 also adds `runs_finished` and `runs_kind_finished`, the indexes the scheduler's due-ness reads lacked. |
+| `run_marks` | A run's life as it goes (migration 39; `docs/activity.md`): `started` (the trigger, who, the subject, the process), `progress` (the stage in words, step of steps), `waiting` (it stopped for the owner, with the verb and the action), `stopping` (the owner clicked Stop), `ended` (its state), `dismissed` (the owner put a failing kind away). `runs` stays the end record and the scheduler's due-ness; a run's uuid is its `runs` row's, its model calls' and its marks'. Written by one buffered writer thread (`activity.py`); removed only through the recorded purge (`activity.keep_days`, `activity.max_rows`, at compaction). Migration 39 also adds `runs_finished` and `runs_kind_finished`, the indexes the scheduler's due-ness reads lacked. |
 | `llm_calls` | Every model call: request, raw response, model, prompt version, tokens, cost, outcome. Migration 25 adds `provider`, `cache_read_tokens` and `cache_write_tokens` (`prompt_tokens` stays the whole prompt) and `equiv_usd` (a plan-billed call's list-price equivalent; its `cost_usd` is 0); null before it. |
 | `items_seen` | Every consumed item and its terminal outcome. Outcomes: `contributed`, `gated`, `skipped`, `screened_out` (dropped by the screen, #84), `sponsored` (the item is an ad: its title says so or it links to an ad or affiliate URL; no model call, #86), `parse_failed`, `item_error`, `prefiltered`, `duplicate`, `near_duplicate`, `removed`, `stale`. `screen_call_id` (migration 16) is the screen's call for the item, whatever its outcome; for `screened_out` it is also `llm_call_id`. A gathered source kept as a child has a row of its own (`item_id` `look:<parent item id>:<hash>`). |
 | `observations` | The library. Embedding BLOB (float32, 384), model name, ratings, excerpt, URL, `admitted_by`, `llm_call_id`. |
-| `runs` | One row per job run: kind, status (`ok`/`degraded`/`failed`/`skipped`), summary JSON, error. An ingest run's summary has per-source counts and, since #86, `overrides` (`rated` replies, `set`, `lifted` below the gate, `refused` by the backstop, `rate` = set / rated; also on the Health page and in `afk run`), `sponsored` items and `sponsor_links` left out of gathering, with up to 10 reasons per source in `sponsor_reasons`. |
+| `runs` | One row per job run: kind, status (`ok`/`degraded`/`failed`/`skipped`), summary JSON, error. An ingest run's summary has per-source counts and, since #86, `overrides` (`rated` replies, `set`, `lifted` below the gate, `refused` by the backstop, `rate` = set / rated; also under Health and in `python -m kranto.cli run`), `sponsored` items and `sponsor_links` left out of gathering, with up to 10 reasons per source in `sponsor_reasons`. |
 | `snapshots`, `snapshot_points`, `clusters` | Maps. Cluster numbers are per snapshot; `lineage_id` carries identity. Trajectory JSON per cluster holds shares, arrivals, burst state, p and q. Since migration 14, shares, source and topic mixes, arrivals and the cross-source size count distinct stories; clusters carry `stories`, `origin_mix` and `max_origin_share`, trajectory points `stories` and `new_max_origin_share`, and the snapshot's quality JSON `stories` (counts and the near-duplicate null check). |
 | `syntheses` | Cached explanations. |
 | `ideas`, `verdicts` | Idea cards and the original card verdicts. |
 | `messages`, `deliveries` | What reached a person, and each delivery attempt. |
 | `strike_candidates`, `strike_decisions` | What might deserve a strike, and the gate's one decision per candidate with its reason. |
-| `watches`, `watch_events` | **Retired** (WT, 2026-10-23): saved questions and their status, no longer read or written (the setting `watch_matches_written_through` likewise). Kept one release with their rows; the next release drops both tables, `watches_topic` (migration 37) and the setting in a migration of its own, with a note here. Their old `strike_candidates` (origin `watch`) and decisions stay as history. |
+| `watches`, `watch_events` | **Retired** (2026-10-23): saved questions and their status, no longer read or written (the setting `watch_matches_written_through` likewise). Kept one release with their rows; the next release drops both tables, `watches_topic` (migration 37) and the setting in a migration of its own, with a note here. Their old `strike_candidates` (origin `watch`) and decisions stay as history. |
 | `grades` | Verdicts on messages, observations, clusters and ideas. |
 | `item_signatures` | An item's pre-judge text (title and the first 1,000 characters of body) as a 128-value MinHash signature, with its method. Hash values only, no text. Written when an item is judged (`contributed`, `gated`, `skipped`) or consumed as `near_duplicate`; removed through a recorded purge once older than `stories.window_days` (30). Purgeable. |
 | `story_links` | One row per item that repeats an earlier one: the item, the item it matched, the story's root (earliest member), the similarity, and whether it was judged (`judged = 0`: consumed as `near_duplicate`). Ids only; never purged. |
@@ -212,19 +233,21 @@ the number that had failed.
 | `source_retention` | Per-source retention overrides; latest wins; `days` NULL means back to the defaults. |
 | `evidence_snapshots` | For idea cards written before #71: what a cited observation said, recorded when compaction removed it. |
 | `settings` | Mutable: the pause flag, the purge token (only inside a purge), and similar. |
-| `source_fetches` | One row per source per ingest run, and per "Fetch now" (`trigger` `run` or `manual`): `state` (`ok`, `paced`, `failing`, `needs_login`), `fetched`, `new`, and the scrubbed `error`. A source's status, last fetch and Fetches table read it (migration 17, S2). A paced fetch also records `retry_at`, when its host may be asked again; ingest defers the source until then (migration 21). |
+| `source_fetches` | One row per source per ingest run, and per "Fetch now" (`trigger` `run` or `manual`): `state` (`ok`, `paced`, `failing`, `needs_login`), `fetched`, `new`, and the scrubbed `error`. A source's status, last fetch and Fetches table read it (migration 17). A paced fetch also records `retry_at`, when its host may be asked again; ingest defers the source until then (migration 21). |
 | `connections`, `connection_events` | A connected account: provider, instance, account label, read-only scopes; and what happened to it (`connected`, `tested`, `needs_login`, `disconnected`; the latest of the first, third and fourth is its state). No secret: tokens and client secrets are encrypted in `data/secrets/connections.json` (`connections/vault.py`), keyed `conn:<id>` (migration 18). |
-| `feedback` | Kranto UI's grades, pairs and confirmed actions (migration 19, `feedback.py`, `web/feedback_api.py`): `target` (observation, cluster by lineage, idea, build by the page's ledger id, source, topic, message, pair), `kind` (`grade`, `pair`, `action`, `implicit`), `value`, `reasons` (the "why" chips), `origin` (`ui`, `review`, `chat`...), `context` (route, the queue slot). The latest grade row on a target counts; a cleared grade is a `skip` row. Every grade is written here (`grades.add_grade` too, since #9); `grades.latest`/`history`, the one reader, also read the rows of `verdicts` and `grades` from before. The review queue asks only for builds and this week's cards. No CHECK constraints: the vocabulary is in `feedback.py`. A build's grade carries `context.card` (the card it was built from) and `context.idea` (the loop's idea), indexed by `feedback_card` (migration 36, CON L3). |
-| `source_mutes` | A mute from Kranto UI's **mute…** (UI-v4 2.3): `muted_until` (not fetched until then) or `read_less` (read at half its items per run); latest row per source wins, and a row with neither is back to normal, so an undo is one more row (migration 20). |
+| `feedback` | Kranto UI's grades, pairs and confirmed actions (migration 19, `feedback.py`, `web/feedback_api.py`): `target` (observation, idea, source, topic, message, pair), `kind` (`grade`, `pair`, `action`, `implicit`), `value`, `reasons` (the "why" chips), `origin` (`ui`, `review`, `chat`...), `context` (route, the queue slot). The latest grade row on a target counts; a cleared grade is a `skip` row. Every grade is written here (`grades.add_grade` too, since #9); `grades.latest`/`history`, the one reader, also read the rows of `verdicts` and `grades` from before. The review queue (Ideas › Review) asks only for this week's ungraded cards. No CHECK constraints: the vocabulary is in `feedback.py`. Rows on the retired targets (`build`, `project`, and `cluster`, a theme by lineage) stay as written and every reader skips them; a build's grade carried `context.card`, indexed by `feedback_card` (migration 36). |
+| `source_mutes` | A mute from Kranto UI's **mute…**: `muted_until` (not fetched until then) or `read_less` (read at half its items per run); latest row per source wins, and a row with neither is back to normal, so an undo is one more row (migration 20). |
 | `archive_themes`, `archive_theme_members` | Themes of an imported archive (migration 22, `importers.import_parallax_themes`): one row per lineage of Parallax's clustering per bundle (the latest row per lineage is the theme), with its name, earlier names, keywords, whether it is alive, size, first and last epoch, and history (size and share per epoch); members are imported observations by id, no foreign key. `/api/archive/themes` reads them; `/api/observations?theme=<lineage>` lists the members. |
-| `idea_topics`, `idea_citations` | A card's topic and its citations (migration 35, L2, `ideate/cards.insert_card`), each a child of its card written at the card's insert (the migration filled them for older cards): `idea_topics.topic_id` the user topic with the largest share of the card's evidence (NULL: none, as for a dispatch card's archive evidence) and `shares` the list the card's row shows (`[{id, name, kind, n, share}]`, user topics first), the newest row of a card counting; `idea_citations` one row per citation (`observation_id`, `n`, `role` evidence or demand), indexed by the observation ("which cards cite this"; no foreign key: retention may remove the observation, and the row stays). Append-only. |
-| `outcomes` | What happened to an idea card after it was written (migration 24, `outcomes.py`): `idea_id`, `kind` (`editor` first: the weekly editor's class for the card, with `detail.week` and `detail.why`; later `pitch`, `build`, `verdict` and the rest), `value`, `detail` JSON, `source` (`kranto.page`). Written by the page through `POST /api/ideas/{id}/outcome`; append-only; the latest row of a kind counts, and `/api/ideas` sends the latest (`outcome`) and the latest editor row (`editor`). |
-| `api_spend` | What a paid API other than a model costs (migration 26, 5.3): one row per request that returned resources, X's reads first: `provider`, `source_id` and `run_uuid` (null for a preview or a Test), `kind` (`post_read`, `owned_read`, `user_read`, `list_read`, `xai_post`), `count`, `usd` at list price (`pricing.X_PRICES`). An estimate from above: the provider bills a resource read twice in one UTC day once. Ids and counts only; never purged. Live search adds `provider` `exa` (kind `search`, or `search_free` in Exa's free mode at 0), `anthropic_search`, and the free `hackernews`, `github`, `arxiv` at 0, and `caller` (migration 27: `scout`, `cards`, `editor`, `research`...; null for the owner's own). |
+| `idea_topics`, `idea_citations` | A card's topic and its citations (migration 35, `ideate/cards.insert_card`), each a child of its card written at the card's insert (the migration filled them for older cards): `idea_topics.topic_id` the user topic with the largest share of the card's evidence (NULL: none, as for a dispatch card's archive evidence) and `shares` the list the card's row shows (`[{id, name, kind, n, share}]`, user topics first), the newest row of a card counting; `idea_citations` one row per citation (`observation_id`, `n`, `role` evidence or demand), indexed by the observation ("which cards cite this"; no foreign key: retention may remove the observation, and the row stays). Append-only. |
+| `outcomes` | What happened to an idea card after it was written (migration 24, `outcomes.py`): `idea_id`, `kind` (`editor`: the weekly editor's class for the card, with `detail.week` and `detail.why`; `pitch`, `build`, `verdict` and the rest), `value`, `detail` JSON, `source` (`kranto.page`). Written by the page through `POST /api/ideas/{id}/outcome`; the weekly editor, pitches and builds left Kranto, so their rows are history; append-only; the latest row of a kind counts, and `/api/ideas` sends the latest (`outcome`) and the latest editor row (`editor`). |
+| `api_spend` | What a paid API other than a model costs (migration 26): one row per request that returned resources, X's reads first: `provider`, `source_id` and `run_uuid` (null for a preview or a Test), `kind` (`post_read`, `owned_read`, `user_read`, `list_read`, `xai_post`), `count`, `usd` at list price (`pricing.X_PRICES`). An estimate from above: the provider bills a resource read twice in one UTC day once. Ids and counts only; never purged. Live search adds `provider` `exa` (kind `search`, or `search_free` in Exa's free mode at 0), `anthropic_search`, and the free `hackernews`, `github`, `arxiv` at 0, and `caller` (migration 27: `scout`, `cards`, `editor`, `research`...; null for the owner's own). |
 | `search_cache` | Mutable, like `oauth_states` (migration 27): live search's day cache, one row per backend, query (a SHA-256 of it) and recency, holding titles, links, dates and snippets only; rows older than `search.cache_hours` are removed when a search writes. |
 | `events`, `event_cursors` | The feature core's bus (migration 30, `core/events.py`): one row per fact a feature or the core published (`kind` `<noun>.<verb>`, `feature`, `trust`, a payload of ids and small facts, never a document); a subscriber's cursor per kind is the newest `event_cursors` row. Append-only. See [features.md](features.md). |
 | `cub_tickets`, `cub_ticket_states` | Tickets (migration 31, `core/tickets.py`): a feature's or a cub's request for one of the core's high-trust actions (`send.newsletter`, `post.mastodon`, `book.propose`; `trade.instruct` rows are Invest's, from before it left; an earlier release's name for one is an alias of it for one release), its typed fields, its provenance (`because`, `run_uuid`) and its expiry (`9999-12-31T00:00:00Z` for a draft's ask, which waits until answered); each state (`needs_confirm`, `confirmed`, `done`, `dry`, `declined`, `expired`, `refused`, `unknown`) is a new state row; an `expired` row with the note `replaced by #<id>` means a newer draft of its series replaced it. |
 | `cub_pins`, `cub_calls`, `cub_orders` | The rest of the core's record: each feature's or cub's manifest hash (and a cub's tree hash) at a version; every call the core made for a feature or a cub; Invest's instruction steps (`cub_orders`, no longer written). Append-only. Migration 31 copied migration 30's `mod_pins`, `mod_calls` and `money_orders` into them with their ids; the `mod_*` tables stay, frozen, read by no code. |
 | `cubs`, `cub_installs`, `cub_drafts`, `cub_dedupe`, `cub_kv` | The cub runtime (migration 31): the registry of installed cubs (a row per state change), every install step, the drafts a broker adapter holds, `events.publish`'s dedupe keys, and a cub's own key-value store (`cub_kv`, the one mutable table among them). |
+| `prepared` | A verb an assistant (the console, `kranto mcp`) asked for that waits for the owner because the ladder says Ask me in the UI (migration 41, `web/verbs_api.py`): one row per state, `open`, then approved by the owner (with `run_uuid`, the run that did it) or `dismissed`; the newest row of a `prepared_uuid` counts, and an open one past `expires_at` reads as expired. Append-only. |
+| `post_due`, `post_reach` | Posts at an hour (migration 44): `post_due` is the owner's yes to send one waiting ask at a chosen time (`held`) and what became of it (`cancelled`, `missed`, `void`, `spent`), bound to the words the owner read by `fields_hash`; `post_reach` one row per reading of a sent post's numbers (replies, reposts, likes, quotes, views; null where a site gives none). Append-only. |
 | `invest_*`, `radar_*`, `browser_*`, `deep_dives`, `deep_dive_events` | The tables of the features that left Kranto (Invest, the trend radar, the browser extension, deep dives). Kept with every row, written by nothing, read only by `kranto archive` ([archive.md](archive.md)). `money_orders` and `broker_pins` (migration 30's, frozen) stay as they were, read by nothing. |
 | `oauth_states` | Mutable, like `settings`: a sign-in in progress (provider, instance, a SHA-256 of the state, the callback URL, `used_at`). Marked used on the first callback; rows older than an hour are removed with their PKCE verifiers (in the vault) after each ingest run. Not exported. |
 
@@ -233,8 +256,8 @@ number is recorded as `migration:N` in `schema_meta`, so branches that own
 different numbers can merge in any order. In use: 1-6, 8, 10, 11, 12, 13,
 14 (stories, #35), 15 (deep dives, #67), 16 (`items_seen.screen_call_id`,
 #84), 17 (`source_fetches`), 18 (`connections`, `connection_events`,
-`oauth_states`), 19 (`feedback`, LEARNING.md track L1), 20 (`source_mutes`), 21 (`source_fetches.retry_at`, polite fetching), 22 (`archive_themes`, `archive_theme_members`), 23 (`topics.kind`, `topics.ref`, project topics), 24 (`outcomes`), 25 (`llm_calls.provider` and its cache and equivalent-cost columns), 26 (`api_spend`), 27 (`search_cache`, mutable; `api_spend.caller`), 28 (News's tables), 29 (Invest's tables), 30 (the feature core: `events`, `event_cursors`, `mod_pins`, `mod_requests`, `mod_request_states`, `mod_calls`, `broker_pins`, `money_orders`), 31 (the cub runtime and the rename: `cubs`, `cub_installs`, `cub_pins`, `cub_tickets`, `cub_ticket_states`, `cub_calls`, `cub_orders`, `cub_kv`, `cub_drafts`, `cub_dedupe`), 32 (the trend radar: `radar_trends`, `radar_series`, `radar_stages`, `radar_chains`,), 33 (the radar's call ledger: `radar_calls`, `radar_scores`, hash-chained), 34 (the radar watches the owner's topics: `radar_topics`, `radar_proposals`, `radar_trends.topic_id`,), 35 (a card's topic and citations: `idea_topics`, `idea_citations`, CON L2), 36 (`feedback_card`: a build's grade names its card, CON L3), 37 (`watches.topic_id`: a watch filed under a topic, CON L6), 38 (`topic_revisions`, `topic_source_events`, the views `topics_now` and `topic_links`: the owner edits a topic), 39 (`run_marks`, the indexes `runs_finished` and `runs_kind_finished`: background work you can see, ACT), 40 (`news_articles`, `news_article_pages`: News's articles). Numbers 7 and 9 were reserved for phase-2 branches that turned out not
-to need them; they may be reused. The next unused number is 41. A migration may only add; it never rewrites rows or
+`oauth_states`), 19 (`feedback`), 20 (`source_mutes`), 21 (`source_fetches.retry_at`, polite fetching), 22 (`archive_themes`, `archive_theme_members`), 23 (`topics.kind`, `topics.ref`, project topics, from builds), 24 (`outcomes`), 25 (`llm_calls.provider` and its cache and equivalent-cost columns), 26 (`api_spend`), 27 (`search_cache`, mutable; `api_spend.caller`), 28 (News's tables), 29 (Invest's tables), 30 (the feature core: `events`, `event_cursors`, `mod_pins`, `mod_requests`, `mod_request_states`, `mod_calls`, `broker_pins`, `money_orders`), 31 (the cub runtime and the rename: `cubs`, `cub_installs`, `cub_pins`, `cub_tickets`, `cub_ticket_states`, `cub_calls`, `cub_orders`, `cub_kv`, `cub_drafts`, `cub_dedupe`), 32 (the trend radar: `radar_trends`, `radar_series`, `radar_stages`, `radar_chains`,), 33 (the radar's call ledger: `radar_calls`, `radar_scores`, hash-chained), 34 (the radar watches the owner's topics: `radar_topics`, `radar_proposals`, `radar_trends.topic_id`,), 35 (a card's topic and citations: `idea_topics`, `idea_citations`), 36 (`feedback_card`: a build's grade names its card, from builds), 37 (`watches.topic_id`: a watch filed under a topic, from watches), 38 (`topic_revisions`, `topic_source_events`, the views `topics_now` and `topic_links`: the owner edits a topic), 39 (`run_marks`, the indexes `runs_finished` and `runs_kind_finished`: background work you can see), 40 (`news_articles`, `news_article_pages`: News's articles), 41 (`prepared`: a verb an assistant asked for that waits for the owner's approval), 42 (Invest's cards, from before it left), 43 (the browser extension's captures, from before it left), 44 (`post_due`, `post_reach`: a post sent at an hour the owner chose, and what a sent post drew). Numbers 7 and 9 were reserved for phase-2 branches that turned out not
+to need them; they may be reused. The next unused number is 45. A migration may only add; it never rewrites rows or
 rebuilds tables. Migration 13 also recreated the DELETE triggers of the
 purgeable tables with their purge-token `WHEN` clause; migrations 14 and 15
 create `item_signatures` and `observation_links` with that trigger from the
@@ -253,31 +276,22 @@ rebuild it from its table: `INSERT INTO observations_fts(observations_fts)
 VALUES ('rebuild')`, and likewise for `rollups_fts`.
 
 **Project topics.** Migration 23 adds `topics.kind` (`user`, the default and
-every row before it, or `project`) and `topics.ref` (null for user topics). A
-project topic is one the page creates for one of its projects (a published
-repo) through `POST /api/topics` with `kind: "project"` and
-`ref: "project:<id>"` (`project:` then 1-40 lowercase letters and digits);
-`kranto topics add --kind project --ref project:<id>` does the same. The kind
-is set at insert and never updated. A POST with a ref that is already a topic
-returns that topic with `"existing": true` and starts no scout. The body's
-optional `approve` (`none`, the default; `core`; `all`) is what the scout
-approves at once: `core` approves core proposals whose median similarity is at
-or above `ingest.prefilter_min_similarity` (the scout's `--approve` rule),
-`all` every core proposal with a similarity; wildcards always stay proposed.
-A project topic gathers like any topic (ingest, the screen, the judge, the
-map). It does not dilute the owner's: `GET /api/topics` and `kranto topics
-list` take `kind=user|project|all` (default `user`); `/api/status`'s topics
-and setup's topic count are the owner's; `/api/today` lists project topics
-under `project_topics`, apart from `topics` and its totals; the source picker
-(`/api/catalog`, `/api/sources`) lists both, with `kind`. The card writer
-leaves out clusters that are at least half project topics' stories, and does
-not count a project topic towards a bridge, while `ideas.project_topics` is
-`skip` (the default); `cards` makes them candidates like any other. With no
-project topic the candidates are the same either way. `feedback.TARGETS`
-has `project` (the page's project id, like `build`).
+every row before it, or `project`) and `topics.ref` (null for user topics,
+`project:<id>` for a project topic). A project topic followed a product Kranto
+built. Since builds left, an install's project topics are kept as they were but
+held: not read, not matched, listed as paused (without a status row being
+written), and a project topic cannot be resumed or edited. They do not dilute
+the owner's: `GET /api/topics` and `kranto topics list` take
+`kind=user|project|all` (default `user`); `/api/status`'s topics and setup's
+topic count are the owner's; `/api/today` lists project topics under
+`project_topics`, apart from `topics` and its totals. Their observations from
+before stay in the library; the card writer leaves out clusters that are at
+least half project topics' stories, and does not count a project topic towards
+a bridge, while `ideas.project_topics` is `skip` (the default). Grades on a
+project (`feedback` target `project`) are history: every reader skips them.
 
 **Sources described in a pasted text**. `POST /api/sources/from-text {text, topic?}` (202 and a job, key `fromtext`, one at
-a time per install) and `afk sources describe FILE|-` (alias `afk sources add --from-text
+a time per install) and `python -m kranto.cli sources describe FILE|-` (alias `python -m kranto.cli sources add --from-text
 FILE`) send the text to one tier-2 call (`purpose` `resolve`, `max_tokens` `resolve`,
 8000), which names a catalog preset and fields for each source the text names. The text
 is data: one user message inside a `<<<document` fence it cannot close; at most 16,000
@@ -291,12 +305,16 @@ account connected (`connect_first`) are rows of the batch only. A source named t
 already proposed, is one source; one already approved is `already_watching`. X searches,
 accounts and lists are checked with one 10-post fetch each and carry `cost_usd` `{check,
 run, month}`. Nothing is approved by resolving: `POST /api/sources/approve {ids, topic?}`
-and `afk sources approve ID... [--topic ID]` approve in one transaction. The batch is
+and `python -m kranto.cli sources approve ID... [--topic ID]` approve in one transaction. The batch is
 kept as a job (`GET /api/sources/from-text`, `/api/sources/from-text/<call id>`).
 
-**Backups.** Copy the workspace directory while no job is running, or use
-`sqlite3 kranto.db ".backup copy.db"`. `afk export TABLE -o file.jsonl`
-writes any table as JSONL.
+**Backups.** `kranto backup [DIR]` (default `<home>/backups/manual-<time>`)
+copies both databases (`kranto.db`, and the page's `loop.db` when there is
+one), each checked for integrity, with the configs, the unit and the tool's
+receipt, and the row counts in `counts-before.json`; `kranto update` makes the
+same backup before it installs. By hand: copy the workspace directory while no
+job is running, or use `sqlite3 kranto.db ".backup copy.db"`. `python -m kranto.cli export
+TABLE -o file.jsonl` writes any table as JSONL.
 
 ## 4. Jobs
 
@@ -311,34 +329,48 @@ writes any table as JSONL.
 | cubs.gc | daily | Rotates cubs' logs, removes staged folders and work older than a day and removed cubs older than 30 days, expires open tickets past their time (a draft's ask has none) and files again the ask of an unseen draft that ran out of time under an earlier release, fails fetch jobs a crash left idle for an hour | Never refused |
 | a cub's own jobs (`newsletter.weekly`, `toot.weekly`, …) | as each `cub.yaml` says (`every_hours`, or `at` and `days` in the host's zone) | Runs the cub's handler in its sandbox: a `runs` row and `job.finished` | The cub is paused, stopped or off, `cubs.enabled` is false, `cubs.STOP` exists, or the update's drain holds the scheduler: skipped and due again |
 
-`afk serve` runs these in-process. A job is due when the last non-skipped run
+`python -m kranto.cli serve` runs these in-process. A job is due when the last non-skipped run
 of its kind finished more than its interval ago, computed from the `runs`
 table, so restarts neither skip nor repeat work. A skipped run (an unchanged
 map, a refused idea run) does not reset the interval but defers the next attempt
 by an hour, or by the interval if shorter, so new data is picked up within
 the hour and an unchanged library is checked hourly, not on every tick. After every job the gate
-runs and pending messages are delivered. For cron instead: `afk serve
---no-scheduler` and schedule `afk run`, `afk snapshot`, `afk ideas`, `afk
-compact`, `afk heartbeat`, `afk strikes --run`. The ingest file lock prevents overlaps
+runs and pending messages are delivered. For cron instead: `python -m kranto.cli serve
+--no-scheduler` and schedule `python -m kranto.cli run`, `python -m kranto.cli snapshot`, `python -m kranto.cli ideas`, `python -m kranto.cli
+compact`, `python -m kranto.cli heartbeat`, `python -m kranto.cli strikes --run`. The ingest file lock prevents overlaps
 between cron and the server; snapshot and ideas take their own locks.
 A stop (SIGTERM) ends within 10 s (`stopping.py`): open requests get 3 s, the
 cub host's processes and scopes up to 4 s, a running job and the lanes' ticks
 what is left less 2 s, then the server's own children (a terminal, a `claude -p`,
-a `git`) get SIGTERM and, 2 s later, SIGKILL. Detached jobs (builds, fixes,
-pre-push checks) keep running and the next start adopts them. A job cut off has
+a `git`) get SIGTERM and, 2 s later, SIGKILL. The page's detached jobs (what it
+starts in a session of its own, such as its reapers) keep running and the next
+start adopts them. A job cut off has
 recorded no run, so it is due again at the start. A watchdog exits at 12 s
 whatever is left; the unit's `TimeoutStopSec=15` is only the last resort. The
 journal says how each stop went (`stop: done in 1.2 s, clean`, or what was cut
 off), and `kranto update` reports a stop over 12 s as a warning with that line.
 
-**`kranto serve`** is `afk serve` with the scheduler on by default (the old
+**`kranto serve`** is `python -m kranto.cli serve` with the scheduler on by default (the old
 `calibration.conf` drop-in is retired; `--no-scheduler` stays for cron), and the
-page at `/` when `brb.enabled` is set and the server is on loopback.
+page at `/` when `brb.enabled` is set and the server is on loopback. `brb` is
+the settings section of the page (it keeps its old key): `enabled`, `loop_home`
+(the folder of the page's `loop.yaml`, `~/.kranto/loop` on a new home) and
+`root`.
 
-**Builds left Kranto.** A `builds:` section still in `kranto.yaml` is ignored, and
-`kranto doctor` says so in one line. Nothing is deleted: `loop.db`, the task folders
-and the project topics stay on disk, untouched, and `kranto archive` writes them out
-([archive.md](archive.md)).
+**News** adds its own job, `news.brief`: hourly, it writes the brief of each topic
+News is on for when it is due, then the article for the item with the most
+behind it; it also follows each ingest. It runs only with `news.enabled`
+([news.md](news.md)).
+
+**What left.** Building software (builds, projects, repository maintenance,
+pitches, the weekly editor and the build loop that ran them), Invest, the trend
+radar, the browser extension and deep dives are not part of Kranto any more. A
+`builds:` section that still turns builds on (`builds.enabled: true`) is read and
+ignored, and `kranto doctor` says so in one line; an `invest:`, `radar:` or
+`browser:` section loads as before and is never read ([archive.md](archive.md)).
+Nothing is deleted: `loop.db`, the task folders (`brb.root`; a home made since
+0.7 has none), the project topics and the retired tables stay as they were,
+and `kranto archive` writes their record out.
 
 Run statuses: `ok` (everything worked), `degraded` (some sources or calls
 failed, a reply came back empty or was declined, or the run stopped early on budget
@@ -350,10 +382,14 @@ not allowed to spend).
 Degraded, Paused) and one line saying why are worked out on the server and served as
 `ingest.health` on `/api/today` and `health` on `/api/activity`, `{word, tone, reason, at,
 run, trace}`; the page, the phone and the console (`kranto_incidents`) read that answer.
-Paused: watching paused, the provider paused it until a time, or the build loop paused.
-Degraded: your sources not read yet, the last read failed or had problems ("The last read of your sources
-failed at 12:42: a safety filter at OpenRouter declined one item"), more than one judge
-call in five failed in 24 hours, or the build loop is not running. `trace` opens the run.
+Paused: watching paused, or the provider paused it until a time. Not set up yet: no source is
+watched. Reading for the first time: sources are watched and no read has ended. Degraded:
+the last read failed or had problems ("The last read of your sources failed at 12:42: a
+safety filter at OpenRouter declined one item"), more than one judge call in five failed in
+24 hours, or Claude Code is the watching model and is not installed or not signed in.
+`trace` opens the run. (Builds left Kranto, but with `builds.enabled: true` still in the
+settings the word also reads the old build loop's files and can say "The build loop is not running": remove the
+setting; `kranto doctor` names it.)
 
 ## 5. Money
 
@@ -363,9 +399,9 @@ call in five failed in 24 hours, or the build loop is not running. `trace` opens
 | 1 `judge` | anthropic/claude-haiku-5.5 (4.5 until 2026-10-08) | Screening and judging items, cluster names, rollup names and summaries. |
 | 2 `reason` | anthropic/claude-sonnet-5.5 | Scout, explanations, idea cards and their citation checks. |
 
-Both are set under Settings › Watching › Models in Kranto UI (`/api/settings/models`, which writes
-`llm.models` in the config and applies from the next call). The list offered there is
-the page's (`src/kranto/page/models.py`).
+Both are set under Settings › Watching in Kranto UI (`/api/settings/models`, which writes
+`llm.models` in the config and applies from the next call). The list of models offered there
+is the page's, not the server's.
 
 Every call is checked against the pause switch and `budget.monthly_usd`
 (none by default, `null`: spend is uncapped unless a cap is set; Settings › Spend writes it) before it is sent, and alarms fire once a month at
@@ -414,23 +450,24 @@ runs. Fix the cause, then `kranto cub resume ID`. A cub's process and calls are 
 (`kranto cub log ID --calls`).
 
 **Alarm: "ingest run failed" with HTTP 401/403.** The key is wrong, revoked
-or missing. `afk doctor` verifies it against OpenRouter. Nothing was lost:
+or missing. `kranto doctor` verifies it against OpenRouter. Nothing was lost:
 items are only marked seen after a real outcome. Fix the key; the next run
 continues.
 
 **Alarm with HTTP 402.** Out of provider credit. Top up; nothing was lost.
 
 **HTTP 404 from the model endpoint.** The model slug no longer exists.
-`afk doctor` compares configured models with the provider's list. This has
+`kranto doctor` compares configured models with the provider's list. This has
 happened once already: `anthropic/claude-haiku-4-5` disappeared from
 OpenRouter's list.
 
 **Alarm: budget exhausted.** Model calls stop until the month rolls over or
-the budget is raised. Check the Health page for which runs spent it; a broad
+the budget is raised. Check Settings › Spend, and the runs under Health (Settings ›
+System), for which runs spent it; a broad
 source without a topic sends every new item to the judge.
 
-**Runs are `degraded` with fetch errors.** Look at the per-source detail on
-the Health page. A throttled source (429, 503, a timeout) is *paced*, not
+**Runs are `degraded` with fetch errors.** Look at the per-source detail under
+Health (Settings › System), or a source's own page under Watch › Sources. A throttled source (429, 503, a timeout) is *paced*, not
 failing: it waits for the host's `Retry-After` or a backoff, is fetched once
 more at the end of the run, else deferred ("paced, retrying at ..."), and never
 marks a run degraded. Only a source that fails `fetch.failing_after_runs` runs
@@ -440,38 +477,39 @@ by itself (`fetch.failing_backoff_hours`, doubling up to
 its page shows the current error) or retire it. The per-host gap, retries and
 the longest wait retried in a request are `fetch.*` in the config.
 
-**No map.** Fewer than 30 observations. The Map page says how many are
+**No map.** Fewer than 30 observations. Watch › Map says how many are
 missing. Backfill on a source's first run helps; so does a broader pack.
 
 **No idea cards.** Needs a map, and a cluster that is cross-source (at least
 10 members, no source above 70%), bridging (two topics each at least 20%),
-or rising. The Ideas page says what is missing.
+or rising. Ideas says what is missing.
 
-**A card on a theme you choose.** A theme's sheet has **Card this theme now…** (or `afk ideas
-card LINEAGE`): one card call and its check, about $0.06, outside the daily selection, under
-the same lock and budget (the owner's D-1 of). The card says it was asked for; the
-same evidence is not carded twice; the daily run is not affected.
+**A card on a theme you choose.** A theme's sheet (Watch › Map) has **Card it now** (or `python -m kranto.cli
+ideas card LINEAGE`); a News story whose theme has no card has **Idea from this**. Either is
+one card call and its check, about $0.06, outside the daily selection, under the same lock and
+budget. The card says it was asked for; the same evidence is not carded twice; the daily run
+is not affected.
 
 **No strikes.** Expected most weeks. Read the latest heartbeat: it lists the
-candidates that came closest and why each was held back. `afk strikes -v`
+candidates that came closest and why each was held back. `python -m kranto.cli strikes -v`
 shows every decision and reason. Thresholds are per origin in the `strike`
 section of the config and are not calibrated yet.
 
 **No heartbeat arrived this week.** The process is not running, or delivery
-is failing. Check `afk messages --kind heartbeat` and the deliveries on the
-Health page. For an external check, set `notify.heartbeat_ping_url` to a
+is failing. Check `python -m kranto.cli messages --kind heartbeat` and the deliveries under
+Health (Settings › System). For an external check, set `notify.heartbeat_ping_url` to a
 healthchecks.io-style URL: it is pinged after every ok or degraded ingest,
 and its absence alerts from outside the machine.
 
 **Delivery targets configured but nothing arrives.** Apprise must be
-installed (`pip install 'kranto[notify]'`); `afk doctor` and the Health page
-say so if it is not. Each attempt is a row in `deliveries` with its error.
+installed (the `notify` extra, which `install.sh` and `kranto update` install);
+`kranto doctor` and Health (Settings › System) say so if it is not. Each attempt is a row in `deliveries` with its error.
 
 **A run is stuck as "another run holds the lock".** A crashed process can
 leave the lock file, but the lock is an OS file lock, so it is released when
-the process dies. If it persists, another `afk` process is running.
+the process dies. If it persists, another Kranto process is running.
 
-**Reaching the UI from another machine.** Keep `afk serve` on 127.0.0.1 and
+**Reaching the UI from another machine.** Keep `python -m kranto.cli serve` on 127.0.0.1 and
 forward the port: `ssh -N -L 8766:127.0.0.1:8765 host`, then open
 http://127.0.0.1:8766. If you bind to a LAN address instead, requests are
 accepted only for loopback names, the `--host` address and each
@@ -481,10 +519,11 @@ the address they use.
 
 **Retention and compaction.** How long observations are kept is
 `retention.default_days` (90), `retention.by_kind` (for example `{reddit:
-30}`), and per source `afk sources retention ID DAYS` (`0` keeps a source
-forever, `default` removes the override). `afk compact` runs it now; the
-Health page shows the settings, the last compaction, rollups written and rows
-removed per table, and Library › Rollups lists and searches the compacted weeks.
+30}`), and per source `python -m kranto.cli sources retention ID DAYS` (`0` keeps a source
+forever, `default` removes the override). `python -m kranto.cli compact` runs it now; Health
+(Settings › System) shows the settings, the last compaction, rollups written and
+rows removed per table, and Watch › Evidence's Rollups group lists and searches
+the compacted weeks.
 Before shortening retention on a real library, try it on a copy
 (`sqlite3 kranto.db ".backup copy.db"` into a throwaway workspace): removal
 cannot be undone. A compaction that failed rolled back its current week and
@@ -500,7 +539,27 @@ MB to 11.3 MB, $0.116 in 53 calls (about $0.0022 each), 207 s.
 **Moving or copying a workspace.** Stop jobs, copy the directory, keep `.env`
 out of anything shared.
 
-**Seeding from Parallax.** `afk import parallax PATH... [--snapshot DIR]` reads
+**The service and its log.** `kranto status` is one screen: the service, what runs next,
+spend and caps. `kranto logs` follows the unit's journal (`-n 200 --no-follow` for the last
+lines); a stop's own line is there (`stop: done in 1.2 s, clean`). `kranto down` stops the
+service until the next boot (`--disable` keeps it stopped); `kranto up` starts it again.
+Without systemd Kranto serves in the foreground and its log is that terminal.
+
+**Updating and going back.** `kranto update` backs up (`kranto backup` into
+`<home>/backups/update-…`), installs the release, restarts, reads every page on your data
+(`kranto doctor --routes`) and rolls itself back when the new version does not come up or a
+page fails. `--check` only looks (exit 10 when one is available), `--to TAG` installs a given
+release, older ones included, `--rollback` goes back to the version before, `--cancel` lets go
+of an update still waiting. If an update is cut off while it installs, `kranto status` names
+`update/RECOVER.txt` in the home: `sh` it to put the previous version back.
+
+**Tokens.** Every write needs one; reads do not. `kranto token list` shows each (never its
+value), `kranto token add agent:<name> [--actions …]` makes one for a script or an assistant,
+`kranto token revoke NAME` removes one, and `kranto token rotate ui` signs every browser out
+(then `kranto open` for a new sign-in link). The files are in `~/.config/kranto/tokens/`
+(mode 600).
+
+**Seeding from Parallax.** `python -m kranto.cli import parallax PATH... [--snapshot DIR]` reads
 Parallax `library.jsonl` files (`library/runs` and `experiments/05-first-intern`
 between them hold every observation of the published snapshot). Embeddings are
 identical to the server's (verified), so imports share the index. Imported sources
@@ -514,21 +573,22 @@ reconcile and writes its themes (`archive_themes`: one per lineage of
 `trajectories.json`, named by the latest name in the dated bundles'
 `cluster_names.json`, else keywords; members are the imported observations of an
 alive lineage's cluster). The archive is no flood: imported rows keep the time they
-were observed, so they are never new on Today and sort below the library's own; they
+were observed, so they are never new on the home or in Needs you and sort below the library's own; they
 are on the map but never arrivals, so no burst or rising theme comes from them; the
 map's idea runs do not cite them (`parallax.card_evidence`); a topic's views leave
-them out unless `parallax.topic_match` is set; the Library lists them with
-`source=parallax`. Retention keeps them (`retention.by_kind.parallax` defaults to 0):
+them out unless `parallax.topic_match` is set; the library's list (Watch › Evidence)
+shows them with `source=parallax`. Retention keeps them (`retention.by_kind.parallax` defaults to 0):
 the default age would purge all of it at the next compaction.
 
-`afk import parallax-dispatches DIR [--only ID] [--limit N]` writes one idea card per
+`python -m kranto.cli import parallax-dispatches DIR [--only ID] [--limit N]` writes one idea card per
 pitch (OSS, commercial, founder) of each prose dispatch, no model call: the pitch
 verbatim, the opening argument as thesis, the "My bet" paragraph as prediction, the
 dispatch as provenance, and the dispatch's links matched by canonical URL to
 observations as citations (`verified: "url_match"`); fewer than two matches leaves
 the card `unsupported`. Run it after the observations. Cards have `origin` `dispatch`,
 no score, are never strike candidates, and `/api/ideas` marks them `intake: manual`
-(the page's automatic intake leaves them; `parallax.dispatch_auto_intake`). Dispatches
+(with `parallax.dispatch_auto_intake`, a mark for the build loop's automatic intake, which
+left with builds). Dispatches
 without the three pitches (the schema-1 data dumps) are listed, not carded.
 
 **A hotfix**. A fix's pull request is open (its test in it):
@@ -587,8 +647,11 @@ to start from a copy of a real home (by `scripts/preview/copy_live.py`'s rules: 
 `.env`), `--home-copy <home>`; `--dry-run` says what it would run. CI's `install` job (not a
 required check yet) builds the final wheel, installs it into a scratch HOME and serves it.
 
-**Where it runs.** The operator's instances run on an always-on server, not the
-operator's PC: one checkout of the repository (after a merge: `git pull`,
+**Where it runs.** An install is one home (`~/.kranto`, or `$KRANTO_HOME`) served by
+the systemd user unit `kranto.service` on 127.0.0.1, made by `kranto up`
+([setup.md](setup.md)); `kranto status`, `kranto logs`, `kranto doctor` and
+`kranto paths` say how it stands and where things are. The maintainer's own
+instances run on an always-on server, not a PC: one checkout of the repository (after a merge: `git pull`,
 reinstall if `pyproject.toml` changed, run the tests), one workspace per purpose
 (the local-first library, and a second one for the #63 benchmark), each served
 by a systemd user unit bound to 127.0.0.1 and reached through an SSH tunnel.
@@ -596,7 +659,7 @@ Work that needs another branch uses a separate worktree, never the served
 checkout. `kranto adopt` moves an install from before Kranto (by default that
 install's own workspace, loop home and task folders where the older release put them;
 `-w` and `--loop-home` for others) to `kranto.service` in place (backups next to
-the workspace in `<workspace>-backups`, the `brb` section written, migrations,
+the workspace in `<workspace>-backups`, the page's `brb` section written, migrations,
 then with a yes `kranto.service` and its drop-in replaced); `kranto adopt
 --dry-run` prints the plan and changes nothing.
 

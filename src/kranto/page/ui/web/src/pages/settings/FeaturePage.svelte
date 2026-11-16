@@ -98,7 +98,7 @@
 {:else if !fs}
   <List title="Settings"><Loading /></List>
 {:else if !f || !g}
-  <List title={id} head={{ crumb: [{ to: settingsPath(id), w: id }] }}><Empty text={`There is no feature or cub called ${id} on this Kranto.`} link={{ href: "#/settings", w: "Settings ›" }} /></List>
+  <List title={id} head={{ crumb: [{ to: settingsPath(id), w: id }] }}><Empty text={`There is no feature called ${id} on this Kranto.`} link={{ href: "#/settings", w: "Settings ›" }} /></List>
 {:else}
   <List title={f.title} label={`Settings › ${f.title}`} head={{ crumb: [{ to: settingsPath(f.id), w: f.title }], trust: { w: trustWord(f.trust), cls: f.trust }, facts: featureLine(f), lede: f.says,
     glyph: glyphOf(f.manifest.ui.glyph), wash: KIND_WASH[f.manifest.ui.kind || ""] || "grey",
@@ -140,11 +140,11 @@
       </Group>
     {/if}
     {#if isCub && place}
-      <Group id="fs-core" title="The core's keys" count="" kind="sets" says="what Kranto holds for this cub">
+      <Group id="fs-core" title="The core's keys" count="" kind="sets" says="what Kranto holds for this feature">
         <Row title="May add rows to Needs you" meta="also under Arrange on the home">{#snippet end()}{@render sw(place.needs_you, "May add rows to Needs you", (b) => shell(`shell.needs_you.${f.id}`, !place.needs_you, b), "k-needs")}{/snippet}</Row>
         <Row title="May add rows to New" meta="also under Arrange on the home">{#snippet end()}{@render sw(place.new, "May add rows to New", (b) => shell(`shell.new.${f.id}`, !place.new, b), "k-new")}{/snippet}</Row>
         {#each CORE_CAPS as [k, w] (k)}<SetRow key={"cap:" + k} word={w} summary={k === "monthly_usd" ? (cub?.spend.cap_usd == null ? "no cap" : `$${cub.spend.cap_usd.toFixed(2)}`) : k === "calls_per_day" ? String(cub?.spend.calls_per_day ?? "the default") : "the kind's own"} state={SET_ST.set} />{/each}
-        <Row title="Updates" meta="cubs update by themselves when an update adds no permission: Settings › System" href={href("settings/system")} />
+        <Row title="Updates" meta="an update that adds no permission applies by itself: Settings › System" href={href("settings/system")} />
       </Group>
     {/if}
     {#if Object.keys(f.manifest.broker || {}).length}

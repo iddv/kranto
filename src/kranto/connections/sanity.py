@@ -150,8 +150,8 @@ INFO = {
              "drafts the dataset holds.",
     "never": "Never publishes, deletes or edits a published post; never writes a document "
              "whose id does not start with drafts.kranto-; never overwrites a draft you edited "
-             "in Studio. Never files while the cub is in practice (the default: nothing is "
-             "sent) or cubs.STOP exists.",
+             "in Studio. Never files while the blog is in practice (the default: nothing is "
+             "sent) or stopped.",
     "revoke_at": "sanity.io/manage, your project, API, Tokens: delete the token.",
     "expiry": "no expiry",
     "steps": ["Open sanity.io/manage and your project. Under API, Tokens, click Add API token.",
@@ -161,8 +161,7 @@ INFO = {
               "Paste the project id (as in sanity.config), the dataset (production) and the "
               "token below. Optionally your Studio's address and your posts' address, so the "
               "confirm can link to them. Click Save and test: Kranto only reads.",
-              "A cub's Send to Sanity is practice (nothing is sent) until you turn on Send for "
-              "real."],
+              "Send to Sanity is practice (nothing is sent) until you turn on Send for real."],
     "fields": [{"key": "project", "label": "Project id", "placeholder": "yourprojectid"},
                {"key": "dataset", "label": "Dataset", "placeholder": "production"},
                {"key": "token", "label": "Token", "secret": True},

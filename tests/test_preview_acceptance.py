@@ -52,6 +52,29 @@ def test_it_plays_the_testers_items_and_the_site_name_test_catches_it():
     assert not m.SITE.search("Blog")
 
 
+def test_the_toot_redirect_is_measured_where_it_lands():
+    """#/settings/toot lands on Posting once the features' list is read: the check waits for the
+    address instead of reading it the moment the old page drew"""
+    m = _module()
+
+    class Page:
+        def __init__(self, moves_after: int):
+            self.n, self.moves_after = 0, moves_after
+
+        @property
+        def url(self) -> str:
+            return ("http://127.0.0.1:1/#/settings/posting" if self.n >= self.moves_after
+                    else "http://127.0.0.1:1/#/settings/toot")
+
+        def wait_for_timeout(self, ms: int) -> None:
+            self.n += 1
+
+    assert m.landed_at(Page(3), "/settings/posting") == "/settings/posting"
+    assert m.landed_at(Page(10 ** 9), "/settings/posting", wait_s=0.05) == "/settings/toot"
+    src = SCRIPT.read_text()
+    assert 'landed = landed_at(pg, "/settings/posting")' in src
+
+
 def test_it_reads_only():
     """every request but a GET is aborted in the page; nothing is clicked but Write a post's
     question (which asks nothing of the server) and the phone's ✦"""

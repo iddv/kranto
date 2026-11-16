@@ -22,7 +22,7 @@
   import { IDEAS_API } from "../../pages/ideas/cards";
   import { HOME_API, type HomeAnswer } from "../home";
   import type { Snippet } from "svelte";
-  import { LATEST, ROWS, briefPagePath, clock, earlyWords, deepDive, ideaFromThis, ideaHref, ideaLabel, longDay, minutesWords, okArticle, outletsDays, outletsLine, storyHref, storyKey, storyWords, whyNothingRuns, failedTryLine, fixPlace, type Brief, type BriefItem, type Latest, type TopicRows } from "./news";
+  import { LATEST, ROWS, briefPagePath, clock, earlyWords, deepDive, ideaFromThis, ideaHref, ideaLabel, longDay, minutesWords, okArticle, outletsDays, outletsLine, storyHref, storyKey, storyWords, whyNothingRuns, JOBS_OFF, jobsOff, failedTryLine, fixPlace, type Brief, type BriefItem, type Latest, type TopicRows } from "./news";
 
   // bid: one brief's own day (#/news/b/<id>,), drawn in Today's layout
   let { view, bid = "", details }: { view: View; bid?: string; details?: Snippet<[Brief]> } = $props();
@@ -57,6 +57,12 @@
   const stuck = $derived.by(() => {
     void view.tick;
     return whyNothingRuns();
+  });
+  // jobs off (serve --no-scheduler): one line at the top says no new brief comes; a topic waiting
+  // for its first brief then says only that it has none, never the same words again
+  const off = $derived.by(() => {
+    void view.tick;
+    return host && !bid && jobsOff();
   });
   // the first hour's read, as the home has it: "reading for the first
   // time, 9 kept of 41. The first brief is written as soon as 8 are kept."
@@ -113,6 +119,8 @@
 
 <svelte:window onkeydown={keys} />
 
+{#snippet jobsLine()}<p class="muted small jobs-off" id="news-jobs-off">{JOBS_OFF} <a href="#/activity">Activity ›</a></p>{/snippet}
+
 {#snippet story(b: Brief, x: BriefItem, n: number)}
   {@const key = storyKey(b.id, n)}
   {@const art = okArticle(b, n)}
@@ -149,8 +157,9 @@
     {:else if rows?.data && !rows.data.enabled}
       <Empty text="News is off: it writes no brief until it is on." link={{ href: "#/settings/news", w: "Settings › News ›" }} />
     {:else if !shown.length && !coming.length && !quiet.length}
-      <MarkEmpty text="No brief yet. A new topic's first brief is written right after its first read." />
+      {#if off}{@render jobsLine()}{:else}<MarkEmpty text="No brief yet. A new topic's first brief is written right after its first read." />{/if}
     {:else}
+      {#if off}{@render jobsLine()}{/if}
       {#each shown as t (t.topic.id)}
         {@const b = t.brief!}
         {@const w = waiting(t.topic.id)}
@@ -165,8 +174,8 @@
       {/each}
       {#each quiet as t (t.topic.id)}<p class="muted small quiet-topic" data-topic={String(t.topic.id)}>{t.brief!.status === "quiet" ? `${t.topic.name}: a quiet day. ${t.brief!.quiet || ""}` : `${t.topic.name}'s brief could not be written${t.failed ? `: ${t.failed.why.replace(/[.\s]+$/, "")}` : ""}. `}{#if t.brief!.status !== "quiet"}{#if t.failed?.fix}<a href={"#/" + t.failed.fix}>{fixPlace(t.failed.fix)}</a>{:else}<a href={href("news/topics")}>News › Topics ›</a>{/if}{/if}</p>{/each}
       {#if bid && one?.data && details}{@render details(one.data)}{/if}
-      {#each bid ? [] : coming as t (t.id)}{#if stuck}<p class="muted small first-brief" data-topic={String(t.id)}>{`No brief for ${t.name} yet. ${stuck.text} `}{#if stuck.link}<a href={stuck.link.href}>{stuck.link.w}</a>{/if}</p>{:else}<p class="muted small first-brief" data-topic={String(t.id)}>{firstReading(t.id, t.name)}</p>{/if}{/each}
-      <p class="muted small news-foot">{bid ? "" : "Written every day at the topic's hour · "}<a href={href("news/earlier")}>Earlier days ›</a></p>
+      {#each bid ? [] : coming as t (t.id)}{#if off}<p class="muted small first-brief" data-topic={String(t.id)}>{`No brief for ${t.name} yet.`}</p>{:else if stuck}<p class="muted small first-brief" data-topic={String(t.id)}>{`No brief for ${t.name} yet. ${stuck.text} `}{#if stuck.link}<a href={stuck.link.href}>{stuck.link.w}</a>{/if}</p>{:else}<p class="muted small first-brief" data-topic={String(t.id)}>{firstReading(t.id, t.name)}</p>{/if}{/each}
+      <p class="muted small news-foot">{bid || off ? "" : "Written every day at the topic's hour · "}<a href={href("news/earlier")}>Earlier days ›</a></p>
     {/if}
   </div>
 {/if}

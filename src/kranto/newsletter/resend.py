@@ -268,9 +268,9 @@ INFO = {
              "that issue (Send now).",
     "scopes": ["Full access (broadcasts need it)"],
     "reads": "Your domains and whether they are verified, your audiences and how many "
-             "subscribers each has, and the broadcasts a cub drafted.",
-    "never": "Never sends without your approval, and never while the cub is in practice (the "
-             "default: nothing is sent) or cubs.STOP exists. Never adds, edits or removes a "
+             "subscribers each has, and the broadcasts Kranto drafted.",
+    "never": "Never sends without your approval, and never while the newsletter is in practice "
+             "(the default: nothing is sent) or stopped. Never adds, edits or removes a "
              "contact.",
     "revoke_at": "resend.com, API Keys: delete the key.",
     "expiry": "no expiry",
@@ -283,7 +283,7 @@ INFO = {
               "(a Sending access key cannot make broadcasts), and copy it.",
               "Paste the key, the audience's name and your from address below, and click Save "
               "and test. Kranto only reads: it says what is missing in plain words.",
-              "A cub's issues are practice (nothing is sent) until you turn on Send for real."],
+              "Issues are practice (nothing is sent) until you turn on Send for real."],
     "fields": [{"key": "key", "label": "API key", "placeholder": "re_...", "secret": True},
                {"key": "audience", "label": "Audience (a segment's name)",
                 "placeholder": "Newsletter"},

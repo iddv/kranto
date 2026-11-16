@@ -99,6 +99,18 @@ class Result:
     seen: dict[str, Any] = field(default_factory=dict)
 
 
+def landed_at(pg: Any, want: str, wait_s: float = 10.0) -> str:
+    """The address's route once it starts with ``want``, else after ``wait_s``: a redirect the
+    page makes once a read arrives (#/settings/toot waits for the features' list) is measured
+    where it lands, not before it moved."""
+    end = time.monotonic() + wait_s
+    while True:
+        landed = pg.url.split("#")[-1]
+        if landed.startswith(want) or time.monotonic() >= end:
+            return landed
+        pg.wait_for_timeout(200)
+
+
 class Preview:
     """One signed-in browser on a preview's port; every non-GET aborted and counted."""
 
@@ -529,7 +541,7 @@ def social_lines(p: Preview) -> list[Result]:
     out.append(ok("SOC no copy", "no page offers copy and open", "copy and open" not in
                   words.lower(), "none" if "copy and open" not in words.lower() else "found"))
     p.go(pg, "#/settings/toot")
-    landed = pg.url.split("#")[-1]
+    landed = landed_at(pg, "/settings/posting")
     out.append(ok("SOC redirect", "my old address for the toot's settings lands on Posting",
                   landed.startswith("/settings/posting"), landed))
     if short:

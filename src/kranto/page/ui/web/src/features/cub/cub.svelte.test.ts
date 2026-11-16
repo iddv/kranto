@@ -67,7 +67,9 @@ describe("a cub's page, drawn from its manifest", () => {
     const { target, done } = await draw(CubPage, cubWhere());
     await settle();
     const h = headOf();
-    expect(h.crumb!.map((c) => c.w)).toEqual(["Cubs", "Digest"]);               // Home › Cubs › Digest, no "cub" tag
+    // Home › Post › Digest: #/cubs lands on Post, and no word "Cubs" or "cub" tag
+    expect(h.crumb!.map((c) => c.w)).toEqual(["Post", "Digest"]);
+    expect(h.crumb![0]!.to).toBe("post");
     expect(h.stop?.label).toBe("Stop");
     expect(h.trust).toMatchObject({ w: "built-in" });
     expect(h.tags!.map((t) => t.w)).toEqual(["practice"]);
@@ -482,7 +484,7 @@ describe("a cub draws like Kranto's own", () => {
     expect(body.querySelector("script")).toBeNull();
     expect(body.querySelector("a")).toBeNull();                                      // a link out is not the cub's to make
     expect(headOf().title).toBe("This week");
-    expect(headOf().crumb!.map((c) => c.w)).toEqual(["Cubs", "Newsletter", "This week"]);
+    expect(headOf().crumb!.map((c) => c.w)).toEqual(["Post", "Newsletter", "This week"]);
     expect(headOf().primary?.label).toBe("Approve");                               // an ask waits
     expect(headOf().facts).toBe("Three items. · waiting");
     // what it rests on: the observation, and the brief once (it gave three items), its page

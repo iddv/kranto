@@ -6,6 +6,8 @@ import type { ActionDecl, FeatureRow, ListDecl } from "./index";
 
 /** a cub's page: #/cub/<id>, with the list (list=), the sheet (sel=) */
 export const cubHref = (id: string, q: Record<string, string | null | undefined> = {}): string => href("cub/" + id, q);
+/** the crumb above a cub's page: Post, where its asks wait (#/cubs itself lands on Post) */
+export const POST_CRUMB = { to: "post", w: "Post" };
 /** a cub's action: POST /api/f/<id>/act/<verb> */
 export const actPath = (kind: string): string => {
   const [fid, verb] = kind.split(".", 2);
@@ -119,7 +121,7 @@ export function permissionWords(m: Record<string, unknown>): [string, string][] 
   if (req.length) out.push(["Asks you", req.map(kindWords).join(", ") + ": each one waits for your approval on the page"]);
   return out;
 }
-export const CANNOT = "It cannot pay, post, trade or send by itself, read a key, reach the network on its own, read another cub's data, grade a card, or change a setting that is not its own.";
+export const CANNOT = "It cannot pay, post, trade or send by itself, read a key, reach the network on its own, read another feature's data, grade a card, or change a setting that is not its own.";
 
 // -- installed cubs (the server's /api/cubs,) --------------------------------------
 

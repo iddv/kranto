@@ -69,7 +69,7 @@
 
 <Detail back={view.back}>
   {#if !f}
-    <div class="pane-empty"><p class="empty">{fs ? `There is no cub called ${id} on this Kranto.` : "Loading…"}</p></div>
+    <div class="pane-empty"><p class="empty">{fs ? `There is no feature called ${id} on this Kranto.` : "Loading…"}</p></div>
   {:else if !sel}
     <Pane title={f.title} lede={f.says}>
       {#snippet kind()}{`${trustWord(f.trust)} · ${f.mode} · ${f.version}`}{/snippet}

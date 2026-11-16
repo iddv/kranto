@@ -25,7 +25,7 @@
   import { plural } from "../../lib/format";
   import { ui } from "../../lib/shell.svelte";
   import { features, featurePath, glyphOf, modeTone, modeWord, trustWord } from "../index";
-  import { askVerb, at, cubHref, cubPath, groupsOf, headActions, ticketOf, type CubDetail } from "../cub";
+  import { askVerb, at, cubHref, cubPath, groupsOf, headActions, POST_CRUMB, ticketOf, type CubDetail } from "../cub";
   import { ASKS_API } from "../ask";
   import AskLine from "./AskLine.svelte";
   import { cubAct, openAsk } from "../cubverbs";
@@ -106,7 +106,7 @@
       : f.mode !== "live" && !f.mode.startsWith("reads") ? { kind: "amber" as const, text: "Practice: approving what it asks sends nothing. Send for real is in its dialog.", link: { href: href("settings/" + f.id), w: `Settings › ${f.title} ›` } }
       : null;
     return {
-      crumb: [{ to: "cubs", w: "Cubs" }, { to: "cub/" + f.id, w: f.title }],
+      crumb: [POST_CRUMB, { to: "cub/" + f.id, w: f.title }],
       glyph: glyphOf(f.manifest.ui.glyph), wash: KIND_WASH[f.manifest.ui.kind || ""] || "grey",
       trust: { w: trustWord(f.trust), cls: f.trust }, tags: [{ w: modeWord(f.mode), cls: modeTone(f.mode) }],
       facts: [f.version, updated ? `updated to ${updated.version} ${updated.by === "itself" ? "by itself" : "by you"}, ${when(updated.at).slice(0, 10)}` : null,
@@ -123,11 +123,11 @@
 </script>
 
 {#if !H}
-  <List title="Cubs" head={{ crumb: [{ to: "cubs", w: "Cubs" }] }}><Empty text="Cubs come from the server, which is not hosting this page." /></List>
+  <List title={id} head={{ crumb: [POST_CRUMB] }}><Empty text="Features come from the server, which is not hosting this page." /></List>
 {:else if !fs}
-  <List title="Cubs" head={{ crumb: [{ to: "cubs", w: "Cubs" }] }}><Loading /></List>
+  <List title={id} head={{ crumb: [POST_CRUMB] }}><Loading /></List>
 {:else if !f}
-  <List title={id} head={{ crumb: [{ to: "cubs", w: "Cubs" }] }}><Empty text={`There is no cub called ${id} on this Kranto.`} link={{ href: "#/cubs", w: "Cubs ›" }} /></List>
+  <List title={id} head={{ crumb: [POST_CRUMB] }}><Empty text={`There is no feature called ${id} on this Kranto.`} link={{ href: "#/post", w: "Post ›" }} /></List>
 {:else}
   <List title={f.title} label={f.title} head={head}>
     {#if f.enabled && (f.manifest.requests || []).length && f.trust !== "first-party"}<AskLine cub={f.id} tick={view.tick} />{/if}

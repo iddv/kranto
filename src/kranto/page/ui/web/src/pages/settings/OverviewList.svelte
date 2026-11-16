@@ -88,7 +88,7 @@
     {#if host}
       <Group id="set-features" title="Features" count={fx ? String(fx.length) : null} kind="sets" says="what Kranto writes and posts" fold="settings:features" start>
         {#each fx || [] as x (x.id)}<Row title={x.title} href={href("settings/" + x.id)}>{#snippet meta()}<span class={"htag t-" + x.trust}>{trustWord(x.trust)}</span>{" " + featureLine(x)}{/snippet}</Row>{/each}
-        {#if fx && !fx.length}<Empty li text="No feature or cub yet." />{/if}
+        {#if fx && !fx.length}<Empty li text="No feature yet." />{/if}
       </Group>
     {/if}
     {@render feedback()}

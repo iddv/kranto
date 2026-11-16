@@ -56,14 +56,14 @@
     <div class="pane-in"><Loading error={r?.error} /></div>
   {:else}
     {@const st = nlSt(d)}
-    <Pane title="Newsletter" lede="The platform a newsletter cub's issues go out through. A cub never names one and never sees its key: you choose it here, and every send is still your approval (Send now, in the issue's dialog)."
+    <Pane title="Newsletter" lede="The platform the newsletter's issues go out through. The newsletter never names one and never sees its key: you choose it here, and every send is still your approval (Send now, in the issue's dialog)."
       sections={[{ id: "use", w: "In use" }, { id: "connect", w: "Connect a provider" }]}>
       {#snippet kind()}<Glyph name={st[0]} colour={st[1]} word={st[2]} />{" newsletter · " + (d.name || d.unnamed)}{/snippet}
       {#snippet acts()}{#if d.connection}<button class="btn sm" id="nl-check" onclick={(e) => act(e.currentTarget, NEWSLETTER_API + "/check", {})}>Check again</button>{/if}{/snippet}
       {#snippet section(s)}
         {#if s.id === "use"}
           {#if !d.platform}
-            <p>No newsletter platform is connected. A newsletter cub's drafts wait in Kranto until you connect one below.</p>
+            <p>No newsletter platform is connected. The newsletter's drafts wait in Kranto until you connect one below.</p>
           {:else}
             <Kv rows={[["Platform", d.name || ""], ["Connection", d.connection ? `${d.connection.account} (${d.connection.state === "connected" ? "connected" : "needs you"})` : "not connected"],
               ...(d.from_address ? [["From", d.from_address] as [string, string]] : []), ["To", d.audience || "–"], ["Ready", d.ready ? "yes: an issue goes out when you click Send now on it" : "not yet"]]} />

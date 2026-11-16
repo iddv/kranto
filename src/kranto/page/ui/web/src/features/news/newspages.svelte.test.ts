@@ -167,6 +167,29 @@ describe("News › Today: one line a story", () => {
     done();
   });
 
+  it("says once that no new brief comes while jobs are off (serve --no-scheduler), and nothing of it while they run", async () => {
+    stub({ host: { scheduler: false } });
+    hosted();
+    const padel = { ...rows(true).topics[0]!, id: 5, name: "Padel", last: null };
+    answering({ [LATEST]: { topics: [{ topic: { id: 3, name: "Robotics" }, brief: brief() }, { topic: { id: 5, name: "Padel" }, brief: null }] },
+      [ROWS]: { ...rows(true), topics: [...rows(true).topics, padel] }, [IDEAS]: { ideas: [] } });
+    let v = await draw(NewsToday, where("news"));
+    await settle();
+    expect([...v.target.querySelectorAll("#news-jobs-off")].map((p) => p.textContent)).toEqual(["No new briefs are made while jobs are off. Activity ›"]);
+    expect(v.target.querySelectorAll("section.brief li.story").length).toBeGreaterThan(0);         // what was written stays
+    expect([...v.target.querySelectorAll("p.first-brief")].map((p) => p.textContent)).toEqual(["No brief for Padel yet."]);
+    expect(v.target.querySelector(".news-foot")?.textContent).not.toContain("Written every day");
+    expect(v.target.textContent!.split("jobs are off").length).toBe(2);                              // said once
+    v.done();
+    stub({ host: { scheduler: true } });
+    hosted();
+    answering({ [LATEST]: { topics: [{ topic: { id: 3, name: "Robotics" }, brief: brief() }] }, [ROWS]: rows(true), [IDEAS]: { ideas: [] } });
+    v = await draw(NewsToday, where("news"));
+    await settle();
+    expect(v.target.querySelector("#news-jobs-off")).toBeNull();
+    v.done();
+  });
+
   it("words its helpers plainly", () => {
     expect(minutesWords(197)).toBe("about a minute");
     expect(minutesWords(700)).toBe("about three minutes");

@@ -214,7 +214,7 @@ def _preview_words() -> str:
 
 def _why_practice(why: str | None) -> str:
     if why and why.startswith("cubs.STOP"):
-        return "every cub is stopped by the cubs.STOP file"
+        return "every feature is stopped while the stop file is there"
     return why or "this Kranto holds it"
 
 

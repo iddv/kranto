@@ -176,8 +176,12 @@ asked; the toot cub is yours to add.
 
 `topics.list` (each with `first_read_at`: when its first read ended, null before),
 `library.observations`, `library.search`, `themes.list`, `themes.get`,
-`ideas.list` (with the weekly editor's verdict, `editor_class` to filter; each card's latest
-`outcome` and `built`: what the loop made of it, `{state, repo, url}` or null), `ideas.get`, `briefs.list`, `briefs.get` (News), `objects.get` (observation, idea, theme, brief, and from the loop build, product and project: public records, no path or log; none for a cub narrowed to some topics), `events.read`,
+`ideas.list` (with the weekly editor's verdict on cards it judged before it left, `editor_class`
+to filter; each card's latest `outcome`, and `built`, kept for v1 readers: `{state, repo, url}`
+for a card built before builds left Kranto, else null), `ideas.get`, `briefs.list`, `briefs.get`
+(News), `objects.get` (observation, idea, theme, brief; the kinds `build`, `product` and
+`project` are still accepted and answered "not found", since builds left; none for a cub
+narrowed to some topics), `events.read`,
 `spend.mine`. `GET /api/read/<name>` serves them to the page and the command line.
 
 ## Adding a feature

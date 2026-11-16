@@ -67,14 +67,14 @@ The exceptions are the accounts a draft is sent with, all optional (every draft 
 without one), and each sends only when you approve the draft (**Send now** in its dialog), never
 while it is in practice. **Newsletter** (Settings › Posting › Newsletter): **Connect a provider** offers each newsletter platform Kranto knows; you paste its
 key there, and Save and test only reads and says what is missing (a domain to verify, an
-audience to choose). A newsletter cub never names a platform: its issues go out through the one
+audience to choose). The newsletter never names a platform: its issues go out through the one
 you connected, and its draft waits in Kranto until you connect one. **Check again** reads again;
 **Create the audience** makes one at a platform that has audiences, after a confirm. Kranto's
 newsletter guide (docs/newsletter.md) has every platform's steps. **Sanity** (Settings ›
 Posting › Sanity): paste the project id, the dataset and a robot token (an Editor token named
-`kranto-drafts`); Save and test only reads. A cub's **Send to Sanity**
+`kranto-drafts`); Save and test only reads. **Send to Sanity**
 files a post there as a draft and never publishes it: you read it and publish in Studio (the
-examplecom cub's guide, in octo-owner/bearcubs). A form's **Markdown** box keeps your lines as you typed them.
+examplecom feature's guide, in octo-owner/bearcubs). A form's **Markdown** box keeps your lines as you typed them.
 
 ## Watch: a topic first {#watch}
 
@@ -466,7 +466,7 @@ that left lands on the Overview.
 
 ## A cub's page {#cub-page}
 
-A cub's page looks like the rest of Kranto: Home › Cubs › its name, its glyph, who made it and its
+A cub's page looks like the rest of Kranto: Home › Post › its name, its glyph, who made it and its
 mode, one line of facts, what it is for, what of it runs now, one line when it is not live (and
 where to change that), then its lists and Log as the words across the top. Its one blue button is
 its main verb (Compose, Draft a post); Stop sits beside it for one that runs; every
@@ -561,8 +561,8 @@ wait and try again", and goes at the next call that works. A key with no credit 
 "out of credit" and stops until credit is added.
 
 **The band is for Kranto itself.** Only what stops Kranto's own work raises it: a refused model key,
-and Kranto's core (the service, the scheduler, the database). No feature or cub can: their blocked
-states (a sign-in expired, a cub stopped) are one Needs you row each, first in Fix, with the button that fixes it, and the line on the cub's tile;
+and Kranto's core (the service, the scheduler, the database). No feature can: their blocked
+states (a sign-in expired, a feature stopped) are one Needs you row each, first in Fix, with the button that fixes it, and the line on the feature's tile;
 they do not turn the top bar red. `kranto status` says the same: Kranto's own on an `INCIDENT` line, a
 feature's on a `NEEDS YOU` line. Any of them can be dismissed.
 

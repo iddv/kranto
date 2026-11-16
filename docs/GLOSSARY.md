@@ -20,7 +20,7 @@ The words Kranto uses, in the app, its commands and this repository.
 - **Token**: who may act. Every write needs one (the page's session cookie, `kranto mcp`'s,
   the console's, the command line's, or a named agent's); reads do not. They live in
   `~/.config/kranto/tokens/`. A door is one of those callers.
-- **Verb**: one click a page offers (Add topic, Approve, Publish), said once in Kranto's registry
+- **Verb**: one click a page offers (Add topic, Approve, Write a post), said once in Kranto's registry
   so the page, `kranto mcp` and the console run the same thing (`docs/verbs.md`).
 - **Ladder**: what an assistant may do by itself, per kind of verb: Do it, Ask me in the UI or
   Never (Settings › Assistant). Keys and approving what a cub asks are locks: yours.
@@ -37,10 +37,9 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
   The command line's choices stay `anthropic`, `openrouter`, `endpoint`, `claude_code`.
 - **Key**: a secret you paste (never "model key", "api key" or "token" for a key). **Login**:
   a program's own sign-in on this machine (Claude Code's, the GitHub CLI's), Ready or Missing.
-- **Kranto's GitHub sign-in** (a code you type at github.com) and **Kranto's GitHub App** (the bot
-  that comments and opens pull requests): two of the three GitHub things, with your gh login.
-- **Account**: one you read sources with (Mastodon, Bluesky, X…); Connect and Disconnect…
-  are its verbs.
+- **Account**: one you read sources with or post through (Mastodon, Bluesky, X, GitHub…);
+  Connect and Disconnect… are its verbs. Kranto also uses a connected GitHub account, or your
+  gh login, to check for updates while the repository is private.
 - **Door** and **agent**: who may act; the file each uses is a token.
 - **Cap**: a spend ceiling, always "X a month" or "a day"; "no cap" when there
   is none. Never "budget" or "limit" (a provider's own spend limit keeps its name).
@@ -52,16 +51,15 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
 - **Usage reports**: Nothing, Local only, Basic, Detailed (`off`, `local`, `basic`,
   `detailed` on the command line, which calls them telemetry), on Settings › Privacy & access.
 - **When a change takes effect**: every Save ends with one of "Applies at once.", "From the
-  loop's next tick (under a minute).", "From the next build.", "From the next check.", "From
-  the next run.", "From the next publish." or "After a restart (kranto down, kranto up)."
+  next check.", "From the next run." or "After a restart (kranto down, kranto up)."
 - **Formats**: money as `$1.00`; tokens as 84k or 5.2M; a time as "now", "7 min", "3 h" (in a
   sentence "7 min ago"), else "17 Oct 08:44".
 
 ## Watching (the server)
 
 - **Topic**: something you want watched, in your words. Topics are yours: Kranto proposes
-  sources for them, never the topics themselves. A **project topic** follows one of your
-  published products.
+  sources for them, never the topics themselves. A **project topic** followed a product
+  Kranto built; since builds left, project topics are kept but not read.
 - **Source**: a feed, a Hacker News query, a subreddit and so on, attached to a topic once you
   approve it. The **scout** proposes sources for a topic with one model call; a **wildcard**
   is a proposed source unrelated to the topic that may carry the same patterns. Sources with
@@ -128,8 +126,7 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
   always wait for your click.
 - **Spend**: what was spent, in dollars on Settings › Spend and in tokens everywhere else.
   There is no cap by default; every cap is configurable.
-- **Weekly editor**: once a week reads what was gathered and recommends at most one idea (the
-  **nominee**), or says why not.
 
-Builds, projects, pitches and maintenance left Kranto; what they kept is in
-[archive.md](archive.md).
+Builds, projects, pitches, maintenance and the weekly editor (which chose one idea a week to
+build) left Kranto. What builds and projects kept is in [archive.md](archive.md); cards the
+weekly editor judged keep its notes.
