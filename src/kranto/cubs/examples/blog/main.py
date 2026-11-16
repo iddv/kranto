@@ -151,19 +151,34 @@ def _disclosed(body: str, got: dict) -> str:
     return f"{body}\n\n*{line}*" if line else body
 
 
-def _polish(ctx, text: str, angle: str, kind: str = "long") -> tuple[str, dict]:
+def sources_of(material: dict | None) -> str | None:
+    """The words the post was written from (its material's title and facts), for the checker's
+    ``salt.person``: a person's name or a handle they do not have is flagged."""
+    if not material:
+        return None
+    words = "\n".join(str(material.get(k) or "") for k in ("title", "facts")).strip()
+    return words or None
+
+
+def _polish(ctx, text: str, angle: str, kind: str = "long",
+            material: dict | None = None) -> tuple[str, dict]:
     """The engine's check, then one rewrite of only the flagged spans (at most two rounds);
-    what remains is kept and said on the row (``prose``)."""
+    what remains is kept and said on the row (``prose``). ``material``: what the post was
+    written from, passed to the check as its sources."""
     if not text:
         return text, {}
-    got = ctx.prose.check(text, site="blog", kind=kind, take=angle)
+    sources = sources_of(material)
+    got = ctx.prose.check(text, site="blog", kind=kind, take=angle, sources=sources)
     rounds = 0
     if any(f.get("scope", "span") == "span" or f.get("rule") == "site.length"
            for f in got.get("flags") or []):
         fixed = ctx.prose.revise(text, got["flags"], purpose="blog_post", tier="reason",
-                                 site="blog", kind=kind, take=angle)
+                                 site="blog", kind=kind, take=angle, sources=sources)
         text, rounds = fixed.get("text") or text, int(fixed.get("rounds") or 0)
         got = {**got, **{k: fixed[k] for k in ("flags", "score", "verdict") if k in fixed}}
+        if sources:
+            # revise's own last look has no sources: what is left is checked with them
+            got = ctx.prose.check(text, site="blog", kind=kind, take=angle, sources=sources)
     return text, {"score": got.get("score"), "verdict": got.get("verdict"), "rounds": rounds,
                   "left": [f.get("rule") for f in got.get("flags") or []],
                   "angle": angle or None}
@@ -270,12 +285,13 @@ def card_material(card: dict, srcs: list[dict], angle: str = "") -> dict:
 
 def card_post(ctx, card: dict, angle: str = "") -> dict | None:
     srcs = [s for s in card.get("sources") or [] if s.get("url")][:8]
+    material = card_material(card, srcs, angle)
     got = _write(ctx, fields=("title", "excerpt", "body"), max_tokens=1100, task=CARD_TASK,
-                 material=card_material(card, srcs, angle))
+                 material=material)
     body = _untitled(got.get("body"))
     if not body:
         return None
-    body, prose = _polish(ctx, body, angle)
+    body, prose = _polish(ctx, body, angle, material=material)
     body = re.sub(r"\[(\d{1,2})\](?!\()", lambda m: f"[{m.group(1)}]" if any(
         s["n"] == int(m.group(1)) for s in srcs) else "", body)
     title = _cut(got.get("title") or card.get("title") or "An idea", 120)
@@ -318,12 +334,13 @@ def item_post(ctx, brief: dict, n: int, angle: str = "") -> dict | None:
         return None
     it = items[n - 1]
     srcs = [s for s in it.get("sources") or [] if s.get("url")][:8]
+    material = item_material(it, angle)
     got = _write(ctx, fields=("title", "excerpt", "body"), max_tokens=900, task=ITEM_TASK,
-                 material=item_material(it, angle))
+                 material=material)
     body = _untitled(got.get("body"))
     if not body:
         return None
-    body, prose = _polish(ctx, body, angle)
+    body, prose = _polish(ctx, body, angle, material=material)
     title = _cut(got.get("title") or it.get("headline") or "A news item", 120)
     return {"doc": f"brief-{brief['id']}-{n}", "slug": slugify(title, 96), "title": title,
             "body": _disclosed(body, got) + _sources(srcs), "origin": "brief", "prose": prose,
@@ -378,12 +395,12 @@ def week_post(ctx, topic: dict | None, angle: str = "") -> dict | None:
                 ids.append(b["id"])
     if not items:
         return None
+    material = {"angle": angle or None, "title": "the week's news",
+                "facts": "\n".join(f"- {it['headline']}: {it['body']}" for it in items)}
     got = _write(ctx, fields=("intro",), max_tokens=300, task=WEEK_TASK, kind="intro",
-                 material={"angle": angle or None, "title": "the week's news",
-                           "facts": "\n".join(f"- {it['headline']}: {it['body']}"
-                                              for it in items)})
+                 material=material)
     intro, prose = _polish(ctx, " ".join(str(got.get("intro") or "").split()), angle,
-                           "intro")
+                           "intro", material=material)
     day = ctx.now_minus(days=0).astimezone(UTC)
     year, week, _ = day.isocalendar()
     name = topic["name"] if topic else "The week"

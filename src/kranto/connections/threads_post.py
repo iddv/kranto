@@ -19,7 +19,7 @@ from .base import Bearer, Grant, Provider, need, reply_json, status_of
 from .oauth import OAuthError
 from .secret import Secret
 
-SCOPES = ("threads_basic", "threads_content_publish")
+SCOPES = ("threads_basic", "threads_content_publish", "threads_manage_insights")
 HOST = "graph.threads.com"
 LIFETIME_S = 60 * 86400
 REFRESH_AFTER_S = 86400          # Meta: a token at least 24 hours old, not expired
@@ -99,7 +99,8 @@ INFO = {
     "blurb": "Your own Meta app's token, so Kranto can post to Threads a draft you approved in "
              "the confirm dialog. Without it, Threads still opens with the draft written.",
     "scopes": list(SCOPES),
-    "reads": "Which account it is.",
+    "reads": "Which account it is, and the numbers of the posts Kranto sent (views, likes, "
+             "replies, reposts, quotes), once a day.",
     "never": "Never posts without your yes on that one draft. Never replies, likes, follows or "
              "reads your messages. The app stays in development mode, for you only.",
     "revoke_at": "threads.com: Settings, Account, Website permissions.",
@@ -107,7 +108,8 @@ INFO = {
     "steps": ["Open developers.facebook.com/apps and choose Create app. Pick the use case "
               "Access the Threads API. Name it Kranto.",
               "In the app open Use cases, then Customize beside Threads, and add "
-              "threads_content_publish (threads_basic is already there).",
+              "threads_content_publish and threads_manage_insights (threads_basic is "
+              "already there). The second lets Kranto read how your posts did.",
               "Open App roles, then Roles, then Add people, and add your own Threads account as "
               "a Threads tester.",
               "In Threads: Settings, Account, Website permissions, Invites: accept the "

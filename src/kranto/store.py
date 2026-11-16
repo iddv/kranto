@@ -1729,6 +1729,44 @@ _MIGRATIONS: list[tuple[int, str]] = [
     );
     CREATE INDEX browser_clients_token ON browser_clients (token_name, id);
     """),
+    # 44: posts at an hour, and what a sent post drew. ``post_due``: the person's yes to send
+    # one waiting ask at a time they chose (``held``), and what became of it, one row a change,
+    # never edited: moved (a newer ``held`` row), ``cancelled``, ``missed`` (its hour passed
+    # while Kranto was stopped: the ask waits again for a new yes), ``void`` (the ask was
+    # answered, edited or declined before the hour), ``spent`` (Kranto sent it at its hour:
+    # the yes is used up whatever the site answered). The newest row of a ticket says where it
+    # stands. ``fields_hash`` binds the yes to the words the person read. ``post_reach``: one
+    # row a reading of a sent post's numbers (each nullable: a site that does not give one
+    # stores null); ``shape`` is the post's shape (site, parts, card, length, weekday and hour
+    # sent) for what was learned.
+    (44, """
+    CREATE TABLE post_due (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticket_id INTEGER NOT NULL,
+        state TEXT NOT NULL CHECK (state IN ('held', 'cancelled', 'missed', 'void', 'spent')),
+        due_at TEXT NOT NULL,
+        fields_hash TEXT NOT NULL,
+        door TEXT,
+        note TEXT,
+        created_at TEXT NOT NULL
+    );
+    CREATE INDEX post_due_ticket ON post_due (ticket_id, id);
+    CREATE TABLE post_reach (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticket_id INTEGER NOT NULL,
+        site TEXT NOT NULL,
+        read_at TEXT NOT NULL,
+        replies INTEGER,
+        reposts INTEGER,
+        likes INTEGER,
+        quotes INTEGER,
+        views INTEGER,
+        shape TEXT NOT NULL DEFAULT '{}',
+        note TEXT,
+        created_at TEXT NOT NULL
+    );
+    CREATE INDEX post_reach_ticket ON post_reach (ticket_id, id);
+    """),
 ]
 
 

@@ -142,6 +142,9 @@ class BlueskyAdapter:
                 root = ref
                 first_address = post_address(handle, body["uri"]) or "on Bluesky"
             parent = ref
+        from ....social import reach
+        reach.sent(ctx.store, ticket["id"], SERVICE, {"uri": (root or {}).get("uri")},
+                   d["content"], parts=len(parts))
         return {"state": "done", "note": f"posted: {first_address}"}
 
     def ask(self, kind: str, fields: dict, store, rt=None) -> dict:

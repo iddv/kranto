@@ -8,7 +8,7 @@ import { answering, draw, settle, stub, where } from "../testing.svelte";
 import AddTopic from "./AddTopic.svelte";
 import AddTopicPane from "./AddTopicPane.svelte";
 import Welcome from "./Welcome.svelte";
-import { about, afkJob, perDay, TOPIC, type Proposal } from "./welcome.svelte";
+import { about, afkJob, perDay, RESTORE, TOPIC, type Proposal } from "./welcome.svelte";
 
 const READS = {
   "/api/topics": { topics: [{ id: 1, name: "Energy access", status: "active" }, { id: 2, name: "Old", status: "paused" }] },
@@ -28,6 +28,7 @@ const hosted = () => { ui.facts = { header: { host: { paused: false } } } as unk
 afterEach(() => {
   ui.facts = null;
   TOPIC.t = null;
+  RESTORE.tried = false;
   history.replaceState(null, "", "#/");
 });
 /** the old module with the proposals' group and watching what is ticked; api answers by path */
@@ -198,6 +199,74 @@ describe("Add topic", () => {
     await settle();
     expect(watched(L)).toEqual([expect.objectContaining({ ids: [11] })]);
     expect(location.hash).toBe("#/welcome/finish");
+    done();
+  });
+
+  // a first run: a reload in step 2 lost the proposals (they stayed proposed on the topic's page)
+  const SETUP_TOPIC = { ...READS, [SETUP_API]: { every_hours: 6, budget_usd: 20, topics: 1, done: false } };
+  const TOPICS = { topics: [{ id: 3, name: "Old", description: "o", status: "paused" }, { id: 9, name: "Energy access", description: "Getting power to people.", status: "active" }] };
+  /** step 2 drawn fresh, as after a reload, with api answering by path (a function: a refusal) */
+  async function reloaded(answers: Record<string, unknown>) {
+    const { L } = stubbed();
+    L.api.mockImplementation(async (path: string) => {
+      const a = answers[path];
+      if (typeof a === "function") return (a as () => unknown)();
+      return a ?? {};
+    });
+    hosted();
+    answering(SETUP_TOPIC);
+    const drawn = await draw(Welcome, step());
+    await settle();
+    await settle();
+    return { L, ...drawn };
+  }
+  function shows(target: HTMLElement, ticked: number[]): void {
+    expect((target.querySelector("#topic-name") as HTMLInputElement).value).toBe("Energy access");
+    expect((target.querySelector("#topic-name") as HTMLInputElement).disabled).toBe(true);
+    expect(TOPIC.t?.id).toBe(9);
+    expect([...TOPIC.t!.ticked]).toEqual(ticked);
+    const box = target.querySelector(".grp.props")!;
+    expect(box.querySelector("h2")?.textContent).toBe("Proposed for “Energy access”");
+    expect(box.querySelectorAll("li.row").length).toBe(2);
+    expect((target.querySelector("#watch-continue") as HTMLButtonElement).textContent).toBe("Watch these and continue");
+  }
+
+  it("after a reload, step 2 reads setup's topic and its finished scout back from the server", async () => {
+    const { target, done } = await reloaded({ "/api/topics": TOPICS, "/api/topics/9/scout": { job: { state: "done", result: { proposals: P, message: "2 proposed.", invalid: 1 } } } });
+    shows(target, [11]);
+    expect(target.querySelector(".box-b p.mt")?.textContent).toBe("2 places found. 1 could not be read and is not shown.");
+    done();
+  });
+
+  it("after a reload with the server started again since, step 2 reads the topic's own rows", async () => {
+    const gone = () => Promise.reject(new Error("this topic has no scout running or finished"));
+    const { L, target, done } = await reloaded({ "/api/topics": TOPICS, "/api/topics/9/scout": gone, "/api/topics/9": { source_rows: P } });
+    shows(target, [11]);
+    expect(L.api).toHaveBeenCalledWith("/api/topics/9");
+    expect(target.querySelector(".box-b p.mt")?.textContent).toBe("2 places found.");
+    done();
+  });
+
+  it("after a reload during the scout, step 2 waits for it again and then shows its proposals", async () => {
+    let polls = 0;
+    const scout = () => (polls++ === 0 ? { job: { state: "running", elapsed_s: 40 } } : { job: { state: "done", result: { proposals: P, message: "2 proposed.", invalid: 0 } } });
+    const { target, done } = await reloaded({ "/api/topics": TOPICS, "/api/topics/9/scout": scout });
+    expect(target.querySelector("#scout-state h2")?.textContent).toBe("Finding places to read");
+    expect(target.querySelector("#scout-elapsed")?.textContent).toMatch(/^Finding places to read… \(4\d s\)$/);
+    await new Promise((r) => setTimeout(r, 1700));
+    await settle();
+    shows(target, [11]);
+    done();
+  });
+
+  it("reads nothing back once setup is done", async () => {
+    const { L } = stubbed();
+    hosted();
+    answering({ ...SETUP_TOPIC, [SETUP_API]: { topics: 1, done: true } });
+    const { target, done } = await draw(Welcome, step());
+    await settle();
+    expect(L.api).not.toHaveBeenCalledWith("/api/topics");
+    expect((target.querySelector("#topic-name") as HTMLInputElement).value).toBe("");
     done();
   });
 });

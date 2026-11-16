@@ -824,8 +824,11 @@ def _sentence(briefs: dict[str, Any], waiting: dict[str, int]) -> str:
 
 
 def _quiet(rt: Any, next_run: dict[str, Any] | None) -> dict[str, Any]:
-    """The quiet line: topics and sources watched, the last read, the next result."""
+    """The quiet line: topics and sources watched, the last read, whether a read runs now
+    (``reading``: a home whose first read is still going says so, not "not read yet"), the next
+    result."""
     from .. import library
+    from ..tick import current_progress
 
     last = rt.store.query_one(
         "SELECT finished_at FROM runs WHERE kind = 'ingest' AND status "
@@ -845,6 +848,7 @@ def _quiet(rt: Any, next_run: dict[str, Any] | None) -> dict[str, Any]:
         "topics": sum(1 for t in library.active_topics(rt.store) if t.kind == "user"),
         "sources": len(library.list_sources(rt.store, status="approved")),
         "read_at": last["finished_at"] if last else None,
+        "reading": current_progress() is not None,
         "next": {"kind": nxt[0][1], "words": NEXT_JOBS[nxt[0][1]], "at": nxt[0][0]}
         if nxt
         else None,

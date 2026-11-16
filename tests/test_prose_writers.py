@@ -95,3 +95,23 @@ def test_a_reply_in_prose_still_writes_a_draft_and_nonsense_says_why(home):  # n
                              "not read: try again.")
     else:
         raise AssertionError("an unreadable answer writes no draft")
+
+
+@needs_bwrap
+def test_the_products_own_write_flags_a_person_its_card_does_not_name(home):  # noqa: F811
+    """salt.person through the cub host: the blog cub's polish step passes the card's words as
+    the check's sources (SDK 1.4), so a draft naming someone the card does not is flagged."""
+    named = {**POST_JSON, "body": "Kiosks swap batteries all day [1]. Ask Jane Stranger, who "
+                                  "keeps no record [2]."}
+
+    def model(body: dict):
+        if "edit a draft post" in body["messages"][0]["content"]:
+            return chat_response(json.dumps({"edits": []}))
+        return chat_response(json.dumps(named))
+
+    home.llm.fake.handler = model
+    n = card(home)
+    post_api.write(home, f"card:{n}", "blog", door="ui")
+    rows = [json.loads(r["value"]) for r in home.store.query(
+        "SELECT value FROM cub_kv WHERE cub = 'blog' AND key LIKE 'post:%'")]
+    assert rows and "salt.person" in rows[0]["prose"]["left"]

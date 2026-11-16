@@ -5,9 +5,13 @@
   // switches (length, register, opinions, emoji), "What do you think?" on Write a post, and the
   // samples (add one, remove one). Under Advanced, folded: the other switches (hashtags, links,
   // reading level), the checker's strictness and its rules, the never, keep and always lists,
-  // the guides each site follows, and disclosure for each site. One primary, Save, which sends
-  // what changed as one prose.voice; adding or removing a sample is its own small press. The
-  // contents and the API are the server's (docs/prose.md, GET /api/prose); this page draws them.
+  // and the guides each site follows. Who writes: a model for each of Kranto's writers (none is
+  // chosen for you: Kranto's own writing model writes until you choose), and the OpenAI key a
+  // writer on OpenAI uses, pasted here once, tested, kept, never shown again (its own press:
+  // Save and test). Disclosure: the words each site's posts end with, where you switched it on.
+  // One primary, Save, which sends what changed as one prose.voice; adding or removing a sample
+  // and the key are their own small presses. The contents and the API are the server's
+  // (docs/prose.md, GET /api/prose); this page draws them.
   import Loading from "../../ui/Loading.svelte";
   import NeedHost from "../../ui/NeedHost.svelte";
   import Page from "../Page.svelte";
@@ -15,7 +19,7 @@
   import { read } from "../../lib/reads.svelte";
   import { afkDropPrefix } from "../../lib/app/data";
   import { app, ui } from "../../lib/shell.svelte";
-  import { PROSE, SITE_WORDS, SWITCH_LABELS, MAIN_SWITCHES, MORE_SWITCHES, choiceWords, linesOf, listDiff, type Prose } from "./voice";
+  import { DISCLOSE_SITES, PROSE, PROVIDER_WORDS, SITE_WORDS, SWITCH_LABELS, MAIN_SWITCHES, MORE_SWITCHES, WRITERS, choiceWords, linesOf, listDiff, writerChange, type Prose } from "./voice";
 
   let { view }: { view: View } = $props();
   const host = $derived(!!ui.facts?.header.host);
@@ -36,6 +40,9 @@
   const LISTS: ["never" | "keep" | "always", string][] = [["never", "Never use (a word, or /a pattern/, a line each)"], ["keep", "Your phrases the checker leaves alone"], ["always", "Every post keeps (a sign-off)"]];
   let sample = $state("");
   let drafting = $state(false);
+  // who writes: the provider and model typed per writer (absent: not touched)
+  let writers = $state<Record<string, { provider: string; model: string }>>({});
+  let keySaid = $state<{ text: string; ok: boolean } | null>(null);
 
   const sw = (k: string): string | number => switches[k] ?? p?.switches[k] ?? "";
   const changes = $derived.by((): Record<string, unknown> => {
@@ -59,13 +66,36 @@
     if (Object.keys(g).length) out.guides = g;
     const dd = Object.fromEntries(Object.entries(disclosure).filter(([site, line]) => line !== (p.sites.find((x) => x.site === site)?.disclosure || "")));
     if (Object.keys(dd).length) out.disclosure = dd;
+    const wm: Record<string, { provider: string; model: string } | null> = {};
+    for (const [w, x] of Object.entries(writers)) {
+      const was = p.writer_models?.[w] || null;
+      const now = writerChange(x.provider, x.model);
+      if (JSON.stringify(now) !== JSON.stringify(was)) wm[w] = now;
+    }
+    if (Object.keys(wm).length) out.writer_model = wm;
     return out;
   });
   const dirty = $derived(Object.keys(changes).length > 0);
 
   function reset(): void {
     voice = null; switches = {}; take = null; strictness = null; off = {};
-    lists = { never: null, keep: null, always: null }; guides = {}; disclosure = {};
+    lists = { never: null, keep: null, always: null }; guides = {}; disclosure = {}; writers = {};
+  }
+  const writerOf = (w: string): { provider: string; model: string } => writers[w] ?? { provider: p?.writer_models?.[w]?.provider || "", model: p?.writer_models?.[w]?.model || "" };
+  /** the OpenAI key: sent once, tested by the server and kept only when it passes; the box is
+   * emptied whatever the answer, and the key is never shown again */
+  function saveKey(btn: HTMLElement | null): void {
+    const L = app();
+    const box = document.getElementById("voice-key") as HTMLInputElement | null;
+    const key = (box?.value || "").trim();
+    if (!L || !box) return;
+    if (!key) { box.focus(); return; }
+    box.value = "";
+    void L.act(btn, () => L.api("/api/prose/writer-key", { key }), (r) => {
+      const got = r as { ok?: boolean; say?: string };
+      keySaid = { text: got.say || (got.ok ? "Kept." : "Not kept."), ok: !!got.ok };
+      afkDropPrefix(PROSE);
+    });
   }
   function save(btn: HTMLElement | null): void {
     const L = app();
@@ -120,7 +150,7 @@
   <Page head={{ title: "How you write", label: "How you write", crumb: [{ to: "settings/posting", w: "Posting" }, { to: "settings/posting/voice", w: "How you write" }],
       facts: `${p.samples.length} ${p.samples.length === 1 ? "sample" : "samples"} · checker ${p.strictness}`,
       primary: { label: "Save", id: "voice-save", run: () => save(document.getElementById("voice-save")), title: dirty ? "Save what you changed" : "Nothing changed yet" } }}
-    sections={[{ id: "card", w: "Your voice" }, { id: "switches", w: "Switches" }, { id: "samples", w: "Samples", n: p.samples.length }, { id: "advanced", w: "Advanced" }]}>
+    sections={[{ id: "card", w: "Your voice" }, { id: "switches", w: "Switches" }, { id: "samples", w: "Samples", n: p.samples.length }, { id: "writers", w: "Who writes" }, { id: "disclosure", w: "Disclosure" }, { id: "advanced", w: "Advanced" }]}>
     {#snippet section(s)}
       {#if s.id === "card"}
         <p class="muted small">How you write, in plain words. Every post follows it.</p>
@@ -142,8 +172,39 @@
         </ul>
         <textarea id="voice-sample" class="wide" rows="4" placeholder="Paste something you wrote" bind:value={sample}></textarea>
         <p class="acts"><button type="button" class="btn sm" id="voice-sample-add" disabled={!sample.trim()} onclick={(e) => addSample(e.currentTarget)}>Add this sample</button></p>
+      {:else if s.id === "writers"}
+        <p class="muted small">Kranto's own writing model writes every post until you choose another for a writer here.</p>
+        <dl class="kv" id="voice-writers">
+          {#each WRITERS as [w, words] (w)}
+            {@const x = writerOf(w)}
+            <dt><label for={"voice-writer-" + w}>{words}</label></dt>
+            <dd>
+              <select id={"voice-writer-" + w} value={x.provider} onchange={(e) => (writers = { ...writers, [w]: { provider: e.currentTarget.value, model: x.model } })}>
+                {#each ["", ...(p.writer_providers || [])] as v (v)}<option value={v}>{PROVIDER_WORDS[v] || v}</option>{/each}
+              </select>
+              {#if x.provider}<input id={"voice-writer-model-" + w} type="text" placeholder="the model's name" aria-label={`${words}: the model's name`} value={x.model} oninput={(e) => (writers = { ...writers, [w]: { provider: x.provider, model: e.currentTarget.value } })} />{/if}
+            </dd>
+          {/each}
+        </dl>
+        <div class="field voice-key">
+          <label for="voice-key">OpenAI key, for a writer on OpenAI <span class="muted small" id="voice-key-state">{p.writer_key?.set ? "· kept (never shown)" : "· not set"}</span></label>
+          <input id="voice-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste it here" />
+          <button type="button" class="btn sm" id="voice-key-save" onclick={(e) => saveKey(e.currentTarget)}>Save and test</button>
+        </div>
+        {#if keySaid}<p class={"small " + (keySaid.ok ? "c-green" : "c-amber")} id="voice-key-said" role="status">{keySaid.text}</p>{/if}
+      {:else if s.id === "disclosure"}
+        <p class="muted small">The line a post ends with, where you switched it on (Settings › Posting). Each site its own words.</p>
+        <dl class="kv small" id="voice-disclosure">
+          {#each DISCLOSE_SITES as site (site)}
+            {@const x = p.sites.find((y) => y.site === site)}
+            {#if x}
+              <dt><label for={"voice-disclose-" + site}>{SITE_WORDS[site] || site}</label></dt>
+              <dd><input id={"voice-disclose-" + site} type="text" class="wide" maxlength="200" placeholder={site === "blog" || site === "newsletter" ? `off (or: ${p.disclosure_line})` : p.disclosure_default || ""} value={disclosure[site] ?? x.disclosure} oninput={(e) => (disclosure = { ...disclosure, [site]: e.currentTarget.value })} /></dd>
+            {/if}
+          {/each}
+        </dl>
       {:else}
-        <details id="voice-advanced"><summary class="small">The other switches, the checker, your lists, guides and disclosure</summary>
+        <details id="voice-advanced"><summary class="small">The other switches, the checker, your lists and guides</summary>
           <dl class="kv small">
             {#each MORE_SWITCHES as k (k)}
               <dt><label for={"voice-sw-" + k}>{SWITCH_LABELS[k]}</label></dt>
@@ -159,11 +220,10 @@
             <label class="small" for={"voice-list-" + k}>{w}</label>
             <textarea id={"voice-list-" + k} class="wide" rows="3" value={lists[k] ?? p[k].join("\n")} oninput={(e) => (lists = { ...lists, [k]: e.currentTarget.value })}></textarea>
           {/each}
-          <details class="small"><summary>Guides and disclosure for each site</summary>
+          <details class="small"><summary>Guides for each site</summary>
             {#each p.sites as x (x.site)}
               <fieldset class="voice-site"><legend>{SITE_WORDS[x.site] || x.site}</legend>
                 {#each p.guides.filter((g) => !g.always) as g (g.name)}<label class="inline"><input type="checkbox" checked={guidesOf(x.site).includes(g.name)} onchange={(e) => toggleGuide(x.site, g.name, e.currentTarget.checked)} /> {g.title}</label>{" "}{/each}
-                <label class="inline">Disclosure <input type="text" class="wide" placeholder={`off (or: ${p.disclosure_line})`} value={disclosure[x.site] ?? x.disclosure} oninput={(e) => (disclosure = { ...disclosure, [x.site]: e.currentTarget.value })} /></label>
               </fieldset>
             {/each}
           </details>
@@ -177,5 +237,17 @@
   .voice-samples { padding-left: 18px; }
   .voice-rules { columns: 2; padding-left: 0; list-style: none; }
   .voice-site { border: 1px solid var(--border); border-radius: 6px; margin: 6px 0; padding: 6px 10px; }
+  .voice-key { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 0; }
+  .voice-key label { flex-basis: 100%; }
+  .voice-key input { width: min(100%, 320px); }
+  #voice-writers input { margin-left: 6px; width: min(100%, 220px); }
+  #voice-writers select, #voice-writers input { max-width: 100%; }
+  #voice-disclosure input { width: min(100%, 420px); }
+  /* a phone: each writer's label above its choice, so nothing runs past the screen's edge */
+  @media (max-width: 640px) {
+    #voice-writers, #voice-disclosure { display: block; }
+    #voice-writers dd, #voice-disclosure dd { margin: 2px 0 10px; min-width: 0; }
+    #voice-writers input { margin: 6px 0 0; }
+  }
   @media (max-width: 640px) { .voice-rules { columns: 1; } }
 </style>

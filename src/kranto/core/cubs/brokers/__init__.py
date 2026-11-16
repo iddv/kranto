@@ -58,6 +58,11 @@ def _register() -> None:
             if hasattr(adapter, "ask"):      # the plain dialog's parts (core.asks)
                 spec.ask = (lambda a, k: lambda fields, store, rt: a.ask(k, fields, store, rt))(
                     adapter, kind)
+            if spec.ask is not None and spec.meta.get("holds"):
+                # a send Kranto may hold for an hour: the dialog offers Schedule, in the
+                # person's own time (the page turns it into UTC)
+                spec.ask = (lambda f: lambda fields, store, rt: {
+                    **(f(fields, store, rt) or {}), "schedule": True, "zone": "local"})(spec.ask)
 
 
 _register()

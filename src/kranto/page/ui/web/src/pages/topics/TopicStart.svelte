@@ -39,15 +39,5 @@
     {#snippet foot()}{#if s.quiet}<p class="more" id="topic-quiet">{s.quiet}</p>{/if}{/snippet}
   </Group>
 {/if}
-
-<style>
-  /* a row's time keeps its whole width ("29 Oct 06:47" was cut in the rows' 40 px age
-     column, at 1400 as on a phone); on a phone the words take a second line under the title */
-  :global(section[aria-labelledby="topic-start"] .row.lr) { grid-template-columns: var(--tickw, 0px) var(--stw, 14px) 0px minmax(0, 1fr) 0px max-content 0px; }
-  :global(section[aria-labelledby="topic-start"] .lr .c-age) { overflow: visible; min-width: max-content; }
-  @media (max-width: 759px) {
-    :global(section[aria-labelledby="topic-start"] .lr .c-main) { display: flex; flex-direction: column; -webkit-line-clamp: unset; line-clamp: unset; }
-    :global(section[aria-labelledby="topic-start"] .lr .c-main .c-meta) { display: block; white-space: normal; overflow: visible; }
-    :global(section[aria-labelledby="topic-start"] .lr .c-age) { overflow: visible; min-width: max-content; }
-  }
-</style>
+<!-- its rows' layout (the time whole, the words under the title on a phone) is .grp.start's, in
+     base.css: the home's first hour draws the same rows -->
