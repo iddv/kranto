@@ -4,7 +4,8 @@
 
 the page exports one plain function through its host API, ``handle(method, path, query,
 body) -> (status, content_type, body)``. When ``brb.enabled`` is set in kranto.yaml and that
-import works, ``afk serve`` routes ``/brb/...`` to it, in Starlette's thread pool. The host's
+import works, ``python -m kranto serve`` routes ``/brb/...`` to it, in Starlette's thread pool. The
+host's
 guard (allowed Host names, same-origin writes, the content policy) covers the mount like
 every other route.
 

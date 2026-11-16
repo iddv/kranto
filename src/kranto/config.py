@@ -60,7 +60,8 @@ llm:
   # One tier on another provider: tiers: {reason: {provider: anthropic, model: ...}}.
   # The Claude API (provider anthropic): its key's variable, one prompt-cache breakpoint on the
   # system prompt, and per call (screen, judge, name) schema-enforced replies and the thinking
-  # effort (low, medium, high; unset: the model's default). 'afk provider replay' measures both.
+  # effort (low, medium, high; unset: the model's default). 'python -m kranto provider replay'
+  # measures both.
   # anthropic: {api_key_env: ANTHROPIC_API_KEY, base_url: https://api.anthropic.com,
   #             cache: true, structured: {}, effort: {}}
   # Claude Code's login (provider claude_code): per call a JSON schema for the reply, sandbox:
@@ -187,13 +188,13 @@ retention:
   # Per source kind (rss, hackernews, reddit, arxiv, bluesky, mastodon, github,
   # youtube, producthunt, stackexchange, x, parallax), e.g. {reddit: 30}. x is kept 30
   # days unless set here (stored X posts have to track X's; a default you may raise). A single
-  # source can be set with 'afk sources retention ID DAYS' or on its page;
+  # source can be set with 'python -m kranto sources retention ID DAYS' or on its page;
   # newsletter publications added from the catalog are kept 30 days. youtube is
   # capped at 30 days (YouTube's policies for API data): more is refused.
-  # parallax (an archive imported with 'afk import parallax') is kept forever
+  # parallax (an archive imported with 'python -m kranto import parallax') is kept forever
   # unless set here: its observations are older than default_days when imported.
   by_kind: {}
-  # How often compaction runs under 'afk serve' (after the snapshot).
+  # How often compaction runs under 'python -m kranto serve' (after the snapshot).
   every_hours: 24
 
 activity:
@@ -239,7 +240,7 @@ look:
   screen_batch: 20
 
 deep_dive:
-  # Deep dives left Kranto in wave 3 (the job and 'afk deepdive'); the observations
+  # Deep dives left Kranto in wave 3 (the job and 'python -m kranto deepdive'); the observations
   # they found stay, linked to theirs. Reading one step from an item is look:'s.
   # These keys are accepted so existing files load; only Settings › Watching and
   # the usage report still show enabled and daily_usd.
@@ -368,7 +369,7 @@ telemetry:
   mode: local
 
 parallax:
-  # An archive imported from Parallax ('afk import parallax', 'afk import
+  # An archive imported from Parallax ('python -m kranto import parallax', 'python -m kranto import
   # parallax-dispatches'): its observations are browsable in the Library under
   # their "(Parallax)" sources and count in the map, but are never new on Today
   # and never arrivals in the map's movement.
@@ -812,7 +813,8 @@ class NotifyConfig:
 
 @dataclass(frozen=True)
 class BrbConfig:
-    """the page's builds UI, mounted at /brb/ by 'afk serve' when the page is installed in
+    """the page's builds UI, mounted at /brb/ by 'python -m kranto serve' when the page is
+    installed in
     the same environment. Off by default. ``root`` is the task folder it lists (default: the
     loop's tasks_dir, ~/tasks) and ``loop_home`` the loop's home (default: ~/kranto-loop)."""
 
@@ -1177,7 +1179,8 @@ def load(root: Path, *, dotenv: bool = True) -> Config:
         load_dotenv(root / ".env")
     path = config_path(root)
     if path is None:
-        raise ConfigError(f"no {CONFIG_FILENAME} in {root}; run 'afk init {root}' first")
+        raise ConfigError(f"no {CONFIG_FILENAME} in {root}; run "
+            f"'python -m kranto init {root}' first")
     try:
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except yaml.YAMLError as exc:
@@ -1673,6 +1676,6 @@ def find_workspace(explicit: str | None = None) -> Path:
     if config_path(root) is None:
         raise ConfigError(
             f"{root} is not a the server workspace (no {CONFIG_FILENAME}). "
-            f"Pass --workspace, set ${WORKSPACE_ENV}, or run 'afk init <dir>'."
+            f"Pass --workspace, set ${WORKSPACE_ENV}, or run 'python -m kranto init <dir>'."
         )
     return root

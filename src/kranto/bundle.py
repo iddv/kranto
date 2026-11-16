@@ -1,4 +1,4 @@
-"""``afk export bundle``: a static, read-only copy of the latest map.
+"""``python -m kranto export bundle``: a static, read-only copy of the latest map.
 
 For publishing a map somewhere without running the server (the way
 example.com/parallax read Parallax's snapshot bundle). The format is versioned
@@ -29,7 +29,7 @@ VERSION = 0
 def export_bundle(store: Store, out_dir: Path) -> dict:
     snap = map_read.latest(store)
     if snap is None:
-        raise ValueError("no map yet; run 'afk snapshot' first")
+        raise ValueError("no map yet; run 'python -m kranto snapshot' first")
     out_dir.mkdir(parents=True, exist_ok=True)
     rows = store.query(
         """

@@ -246,7 +246,7 @@ def _snapshot(store: Store, embedder: Embedder, llm: LLMClient | None,
     # arrivals: they follow their parent into its neighbourhood, and counting them
     # would read one item's thread as a theme gaining ground. They are on the map,
     # but not in movement. Nor is a copy of an earlier story: only a story's
-    # first observation arrives. Nor is an imported archive (``afk import parallax``):
+    # first observation arrives. Nor is an imported archive (``python -m kranto import parallax``):
     # thousands of rows observed months ago would read as one enormous burst.
     def arrived(r: Any) -> bool:
         return (r["id"] > prev_max_id and r["admitted_by"] not in NOT_ARRIVALS

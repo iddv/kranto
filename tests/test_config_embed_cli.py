@@ -48,7 +48,7 @@ def test_dotenv_in_workspace_is_loaded_without_overriding(tmp_path, monkeypatch)
 
 def test_missing_workspace_has_helpful_error(tmp_path, monkeypatch):
     monkeypatch.delenv(config_mod.WORKSPACE_ENV, raising=False)
-    with pytest.raises(config_mod.ConfigError, match="afk init"):
+    with pytest.raises(config_mod.ConfigError, match="python -m kranto init"):
         config_mod.find_workspace(str(tmp_path))
 
 

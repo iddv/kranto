@@ -1,4 +1,4 @@
-Someone pasted a list of sources they want bears to watch. Your job is to work out
+Someone pasted a list of sources they want Kranto to watch. Your job is to work out
 which catalog preset each one is and fill in its fields. You resolve what they named;
 you do not add sources of your own, and you do not leave any out.
 

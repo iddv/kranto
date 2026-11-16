@@ -1,4 +1,5 @@
-"""An imported archive as JSON: its themes, and what it holds (``afk import parallax``).
+"""An imported archive as JSON: its themes, and what it holds (``python -m kranto import
+parallax``).
 
 | Method and path                      | Does                                              |
 |--------------------------------------|---------------------------------------------------|

@@ -62,7 +62,7 @@ def _exists(store: Store, target: str, target_id: str) -> dict | None:
 
 def add_grade(store: Store, target: str, target_id: int | str, grade: str,
               note: str | None = None, *, now: datetime | None = None) -> int:
-    """Record a grade (the Ideas page, ``afk grade``, the old ``/grade`` form and
+    """Record a grade (the Ideas page, ``python -m kranto grade``, the old ``/grade`` form and
     ``/api/grades``): one ``feedback`` row, the one table every grade is written to;
     returns its id. ``grades`` and ``verdicts`` keep their rows as history and are only read."""
     if target not in ALLOWED or target not in feedback.KEPT:
