@@ -405,6 +405,8 @@ more permission · Review", its page's ⋯ says "Update to 1.2.0" and Home › C
 Staged with what it may now do; one click opens the change and its new permissions, and Update
 applies it. Look for an update under About on its Settings page (or `kranto cub update ID` in a
 terminal) looks now. `cubs.auto_update: false` in `kranto.yaml` makes every update wait for your approval.
+A cub Kranto ships (the newsletter, short posts) that was added from the folder an earlier install
+shipped it in keeps updating after an update moved that folder: it reads this Kranto's own copy.
 
 ## Post {#post}
 

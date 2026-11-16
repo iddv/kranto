@@ -27,8 +27,8 @@ def test_a_topics_value_is_a_list_of_topic_ids():
 def test_the_newsletter_picks_its_topics_and_its_older_value_still_reads():
     import yaml
     raw = yaml.safe_load((NEWSLETTER / "cub.yaml").read_text())
-    # topics since 1.2.0; prose 1.5.0; outlets 1.5.1; the check's sources 1.5.2
-    assert raw["version"] == "1.5.2"
+    # topics since 1.2.0; prose 1.5.0; outlets 1.5.1; the check's sources 1.5.2; Kranto 0.7 1.5.3
+    assert raw["version"] == "1.5.3"
     assert raw["settings"]["keys"]["newsletter.topics"]["type"] == "topics"
     assert "topics" in manifest_mod.SETTING_TYPES
     host = FakeHost.from_folder(NEWSLETTER)              # the SDK checks it against the schema

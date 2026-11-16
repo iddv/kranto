@@ -293,3 +293,57 @@ def test_kranto_cub_source_rewrites_the_source_only(home, tmp_path):  # noqa: F8
         install.set_source(home, "hello", str(tmp_path / "nowhere"))
     with pytest.raises(install.InstallError):
         install.set_source(home, "nobody", str(moved))
+
+
+def test_a_shipped_cub_whose_tool_an_update_replaced_updates_from_this_kranto(
+        home, tmp_path, monkeypatch):  # noqa: F811
+    """An install made before the rename added the newsletter and the toot cub from the folders
+    its old tool shipped (``<site-packages>/<old server>/cubs/examples/<id>``); the crossing
+    replaces that tool, so the folders are gone. Each such cub reads this Kranto's own copy from
+    then on: the daily look updates it (its range then holds Kranto 0.7) and nothing says gone."""
+    from kranto import cubs, legacy
+    old = (tmp_path / "tools" / "old" / "lib" / "python3.12" / "site-packages"
+           / legacy.COMPAT_SERVER / "cubs" / "examples" / "hello")
+    added(home, make_cub(old))
+    shutil.rmtree(old)
+    shipped = tmp_path / "shipped"
+    make_cub(shipped / "hello", manifest(version="1.2.1"))
+    monkeypatch.setattr(cubs, "examples_dir", lambda: shipped)
+    assert views.row(home, "hello")["source_gone"] is None
+    out = updates.run(home)
+    assert out["line"] == "Hello updated to 1.2.1 by itself"
+    row = registry.latest(home.store, "hello")
+    assert row["version"] == "1.2.1" and row["trust"] == "owner"
+    assert json.loads(row["source"])["path"] == str(shipped / "hello")
+    assert updates.run(home)["line"] == "every cub is up to date"
+
+
+def test_only_a_shipped_cubs_own_folder_is_read_from_this_kranto(tmp_path, monkeypatch):
+    from kranto import cubs, legacy
+    shipped = tmp_path / "shipped"
+    make_cub(shipped / "toot", manifest("toot"))
+    monkeypatch.setattr(cubs, "examples_dir", lambda: shipped)
+    site = "/h/.local/share/uv/tools/x/lib/python3.12/site-packages"
+    assert legacy.shipped_cub(f"{site}/{legacy.COMPAT_SERVER}/cubs/examples/toot") == "toot"
+    assert legacy.shipped_cub(f"{site}/kranto/cubs/examples/toot/") == "toot"
+    assert legacy.shipped_cub("/srv/cubs/toot") is None
+    assert updates.shipped_now("toot", f"{site}/kranto/cubs/examples/toot") == \
+        str(shipped / "toot")
+    # another cub's folder, a cub this Kranto does not ship, the owner's own folder: as before
+    assert updates.shipped_now("hello", f"{site}/kranto/cubs/examples/toot") is None
+    assert updates.shipped_now("gone", f"{site}/kranto/cubs/examples/gone") is None
+    assert updates.shipped_now("toot", "/srv/cubs/toot") is None
+
+
+def test_every_cub_kranto_ships_runs_for_real_on_the_first_release():
+    """Outside its range a cub runs dry only: the cubs in the wheel must hold 0.7.0 and its
+    nightly builds (the first release's number, docs/RELEASING.md)."""
+    import yaml
+
+    from bears_cub.schema import HOST_RANGE
+    from kranto.core.manifest import in_range
+    from kranto.cubs import examples_dir
+    for m in sorted(examples_dir().glob("*/cub.yaml")):
+        rng = yaml.safe_load(m.read_text())[HOST_RANGE]
+        for v in ("0.7.0.dev1", "0.7.0", "0.7.3"):
+            assert in_range(v, rng), (m.parent.name, rng, v)

@@ -35,6 +35,18 @@ def folder_gone(row) -> str | None:
     return _folder_gone(row)
 
 
+def shipped_now(cid: str, gone: str) -> str | None:
+    """Where a cub Kranto ships lives now, when the folder it was added from was that cub's
+    folder in an installed tool an update since replaced (the crossing removes the old tool;
+    ``legacy.shipped_cub``): this Kranto's own copy of it, or None."""
+    from ... import legacy
+    from ...cubs import examples_dir
+    if legacy.shipped_cub(gone) != cid:
+        return None
+    here = examples_dir() / cid
+    return str(here) if (here / "cub.yaml").is_file() and str(here) != gone else None
+
+
 def _folder_gone(row) -> str | None:
     """The folder a cub was added from, when it is no longer there: the cub keeps running as
     installed, with nothing to look at (a reference cub a release no longer ships, a folder
@@ -102,6 +114,12 @@ def check(rt, *, apply: bool) -> list[dict]:
             o.update(state="kept", why="read as Kranto's own blog writer, which comes with Kranto")
             continue
         gone = _folder_gone(row)
+        moved = shipped_now(cid, gone) if gone else None
+        if moved:
+            # a cub Kranto ships, added from the tool an update replaced: it updates from the
+            # folder this Kranto ships from now on (the next look reads the new place)
+            install.set_source(rt, cid, moved)
+            gone = None
         if gone:
             g = gone_words(cid, gone)
             o.update(state="kept", why=f"stays as installed: {g['words']}")

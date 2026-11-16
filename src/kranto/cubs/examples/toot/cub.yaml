@@ -9,12 +9,13 @@
 # a fix of only the lines that read like AI); toot.tone moved into the voice card.
 # 1.6.0: your angle (one sentence) opens the post on the reader's interest;
 # none writes a plain summary and says so.
+# 1.6.1: tested with Kranto 0.7 (its range holds the first release; outside it a cub runs dry).
 schema: 1
 api: cub/1
 id: toot
 name: local/toot
-version: 1.6.0
-bears: ">=0.5.19,<0.7"
+version: 1.6.1
+bears: ">=0.5.19,<0.8"
 title: Short posts
 says: Writes a short post about an idea card for your Mastodon account, which you read, copy, or approve before it goes out.
 entry: main.py
