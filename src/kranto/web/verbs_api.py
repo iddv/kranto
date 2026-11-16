@@ -474,9 +474,29 @@ class VerbsAPI:
                 d["says"] = v.says
                 d["ladder"] = v.ladder
                 d["locked"] = bool(verbs.choice_for(self.rt.cfg, v).locked)
+            if not isinstance(d.get("subject_name"), str) or not d["subject_name"]:
+                d["subject_name"] = self._subject_name(d.get("subject_kind"), d.get("subject_id"))
             d["uuid"] = d.pop("prepared_uuid")
             out.append(d)
         return out
+
+    # what a prepared item acts on, by name: Needs you says "Archive: Padel", not "topic #15"
+    # Read when the rows are read (never stored), so items prepared before say it too; None
+    # when the kind has no name here or the row is gone.
+    _NAMES = {"topic": ("topics", "name"), "source": ("sources", "label"),
+              "idea": ("ideas", "title"), "card": ("ideas", "title")}
+
+    def _subject_name(self, kind: Any, sid: Any) -> str | None:
+        if not isinstance(kind, str) or kind not in self._NAMES or sid is None:
+            return None
+        try:
+            ident = int(str(sid))
+        except ValueError:
+            return None
+        table, column = self._NAMES[kind]
+        row = self.rt.store.query_one(f"SELECT {column} AS n FROM {table} WHERE id = ?", (ident,))
+        name = row["n"] if row else None
+        return " ".join(name.split())[:80] if isinstance(name, str) and name.strip() else None
 
     async def prepared(self, request: Request):
         state = request.query_params.get("state") or "open"

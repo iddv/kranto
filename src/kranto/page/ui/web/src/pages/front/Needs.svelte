@@ -26,8 +26,8 @@
   import { ACT_PATH, bandOf } from "../../lib/activity";
   import IncidentBand from "../../shell/IncidentBand.svelte";
   import { dismissIncident } from "../../shell/incidents";
-  import { gone, PREPARED_API, waitingItems, whoOf, type Prepared } from "../../lib/prepared";
-  import { openPrepared, refusedPrepared } from "../../ui/prepared.svelte";
+  import { gone, lineOf, PREPARED_API, waitingItems, whoOf, type Prepared } from "../../lib/prepared";
+  import { actPrepared, openPrepared, refusedPrepared } from "../../ui/prepared.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { put, read } from "../../lib/reads.svelte";
   import { tagOf, UPD_API } from "../settings/updates";
@@ -209,7 +209,9 @@
 <!-- a row's verb: a plain button in a row, the primary in the one thing (R3) -->
 {#snippet verb(x: Item, main: boolean)}
   {@const pc = main ? " primary" : ""}
-  {#if x.kind === "prep"}{@const p = x.r!.prepared!}<button type="button" class={"btn sm" + pc} data-prepared-act={p.uuid} title={x.r!.verb} onclick={() => openPrepared(p)}>{x.r!.verb}</button>
+  <!-- a prepared item: its yes, and Dismiss beside it as on its page's line, naming
+       what it would act on -->
+  {#if x.kind === "prep"}{@const p = x.r!.prepared!}<span class="acts2"><button type="button" class={"btn sm" + pc} data-prepared-act={p.uuid} title={x.r!.verb} onclick={() => openPrepared(p)}>{x.r!.verb}</button>{#if !gone(p)}<button type="button" class="btn sm quiet" data-prepared-dismiss={p.uuid} aria-label={`Dismiss ${lineOf(p)}`} title="Dismiss: put it away, nothing happens" onclick={() => void actPrepared(p, "dismiss")}>Dismiss</button>{/if}</span>
   {:else if x.kind === "cub"}{#if x.r!.ask}{@const a = x.r!.ask}<button type="button" class={"btn sm" + pc} data-act="ask-open" title={x.r!.verb} onclick={(e) => openAsk(a, e.currentTarget)}>{x.r!.verb}</button>{:else}<a class={"btn sm" + pc} href={x.r!.href} title={x.r!.verb}>{x.r!.verb}</a>{/if}
   {:else if x.kind === "act"}<a class={"btn sm" + pc} href={x.r!.href} title={x.r!.verb}>{x.r!.verb}</a>{#if x.r!.dismiss}{@const id = x.r!.dismiss}<button type="button" class="btn sm quiet" data-dismiss={id} title="Put it away until it happens again" onclick={(e) => dismissIncident(id, e.currentTarget)}>Dismiss</button>{/if}
   {:else if x.kind === "failing"}<a class={"btn sm" + pc} href={"#/settings/sources/" + x.f!.id} title="Fix">Fix</a>
