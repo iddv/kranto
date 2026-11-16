@@ -146,8 +146,9 @@ def test_an_empty_console_offers_three_starters_and_sends_the_one_you_click(brow
 
 
 def test_on_a_phone_the_console_is_read_and_approve_not_a_terminal(browser, page_base):
-    """on a phone the console opens as a sheet: what waits for your yes and
-    what it last said, with one link to the terminal; no session starts by itself."""
+    """on a phone the console opens as a sheet when you ask (✦ in the bar of doors): what waits
+    for your yes and what it last said, with one link to the terminal; no session starts by
+    itself, and a place kept as open does not cover the page by itself."""
     ctx = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
     page = ctx.new_page()
     page.add_init_script("localStorage.setItem('kranto.console', 'open')")
@@ -164,6 +165,12 @@ def test_on_a_phone_the_console_is_read_and_approve_not_a_terminal(browser, page
         rt.fulfill(status=500, content_type="application/json", body="{}")
     page.route(re.compile(r"/api/term/console/open$"), refuse)
     page.goto(f"{page_base}/#/needs")
+    # ✦: the bar of doors' Console (New), else the top bar's chip of the minimized console
+    ask = "#tab-console:visible, #console-min:visible"
+    until(page, "!!document.querySelector('#tab-console, #console-min')")
+    page.wait_for_timeout(1500)                       # the console has read its state and placed
+    assert not page.is_visible("#console-phone"), "the sheet waits for ✦"
+    page.locator(ask).first.click()
     until(page, "!!document.querySelector('#console-phone')")
     text = page.inner_text("#console-phone")
     assert "Waiting for your yes" in text and "What it last said" in text

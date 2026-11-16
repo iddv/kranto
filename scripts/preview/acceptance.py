@@ -550,6 +550,7 @@ def social_lines(p: Preview) -> list[Result]:
         out.append(skip("SOC-2", "a short post's parts within the site's limit",
                         "no short post on this copy (it needs a model answer)"))
         out.append(skip("SOC-4", "Open first, off on the preview", "no short post on this copy"))
+    out += reach_and_hours_lines(p, pg)
     ctx.close()
     out.append(skip("SOC-1", "Write a post › Short posts: one row naming the sites",
                     "needs a model key (the angles and the write); the scratch install's real "
@@ -561,6 +562,48 @@ def social_lines(p: Preview) -> list[Result]:
                     "(tests: test_social_routes.py)"))
     out.append(skip("SOC-12", "I posted it records posted by you, nothing sent",
                     "a write on the copy (tests: test_social.py)"))
+    return out
+
+
+def reach_and_hours_lines(p: Preview, pg) -> list[Result]:
+    """SOC-9 and SOC-10, read-only: a sent post's numbers on Sent and the sites that give none
+    said once; the Scheduled group and its Cancel. A press (Schedule, Cancel) is never made on
+    the copy: the tests hold them (test_post_hours.py, test_post_reach.py)."""
+    out: list[Result] = []
+    post = p.api(pg, "/api/post")
+    sent = post.get("sent") or []
+    counted = [r for r in sent if (r.get("reach") or {}).get("words")]
+    p.go(pg, "#/post")
+    page = _text(pg, "[aria-labelledby=post-sent]")
+    if counted:
+        w = counted[0]["reach"]["words"]
+        out.append(ok("SOC-9", "a sent post shows its replies, reposts and likes", w in page, w))
+    else:
+        out.append(skip("SOC-9", "a sent post's numbers on Sent",
+                        "no sent post with numbers on this copy (tests: test_post_reach.py)"))
+    gone = {r.get("site") for r in sent} & {"linkedin", "x"}
+    if gone:
+        foot = post.get("reach_foot") or ""
+        out.append(ok("SOC-9 foot", "Sent says once which sites give no numbers",
+                      bool(foot) and page.count(foot) == 1, foot[:120] or "no foot"))
+    learned = p.api(pg, "/api/post/learned")
+    out.append(ok("SOC-9 learned", "what was learned answers per site, nothing under 8 a side",
+                  isinstance(learned.get("sites"), list) and all(
+                      x.get("lines") == [] or x.get("posts", 0) >= 16
+                      for x in learned.get("sites") or []),
+                  ", ".join(f"{x.get('word')}: {x.get('posts')}" for x in learned.get("sites")
+                            or [])))
+    held = post.get("scheduled")
+    out.append(ok("SOC-10 read", "Post's read has the Scheduled group", isinstance(held, list),
+                  f"{len(held or [])} scheduled"))
+    if held:
+        g = _text(pg, "[aria-labelledby=post-scheduled]")
+        out.append(ok("SOC-10", "a scheduled post shows its hour and Cancel",
+                      "Cancel" in g and "Goes " in g, g[:120]))
+    else:
+        out.append(skip("SOC-10", "Schedule moves the row to Scheduled with Cancel; on the "
+                        "preview it says nothing is posted",
+                        "a press on the copy (tests: test_post_hours.py)"))
     return out
 
 

@@ -89,7 +89,10 @@ def _caption(ctx, idea: dict, link: bool, *, angle: str = "", hint: str = "") ->
     url = idea.get("url") if link else None
     room = min(limit - (len(url) + 2 if url else 0), 280)
     limits = {"max_chars": room, "unit": "characters", "links": 0}
-    composed = ctx.prose.compose(card_material(idea, angle, hint), site="mastodon",
+    material = card_material(idea, angle, hint)
+    # what the caption was written from: the checker flags a person or a handle it lacks
+    sources = "\n".join(str(material.get(k) or "") for k in ("title", "facts")).strip() or None
+    composed = ctx.prose.compose(material, site="mastodon",
                                  kind="short", task=TASK.format(room=room), limits=limits)
     reply = ctx.model.complete(
         purpose="toot_caption", tier="reason", max_tokens=200,
@@ -99,14 +102,20 @@ def _caption(ctx, idea: dict, link: bool, *, angle: str = "", hint: str = "") ->
     text = " ".join(_said(reply).split())
     if not text and str(reply.get("text") or "").strip():
         raise Unread(str(reply.get("text"))[:200])
-    got = ctx.prose.check(text, site="mastodon", kind="short", limits=limits, take=angle)
+    got = ctx.prose.check(text, site="mastodon", kind="short", limits=limits, take=angle,
+                          sources=sources)
     rounds = 0
     if any(f.get("scope", "span") == "span" or f.get("rule") == "site.length"
            for f in got.get("flags") or []):
         fixed = ctx.prose.revise(text, got["flags"], purpose="toot_caption", tier="reason",
-                                 site="mastodon", kind="short", limits=limits, take=angle)
+                                 site="mastodon", kind="short", limits=limits, take=angle,
+                                 sources=sources)
         text, rounds = " ".join(str(fixed.get("text") or text).split()), fixed.get("rounds", 0)
         got = {**got, **{k: fixed[k] for k in ("flags", "score", "verdict") if k in fixed}}
+        if sources:
+            # revise's own last look has no sources: what is left is checked with them
+            got = ctx.prose.check(text, site="mastodon", kind="short", limits=limits,
+                                  take=angle, sources=sources)
     text = _fit(text, room)
     line = str(composed.get("disclosure") or "")
     if line and len(text) + len(line) + 2 <= room:

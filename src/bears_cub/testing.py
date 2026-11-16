@@ -791,7 +791,7 @@ class FakeHost:
         if engine is None:
             return {"score": 100, "flags": [], "verdict": "Reads natural"}
         return engine.check(p["text"], p.get("site"), profile, kind=p.get("kind"),
-                            limits=p.get("limits"), take=p.get("take"))
+                            limits=p.get("limits"), take=p.get("take"), sources=p.get("sources"))
 
     def _m_prose_revise(self, p: dict) -> dict:
         self.prose.calls.append({"method": "revise", "params": copy.deepcopy(p)})
@@ -799,7 +799,8 @@ class FakeHost:
         flags = p.get("flags")
         if flags is None:
             flags = self._m_prose_check({k: v for k, v in p.items()
-                                         if k in ("text", "site", "kind", "limits", "take")}
+                                         if k in ("text", "site", "kind", "limits", "take",
+                                                  "sources")}
                                         )["flags"]
         if engine is None or not flags:
             return {"text": p["text"], "flags": flags or [], "rounds": 0, "changed": []}

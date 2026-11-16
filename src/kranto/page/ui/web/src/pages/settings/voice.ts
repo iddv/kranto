@@ -12,6 +12,13 @@ export interface Prose {
   guides: { name: string; title: string; from: string; always: boolean }[];
   sites: { site: string; guides: string[]; default: boolean; limits: Record<string, number>; disclosure: string }[];
   disclosure_line: string;
+  /** what a short post ends with where its disclosure is on and no words are set */
+  disclosure_default?: string;
+  /** the model each writer writes with: null is Kranto's own writing model (none is chosen) */
+  writer_models?: Record<string, { provider: string; model: string } | null>;
+  writer_providers?: string[];
+  /** whether an OpenAI key for a writer's own model is kept: never the key */
+  writer_key?: { set: boolean };
   take: boolean;
   never: string[];
   keep: string[];
@@ -37,6 +44,19 @@ export const SITE_WORDS: Record<string, string> = {
   blog: "Blog", newsletter: "Newsletter", mastodon: "Mastodon", bluesky: "Bluesky", linkedin: "LinkedIn",
   threads: "Threads", x: "X", substack: "Substack",
 };
+/** Kranto's writers, in the page's order, and the words for each */
+export const WRITERS: [string, string][] = [["social", "Short posts"], ["blog", "Blog posts"], ["newsletter", "The newsletter"], ["toot", "The Mastodon post on a card"]];
+/** where a writer's own model runs, in words; "" is Kranto's own writing model */
+export const PROVIDER_WORDS: Record<string, string> = {
+  "": "Kranto's writing model", openai: "OpenAI, with your key", anthropic: "Anthropic, with your key",
+  openrouter: "OpenRouter, with your key", openai_compat: "Your OpenAI-compatible server", claude_code: "Claude Code, your login",
+};
+/** the sites a disclosure line can end: the short-post sites, then the long ones */
+export const DISCLOSE_SITES = ["bluesky", "mastodon", "threads", "linkedin", "x", "blog", "newsletter"] as const;
+/** a writer-model change as prose.voice takes it: null back to Kranto's own, else the pair */
+export function writerChange(provider: string, model: string): { provider: string; model: string } | null {
+  return provider ? { provider, model: model.trim() } : null;
+}
 /** a list as typed, a line each, blank lines and duplicates dropped */
 export const linesOf = (text: string): string[] => [...new Set(text.split("\n").map((l) => l.trim()).filter(Boolean))];
 /** what to add and remove to go from one list to the other */

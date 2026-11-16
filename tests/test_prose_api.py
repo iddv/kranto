@@ -15,10 +15,13 @@ from .test_web import rt  # noqa: F401 - fixture
 AI = "Here's the thing: this tool is a game-changer. Let that sink in."
 
 
-def test_the_three_verbs_are_in_the_table_with_their_ladder():
+def test_the_four_verbs_are_in_the_table_with_their_ladder():
     got = {v.kind: v for v in verbs.CORE if v.kind.startswith("prose.")}
-    assert set(got) == {"prose.check", "prose.voice", "prose.learn"}
+    assert set(got) == {"prose.check", "prose.voice", "prose.learn", "prose.writer_key"}
     assert got["prose.check"].ladder == "read"
+    # the OpenAI key a writer's own model uses: pasted on the page only, never by an assistant
+    assert got["prose.writer_key"].ladder == "credential"
+    assert got["prose.writer_key"].doors == verbs.PAGE_ONLY
     assert got["prose.voice"].ladder == "reversible" and got["prose.learn"].ladder == "reversible"
     assert {f.name for f in next(v for v in verbs.CORE if v.kind == "post.write").fields} \
         >= {"about", "as", "take"}

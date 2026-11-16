@@ -420,6 +420,17 @@ def is_bot(name: str, email: str) -> bool:
     return name == BOT_NAME and email.lower() == BOT_EMAIL.lower()
 
 
+# GitHub's own identity as the committer of a commit it writes for a person: a pull request
+# squash-merged or merged on the site or through its API (the push run on main checks it).
+# Only as the committer: the author is still the person, with their own no-reply address and
+# sign-off.
+GITHUB_COMMITTER = ("GitHub", "noreply@" + "github.com")
+
+
+def is_github_committer(name: str, email: str) -> bool:
+    return name == GITHUB_COMMITTER[0] and email.lower() == GITHUB_COMMITTER[1]
+
+
 def dco_problem(author: tuple[str, str], committer: tuple[str, str], body: str) -> str | None:
     """Why a commit's sign-off does not hold, or None. ``author`` and ``committer``: (name,
     email).
@@ -467,7 +478,9 @@ def scan_commits(range_spec: str, repo: str | Path = ".", dco: bool = False) -> 
             continue
         sha, a_name, author, c_name, committer, body = parts
         label = sha[:12]
-        for role, email in (("author", author), ("committer", committer)):
+        for role, name, email in (("author", a_name, author), ("committer", c_name, committer)):
+            if role == "committer" and is_github_committer(name, email):
+                continue
             if not email.lower().endswith("@" + NOREPLY_DOMAIN):
                 findings.append(
                     Finding(

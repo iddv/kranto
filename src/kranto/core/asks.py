@@ -171,6 +171,9 @@ def ask(rt: Any, t: dict[str, Any]) -> dict[str, Any]:
         "title": own.get("title") or w["title"], "to": own.get("to"),
         "body": own.get("body") or "", "needs": own.get("needs"),
         "schedule": bool(own.get("schedule")), "when": own.get("when"),
+        # the time the dialog's Schedule is typed in: ``utc`` (a platform's own schedule, the
+        # newsletter's) or ``local`` (Kranto holds the post: the person's own clock)
+        "zone": own.get("zone") or "utc",
         "open": t["state"] == tickets.OPEN, "said": said(t),
         "again": t["state"] != tickets.OPEN and again_why_not(store, t) is None,
         "practice": None,

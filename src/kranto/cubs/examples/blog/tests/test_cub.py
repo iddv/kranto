@@ -128,3 +128,18 @@ def test_markdown_is_kept_as_written_and_redraft_replaces(host):
     assert states == ["needs_confirm", "expired", "needs_confirm"]
     assert host.read("posts")["waiting"][0]["origin"] == "card"
     assert host.read("count") == {"count": 2}
+
+
+def test_the_check_gets_what_the_post_was_written_from_and_flags_a_stranger(host):
+    """salt.person in the product's own write: the polish step passes the card's words as the
+    check's sources (SDK 1.4), so a person the card never names is flagged and said on the row."""
+    host.model.reply("blog_post", structured={
+        "title": "Small padel clubs", "excerpt": "Clubs still book by phone.",
+        "body": "Padel courts keep filling up [1]. Somewhere Jane Stranger books by phone [2].",
+        "intro": ""})
+    host.act("draft_card", {"card": 143}, strict=True)
+    check = next(c for c in host.prose.calls if c["method"] == "check")
+    assert "Court booking for small padel clubs" in check["params"]["sources"]
+    assert "Booking by phone" in check["params"]["sources"]
+    [d] = host.drafts
+    assert "salt.person" in host.kv[f"post:{d['ref']}"]["prose"]["left"]

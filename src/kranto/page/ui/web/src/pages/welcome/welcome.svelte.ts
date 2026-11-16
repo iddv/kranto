@@ -58,6 +58,61 @@ export interface TopicStep {
 export const newStep = (): TopicStep => ({ name: "", desc: "", id: null, rows: [], ticked: new Set(), message: null, invalid: 0 });
 export const TOPIC = $state<{ t: TopicStep | null }>({ t: null });
 
+/** a finished scout's proposals joined to the form's rows, a close match ticked (Find places to
+ * read, Find more, and step 2 read back after a reload) */
+export function takeScouted(t: TopicStep, x: Scouted): void {
+  const known = new Set(t.rows.map((p) => p.id));
+  t.rows = [...t.rows, ...x.proposals.filter((p) => !known.has(p.id))];
+  for (const p of x.proposals) if (p.pretick && !known.has(p.id)) t.ticked.add(p.id);
+  t.message = x.message;
+  t.invalid = x.invalid || 0;
+}
+
+/** step 2 is read back from the server once a page load (a reload lost the
+ * proposals); Add another topic starts afresh and is not read back */
+export const RESTORE = { tried: false };
+interface TopicRef {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+}
+interface ScoutJobRead {
+  state: string;
+  elapsed_s?: number;
+  error?: string | null;
+  result?: Scouted | null;
+}
+/** Setup's topic after a reload of step 2, read back from the server: the newest active topic
+ * (setup makes one), its scout's job (still running: `running` is the job, for the page to wait
+ * on it again; done: its proposals as the page first drew them), else, when the server has
+ * started again since, the topic's own rows (the scout's proposals for it, ticked as the scout
+ * ticks them). Null when there is nothing to read back, or the person typed meanwhile. */
+export async function restoreStep(L: App, t: TopicStep): Promise<{ running: ScoutJobRead | null } | null> {
+  const list = (await L.api("/api/topics")) as { topics?: TopicRef[] } | null;
+  const topic = (list?.topics || []).filter((x) => x.status === "active").sort((a, b) => b.id - a.id)[0];
+  if (!topic || t.id || t.name) return null;
+  let job: ScoutJobRead | null = null;
+  try {
+    job = ((await L.api(`/api/topics/${topic.id}/scout`)) as { job?: ScoutJobRead }).job || null;
+  } catch {
+    job = null; // no scout since the server started
+  }
+  if (t.id || t.name) return null;
+  t.id = topic.id;
+  t.name = topic.name;
+  t.desc = topic.description;
+  if (job?.state === "running") return { running: job };
+  if (job?.state === "done" && job.result) {
+    takeScouted(t, job.result);
+    return { running: null };
+  }
+  const page = (await L.api(`/api/topics/${topic.id}`)) as { source_rows?: Proposal[] } | null;
+  const rows = page?.source_rows || [];
+  takeScouted(t, { message: rows.length ? "read back" : "", proposals: rows, invalid: 0 });
+  return { running: null };
+}
+
 /** items a day from these sources, before filtering: their rate, else a 30-day test fetch's */
 export const perDay = (rows: { items_per_day?: number | null; validation?: SourceValidation | null }[]): number =>
   rows.reduce((a, s) => a + (s.items_per_day != null ? s.items_per_day : (s.validation?.recent || 0) / 30), 0);

@@ -93,7 +93,7 @@ Details), one page a story `#/news/i/:brief/:n` (`StoryPage.svelte`: the item an
 `features/post/DraftEditor.svelte` with the prose checker's flags (`ProseFlags.svelte`, `prose.ts`: `POST
 /api/prose/check`, `/api/prose/revise`, `/api/prose/learn`) and Save as `POST /api/post/d/<id>/edit`;
 Settings › Posting › How you write is `pages/settings/VoicePage.svelte` (`#/settings/posting/voice`,
-`GET /api/prose`, `POST /api/prose/voice`); the top bar's Needs you count is
+`GET /api/prose`, `POST /api/prose/voice`; its OpenAI key, `POST /api/prose/writer-key`); the top bar's Needs you count is
 `pages/front/needstotal.ts`, and what a button in an open sheet did is said in it by `shell/PressLine.svelte`; their lines are `NewsSources.svelte` (title, where from and when, the
 observation a quiet link). The figures are `features/news/diagrams/` (`Timeline` across the page
 and down it on the phone, `Bars`, `Series`, `RelMap`, `Thumb` beside an item on News › Today): plain SVG in the tokens,
