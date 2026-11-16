@@ -1067,3 +1067,199 @@ def test_every_command_the_helper_runs_names_this_install_in_both_spellings(worl
     assert seen and all(e[old + "HOME"] == str(world.home) and e["KRANTO_HOME"] == str(world.home)
                         and e[old + "UNIT"] == legacy.UNIT == e["KRANTO_UNIT"] for e in seen)
 
+
+# -- every variable the install's unit sets, in both spellings -----------------------------------
+
+OLD_ENV = legacy.ENV_PREFIXES[0]
+# what the version before the rename reads besides its home and unit (grepped from its tag):
+# its loop home, tokens, Claude and GitHub folders, prompts store, telemetry, the console's MCP
+# switch, the stop files, the product folder; and the names renamed outright
+OLD_READS = [OLD_ENV + s for s in ("TOKENS_DIR", "CLAUDE_DIR", "GITHUB_DIR", "PROMPTS_HOME",
+                                   "PRODUCT_DIR", "TELEMETRY", "TELEMETRY_ENDPOINT",
+                                   "MCP_CONSOLE", "CUBS_STOP", "INVEST_STOP")] + \
+    [old for old, new in legacy.ENV_RENAMED.items() if new != "KRANTO_HOME"]
+
+
+def commands_env(world):
+    """Record the environment of every command the helper runs from the tool's folder."""
+    seen = []
+    real = world.run
+
+    def run(cmd, env=None, timeout=None):
+        if cmd[0].startswith(str(world.bin)):
+            seen.append(dict(env or {}))
+        return real(cmd, env=env, timeout=timeout)
+
+    world.run = run
+    return seen
+
+
+def unit_file(world, name=None):
+    return world.tmp / ".config" / "systemd" / "user" / (name or world.unit)
+
+
+@pytest.mark.parametrize("name", OLD_READS)
+def test_an_old_variable_the_unit_sets_reaches_the_old_version_under_both_names(world, name):
+    """A rollback to the version before the rename starts it with every old-named variable its
+    unit sets (not only the home and the unit), and the new name beside it."""
+    old_install(world)
+    unit = unit_file(world)
+    unit.write_text(unit.read_text() + f"[Service]\nEnvironment={name}=%h/the-{name.lower()}\n")
+    seen = commands_env(world)
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    assert world.helper(to="previous").run_all() == "done"
+    want = f"{world.tmp}/the-{name.lower()}"
+    new = legacy.new_env_name(name)
+    assert new and seen
+    assert all(e[name] == want and e[new] == want for e in seen), name
+
+
+@pytest.mark.parametrize("name", OLD_READS)
+def test_a_new_variable_the_unit_sets_reaches_the_old_version_under_its_old_names(world, name):
+    """After the crossing a unit may name a variable the new way; on the way back, the version
+    before the rename finds it under the names it reads."""
+    new = legacy.new_env_name(name)
+    world.unit = "kranto.service"
+    unit = unit_file(world)
+    unit.parent.mkdir(parents=True, exist_ok=True)
+    unit.write_text(f"[Service]\nEnvironment=\"{new}=/srv/x y\"\n")
+    seen = commands_env(world)
+    assert world.helper().run_all() == "done"
+    assert seen and name in legacy.old_names(new)
+    assert all(e[new] == "/srv/x y" and all(e[o] == "/srv/x y" for o in legacy.old_names(new))
+               for e in seen)
+
+
+def test_the_helpers_own_home_and_unit_win_over_the_units(world):
+    old_install(world)
+    unit = unit_file(world)
+    unit.write_text(unit.read_text() + f"[Service]\nEnvironment={OLD_ENV}HOME=/elsewhere "
+                    f"{OLD_ENV}UNIT=other.service\n")
+    seen = commands_env(world)
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    homes = {o: str(world.home) for o in ("KRANTO_HOME", *legacy.old_names("KRANTO_HOME"))}
+    assert seen and all({k: e[k] for k in homes} == homes for e in seen)
+    assert all(e[OLD_ENV + "UNIT"] == legacy.UNIT == e["KRANTO_UNIT"] for e in seen)
+
+
+def test_a_drop_in_s_variable_wins_over_the_unit_s(world):
+    old_install(world)
+    unit = unit_file(world)
+    name = OLD_ENV + "TOKENS_DIR"
+    unit.write_text(unit.read_text() + f"[Service]\nEnvironment={name}=/a\n")
+    d = unit.parent / f"{unit.name}.d"
+    d.mkdir()
+    (d / "50-mine.conf").write_text(f"[Service]\nEnvironment={name}=/b\n")
+    h = world.helper(to="v0.7.0-dev1")
+    assert h.env[name] == "/b" == h.env["KRANTO_TOKENS_DIR"]
+
+
+def test_unit_environment_reads_systemd_s_forms():
+    text = ('[Service]\nEnvironment=A=1 "B=two words" C=%h/c\nEnvironment="D=4"\n'
+            "EnvironmentFile=-%h/.env\n# Environment=E=5\n")
+    assert legacy.unit_environment(text, "/u") == {"A": "1", "B": "two words", "C": "/u/c",
+                                                   "D": "4"}
+
+
+# -- the way back by hand: RECOVER.txt ------------------------------------------------------------
+
+
+class Killed(BaseException):
+    """The helper killed (a reboot, kill -9): nothing after this point runs."""
+
+
+def kill_at_install(world):
+    real = world.run
+    seen = {}
+
+    def run(cmd, env=None, timeout=None):
+        if cmd[:3] == ["uv", "tool", "install"]:
+            seen["recover"] = apply.recover_path(world.home).read_text()
+            seen["stubs"] = sorted(p.name for p in world.bin.iterdir()
+                                   if apply.STUB_MARK in p.read_text())
+            raise Killed()
+        return real(cmd, env=env, timeout=timeout)
+
+    world.run = run
+    return seen
+
+
+def test_the_way_back_is_written_before_the_install_and_removed_when_done(world):
+    seen = {}
+    real = world.run
+
+    def run(cmd, env=None, timeout=None):
+        if cmd[:3] == ["uv", "tool", "install"]:
+            seen["recover"] = apply.recover_path(world.home).read_text()
+        return real(cmd, env=env, timeout=timeout)
+
+    world.run = run
+    assert world.helper().run_all() == "done"
+    assert "systemctl --user stop kranto.service" in seen["recover"]
+    assert "uv tool install --force --python 3.12 'kranto[connections,notify] @ git+" \
+        in seen["recover"]
+    assert "export KRANTO_HOME=" in seen["recover"] and f"export {OLD_ENV}HOME=" in seen["recover"]
+    assert not apply.recover_path(world.home).exists()
+
+
+def test_the_way_back_is_removed_after_a_rollback_and_kept_after_a_failure(world):
+    assert world.helper(env={"KRANTO_UPDATE_FAIL": "verify"}).run_all() == "rolled_back"
+    assert not apply.recover_path(world.home).exists()
+    assert world.helper(env={"KRANTO_UPDATE_FAIL": "verify,rollback"}).run_all() == "failed"
+    path = apply.recover_path(world.home)
+    assert path.is_file()
+    assert check.apply_state(world.home)["recover"] == str(path)
+    assert f"the way back by hand: {path}" in check.status_line(world.home)
+
+
+def test_an_update_killed_while_it_installs_says_where_the_way_back_is(world):
+    """Killed between the old tool's uninstall and the new one's install: no command is left.
+    Each command's place says where the way back is, and status names the file."""
+    old_install(world)
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    seen = kill_at_install(world)
+    with pytest.raises(Killed):
+        world.helper(to="v0.7.0-dev2").run_all()
+    path = apply.recover_path(world.home)
+    assert path.is_file() and seen["stubs"] == sorted(["kranto", legacy.COMMAND])
+    for name in ("kranto", legacy.COMMAND):
+        r = subprocess.run([str(world.bin / name), "status"], capture_output=True, text=True,
+                           timeout=30)
+        assert r.returncode == 1 and str(path) in r.stderr
+    st = json.loads(apply.state_path(world.home).read_text())
+    assert st["state"] == "installing"
+    apply.write_json(apply.state_path(world.home), {**st, "pid": 2**22 + 7})   # its helper gone
+    said = check.status_line(world.home)
+    assert "stopped while installing" in said and str(path) in said
+
+
+def test_the_way_back_s_lines_work(world, tmp_path):
+    """``sh RECOVER.txt`` after a kill: stops the unit, clears the stand-in commands, installs the
+    previous version and starts it with this install's variables in both spellings."""
+    old_install(world)
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    kill_at_install(world)
+    with pytest.raises(Killed):
+        world.helper(to="v0.7.0-dev2").run_all()
+    fake = tmp_path / "fakebin"
+    fake.mkdir()
+    log = tmp_path / "calls.log"
+    cmd = world.bin / legacy.COMMAND
+    (fake / "systemctl").write_text(f'#!/bin/sh\necho "systemctl $*" >> {log}\n')
+    (fake / "uv").write_text(
+        f'#!/bin/sh\necho "uv $1 $2 $3 $4 $5 $6" >> {log}\n'
+        f'if [ "$2" = install ]; then printf \'#!/bin/sh\\necho "up $* '
+        f'${OLD_ENV}HOME ${OLD_ENV}UNIT $KRANTO_HOME" >> {log}\\n\' > {cmd}; '
+        f"chmod +x {cmd}; fi\n")
+    for f in fake.iterdir():
+        f.chmod(0o755)
+    path = apply.recover_path(world.home)
+    r = subprocess.run(["sh", str(path)], capture_output=True, text=True, timeout=60,
+                       env={"PATH": f"{fake}:/usr/bin:/bin", "HOME": str(world.tmp)})
+    assert r.returncode == 0, r.stderr
+    calls = log.read_text().splitlines()
+    assert calls[0] == f"systemctl --user stop {legacy.UNIT}"
+    assert calls[1].startswith("uv tool install --force --python 3.12 --with-executables-from")
+    assert calls[2] == f"up up --no-browser {world.home} {legacy.UNIT} {world.home}"
+    assert not path.exists() and not (world.bin / "kranto").exists()
+

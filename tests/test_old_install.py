@@ -123,6 +123,51 @@ def test_up_on_a_new_install_writes_the_new_names(user_home):
     assert (user_home / ".kranto" / product.HOME_FILE).is_file()
 
 
+def test_up_from_another_tool_leaves_the_installed_tool_s_unit_alone(user_home, capsys):
+    """A checkout or a scratch tool run under the real HOME (``kranto up`` with no names set)
+    must not rewrite or restart the unit the installed tool wrote: it says so and changes
+    nothing, not even the home pointer, until told ``--adopt``."""
+    old = old_install(user_home)
+    before = old["unit"].read_bytes()
+    pointer = (old["conf"] / "home").read_bytes()
+    host = make_host(user_home)
+    host.machine.tools["kranto"] = str(user_home / "src" / ".venv" / "bin" / "kranto")
+    assert launcher.main(["up", "--no-browser"], host) == 2
+    err = capsys.readouterr().err
+    assert f"{legacy.UNIT} runs {user_home}/.local/bin/{legacy.COMMAND}" in err
+    assert "--adopt" in err
+    assert old["unit"].read_bytes() == before and (old["conf"] / "home").read_bytes() == pointer
+    assert not [c for c in host.machine.calls if c[0] == "systemctl" and c[2] != "show-environment"]
+    assert not (old["conf"] / "tokens").exists()
+    # asked: this tool's unit replaces it, and is started
+    assert launcher.main(["up", "--no-browser", "--adopt"], host) == 0
+    text = old["unit"].read_text()
+    assert "ExecStart=%h/src/.venv/bin/kranto serve" in text
+    assert ["enable", "--now", legacy.UNIT] in [c[2:] for c in host.machine.calls]
+
+
+def test_up_takes_the_last_exec_start_of_the_drop_ins(user_home):
+    old = old_install(user_home)
+    (old["dropins"] / "40-d.conf").write_text(
+        "[Service]\nExecStart=\nExecStart=/opt/x/kranto serve\n")
+    host = make_host(user_home)
+    assert launcher.unit_command(old["unit"], user_home) == "/opt/x/kranto"
+    assert launcher.main(["up", "--no-browser"], host) == 2
+    (old["dropins"] / "40-d.conf").write_text(
+        f"[Service]\nExecStart=\nExecStart=-%h/.local/bin/{legacy.COMMAND} serve --host x\n")
+    assert launcher.unit_of_another_tool(old["unit"], user_home / ".local/bin/kranto",
+                                         user_home) is None
+    assert launcher.main(["up", "--no-browser"], host) == 0
+
+
+def test_up_from_the_installed_tool_or_with_no_unit_goes_on(user_home):
+    host = make_host(user_home)
+    assert launcher.main(["up", "--no-browser"], host) == 0          # no unit yet: writes it
+    unit = user_home / ".config" / "systemd" / "user" / product.UNIT
+    assert launcher.unit_of_another_tool(unit, launcher.kranto_exe(host), user_home) is None
+    assert launcher.main(["up", "--no-browser"], host) == 0          # its own: as before
+
+
 def test_status_down_and_logs_name_the_old_unit(user_home):
     old_install(user_home)
     host = make_host(user_home)

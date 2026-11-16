@@ -5,7 +5,6 @@ the three public-domain paragraphs still give no flag, even checked as posts."""
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
@@ -14,7 +13,7 @@ from kranto.prose import check, invented_first_person
 
 from .test_prose_check import HUMAN
 
-READ = json.loads((Path(evals.__file__).parent / "owner_read_1.json").read_text("utf-8"))
+READ = json.loads(evals.fixture("owner_read_1.json").read_text("utf-8"))
 POSTS = {p["post"]: p for p in READ["posts"]}
 
 

@@ -588,6 +588,46 @@ def keep_old_unit(path: Path) -> bool:
     return new != text
 
 
+_EXEC_PREFIXES = "-@:+!"      # systemd's ExecStart= prefixes before the command
+
+
+def unit_command(path: Path, user_home: Path) -> str | None:
+    """The command a unit file starts: its last ``ExecStart=`` (drop-ins included, an empty one
+    resets it, as systemd reads them), ``%h`` expanded; None when there is no unit or none."""
+    files = [path] + sorted((path.parent / f"{path.name}.d").glob("*.conf"))
+    command = None
+    for f in files:
+        try:
+            text = f.read_text(errors="replace")
+        except OSError:
+            continue
+        for line in text.splitlines():
+            key, sep, value = line.strip().partition("=")
+            if sep and key.strip() == "ExecStart":
+                words = value.split()
+                command = words[0].lstrip(_EXEC_PREFIXES).replace("%h", str(user_home)) \
+                    if words else None
+    return command
+
+
+def unit_of_another_tool(path: Path, exe: Path, user_home: Path) -> str | None:
+    """The command of the unit at ``path`` when ``up`` with this tool (``exe``) did not write
+    it: it starts something other than this tool's own command folder's ``kranto`` (or the old
+    command beside it, which the same tool carries). None when it is this tool's, or there is
+    no unit. A checkout or a scratch tool must not take over the installed tool's unit."""
+    command = unit_command(path, user_home)
+    if command is None:
+        return None
+    ran = Path(command).expanduser()
+    if ran.name in (product.COMMAND, legacy.COMMAND):
+        try:
+            if ran.parent.resolve() == Path(exe).parent.resolve():
+                return None
+        except OSError:
+            pass
+    return command
+
+
 def install_unit(host: Host, text: str) -> tuple[Path, bool]:
     """Write ``kranto.service``; True when it changed. On an install made before the rename,
     its old unit (the old name, or any unit whose text the old version wrote:
@@ -605,6 +645,17 @@ def install_unit(host: Host, text: str) -> tuple[Path, bool]:
 
 def cmd_up(args, host: Host) -> int:
     home = kranto_home(args.home, host)
+    why_not = "--foreground" if args.foreground else host.systemd()
+    unit_path, exe, other = host.unit_dir / host_unit(host), kranto_exe(host), None
+    if why_not is None:
+        # before anything is written: a unit another tool's command runs (the installed one,
+        # while this is a checkout or a scratch tool) is not this up's to rewrite or restart
+        other = unit_of_another_tool(unit_path, exe, host.home)
+        if other and not getattr(args, "adopt", False):
+            raise KrantoError(
+                f"{unit_path.name} runs {other}, not this {product.COMMAND} ({exe}): it is left "
+                f"as it is and not restarted. Run that command's 'up' instead, or "
+                f"'{product.COMMAND} up --adopt' to make this one the unit's command.")
     existing = config_mod.config_path(home) is not None
     port = args.port or DEFAULT_PORT
     written = make_home(home, port, host.home)
@@ -622,9 +673,16 @@ def cmd_up(args, host: Host) -> int:
     if made:
         print(f"  made the {', '.join(made)} token(s) in {token_store(host).root}")
     then = "/#/welcome" if not existing else "/"
-    why_not = "--foreground" if args.foreground else host.systemd()
     if why_not is None:
-        unit, changed = install_unit(host, render_unit(home, kranto_exe(host), port, host.home))
+        text = render_unit(home, exe, port, host.home)
+        if other:          # --adopt: this tool's unit replaces the one another tool wrote
+            changed = not unit_path.exists() or unit_path.read_text(errors="replace") != text
+            unit_path.parent.mkdir(parents=True, exist_ok=True)
+            unit_path.write_text(text)
+            unit = unit_path
+            print(f"  adopted {unit_path.name}: it ran {other}")
+        else:
+            unit, changed = install_unit(host, text)
         name = unit.name
         active = host.sh("systemctl", "--user", "is-active", name).stdout.strip() == "active"
         if not active and port_in_use(port):
@@ -2516,6 +2574,12 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
     s.add_argument("--no-browser", action="store_true", help="print the URL instead")
     s.add_argument(
         "--foreground", action="store_true", help="serve here instead of installing kranto.service"
+    )
+    s.add_argument(
+        "--adopt",
+        action="store_true",
+        help="rewrite and restart the unit even when another install's command runs it "
+        "(without it, up from a checkout or a second tool leaves that unit alone)",
     )
     s.set_defaults(func=cmd_up)
 

@@ -139,6 +139,11 @@ and then one of two endings:
 Useful options: `kranto up --port 8790` for another port, `kranto up --no-browser` to print the
 sign-in link instead of opening a browser. Kranto only ever listens on 127.0.0.1.
 
+`kranto up` rewrites and restarts the unit only when the unit runs this same `kranto` (or the
+old command beside it). Run from a checkout or a second tool while another install's command
+runs the unit, it stops with `<unit> runs <command>, not this kranto` and changes nothing;
+`kranto up --adopt` makes the one you ran the unit's command.
+
 ## 4. Check it
 
 ```sh
@@ -473,6 +478,8 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | `kranto: command not found` after installing | `uv tool update-shell`, then open a new terminal. |
 | `not using systemd: …; serving in the foreground` | Expected without a systemd user manager: keep that terminal open. With a `HOME` that is not your login home, systemd is skipped on purpose. |
 | `port 8765 is already in use` | Another program (or another Kranto) holds it: `kranto up --port 8790`. |
+| `kranto.service runs …, not this kranto` from `kranto up` | Another install's command runs the unit (you ran a checkout or a second tool): run that one's `kranto up`, or `kranto up --adopt` to make the one you ran the unit's command. |
+| `an update was cut off while it installed`, or `kranto status` names `RECOVER.txt` | `sh ~/.kranto/update/RECOVER.txt` (the path it names): it puts the previous version back and removes the file. |
 | `FAIL  api key` in `kranto doctor`, or `Scouting failed: no API key: set $OPENROUTER_API_KEY` (or `$ANTHROPIC_API_KEY`) | Paste the key in Welcome › Watching, or Settings › Watching › Watching model (step 6). |
 | `Watching paused until … (Claude Code usage limit)` in the top bar or in Health | Your Claude plan's usage window closed. Watching resumes by itself at the time shown, when the window reopens; nothing is lost. |
 | `FAIL  claude login` in `kranto doctor` | Run the command it names (`claude auth login`, or `claude update` for an old version). |
