@@ -42,13 +42,13 @@ describe("Settings › Spend (the server's alone)", () => {
     expect(searchLine({ monthly_usd: null, spent_usd: 0, capped: false, prices_as_of: "2026-10-17", lines: [] })).toBeNull();
   });
 
-  it("lists where it went by topic first, then watching's four caps in one group", async () => {
+  it("lists where it went by topic first, then watching's three caps in one group", async () => {
     stub();
     hosted();
     answering({ [TOPICS]: T, [WATCH]: W });
     const { target, done } = await draw(SpendList, where("settings/spend"));
     expect([...target.querySelectorAll(".grp h2")].map((h) => h.textContent)).toEqual(["By topic", "Caps"]);
-    expect([...target.querySelectorAll(".grp .ghd .n")].map((n) => n.textContent)).toEqual(["$2.00 of $10.00", "4"]);
+    expect([...target.querySelectorAll(".grp .ghd .n")].map((n) => n.textContent)).toEqual(["$2.00 of $10.00", "3"]);
     expect(target.querySelector('[data-sel="t2"] .c-num')?.textContent).toBe("$1.25");
     expect([...target.querySelectorAll('[data-sel^="ecap:"] .r-title')].map((r) => r.textContent)).toEqual(
       ["Watching a month", "X a month", "Live search a month"]);
