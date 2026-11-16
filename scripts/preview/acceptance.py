@@ -9,7 +9,7 @@ on a card, Write draft writing, a real send, the console's answer) is "skip", wi
 not fail.
 
     acceptance.py [--port 8766] [--link URL] [--fresh-port 8767 --fresh-link URL] [--topic Padel]
-                  [--out FILE] [--arch-before FILE] [--only arch,tfix,...]
+                  [--out FILE] [--arch-before FILE] [--only arch,fixes,...]
 
 the lines run ``kranto archive --out <a temporary folder>`` and ``kranto doctor`` with the
 preview's own install, and read its databases read-only.
@@ -506,7 +506,7 @@ def social_lines(p: Preview) -> list[Result]:
     p.go(pg, "#/settings/posting")
     words += _text(pg, "#app")
     c = pg.evaluate(COUNT, _root(pg))
-    # the page's own content: the crumbs and Settings' eight page links (the same on every
+    # The page's own content: the crumbs and Settings' eight page links (the same on every
     # Settings page, counted by COUNT settings) are left out of SOC-7's budget
     chrome = pg.evaluate(SETTINGS_CHROME, _root(pg))
     own = {**c, "words": c["words"] - chrome["words"],
@@ -607,7 +607,7 @@ def reach_and_hours_lines(p: Preview, pg) -> list[Result]:
     return out
 
 
-def tfix_lines(p: Preview) -> list[Result]:
+def fixes_lines(p: Preview) -> list[Result]:
     """The copy: A's items a page shows without a press, and B's words where a stranger meets
     them (? keys, ⌘K, Settings › Prompts, the site cub's name)."""
     out = []
@@ -617,7 +617,7 @@ def tfix_lines(p: Preview) -> list[Result]:
     landed = pg.url.split("#")[-1]
     text = _text(pg)
     opened = pg.evaluate("() => document.body.classList.contains('con-open')")
-    out.append(ok("TFIX-3", "#/console opens the console, never \"There is no page\"",
+    out.append(ok(" console", "#/console opens the console, never \"There is no page\"",
                   "There is no page" not in text and not landed.startswith("/console") and opened,
                   f"landed on #{landed}; console {'open' if opened else 'not open'}"))
     sel = pg.evaluate("""() => { const s = document.querySelector('.con-head select');
@@ -627,18 +627,18 @@ def tfix_lines(p: Preview) -> list[Result]:
     ctx.close()
     ctx, pg = p.page(NEW)
     post = p.api(pg, "/api/post")
-    out.append(ok("TFIX-4", "Post keeps a failed Write a post with its reason (GET /api/post's "
+    out.append(ok(" failed", "Post keeps a failed Write a post with its reason (GET /api/post's "
                   "failed)", isinstance(post.get("failed"), list),
                   f"{len(post.get('failed') or [])} failed writes kept"))
     p.go(pg, "#/post")
     gear = pg.evaluate("() => document.querySelector('#page-gear')?.getAttribute('href')")
-    out.append(ok("TFIX-9", "Post's ⚙ goes to #/settings/posting", gear == "#/settings/posting",
+    out.append(ok(" gear", "Post's ⚙ goes to #/settings/posting", gear == "#/settings/posting",
                   str(gear)))
     hrefs = pg.evaluate(HREFS)
     masto = [h for h in hrefs if "connections/mastodon" in h]
     # Post's accounts are one line to Settings › Posting since short posts (SOCIAL): no
     # Mastodon link on Post is fine, and any there must be the posting one
-    out.append(ok("TFIX-7", "Post's Mastodon Connect leads to the posting connection",
+    out.append(ok(" mastodon", "Post's Mastodon Connect leads to the posting connection",
                   all(h.endswith("mastodon_post") for h in masto),
                   ", ".join(masto) or "accounts on Settings › Posting"))
     site = SITE.findall(_text(pg, "#app"))
@@ -656,7 +656,7 @@ def tfix_lines(p: Preview) -> list[Result]:
     p.go(pg, "#/news")
     news = _text(pg, "#app")
     stuck = st.get("scheduler") is False
-    out.append(ok("TFIX-8", "with the scheduler off News says why, never \"being written\"",
+    out.append(ok(" news off", "with the scheduler off News says why, never \"being written\"",
                   "being written" not in news and (not stuck or "scheduler off" in news),
                   "scheduler off" if stuck else "scheduler on"))
     # B: ? keys and ⌘K, with builds off
@@ -693,15 +693,15 @@ def tfix_lines(p: Preview) -> list[Result]:
     ctx.close()
     out.append(skip(" press", "Write a post with no key says \"no model key is set\" and "
                     "stays on Post", "a press; tests/test_post_write.py and post.svelte.test.ts"))
-    out.append(skip("TFIX-5", "kranto_outcomes reports the failed post",
+    out.append(skip(" outcomes", "kranto_outcomes reports the failed post",
                     "an MCP call; the page tests/test_mcp_tools.py"))
-    out.append(skip("TFIX-6", "Pause with builds off says Paused once", "a press (Pause)"))
+    out.append(skip(" pause", "Pause with builds off says Paused once", "a press (Pause)"))
     out.append(skip(" updates", "Check for updates says updates are off on the preview",
                     "a press (a POST); tests/test_activity_api.py"))
     return out
 
 
-def tfix_fresh(p: Preview) -> list[Result]:
+def fresh_lines(p: Preview) -> list[Result]:
     """The fresh home: signed out, / says how to sign in and nothing of builds."""
     ctx = p.b.new_context(viewport={"width": 1400, "height": 900})
     pg = ctx.new_page()
@@ -711,7 +711,8 @@ def tfix_fresh(p: Preview) -> list[Result]:
     text = _text(pg)
     good = "Could not read the builds" not in text and not WORDS.search(_text(pg, "#app"))
     ctx.close()
-    return [ok("TFIX-1", "signed out, / says how to sign in, never \"Could not read the builds\"",
+    return [ok(" signed out",
+               "signed out, / says how to sign in, never \"Could not read the builds\"",
                good and ("kranto open" in text or "Sign in" in text),
                text.replace("\n", " ")[:160])]
 
@@ -996,7 +997,7 @@ def arch_words(p: Preview) -> list[Result]:
 
 KRANTO = os.path.join(ROOT, "venv", "bin", "kranto")
 CUT_PAGES = ["#/home", "#/news", "#/ideas", "#/watch", "#/post", "#/settings"]
-# the page server's factory routes: 404 since C2 (the page reads the server for everything else)
+# The page server's factory routes: 404 since C2 (the page reads the server for everything else)
 CUT_GONE = [
     "/brb/api/kranto",
     "/brb/api/loop",
@@ -1812,7 +1813,7 @@ def front_14(p: Preview) -> Result:
 def front_15(p: Preview) -> Result:
     ctx, pg = p.page(NEW)
     p.go(pg, "#/watch/sources?sel=s999999", 4000)
-    # the page's own words, not the top bar (whose wordmark is the name in lowercase): no
+    # The page's own words, not the top bar (whose wordmark is the name in lowercase): no
     # internal name of the server leaks into what the page says
     text = _text(pg, "#app")
     if pg.query_selector("#top"):
@@ -1826,7 +1827,7 @@ def front_15(p: Preview) -> Result:
     return ok(
         "FRONT-15",
         "#/watch/sources?sel=s999999 says 'This source is not here any more', "
-        "no the server, no Tell us",
+        "no server, no Tell us",
         good,
         "said so" if good else text[text.find("Could") :][:120] or "no words",
     )
@@ -1894,7 +1895,7 @@ def front_20(p: Preview, tag: str = "") -> list[Result]:
     for layout in (NEW, PHONE):
         ctx, pg = p.page(layout)
         p.go(pg, "#/settings/posting/voice")
-        # the page itself (its title, sections and the folded Advanced), not the top bar, the
+        # The page itself (its title, sections and the folded Advanced), not the top bar, the
         # Settings list beside it or the console
         root = "article.page-read" if pg.query_selector("article.page-read") else "#app"
         c = pg.evaluate(COUNT, root)
@@ -2031,8 +2032,8 @@ def main(argv: list[str] | None = None) -> int:
                 results += counts(p)
             if want("social"):
                 results += social_lines(p)
-            if want("tfix"):
-                results += tfix_lines(p)
+            if want("fixes"):
+                results += fixes_lines(p)
             if want("arch"):
                 results += arch_lines(p, a.arch_before)
             if want("cut"):
@@ -2048,7 +2049,7 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 if want("fresh"):
                     results.append(word_test(f, FRESH_PAGES, "fresh home"))
-                    results += tfix_fresh(f)
+                    results += fresh_lines(f)
                 if want("front"):
                     results += front_fresh(f)
                     results += front_f2_fresh(f)

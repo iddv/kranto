@@ -1,7 +1,7 @@
 """The docked console's width (the owner, 07:38 on 28 Oct: resize, remembered,
 double-click, keyboard): a handle on its left edge drags it between 320 px and 60% of the
 window, this browser keeps it across a reload, a double-click resets it to 380, the arrow keys
-step it (one layout since open-source wave 1). the server is answered in the page. Needs the
+step it (one layout since open-source wave 1). The server is answered in the page. Needs the
 built UI (CI's browser job)."""
 import json
 import re

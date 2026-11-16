@@ -31,7 +31,7 @@
     <p class="pf-line small"><span class={got.flags.length ? "pf-warn" : "pf-ok"}>{lineOf(got)}</span>{#if got.flags.length && fix}{" "}<button type="button" class="btn sm" id={id + "-fix"} disabled={fixing} onclick={() => void fixThem()}>{fixing ? "Fixing…" : "Fix them"}</button>{/if}</p>
     {#if got.flags.length}
       <div class="pf-text small" aria-label="The text, with what reads like AI underlined">{#each marks as m, i (i)}{#if m.f}<mark class="pf-mark" title={m.f.fix} data-rule={m.f.rule}>{m.t}</mark>{:else}{m.t}{/if}{/each}</div>
-      <ul class="pf-fixes small">{#each got.flags.filter((f) => f.scope !== "text").slice(0, 6) as f, i (i)}<li><q>{f.text.length > 60 ? f.text.slice(0, 59) + "…" : f.text}</q> · {f.fix}</li>{/each}{#each whole as f, i (i)}<li>{f.words} · {f.fix}</li>{/each}</ul>
+      <ul class="pf-fixes small">{#each got.flags.filter((f) => f.scope !== "text").slice(0, 6) as f, i (i)}<li><q>{f.text.length > 60 ? f.text.slice(0, 59) + "…" : f.text}</q> · {#if f.rule.startsWith("salt.")}{f.words} · {/if}{f.fix}</li>{/each}{#each whole as f, i (i)}<li>{f.words} · {f.fix}</li>{/each}</ul>
     {/if}
   </div>
 {/if}

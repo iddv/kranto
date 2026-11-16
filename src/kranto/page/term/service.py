@@ -587,7 +587,7 @@ class Term:
         except AfkError as e:
             raise D.DoorError(502, str(e))
         if job.get("started") not in mine:
-            # the server runs one list at a time; a newer one (pasted in the page) replaced it
+            # The server runs one list at a time; a newer one (pasted in the page) replaced it
             return {"job": {"state": "unknown", "say": "the server is resolving another list now; "
                             "the owner sees yours on the Add source page"}}
         res = job.get("result") if isinstance(job.get("result"), dict) else None

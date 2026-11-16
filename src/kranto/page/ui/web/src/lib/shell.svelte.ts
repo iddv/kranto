@@ -69,7 +69,7 @@ class Shell {
   /** the area drawn (the route's first part: "settings", "builds"…): Settings says every
    * glyph's word beside it (UP #10) */
   area = $state("");
-  /** the page's head: headOn while the shell draws it (the doors' pages, either
+  /** The page's head: headOn while the shell draws it (the doors' pages, either
    * layout), so a page declares its title instead of drawing it; head is the declaration */
   headOn = $state(false);
   head = $state.raw<(HeadDecl & { n: number }) | null>(null);

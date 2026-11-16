@@ -70,7 +70,7 @@ export interface LibraryGroup {
 }
 /** what GET /api/home answers: the home of open-source wave 2 (the date, the
  * sentence, today's brief, the newest cards, the quiet line, While you were away), absent from an
- * older the server; and, for one wave, the widgets' keys below (a cub's widget, its rows) */
+ * older server; and, for one wave, the widgets' keys below (a cub's widget, its rows) */
 export type HomeAnswer = Partial<HomeToday> & HomeWidgets;
 export interface HomeWidgets {
   widgets: HomeEntry[];
@@ -84,7 +84,7 @@ export interface HomeWidgets {
   budget_s: number;
 }
 
-/** the home's widgets in order: the arrangement's, or the default seven (an older the server) */
+/** the home's widgets in order: the arrangement's, or the default seven (an older server) */
 export function entriesOf(a: Arrangement | null): HomeEntry[] {
   if (a?.widgets) return a.widgets;
   return DEFAULT_HOME.map((id, n) => ({ n, id, known: true, size: "L", phone: true, options: {}, builtin: true }));

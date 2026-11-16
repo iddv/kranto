@@ -1,4 +1,4 @@
-"""CI's own limits (the operator's fix 15): the server's ``test`` job ran 18 to 22
+"""CI's own limits (a review's fix 15): the server's ``test`` job ran 18 to 22
 minutes on ``oss`` in wave 2 and was cancelled at its 25-minute limit three times with nothing
 failing. Its limit is 35."""
 

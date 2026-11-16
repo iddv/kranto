@@ -4,7 +4,7 @@
 // one click (S11). All of it is the server's.
 export const TOPICS = "/api/spend/topics";
 export const WATCH = "/api/settings/spend";
-/** the server's Settings › Watching › Reading (UP #3): how often sources are read, deep dives on */
+/** The server's Settings › Watching › Reading (UP #3): how often sources are read, deep dives on */
 export const READING = "/api/settings/reading";
 export interface Reading {
   every_hours: number;
@@ -30,7 +30,7 @@ export const SPEND_PURPOSE: Record<string, string> = {
  * their raw names */
 const RETIRED_PURPOSE = /^(invest|radar)(_|$)/;
 /** Spend's other purposes as the page words them: a known one by its words, the retired ones as
- * one row, any other by its name in plain words (an older or newer the server's) */
+ * one row, any other by its name in plain words (an older or newer server's) */
 export function otherRows(xs: TopicSpend["other"]): { purpose: string; word: string; usd: number; calls: number }[] {
   const out: { purpose: string; word: string; usd: number; calls: number }[] = [];
   let gone: { purpose: string; word: string; usd: number; calls: number } | null = null;

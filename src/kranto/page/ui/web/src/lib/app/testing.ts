@@ -1,5 +1,5 @@
 // For the app's own tests (lib/app/*.test.ts): the frame its draw needs, the network it reads
-// (fetch for api(), loadHost() and loadWho(); the shared reads for the rest), and a the server
+// (fetch for api(), loadHost() and loadWho(); the shared reads for the rest), and a server
 // status to answer with. Nothing here touches a model or the network.
 import { vi } from "vitest";
 import type { Status } from "../../api/afk.gen";

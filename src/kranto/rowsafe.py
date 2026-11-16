@@ -16,7 +16,7 @@ is one id, and the telemetry's error reports (B1) carry the same signature.
 **Each id is kept once** per process (``note()``): one log line with the traceback for the
 journal, and one line in ``<Kranto data>/errors.jsonl`` (at most ``KEEP`` lines; the oldest go)
 that ``kranto report``, ``GET /api/errors/<id>``, the post-update self-check and the telemetry's
-error reports read. the page keeps the same file, in the same shape, with the same ids
+error reports read. The page keeps the same file, in the same shape, with the same ids
 (``src/kranto/page/rowsafe.py``).
 
 **The report** (``report()``) is what Send this error and ``kranto report`` send: the id, the

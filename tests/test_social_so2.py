@@ -232,3 +232,18 @@ def test_ticking_linkedin_means_post_directly_and_files_its_send(store, tmp_path
     kinds = {r["kind"] for r in store.query("SELECT kind FROM cub_tickets WHERE cub = ?",
                                             (FILER,))}
     assert kinds == {"post.linkedin", "post.threads"}
+
+
+def test_threads_and_linkedin_confirm_dialogs_show_the_link_they_attach(store):
+    t = _ticket(store, "threads", "post.threads", "Kiosks lose batteries daily.")
+    lines = dict(th.ThreadsAdapter().readback("post.threads", t["fields"], store))
+    assert lines["Link"] == "https://ex.com/a"
+    t = _ticket(store, "linkedin", "post.linkedin", "Kiosks lose batteries daily.")
+    lines = dict(li.LinkedInAdapter().readback("post.linkedin", t["fields"], store))
+    assert lines["Link card"] == "A page" and lines["Link"] == "https://ex.com/a"
+    # a draft with no link: no line for it
+    d = new_draft(store, cub=FILER, service="threads", run_uuid=None,
+                  content={"site": "threads", "parts": [{"text": "x"}], "text": "x"})
+    lines = dict(th.ThreadsAdapter().readback("post.threads", {"draft_ref": d["ref"],
+                                                               "text": "x"}, store))
+    assert "Link" not in lines

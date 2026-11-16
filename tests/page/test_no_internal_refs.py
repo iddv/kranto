@@ -159,7 +159,7 @@ RETIRED = re.compile("|".join((
 
 
 def retired_places() -> list[str]:
-    # the page's own docs (the server's record its history in its words)
+    # The page's own docs (the server's record its history in its words)
     docs = [PKG / "ui" / "help.md", ROOT / "README.md",
             *(ROOT / "docs" / n for n in ("ui.md", "mcp.md", "traces.md"))]
     return [f"{p.relative_to(ROOT)}:{n}: {ln.strip()[:100]}" for p in docs

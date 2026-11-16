@@ -1,4 +1,4 @@
-// the server's JSON has a version: the server's /api/status answers
+// The server's JSON has a version: the server's /api/status answers
 // host_api, and this page was built against HOST_API_VERSION (api/afk.gen.ts, generated from
 // the server's web/types.py). When the two differ the list's head says so in one line; an older
 // the server answers none, which counts as v0. Not hosted (brb ui on its own): nothing to say.

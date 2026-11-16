@@ -1,7 +1,7 @@
-"""the page mounted at /brb/ (approach (a)): the adapter, mounted and not,
+"""The page mounted at /brb/ (approach (a)): the adapter, mounted and not,
 the loopback-only rule, the version check, the guard on the mount, and Pause.
 
-the page is not a dependency of the server, so these tests stand in a small fake for
+The page is not a dependency of the server, so these tests stand in a small fake for
 ``kranto.page.host_api`` (``brbfake``): the adapter calls ``API_VERSION``, ``configure``,
 ``handle`` and, when the page has them, ``handle_with_headers`` and ``stream``."""
 
@@ -102,9 +102,9 @@ def test_mounted_routes_to_handle(rt, fake_api):
 
 
 def test_versioned_static_files_are_cached_for_good_and_gzipped(rt, fake_api):
-    """the page's handle_with_headers marks its static/v<version>/ files immutable (S-3b):
+    """The page's handle_with_headers marks its static/v<version>/ files immutable (S-3b):
     the mount passes that on and gzips them for a client that accepts it; every other
-    answer keeps no-store, and an older the page (no handle_with_headers) changes nothing."""
+    answer keeps no-store, and an older page (no handle_with_headers) changes nothing."""
     import gzip
     big = b"export const x = 1;\n" * 400
 
@@ -128,7 +128,7 @@ def test_versioned_static_files_are_cached_for_good_and_gzipped(rt, fake_api):
 
 
 class FakeStream:
-    """the page's live feed: a few events, then the end; remembers that it was closed."""
+    """The page's live feed: a few events, then the end; remembers that it was closed."""
 
     def __init__(self, chunks):
         self.chunks, self.closed = list(chunks), False
@@ -146,7 +146,7 @@ class FakeStream:
 
 
 def test_the_live_feed_streams_through_the_mount(rt, fake_api):
-    """the page's ``api.stream``: ``/brb/api/stream`` is written as server-sent events
+    """The page's ``api.stream``: ``/brb/api/stream`` is written as server-sent events
     through the guard's middleware, each chunk as it comes, with no-store and the page's
     policy; the feed is closed after; every place taken is a 503; anything else is
     ``handle``'s as before."""
@@ -190,7 +190,7 @@ def test_an_older_page_has_no_live_feed(rt, fake_api):
 
 
 def test_mounted_page_is_told_where_the_ideas_api_is(rt, fake_api, monkeypatch):
-    """A the page that accepts ``kranto_url`` gets this server's URL; an older one is
+    """A version of the page that accepts ``kranto_url`` gets this server's URL; an older one is
     configured as before."""
     with client(rt, port=8765):
         pass
@@ -213,7 +213,7 @@ def test_mounted_page_is_told_where_the_ideas_api_is(rt, fake_api, monkeypatch):
 
 
 def test_mounted_page_is_told_where_the_activity_file_is(rt, fake_api, monkeypatch):
-    """ACT: a the page that takes ``kranto_data`` watches its ``activity.json`` for the
+    """ACT: a version of the page that takes ``kranto_data`` watches its ``activity.json`` for the
     live feed; an older one is configured as before (the first test above)."""
     seen = {}
 
@@ -240,7 +240,7 @@ def test_mount_refuses_cross_origin_posts(rt, fake_api):
 
 
 def test_mount_refuses_cross_origin_chat_posts(rt, fake_api):
-    """the page's project chat (API version 2) sits behind the same guard: a chat message or
+    """The page's project chat (API version 2) sits behind the same guard: a chat message or
     an action card's click from another origin, or with no origin, never reaches it."""
     with client(rt) as web:
         for path in ("/brb/api/chat/send", "/brb/api/chat/act", "/brb/api/chat/stop"):

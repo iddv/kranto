@@ -2,7 +2,7 @@
 
 ``kranto`` is what the ``kranto`` distribution (``packages/kranto``) installs. A kranto home
 (``--home``, else ``$KRANTO_HOME``, else the one ``kranto up`` or ``kranto adopt`` recorded in
-``~/.config/kranto/home``, else ``~/.kranto``) is a the server workspace whose config is
+``~/.config/kranto/home``, else ``~/.kranto``) is a workspace whose config is
 ``kranto.yaml``
 with the ``brb`` section on, plus the loop's home and the task folder:
 
@@ -518,7 +518,7 @@ def cmd_serve(args, host: Host) -> int:
             raise KrantoError(why)
         preview.enter(home)
     if cfg.brb.loop_home:
-        # the page's own commands, run by the builds UI, must see the same loop home
+        # The page's own commands, run by the builds UI, must see the same loop home
         os.environ.setdefault("KRANTO_LOOP_HOME", str(Path(cfg.brb.loop_home).expanduser()))
     ns = argparse.Namespace(
         workspace=str(home), host=args.host, port=args.port or port_of(cfg),
@@ -1238,7 +1238,7 @@ CLAUDE_LOGIN = "login.env"             # CLAUDE_CODE_OAUTH_TOKEN=… at 0600
 
 def claude_store(host: Host) -> Path:
     """Kranto's store for the Claude login token the console uses: ``$KRANTO_CLAUDE_DIR``, else
-    ``~/.config/kranto/claude`` (``claude.<unit>`` for another ``$KRANTO_UNIT``). the page's
+    ``~/.config/kranto/claude`` (``claude.<unit>`` for another ``$KRANTO_UNIT``). The page's
     ``claude_login`` reads it at each launch and pipes the token to claude; the path and the
     format are pinned by a test in each repository."""
     if os.environ.get("KRANTO_CLAUDE_DIR"):
@@ -1403,7 +1403,7 @@ def console_checks(cfg: config_mod.Config, svc: tuple[dict, str] | None = None) 
 
 
 def console_words(status: str, detail: str) -> str:
-    """the page's ``term_doctor`` line as the doctor's console line says it: "ready: …" when
+    """The page's ``term_doctor`` line as the doctor's console line says it: "ready: …" when
     it is ok, else "not ready: …" with what is missing; "Open in Claude Code" is the console,
     and where its switch lives is said without the page's file (loop.yaml)."""
     if detail.endswith("(term.enabled)"):                 # off on purpose: ok, and not ready
@@ -1425,12 +1425,13 @@ def term_check(loop_home: Path, svc: tuple[dict, str] | None = None,
     try:
         from kranto.page.host_api import term_doctor
     except ImportError:
-        return Check(WARN, "console", "not ready: this the page has no console; update Kranto")
+        return Check(WARN, "console",
+                     "not ready: this version of Kranto has no console; update Kranto")
     env, where = svc or (None, "")
     try:
         try:
             status, detail = term_doctor(loop_home, environ=env, dotenv=dotenv)
-        except TypeError:                                   # a the page before TK
+        except TypeError:                                   # a version of the page before TK
             status, detail = term_doctor(loop_home, environ=env)
     except Exception as exc:  # noqa: BLE001 - a doctor line, never a crash
         return Check(WARN, "console", f"not ready: could not check it: {exc}")
@@ -1517,7 +1518,7 @@ def mcp_check() -> Check:
     try:
         from kranto.page.host_api import mcp_available
     except ImportError:
-        return Check(OK, "mcp", "kranto mcp is not in this the page (optional)")
+        return Check(OK, "mcp", "kranto mcp is not in this version of Kranto (optional)")
     if mcp_available():
         return Check(OK, "mcp", "the MCP extra is installed: claude mcp add kranto -- kranto mcp")
     return Check(OK, "mcp", f"the MCP extra is not installed (optional; {MCP_INSTALL})")
@@ -1548,13 +1549,14 @@ def cmd_mcp(args, host: Host) -> int:
     try:
         from kranto.page.host_api import mcp_main
     except ImportError:
-        print("kranto mcp: this the page has no MCP server; update Kranto", file=sys.stderr)
+        print("kranto mcp: this version of Kranto has no MCP server; update Kranto",
+              file=sys.stderr)
         return 2
     if getattr(args, "term", None):
         try:
             from kranto.page.host_api import term_mcp_main
         except ImportError:
-            print("kranto mcp: this the page has no Open in Claude Code; update Kranto",
+            print("kranto mcp: this version of Kranto has no Open in Claude Code; update Kranto",
                   file=sys.stderr)
             return 2
         _loop_home_env(args, host)
@@ -1568,7 +1570,7 @@ def cmd_mcp(args, host: Host) -> int:
     if console or compact:
         import inspect
         if "console" not in inspect.signature(mcp_main).parameters:
-            print("kranto mcp: this the page has no --console or --compact; update Kranto",
+            print("kranto mcp: this version of Kranto has no --console or --compact; update Kranto",
                   file=sys.stderr)
             return 2
         return mcp_main(url, console=console, compact=compact)
@@ -1641,7 +1643,7 @@ def cmd_term(args, host: Host) -> int:
     try:
         from kranto.page.host_api import term_cli
     except ImportError:
-        print("kranto term: this the page has no Open in Claude Code; update Kranto",
+        print("kranto term: this version of Kranto has no Open in Claude Code; update Kranto",
               file=sys.stderr)
         return 2
     _loop_home_env(args, host)
@@ -1664,7 +1666,7 @@ def cmd_trace(args, host: Host) -> int:
     try:
         from kranto.page.host_api import add_trace_group
     except ImportError:
-        print("kranto trace: this the page has no traces; update Kranto", file=sys.stderr)
+        print("kranto trace: this version of Kranto has no traces; update Kranto", file=sys.stderr)
         return 2
     _loop_home_env(args, host)
     p = argparse.ArgumentParser(prog="kranto")
@@ -1921,7 +1923,7 @@ def find_layout(args, host: Host) -> Found:
     ws = Path(args.workspace or old_ws).expanduser().resolve()
     cfg_path = config_mod.config_path(ws)
     if cfg_path is None:
-        raise KrantoError(f"no the server workspace at {ws} (no kranto.yaml); pass -w")
+        raise KrantoError(f"no workspace at {ws} (no kranto.yaml); pass -w")
     lh = paths.loop_home(args.loop_home or os.environ.get(paths.LOOP_HOME_ENV) or legacy.LOOP_HOME)
     tasks = old_tasks_dir(lh)
     why_not = host.systemd()
@@ -2743,7 +2745,7 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_eval)
 
     s = sub.add_parser("adopt", help="switch an older installation to Kranto, in place")
-    s.add_argument("-w", "--workspace", help="the the server workspace (default ~/kranto-kb)")
+    s.add_argument("-w", "--workspace", help="the server workspace (default ~/kranto-kb)")
     s.add_argument(
         "--loop-home", help="the loop's home (default $KRANTO_LOOP_HOME, else ~/kranto-loop)"
     )

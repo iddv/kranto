@@ -63,7 +63,7 @@
     <Row title="Your blog" href={href("settings/connections/sanity")} meta={blogLine} />
     <Row sel="enl" title="Newsletter" meta={nlLine(nl)} stw={nst}>{#snippet st()}<Glyph name={nst[0]} colour={nst[1]} word={nst[2]} />{/snippet}</Row>
   </Group>
-  <Group id="post-voice" title="How you write" count="1" kind="sets">
+  <Group id="post-voice" title="Your voice" count="1" kind="sets">
     <Row title="How you write" href={href("settings/posting/voice")} meta="every post follows it"></Row>
   </Group>
 </List>

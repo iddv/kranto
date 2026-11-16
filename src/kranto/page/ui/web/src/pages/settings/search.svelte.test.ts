@@ -6,7 +6,7 @@ import SearchList from "./SearchList.svelte";
 import WatchingPane from "./WatchingPane.svelte";
 import { CALLERS_API, callersLine, SEARCH_API, SEARCH_FORM, searchWords, weeksValue, type SearchSetup } from "./search.svelte";
 
-// the server's /api/setup/search (SearchSetup is generated from its web/types.py): Exa's free mode
+// The server's /api/setup/search (SearchSetup is generated from its web/types.py): Exa's free mode
 const NO = "no live search: results are from model memory and may be stale";
 const S: SearchSetup = {
   provider: "exa", web: "exa", web_label: "Exa, free mode (rate-limited, no account)", free_mode: true, free: ["hackernews", "github", "arxiv"], note: null,

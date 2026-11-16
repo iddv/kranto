@@ -288,8 +288,8 @@ def update_facts(home: Path, day: str) -> dict:
 
 
 def page_facts(cfg) -> dict:
-    """the page's own facts (the console's), when the page is on here. A fact the list no
-    longer names (an older the page's ``projects_count``, its build milestones) is dropped and
+    """The page's own facts (the console's), when the page is on here. A fact the list no
+    longer names (an older page's ``projects_count``, its build milestones) is dropped and
     counted by ``allowed``, as any unknown key is."""
     if cfg is None or not cfg.brb.enabled:
         return {}

@@ -71,3 +71,78 @@ def test_the_pages_have_no_internal_references():
            for n, ln in enumerate(p.read_text(errors="replace").splitlines(), 1)
            if INTERNAL.search(re.sub(r"\{#.*?#\}|//.*$", "", ln))]
     assert bad == []
+
+
+# -- the whole tree ------------------------------------------------------------------------------
+
+def tracked_text() -> list[tuple[str, str]]:
+    """Every tracked text file: (path, text). Lock files, generated types and recordings are
+    not words anyone wrote."""
+    import subprocess
+    names = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True,
+                           check=True).stdout.split()
+    out = []
+    for n in names:
+        if n.endswith((".lock", ".gen.ts", ".png", ".ico", ".svg", ".woff2", ".jpg", ".gif",
+                       ".pdf", ".json")) or n.startswith("tests/fixtures/"):
+            continue
+        try:
+            out.append((n, (ROOT / n).read_text(encoding="utf-8")))
+        except (UnicodeDecodeError, FileNotFoundError, IsADirectoryError):
+            continue
+    return out
+
+
+def _line(text: str, at: int) -> int:
+    return text.count("\n", 0, at) + 1
+
+
+# the words of the people who build Kranto, not of the people who read it: their notes file,
+# their review codes, their own role in the release (private names and paths: scrub.py)
+BUILDERS = re.compile(r"MQ\.NOTES|\bMQ\b|\bTFIX\b|\bHLTH\b|\bUXI\b"
+                      r"|\bthe operator's (?:fix|item|note|bake-off)\b|\bthe operator re-reads?\b")
+
+
+def test_the_tree_holds_none_of_the_builders_own_words():
+    me = "tests/test_no_internal_refs.py"
+    bad = [f"{n}:{_line(t, m.start())}: {m.group(0)}" for n, t in tracked_text() if n != me
+           for m in BUILDERS.finditer(t)]
+    assert bad == []
+
+
+# the rename's broken sentences: an article doubled ("a the page", "this the server"), or "the
+# server"/"the page" starting a sentence in lower case (after a sentence's end, at a paragraph or
+# a docstring's start, or as a comment's first words)
+_X = r"(?:server|page)"
+DOUBLED = re.compile(rf"\b(?:[Aa]n?|[Tt]his|[Tt]he|[Yy]our|[Ee]very|[Ee]ach|[Oo]lder|[Nn]ewer"
+                     rf"|[Oo]ld|[Nn]ew|[Nn]o) the {_X}\b")
+_END = r"(?<!\be\.g)(?<!\bi\.e)(?<!\betc)(?<!\bvs)(?<![\w/`]\.\w)[.!?]"
+_MARK = r"(?:(?://|#|\*|--)[ \t]*)?"
+STARTS = [
+    re.compile(rf"{_END}[\"'’”`*)\]]*(?:[ \t]*\n[ \t]*{_MARK}|[ \t]+)the {_X}\b"),
+    re.compile(rf"\n[ \t]*{_MARK}\n[ \t]*{_MARK}the {_X}\b"),
+    re.compile(rf'(?:"""|/\*\*|<!--)[ \t]*\n?[ \t]*(?:\*[ \t]*)?the {_X}\b'),
+]
+LONE = re.compile(rf"^[ \t]*(?://|#)[ \t]*the {_X}\b", re.M)
+
+
+def _starts_a_comment(text: str, at: int) -> bool:
+    end = text.rfind("\n", 0, at)
+    if end < 0:
+        return True
+    prev = text[text.rfind("\n", 0, end) + 1:end].strip()
+    if not prev.startswith(("#", "//")):
+        return True
+    body = prev.lstrip("#/ ").rstrip()
+    return body == "" or body.endswith((".", "!", "?", ":"))
+
+
+def test_no_sentence_the_rename_broke():
+    bad = []
+    for n, t in tracked_text():
+        if n == "tests/test_no_internal_refs.py":
+            continue
+        hits = [*DOUBLED.finditer(t), *(m for p in STARTS for m in p.finditer(t)),
+                *(m for m in LONE.finditer(t) if _starts_a_comment(t, m.start()))]
+        bad += [f"{n}:{_line(t, m.start())}: {m.group(0).strip()[:60]!r}" for m in hits]
+    assert bad == []

@@ -200,7 +200,7 @@ def test_krantos_csp_is_the_same_policy():
     source when the checkout sits beside this one (CI checks out the page alone)."""
     afk = ROOT.parent / "kranto" / "src" / "kranto" / "web" / "app.py"
     if not afk.is_file():
-        pytest.skip("no the server checkout beside this one")
+        pytest.skip("no server checkout beside this one")
     text = afk.read_text()
     block = text[text.index('"Content-Security-Policy": (') + 28:]
     block = block[:block.index("),")]

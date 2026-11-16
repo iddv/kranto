@@ -89,7 +89,7 @@ def test_every_writers_check_passes_the_material(rel):
 def test_the_writer_list_holds_every_module_that_checks():
     found = {str(p.relative_to(SRC)) for p in SRC.rglob("*.py") if _check_calls(p)}
     listed = {p.values[0] for p in WRITERS}
-    # the page's own Check and Fix them (web/prose_api.py) check what the person typed, and
+    # The page's own Check and Fix them (web/prose_api.py) check what the person typed, and
     # the SDK's test double mirrors the host: neither writes a post
     assert found - listed <= {"kranto/web/prose_api.py", "bears_cub/testing.py"}, found - listed
 

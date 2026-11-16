@@ -45,7 +45,7 @@ def _real_host_api():
     return api
 
 
-# the page's host API version 2 (CUT,): the names it keeps once the factory left.
+# The page's host API version 2 (CUT,): the names it keeps once the factory left.
 # ``Config`` and ``write_setting`` stay for the page's own settings in loop.yaml: the wizard's
 # ``build.claude_command`` (the console's launcher reads it) and verbs_api's ``mcp.actions``.
 HOST_API_V2 = frozenset(

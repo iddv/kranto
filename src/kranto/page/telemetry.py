@@ -1,7 +1,7 @@
-"""the page's usage counters (section 4.2): lines handed to the host's
+"""The page's usage counters (section 4.2): lines handed to the host's
 recorder.
 
-the page keeps nothing itself and decides nothing: ``kranto serve`` gives it the server's
+The page keeps nothing itself and decides nothing: ``kranto serve`` gives it the server's
 ``record`` (``set_sink``, through ``host_api.telemetry_sink``), which applies the mode, the
 allow-list and ``DO_NOT_TRACK``. Without a sink (the page alone, ``brb`` on the command
 line) ``record`` does nothing. It never raises.

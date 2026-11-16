@@ -87,7 +87,7 @@ def test_the_queue_key_map_covers_the_legend():
 def test_the_queue_is_a_nav_entry_with_its_count_and_a_row_on_needs_you():
     assert '"review"' in re.search(r"const VIEWS = new Set\(\[(.*?)\]\)", JS).group(1)
     assert 'register("review", {' in src("pages/index.ts")
-    # this week's cards only (D-2): the page names no builds, and drops one an older the server sends
+    # this week's cards only (D-2): the page names no builds, and drops one an older server sends
     assert 'REVIEW_API = "/api/review/queue";' in src("pages/review/review.ts")
     assert 'x.target !== "build"' in src("pages/review/review.ts") and 'x.target !== "build"' in src("pages/front/needs.ts")
 

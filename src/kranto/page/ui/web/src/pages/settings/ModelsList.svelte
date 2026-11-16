@@ -1,6 +1,6 @@
 <script lang="ts">
   // Settings › Watching › Models, the list: each of watching's roles (the Judge, the Reasoner),
-  // what it calls now, and whether that is set or a choice not saved yet. the server's alone.
+  // what it calls now, and whether that is set or a choice not saved yet. The server's alone.
   import Group from "../../ui/Group.svelte";
   import List from "../../ui/List.svelte";
   import Loading from "../../ui/Loading.svelte";

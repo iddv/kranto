@@ -9,7 +9,7 @@ import urllib.request
 
 
 class AfkError(RuntimeError):
-    """the server's API said no or could not be reached; the message says which, and ``code``
+    """The server's API said no or could not be reached; the message says which, and ``code``
     the HTTP status (None: not reached)."""
 
     def __init__(self, message: str, code: int | None = None):

@@ -226,7 +226,7 @@ def merged_since(repo: str, since: str, until: str | None = None, base: str = "m
 # was published, and offered to every nightly install, before its rc_check ran). The updater's
 # pick() never offers a release whose notes hold "**Do not install:**"; ``kranto update --to``
 # still installs it, which is how rc_check checks it. gate.py offer removes the line after
-# rc_check passed and the operator re-read MQ.
+# rc_check passed and the maintainer checked that no one asked to hold it.
 CHECKING_LINE = ("**Do not install:** being checked (rc_check) before it is offered; "
                  "`gate.py offer {tag}` offers it once the check passed.")
 

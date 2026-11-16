@@ -243,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--revise-again", action="store_true",
                     help="run check, revise and the voice rule again on the record's written "
                          "drafts (no new writing call), after a fix to the engine")
-    ap.add_argument("--kranto.page", help="a the page checkout to import (the Claude Code "
+    ap.add_argument("--kranto.page", help="a checkout of the page to import (the Claude Code "
                                        "provider's claude_print), when it is not installed")
     a = ap.parse_args(argv)
     if a.kranto_page:

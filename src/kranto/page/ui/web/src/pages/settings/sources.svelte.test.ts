@@ -10,7 +10,7 @@ import { gradeWords, removalWords } from "./sourceverbs";
 import { CATALOG_API, filterSources, FORM, GROUPS, listGroup, presetWords, proposalTopic, SOURCES_API, topicWords, type Catalog, type Source, type SourcePage, type Sources } from "./sources.svelte";
 
 const NOW = new Date().toISOString();
-// the server's /api/sources (Sources is generated from its web/types.py)
+// The server's /api/sources (Sources is generated from its web/types.py)
 const src = (id: number, o: Partial<Source> = {}): Source => ({
   id, kind: "rss", label: `Source ${id}`, origin: "manual", review: "approved", group: "approved", status: "ok", detail: "", site: "hn", site_name: "Hacker News",
   preset: "hn-front", fields: null, topics: [{ id: 3, name: "Local-first", kind: "user" }], proposed_for: null, found_for: null, why: null, replaces: null, validation: {}, items_7d: 14,
@@ -23,7 +23,7 @@ const D: Sources = {
   topics: [{ id: 3, name: "Local-first", description: "", kind: "topic", ref: null, sources: 2 }], reddit: { watched: 2, note: "" },
   connections_need_you: 0, every_hours: 6, default_retention_days: 90,
 };
-// the server's /api/catalog (Catalog is generated from its web/types.py)
+// The server's /api/catalog (Catalog is generated from its web/types.py)
 const HN = { provider: "hn", provider_name: "Hacker News", needs: null, reason: null, retention_days: null };
 const CAT: Catalog = {
   providers: [{ key: "hn", name: "Hacker News", presets: [{ ...HN, key: "hn-front", name: "Front page", blurb: "The front page.", access: "public", available: true, fields: [] },
@@ -31,7 +31,7 @@ const CAT: Catalog = {
   { key: "x", name: "X Corp", presets: [{ key: "x-list", provider: "x", provider_name: "X Corp", name: "A list", blurb: "A list.", access: "login", needs: "x", available: false, reason: "Not offered yet", retention_days: null, fields: [] }] }],
   connected: {}, topics: [{ id: 3, name: "Local-first", description: "", kind: "user", ref: null, sources: 2 }], prefilter: 0.3,
 };
-// the server's /api/sources/<id> (SourcePage, generated)
+// The server's /api/sources/<id> (SourcePage, generated)
 const PAGE: SourcePage = { ...src(1), params: { url: "https://hn.example/rss" }, how: { request: "GET https://hn.example/rss", pacing: "one a second", terms: "public" }, every_hours: 6,
   added_at: "2026-09-01T10:00:00Z", retention_override: false, retention_kind_days: 90, topic_facts: [{ id: 3, name: "Local-first", kind: "user", status: "active", sources: 2, kept_month: 34 }],
   kept_month: 19, spend_month: { usd: 0.12, tokens: { in: 40000, out: 1200 } },

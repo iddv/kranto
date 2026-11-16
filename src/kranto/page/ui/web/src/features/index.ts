@@ -1,4 +1,4 @@
-// The features' slots in today's shell. the server's GET /api/features says which
+// The features' slots in today's shell. The server's GET /api/features says which
 // features there are, whether each is on and what it fills; this file draws that in the shell as
 // it is now: a navigator entry under the heading the manifest names (News under Desk) and each feature's page registered by its node. The area shell 
 // designed waits for the owner's review; when it lands, a feature becomes an area here and its
@@ -131,7 +131,7 @@ export interface FeatureRow {
       today_rows?: TodayRowDecl[];
       lists?: ListDecl[];
       forms?: FormDecl[];
-      /** the page's one primary: a form's id, or an action in its head (none: its first form) */
+      /** The page's one primary: a form's id, or an action in its head (none: its first form) */
       primary?: string | null;
     };
   };
@@ -185,9 +185,9 @@ export const GLYPH: Record<string, string> = { mail: "✉", pen: "✎", up: "↗
 export const glyphOf = (g: string | undefined): string => GLYPH[g || "dot"] || GLYPH.dot!;
 /** a cub's kind in words: More cubs and the gallery group by it */
 export const KIND_WORD: Record<string, string> = { post: "Post and send", send: "Post and send", money: "Watch and money", watch: "Watch and money", book: "Book", make: "Make", other: "Other" };
-/** the mode tag's wash: paper and practice amber (an older the server's dry run too), live green, off grey */
+/** the mode tag's wash: paper and practice amber (an older server's dry run too), live green, off grey */
 export const modeTone = (m: string): string => (/^(paper|practice|dry|drafts)/.test(m) ? "amber" : m === "live" ? "green" : "grey");
-/** a mode in the owner's words: an older the server's dry modes are practice (SEND) */
+/** a mode in the owner's words: an older server's dry modes are practice (SEND) */
 export const modeWord = (m: string): string => m.replace(/^(dry run|drafts only)$/, "practice").replace(/^dry \(/, "practice (");
 
 /** the features as the server lists them; null without the server or before the read arrives */

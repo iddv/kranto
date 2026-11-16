@@ -1,7 +1,7 @@
 """The JSON API served by ``python -m kranto serve``, and the host of Kranto UI (``/brb/``).
 
 The UI is Kranto's (the page's pages, mounted at ``/brb/``); the server's old page
-addresses redirect there. the server alone is not a supported way to run (D5): those
+addresses redirect there. The server alone is not a supported way to run (D5): those
 addresses show how to install Kranto instead. The only pages rendered here are the
 connection sign-in pages (``web/sources_api.py``).
 
@@ -304,7 +304,7 @@ class App:
         store = self.rt.store
         ctx.setdefault("paused", store.pause_reason())
         ctx.setdefault("nav", name.split(".")[0])
-        # the page mounted at /brb/: the shared "kranto" header (no builds' figures any more)
+        # The page mounted at /brb/: the shared "kranto" header (no builds' figures any more)
         ctx.setdefault("kranto", {} if self.brb.mounted else None)
         return HTMLResponse(self.env.get_template(name).render(request=request, **ctx))
 
@@ -1158,7 +1158,7 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
                                  rt.cubs, scheduler)
 
     def kranto_page(route):
-        """An old the server page address Kranto UI has as a hash route (UI-v4.md 2.3):
+        """An old server page address Kranto UI has as a hash route (UI-v4.md 2.3):
         while the page is mounted it answers 302 to it, with its query kept; without it,
         the install notice (D5). ``route`` is the hash route, or a function of the request
         that returns it."""

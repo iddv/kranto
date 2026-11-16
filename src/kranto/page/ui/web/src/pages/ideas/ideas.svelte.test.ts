@@ -17,12 +17,12 @@ import { cardIdea, cardNo, firstWords, IDEA_SELECTS, ideaOf, nextAt, priorArtLin
 import { ideaItems, passIdea } from "./verbs";
 
 const HOURS = (h: number): string => new Date(Date.now() - h * 3600e3).toISOString();
-// the server's /api/ideas, as it answers
+// The server's /api/ideas, as it answers
 const RAW = [{ number: 3, title: "Idea card:3", score: 0.25, grade: null, topics: [{ id: 1, name: "Local-first", share: 0.4 }, { id: 2, name: "AI tooling", share: 1 }],
   citations: [{}, {}], signals: { rising: { agrees: true, line: "up 3 maps" }, watch: { agrees: false } }, theme: { name: "Sync engines" }, origin: "map_theme",
   thesis: "Thesis 3.", evidence: [], state: "waiting", created_at: HOURS(2) }];
 const READ_CARDS = { [IDEAS_API]: RAW };
-// the server's cards with their own state, as /api/ideas answers them
+// The server's cards with their own state, as /api/ideas answers them
 const STATED = { ideas: [
   { id: 7, title: "Kiosk ledger", state: "waiting", rank: { position: 2, taste: 0, line: "", parts: [] }, created_at: "2026-11-10T08:00:00Z", topics: [] },
   { id: 3, title: "Idea card:3", state: "waiting", rank: { position: 1, taste: 0, line: "", parts: [] }, created_at: "2026-11-09T08:00:00Z", topics: [{ id: 1, name: "Local-first", share: 0.4 }] },

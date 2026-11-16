@@ -1,6 +1,6 @@
 // The claims test_topics_ui, test_click_levers, test_icon_nav and test_unified_ui read off the old
 // source that the other tests here did not press yet: which pane a selection draws in, the
-// toolbar's height under the group heads, the redraw that leaves the key field alone, a the server
+// toolbar's height under the group heads, the redraw that leaves the key field alone, a server
 // form's notice, Connections' "needs you", j walking (STEPPING) and a row that selects a filter
 // (data-go), the navigator as icons and Spend's pane with nothing selected.
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";

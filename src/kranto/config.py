@@ -25,7 +25,7 @@ WORKSPACE_ENV = "KRANTO_HOME"
 KRANTO_HOME_ENV = "KRANTO_HOME"
 
 DEFAULT_CONFIG_YAML = """\
-# the server workspace configuration.
+# The server workspace configuration.
 # Secrets are read from the environment variable named in llm.api_key_env,
 # which may also be set in a .env file next to this one.
 
@@ -282,7 +282,7 @@ notify:
   heartbeat_ping_url: null
 
 brb:
-  # the page's builds UI at /brb/ (needs the page installed in this environment). It can
+  # The page's builds UI at /brb/ (needs the page installed in this environment). It can
   # start paid builds and make repos public, so it is only mounted when the server is
   # bound to loopback. root: the task folder it lists (default: the loop's tasks_dir);
   # loop_home: the build loop's home (default: $KRANTO_LOOP_HOME, else ~/kranto-loop; a kranto home
@@ -405,7 +405,7 @@ update:
 
 api:
   # Every change made through the page or the API needs a kranto token (~/.config/kranto/tokens:
-  # the page's sign-in cookie, or Authorization: Bearer), and the token says who acted. false:
+  # The page's sign-in cookie, or Authorization: Bearer), and the token says who acted. false:
   # the old way, by the request's origin; kranto doctor warns about it.
   require_token: true
 
@@ -813,7 +813,7 @@ class NotifyConfig:
 
 @dataclass(frozen=True)
 class BrbConfig:
-    """the page's builds UI, mounted at /brb/ by 'python -m kranto serve' when the page is
+    """The page's builds UI, mounted at /brb/ by 'python -m kranto serve' when the page is
     installed in
     the same environment. Off by default. ``root`` is the task folder it lists (default: the
     loop's tasks_dir, ~/tasks) and ``loop_home`` the loop's home (default: ~/kranto-loop)."""
@@ -1675,7 +1675,7 @@ def find_workspace(explicit: str | None = None) -> Path:
             return found
     if config_path(root) is None:
         raise ConfigError(
-            f"{root} is not a the server workspace (no {CONFIG_FILENAME}). "
+            f"{root} is not a workspace (no {CONFIG_FILENAME}). "
             f"Pass --workspace, set ${WORKSPACE_ENV}, or run 'python -m kranto init <dir>'."
         )
     return root

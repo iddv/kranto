@@ -27,12 +27,12 @@ class SchemaError(ValueError):
 
 
 def own() -> dict:
-    """the server's own part, as the file says."""
+    """The server's own part, as the file says."""
     return json.loads(resources.files(__package__).joinpath("schema.json").read_text())
 
 
 def page_part() -> dict | None:
-    """the page's part (its ``telemetry.json``), or None without the page."""
+    """The page's part (its ``telemetry.json``), or None without the page."""
     try:
         from kranto.page.host_api import telemetry_schema
     except (ImportError, AttributeError):

@@ -52,7 +52,7 @@ LOOP_HOME = "~/brb-loop"
 COOKIE = f"{_OLD}_session"
 MCP_SERVER = _OLD
 DISTS = (f"{_OLD}afk", _OLD, f"{_OLD}brb")             # distributions an old install has
-# the page's settings file (loop.yaml): its section for the server, on an old install
+# The page's settings file (loop.yaml): its section for the server, on an old install
 LOOP_SECTION = f"{_OLD}afk"
 # stored outside Kranto: the draft's field in a Sanity document, the keys of exported traces
 SANITY_META = f"{_OLD}Meta"

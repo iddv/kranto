@@ -3,7 +3,7 @@ only while a run runs and says Quiet otherwise; it opens Activity, whose groups 
 and grow without a reload when the live feed says so; Watch › opens the run's trace following it;
 at 1400 px and on a 390 px phone (the ring and the count only there), with no console error, no
 write and no setting key or null on the page. The activity read is answered in the page (the smoke
-app has no the server); everything else is the fake app's. Needs the built UI (CI's browser job)."""
+app has no server); everything else is the fake app's. Needs the built UI (CI's browser job)."""
 import json
 import re
 
@@ -50,7 +50,7 @@ def open_page(browser, width: int, answer: dict):
     page = browser.new_page(viewport={"width": width, "height": 900 if width > 500 else 844})
     errors, sent = [], []
     page.on("pageerror", lambda e: errors.append(str(e)))
-    # an HTTP error, but the host probe's 404 (the smoke app has no the server: that is how it knows)
+    # an HTTP error, but the host probe's 404 (the smoke app has no server: that is how it knows)
     page.on("response", lambda r: errors.append(f"{r.status} {r.url}")
             if r.status >= 400 and not r.url.endswith(HOST_PROBE) else None)
     page.on("request", lambda r: sent.append(f"{r.method} {r.url}") if r.method not in ("GET", "HEAD") else None)

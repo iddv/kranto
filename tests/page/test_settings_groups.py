@@ -182,7 +182,7 @@ def test_prompts_page_follows_the_api():
     # holds the behaviour
     lst, pane = src("pages/settings/PromptsList.svelte"), src("pages/settings/PromptsPane.svelte")
     ts = src("pages/settings/prompts.svelte.ts")
-    # the server's /api/prompts directly (the page's own api/prompts left with the factory, CUT)
+    # The server's /api/prompts directly (the page's own api/prompts left with the factory, CUT)
     assert "PGROUP_WORD: Record<string, string> = {}" in ts and 'export const PROMPTS_API = "/api/prompts";' in ts
     assert "HOUSE_API" not in ts
     # pressed in pages/settings/prompts.svelte.test.ts: the house rules first ("lists the house

@@ -3,7 +3,7 @@
   // or steady, its stories, the label with its source mix, its share and its movement, the
   // sparkline and the new arrivals. It opens in the pane (library/clusters/<n>). On a
   // topic's pages (t) its share is the topic's ("40% from this topic"). On Today (today:
-  // the server's rising themes) it is Rising, its topic's name first, with no share and no age.
+  // The server's rising themes) it is Rising, its topic's name first, with no share and no age.
   import type { Cluster, TopicRef } from "../../api/afk.gen";
   import Glyph from "../../ui/Glyph.svelte";
   import Row from "../../ui/Row.svelte";

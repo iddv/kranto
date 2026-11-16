@@ -806,7 +806,7 @@ def _feature_off(feature) -> bool:
 
 
 def brb_verbs(*, gated: bool = True) -> tuple[Verb, ...]:
-    """the page's actions as verbs ``b.<kind>`` (``host_api.verb_rows``): run through its
+    """The page's actions as verbs ``b.<kind>`` (``host_api.verb_rows``): run through its
     ``api/act`` in this process, so the ladder, the prepared presses and Activity are the same
     for a build as for a topic. None without the page, or with one from before the registry,
     and none while builds are off (``gated``; the guard asks with ``gated=False`` whether
@@ -816,7 +816,7 @@ def brb_verbs(*, gated: bool = True) -> tuple[Verb, ...]:
     try:
         from kranto.page.host_api import verb_rows
         rows = verb_rows()
-    except Exception:  # noqa: BLE001 - no the page, or an older one: the core's verbs only
+    except Exception:  # noqa: BLE001 - no page, or an older one: the core's verbs only
         return ()
     out = []
     for r in rows:

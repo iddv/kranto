@@ -10,7 +10,7 @@ export interface UpdateFacts {
   title: string;
 }
 export interface HeaderFacts {
-  /** the server's half, when it hosts the page */
+  /** The server's half, when it hosts the page */
   host: { paused: boolean; running: string | null; next: string | null; reading?: string | null } | null;
   update: UpdateFacts | null;
   /** what Pause stops, in words */

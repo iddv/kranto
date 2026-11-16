@@ -35,7 +35,7 @@ def key(monkeypatch):
 
 @pytest.fixture
 def reason(monkeypatch):
-    """the server's model settings: the reason tier on Sonnet 5, in a router's name."""
+    """The server's model settings: the reason tier on Sonnet 5, in a router's name."""
     asked = []
 
     def call(url, method, path, body=None, timeout=30):

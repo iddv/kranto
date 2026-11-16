@@ -96,4 +96,4 @@ def test_cli_init_status_pause_resume(tmp_path, capsys):
 def test_cli_reports_missing_workspace(tmp_path, capsys, monkeypatch):
     monkeypatch.delenv(config_mod.WORKSPACE_ENV, raising=False)
     assert cli.main(["-w", str(tmp_path / "nope"), "status"]) == 2
-    assert "not a the server workspace" in capsys.readouterr().err
+    assert "not a workspace" in capsys.readouterr().err

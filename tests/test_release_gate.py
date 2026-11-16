@@ -384,7 +384,7 @@ def test_promote_now_releases_a_held_stable_and_logs(tmp_path):
     assert gate.promote(gh, tag="v0.5.28", now_reason="REL: the last 0.5.x", now=lambda: NOW,
                         log_to=tmp_path / "gate.jsonl", say=said.append) == 0
     (tag, body), = gh.edits
-    assert tag == "v0.5.28" and "**Promoted to stable** 2026-10-24 12:00 UTC: by the operator " \
+    assert tag == "v0.5.28" and "**Promoted to stable** 2026-10-24 12:00 UTC: by the maintainer " \
         "(REL: the last 0.5.x)." in body
     entry = json.loads((tmp_path / "gate.jsonl").read_text())
     assert entry["how"] == "now" and entry["reason"] == "REL: the last 0.5.x"
@@ -394,7 +394,7 @@ def test_promote_now_releases_a_held_stable_and_logs(tmp_path):
 
 def test_the_old_staged_rollout_line_is_replaced_too():
     old = "Kranto 0.5.27: ...\n\n**Staged rollout:** after 6 hours.\n\n- x\n"
-    out = gate.new_body(old, gate.promoted_line("by the operator", NOW))
+    out = gate.new_body(old, gate.promoted_line("by the maintainer", NOW))
     assert "Staged rollout" not in out and out.count("**Promoted to stable**") == 1
 
 

@@ -1,4 +1,4 @@
-"""The eval's prompts, exported for any model (the operator's bake-off).
+"""The eval's prompts, exported for any model (a bake-off).
 
     python -m kranto.features.post.evals export --items brief-24-1,card-158 --out DIR \\
         [--sites blog,toot] [--angles angles.json]

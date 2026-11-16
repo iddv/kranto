@@ -435,7 +435,7 @@ ONE_LINE = (f"ssh -t -L 8766:127.0.0.1:8766 {socket.gethostname().split('.')[0]}
 
 
 def test_the_build_installs_kranto_with_its_mcp_extra():
-    """ 18: kranto mcp on the preview said "install the MCP extra" (the operator added it by
+    """ 18: kranto mcp on the preview said "install the MCP extra" (it was added by
     hand for the outside test): the build installs the one wheel with its mcp extra and stops if
     mcp is missing."""
     src = SCRIPT.read_text()

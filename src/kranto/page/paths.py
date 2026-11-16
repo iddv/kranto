@@ -2,7 +2,7 @@
 (S-8; review D-6). The one module that knows these names.
 
 A **kranto home** (``kranto_home()``: ``--home``, else ``$KRANTO_HOME``, else the home ``kranto
-up`` or ``kranto adopt`` recorded, else ``~/.kranto``) is a the server workspace with the ``brb``
+up`` or ``kranto adopt`` recorded, else ``~/.kranto``) is a workspace with the ``brb``
 section on (``Layout``). The record is ``~/.config/kranto/home`` (``pointer_path()``), or the
 installed unit's ``Environment=KRANTO_HOME``; another unit (``$KRANTO_UNIT``, the update's
 scratch instance) keeps its own pointer, ``home.<unit>``, so it never moves the real one.

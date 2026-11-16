@@ -47,7 +47,7 @@ describe("Post", () => {
     expect(titles(target, "post-drafts")).toEqual(["This week: Amazon grasps 66 objects", "Kranto and robots"]);
     expect([...target.querySelectorAll("[aria-labelledby=post-drafts] .gl-w")].map((x) => x.textContent)).toEqual(["newsletter", "blog post"]);
     expect(target.querySelectorAll(".btn.primary").length).toBe(1);                 // the newest draft's Open
-    expect(target.querySelector("[aria-labelledby=post-drafts] .btn.primary")?.textContent).toBe("Open");
+    expect(target.querySelector("[aria-labelledby=post-drafts] .btn.primary")?.textContent).toBe("View");
     expect(target.querySelector("[aria-labelledby=post-sent]")?.textContent).toContain("Nothing sent yet.");
     // the accounts are one line and one control, whatever the number of sites
     const acc = target.querySelector("[aria-labelledby=post-accounts]")!;

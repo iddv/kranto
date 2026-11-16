@@ -170,7 +170,7 @@ export function redraw(): void {
 /* the flash at the list's top: it stays for 8 s from when it was first drawn, through any
    redraws, then goes: redraws never restart its clock (that kept "Resumed"/"Queued" blinking for
    as long as reads arrived). One with an Undo (Stop round, Cancel) stays while its
-   Undo is offered. A the server form redirected here says its notice (?msg=). */
+   Undo is offered. A server form redirected here says its notice (?msg=). */
 let SHOWN: (Flash & { at: number; on: string }) | null = null;
 function headFlash(r: Route) {
   let f = takeFlash();
@@ -280,7 +280,7 @@ export function render(): void {
   document.body.classList.toggle("bare", ["hello", "welcome"].includes(r.path[0] || "")); // first run: no navigator
   document.body.classList.toggle("show-detail", !!w.object);
   FLASHED = headFlash(r);
-  // the page's one head: the shell draws it on the doors' pages, either layout;
+  // The page's one head: the shell draws it on the doors' pages, either layout;
   // first run (the splash and setup's steps) has none
   ui.headOn = doors && !document.body.classList.contains("bare");
   drawStarts(); // the reads this draw asks for are the page's (their unreadable rows: below)
@@ -387,8 +387,8 @@ const AWAY = ["source", "connection", "observation", "theme", "idea"];
 /* the detail pane: a page's pane (its own object, a selected setting group, compacted week, watch,
    Add watch or Topics row, or what the page is about); an object shown away from its home (sel=: a
    topic from Spend) is its home's; a build, a project, a source, an observation or a theme shown
-   away from home (a Today row, a topic's Builds or Sources) is drawn by its home's pane (UXI,
-   FE-8); a Today row that is not an object's own route (an issue, the proposals, a message, the
+   away from home (a Today row, a topic's Builds or Sources) is drawn by its home's pane; a
+   Today row that is not an object's own route (an issue, the proposals, a message, the
    queue) is Today's pane's, beside any list. With none of those: nothing selected. */
 function renderDetail(w: W): Element | null {
   const box = document.getElementById("dscroll")!;
@@ -506,7 +506,7 @@ export async function boot(): Promise<boolean> {
   await Promise.all([loadHost(), loadWho()]);
   if (host()) {
     await loadShell(api); // which shell draws, before the first draw (shell.home)
-    // first run: a fresh install lands on #/welcome (an older the server has no /api/setup)
+    // first run: a fresh install lands on #/welcome (an older server has no /api/setup)
     let setup: { needs_setup?: boolean; done?: boolean } | null = null;
     try {
       setup = (await api("/api/setup")) as { needs_setup?: boolean; done?: boolean };

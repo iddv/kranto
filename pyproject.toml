@@ -47,7 +47,7 @@ connections = ["cryptography>=42"]
 mcp = ["mcp>=1.8"]
 
 [dependency-groups]
-# the page in a real browser (tests/page/test_browser_*.py): only its CI job installs it
+# The page in a real browser (tests/page/test_browser_*.py): only its CI job installs it
 browser = ["playwright==1.63.0"]
 
 [project.scripts]

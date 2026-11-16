@@ -1,6 +1,6 @@
 """The build loop's actions are verbs too: one door, one ladder, for every assistant.
 
-the page's registry hands its actions to the host (``host_api.verb_rows``); the server lists them
+The page's registry hands its actions to the host (``host_api.verb_rows``); the server lists them
 as ``b.<kind>`` and runs them through ``api/act`` in this process, so the ladder, the prepared
 presses and Activity are the same for a build as for a topic. An assistant's token (``mcp``,
 ``console``) may not post to ``api/act`` directly once the page has verbs; a named agent keeps
@@ -44,7 +44,7 @@ def row(kind, title, ladder, subjects, click="click", fields=(), doors=BOTH, pag
 
 
 class ActApi(FakeApi):
-    """the page's mount with ``verb_rows``, an ``api/act`` that records its caller, and the
+    """The page's mount with ``verb_rows``, an ``api/act`` that records its caller, and the
     loop's settings (``Config``: ``mcp.actions``)."""
 
     def __init__(self):

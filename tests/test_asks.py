@@ -198,7 +198,7 @@ def test_the_owners_click_offers_the_latest_issue_again_with_no_cub_run(home):  
     assert "the ones after it" in a["practice"]["switch"]["words"]
     with pytest.raises(tickets.TicketError, match="already"):
         asks.again(home, t["id"], identity=UI)
-    # the page's lists name no ticket that is not open
+    # The page's lists name no ticket that is not open
     issues = home.cubs.page_read("newsletter", "issues", {})
     named = [r["ticket"] for g in issues.values() if isinstance(g, list) for r in g]
     assert t["id"] not in named

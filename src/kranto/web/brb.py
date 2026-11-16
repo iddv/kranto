@@ -2,7 +2,7 @@
 ``/``; its own files, calls and terminal socket keep the internal prefix ``/brb/``, and the old
 ``/brb/`` address answers 308 to ``/`` (a bookmark's ``#/…`` is kept by the browser).
 
-the page exports one plain function through its host API, ``handle(method, path, query,
+The page exports one plain function through its host API, ``handle(method, path, query,
 body) -> (status, content_type, body)``. When ``brb.enabled`` is set in kranto.yaml and that
 import works, ``python -m kranto serve`` routes ``/brb/...`` to it, in Starlette's thread pool. The
 host's
@@ -78,7 +78,7 @@ class Brb:
     def call_with_headers(self, method: str, path: str, query: str = "", body: Any = None,
                           identity: dict | None = None) -> tuple[int, str, bytes, dict]:
         """``call``, plus the headers the page asks the host to add (``handle_with_headers``:
-        its versioned static files may be cached for good). An older the page gives none."""
+        its versioned static files may be cached for good). An older page gives none."""
         fn = getattr(self.api, "handle_with_headers", None)
         if fn is None:
             return (*self.call(method, path, query, body, identity), {})
@@ -100,8 +100,8 @@ def load(cfg, bind_host: str | None, port: int | None = None,
     """Decide whether to mount the page. ``cfg`` is ``Config.brb``; ``bind_host`` is the
     address the server is bound to (None: loopback, as in tests); ``port`` the one it
     listens on; ``data_dir`` the server's data folder, whose ``activity.json`` the page's live
-    feed watches (ACT: a the page that does not take it is mounted as before). A the page from
-    before the cut that still takes ``builds`` is told False: it serves the page without its
+    feed watches (a page version that does not take it is mounted as before). A page version
+    from before the cut that still takes ``builds`` is told False: it serves the page without its
     builds, projects and repos, and never opens the loop's ledger."""
     if not cfg.enabled:
         return Brb("off")
@@ -120,7 +120,7 @@ def load(cfg, bind_host: str | None, port: int | None = None,
         return Brb("missing", msg)
     version = getattr(api, "API_VERSION", 0)
     if not isinstance(version, int) or version < REQUIRED_API:
-        msg = (f"the page is too old: its API version is {version}, and this the server needs "
+        msg = (f"the page is too old: its API version is {version}, and this server needs "
                f"{REQUIRED_API}. Update the page in this environment.")
         log.warning(msg)
         return Brb("too_old", msg, api)
@@ -174,7 +174,7 @@ def routes(brb: Brb) -> list[Route]:
         return Response(data, status_code=status, headers=headers)
 
     async def to_root(request: Request):
-        # the page's old address: the page is at / now; a browser keeps the #/… fragment
+        # The page's old address: the page is at / now; a browser keeps the #/… fragment
         query = request.url.query
         return RedirectResponse("/" + (f"?{query}" if query else ""), status_code=308)
 
@@ -213,7 +213,7 @@ def term_routes(brb: Brb, auth, allowed_hosts) -> list:
     the page's ``term_ws``. The host's guard is HTTP middleware and never sees a WebSocket, so
     this route checks for itself before the page does again: the Host is one of the allowed
     names, the Origin is exactly this Host's, and the caller is the signed-in owner (the
-    session cookie; a browser cannot send a bearer token). the page then checks the one-time
+    session cookie; a browser cannot send a bearer token). The page then checks the one-time
     ticket that ``POST /brb/api/term/open`` gave."""
     if not brb.mounted:
         return []
@@ -246,7 +246,7 @@ def term_routes(brb: Brb, auth, allowed_hosts) -> list:
 
 
 async def _stream(brb: Brb, request: Request, path: str) -> Response | None:
-    """the page's live feed (``/brb/api/stream``, its ``api.stream``): server-sent events
+    """The page's live feed (``/brb/api/stream``, its ``api.stream``): server-sent events
     written as they come, each wait in the thread pool. None for every other path, and for a
     the page without the feed (the page then polls, as before). A GET like every read: the
     host's guard has already checked the Host; no token, no secret."""

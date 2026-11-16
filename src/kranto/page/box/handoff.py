@@ -155,7 +155,7 @@ def credential(environ=None, started=None) -> Credential | None:
 
 def mark_dotenv(environ=None, started=None) -> None:
     """Name in ``$KRANTO_DOTENV_VARS`` the token variables this process has but was not started
-    with (Kranto's ``.env``'s), so a process it starts inherits the knowledge. the server's
+    with (Kranto's ``.env``'s), so a process it starts inherits the knowledge. The server's
     ``load_dotenv`` does it as it loads them; this covers an older one. Names only."""
     env = os.environ if environ is None else environ
     started = started_names() if started is None else started

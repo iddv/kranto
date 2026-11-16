@@ -239,7 +239,7 @@ describe("an installed cub's Settings page", () => {
     answering({ [FEATURES_API]: FEATURES(toot), [SHELL_API]: shell, [cubPath("toot")]: detail() });
     v = await draw(FeaturePage, where("settings/toot"));
     await settle();
-    expect(v.target.querySelector("#cub-source-gone")).toBeNull();          // an older the server: none
+    expect(v.target.querySelector("#cub-source-gone")).toBeNull();          // an older server: none
     v.done();
   });
 

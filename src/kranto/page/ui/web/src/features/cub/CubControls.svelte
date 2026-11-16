@@ -2,7 +2,7 @@
   // An installed cub's state on its Settings sheet: each kind it may ask
   // for, for real or in practice (for real is the house confirm, here only; practice is a click, and kranto cub dry from
   // a terminal); Stop and Resume; Update (Kranto fetches its source again and shows the files'
-  // change and what it may now do, before anything is applied); Remove. the server's own features
+  // change and what it may now do, before anything is applied); Remove. The server's own features
   // (built-in) have none of this: they are not installed.
   import { app } from "../../lib/shell.svelte";
   import { read } from "../../lib/reads.svelte";

@@ -1,4 +1,4 @@
-"""the server's runs as traces: read through the server's API (a fake host here), never its
+"""The server's runs as traces: read through the server's API (a fake host here), never its
 database file; a call's request and answer are its payloads (redacted, paged), a call whose
 payload retention removed says so, a cub's host call shows its op and never its payload, and
 the cost is the calls' own."""
@@ -57,7 +57,7 @@ def test_a_run_reads_as_a_trace_through_the_hosts_api(tmp_path):
     tr = Traces(None, afk_fetch=fetch)
     tid = f"afk:{UUID}"
     o = tr.get(tid)
-    # the run, and its marks (ACT: its steps; a the server without them answers 404)
+    # the run, and its marks (ACT: its steps; a server without them answers 404)
     assert asked == [f"/api/runs/{UUID}", f"/api/activity?run={UUID}"]
     kinds = sorted(s.kind for s in o.t.spans.values())
     assert kinds == ["call", "call", "event", "run", "tool"]

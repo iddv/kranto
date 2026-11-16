@@ -54,7 +54,7 @@
     { id: "hood", w: "Neighbourhood" }, { id: "nearby", w: "Nearby", n: o.neighbours.length }, { id: "judgment", w: "Judgment" }]);
 
   const judged = $derived((o ? [["content quality", o.content_quality], ["durability", o.durability], ["opportunity", o.opportunity]] : []) as [string, number][]);
-  // why it is in a topic: the topics its source feeds (an older the server does not say)
+  // why it is in a topic: the topics its source feeds (an older server does not say)
   const tops = $derived(o?.topics || []);
   const feedsWords = (ts: SourceLink[]): string => (!ts.length ? "feeds no topic: every item from it is judged" : ts.length === 1 ? `feeds ${ts[0]!.name} (its only topic)` : `feeds ${topicList(ts)}`);
   const whyHere = (ts: SourceLink[], sim: number | null | undefined): string =>

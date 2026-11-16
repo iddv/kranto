@@ -8,7 +8,7 @@ import { plural } from "../../lib/format";
 import { drop, put, read, type Read } from "../../lib/reads.svelte";
 import { SET_ST, type St } from "../../ui/settings";
 
-/** the server's prompts (absolute: the server serves them next to the page) */
+/** The server's prompts (absolute: the server serves them next to the page) */
 export const PROMPTS_API = "/api/prompts";
 
 /** a version's row */

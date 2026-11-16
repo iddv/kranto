@@ -1,6 +1,6 @@
 """Kranto's plugin and your own assistant (the owner's Q3, Q6 and Q9, 2026-10-25).
 
-The plugin ships in the wheel (``kranto paths plugin``) and the the server repo is its marketplace.
+The plugin ships in the wheel (``kranto paths plugin``) and the server repo is its marketplace.
 (``claude plugin validate --strict`` passes on both; tests may not run the real Claude
 Code.) Its skill's always-loaded description names the three locks; a description stays under
 Claude Code's 1,536-character listing. Two hooks: Kranto's secrets are refused; Kranto's own tools

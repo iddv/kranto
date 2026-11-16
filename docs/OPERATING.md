@@ -566,9 +566,9 @@ Needs you; the action writes `update/promote.json` and starts the gate's unit, w
 main, cuts `vX.Y.0` held from the build's commit (making `release/X.Y`), runs
 `rc_check.sh` against the latest stable and releases it; a failure leaves it held, with a row
 saying where it stopped. `gate.py status` says the candidate, each check's reading and what it
-could not read; `gate.py known SIGNATURE --reason WHY` lifts an error the operator has looked
+could not read; `gate.py known SIGNATURE --reason WHY` lifts an error the maintainer has looked
 at; `gate.py withdraw TAG --reason WHY` withdraws a nightly; `gate.py promote --now --tag
-vX.Y.Z --reason WHY` releases a held stable at once (a fix, or the operator's word). Every
+vX.Y.Z --reason WHY` releases a held stable at once (a fix, or the maintainer's word). Every
 promotion is a line in `~/.local/state/kranto-release/gate.jsonl`.
 
 **The two release shapes.** Every release is cut from one checkout of the one repository

@@ -7,7 +7,7 @@ import type { WatchCaps } from "./spend.svelte";
 export interface CapDef {
   key: string;
   word: string;
-  /** the server's body key */
+  /** The server's body key */
   field: string;
   effect: Effect;
   hint: string;

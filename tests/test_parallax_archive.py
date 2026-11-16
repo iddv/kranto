@@ -317,13 +317,13 @@ title: "The pitch was the exclusion list"
 slug: the-pitch-was-the-exclusion-list
 ---
 
-A [the server NAS build](https://www.reddit.com/r/example-host/comments/1/nas/) lists what it
+A [server NAS build](https://www.reddit.com/r/example-host/comments/1/nas/) lists what it
 refuses. \
 It is cheap.
 
 Across the clusters, the [market](https://polymarket.com/market/a) names what will not count.
 
-## The the server shipped a ledger of refusals
+## The server shipped a ledger of refusals
 
 A [vendor post](https://example.org/unmatched) is not in the library. See [an earlier \
 one](/blog/earlier).
@@ -402,7 +402,7 @@ def test_parses_bold_and_prose_pitches_and_reports_what_lacks_them(archive):
     assert dispatches.who_of(bold.pitches[1]) == \
         "a head of growth whose launch posts underconvert"
     assert dispatches.prediction_by(dispatches.plain(bold.prediction), bold.date) == "2027-06-30"
-    assert dispatches.thesis(bold).startswith("A the server NAS build lists what it refuses.")
+    assert dispatches.thesis(bold).startswith("A server NAS build lists what it refuses.")
     prose = dispatches.parse(archive / "2026-07-09-001.md")
     assert [(p.kind, dispatches.title_of(p)) for p in prose.pitches] == [
         ("oss", "An aha-moment observability tool"),
@@ -443,7 +443,7 @@ def test_cards_cite_url_matched_observations_and_never_strike(archive, store):
     assert row["status"] == "shown" and row["title"] == card["title"]
     assert card["pitch"] == dispatches.parse(archive / "2026-10-08-001.md").pitches[0].markdown
     assert [c["verified"] for c in card["citations"]] == ["url_match", "url_match"]
-    assert card["evidence"][0]["claim"] == "A the server NAS build lists what it refuses."
+    assert card["evidence"][0]["claim"] == "A server NAS build lists what it refuses."
     assert card["links"] == [{"url": "https://example.org/unmatched",
                               "claim": "A vendor post is not in the library."}]
     assert card["dispatch"]["url"] == "https://example.com/blog/the-pitch-was-the-exclusion-list"

@@ -462,16 +462,20 @@ def change(cfg, store, body: dict) -> dict:
             raise ProfileError("disclosure is an object: site -> a line (\"\": off)")
         # the same link filter as a post's words (``sites.scrub``): a disclosure line is added
         # under the post by code, after the post's own words were filtered
-        from ..core.sites import scrub
+        from ..core.sites import name_of, scrub
         d = dict(d)
+        plain = False
         for site, line in list(d.items()):
             kept, gone = scrub(line, set())
             if gone:
                 d[site] = kept
-                said.append(f"the web address taken off {site}'s disclosure line (a disclosure "
-                            "line carries no address)")
+                said.append(f"{name_of(site)}'s disclosure line, with its web address taken off "
+                            "(a disclosure line carries no address, mention or site name)")
+            else:
+                plain = True
         row = replace(row, disclosure={**(row.disclosure or {}), **d})
-        said.append("disclosure")
+        if plain or not d:
+            said.append("disclosure")
     if "take" in body:
         if not isinstance(body["take"], bool):
             raise ProfileError("take is true or false")

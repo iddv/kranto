@@ -1,4 +1,4 @@
-"""the server's half of the one activity read: ``GET /api/activity``.
+"""The server's half of the one activity read: ``GET /api/activity``.
 
     {"seq", "running": [Run], "waiting": [Run], "next": [Scheduled], "recent": [Run],
      "folded": [Fold], "failing": [Fail], "counts": {...}, "quiet": "..."}

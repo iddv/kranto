@@ -9,7 +9,7 @@ import MapPane from "./MapPane.svelte";
 import { MAP, mapTheme, moveText, sparkLine, type Map, type ObservationPage } from "./map.svelte";
 
 const NOW = new Date().toISOString();
-// the server's /api/map (Map is generated from its web/types.py): three points in two clusters
+// The server's /api/map (Map is generated from its web/types.py): three points in two clusters
 const MAPD: Map = {
   snapshot: { id: 7, created_at: "2026-10-14T23:45:35Z", n: 3, k: 2, quality: {
     silhouette_umap: 0.41, silhouette_native: 0.05, stories: { observations: 3, distinct: 2 },

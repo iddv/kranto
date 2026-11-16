@@ -1283,7 +1283,7 @@ def server_jobs(rt, *, update_job: bool = False, port: int | None = None) -> lis
             from kranto.page.host_api import telemetry_sink
             telemetry_sink(telemetry.record)
         except (ImportError, AttributeError):
-            pass                                 # a the page without it records nothing
+            pass                                 # a version of the page without it records nothing
     # the features' jobs, each off while its feature is; the bus's
     # delivery after every round of jobs
     from .core import registry as features

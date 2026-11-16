@@ -10,7 +10,7 @@ Origin checks. The caller is the token it carries (``tokens.Store``):
 With ``api.require_token`` (the default) a write without a current token is refused (401).
 MCP, console and agent tokens may only run verbs (``POST /api/verbs/<kind>``, where
 ``core.verbs``'s ladder applies); an agent token may also post the page's ``api/act`` (the
-build loop's, gone since the cut; a the page from before it applies the token's limits
+build loop's, gone since the cut; a version of the page from before it applies the token's limits
 there). An agent token's ``actions`` name verbs; a name from before (a build loop's action)
 is ignored and the token still signs in. Every other write is the owner's (the UI or the
 command line). Reads stay open
@@ -137,7 +137,7 @@ class Auth:
         if ident["origin"] in ASSISTANT_DOORS and path in ACT_PATHS:
             # an assistant acts through the verbs' door, where the owner's ladder decides;
             # never around it through the page's api/act (the build loop's, gone since the
-            # cut: a the page from before it still answers there)
+            # cut: a version of the page from before it still answers there)
             log.warning("refused %s %s: an %s token runs verbs", request.method, path,
                         ident["origin"])
             return _json(403, f"the {ident['origin']} token runs Kranto's verbs: POST "

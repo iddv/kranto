@@ -3,7 +3,7 @@
 Every kind has three forms, scheduled ("Reading your sources"), running ("Reading your
 sources", the stage words after it) and done ("Read your sources"), and the verb a failed run
 offers. A feature's or a cub's job without a row here is said from its feature's title
-("Toot's weekly run"). the page draws the same words from the read; it keeps none of its own.
+("Toot's weekly run"). The page draws the same words from the read; it keeps none of its own.
 """
 
 from __future__ import annotations

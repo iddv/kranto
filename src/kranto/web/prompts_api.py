@@ -16,7 +16,7 @@
 | POST /api/prompts/preview       | {id, subject}: the text the model would get for a real   |
 |                                 | observation, card or topic, scrubbed; no model is called |
 
-the page's Settings › Prompts reads and writes these through this API (it proxies them), so
+The page's Settings › Prompts reads and writes these through this API (it proxies them), so
 nothing but the server touches ``<home>/prompts/the server/``. The guard is the server's, as for
 every other settings API: a known Host, a same-origin POST, a JSON body under the limit.
 """

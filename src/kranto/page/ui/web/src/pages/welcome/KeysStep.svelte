@@ -22,7 +22,9 @@
   const s = $derived(c.data);
   const found = $derived(read<ProviderSetup>(PROVIDER_API, 10000).data);
   const cc = $derived(found?.claude_code || null);
-  const offered = $derived(!!cc?.offered);
+  // "Found on this machine, signed in" only when it is: the server offers the login wherever it
+  // could be chosen, which says nothing about this machine
+  const offered = $derived(!!cc?.offered && !!cc?.installed && (!!cc?.logged_in || !!cc?.token_in_service));
   let pasting = $state(false);
   function onward(e: MouseEvent): void {
     if (!s?.key.set) e.preventDefault();

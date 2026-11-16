@@ -209,7 +209,7 @@ if "$WORK/bin/kranto" doctor --help 2>/dev/null | grep -q -- '--routes'; then
 fi
 
 # The web UI's build is in the installed the page wheel: the page links one hashed
-# module at this version's address, and the mount serves it. (A the page from before the web
+# module at this version's address, and the mount serves it. (A version of the page from before the web
 # UI has no static.APP_DIR and nothing to check.)
 if [ "$("$TOOL_PY" -P -c 'from kranto.page.ui.routes import static; print(hasattr(static, "APP_DIR"))')" != "True" ]; then
   echo "ok: this kranto.page has no web UI build to check"

@@ -1,7 +1,7 @@
 # How Kranto writes your posts: the prose engine
 
-Every post Kranto drafts (a blog post, a newsletter's opening, a Mastodon post, and each site
-SOCIAL adds) is written through one engine, `kranto.prose`. It puts your voice and Kranto's rules
+Every post Kranto drafts (a blog post, a newsletter's opening, a Mastodon post, and each
+short post for the sites you tick) is written through one engine, `kranto.prose`. It puts your voice and Kranto's rules
 into the prompt, checks the draft for the shapes that make machine-written text tiring to read,
 and rewrites only the lines that need it. It writes for readers. It does not try to get past AI
 detectors, and nothing here claims it does.
@@ -199,7 +199,7 @@ cub's own purpose, tier, hourly window and cap. When the owner set a model for K
 toot or newsletter writer, that writer's model calls (its writing and its revise) go to it,
 through the same metered client. The methods are in [cub-protocol.md](cub-protocol.md).
 
-**For SOCIAL's site variants**: "before writing" is `compose(material,
+**For the short posts' site variants**: "before writing" is `compose(material,
 site=<site>, kind=short|thread|long|note, language=, limits=<the registry's limits>,
 features=<the site's playbook and advanced-feature rules>)`; the playbook comes after the
 profile in the system message and wins only on what the site can carry. "After writing" is

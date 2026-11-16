@@ -68,7 +68,7 @@ describe("the indicator", () => {
     const [row] = needsRows(a, new Set());
     expect(row).toMatchObject({ kind: "incident", verb: "Reconnect", href: "#/settings/posting?sel=enl", title: "Your newsletter platform's sign-in has expired: reconnect" });
     expect(row?.meta).not.toContain("failed run");
-    // a the server before the field: by the id's class (the server itself sets band from the class)
+    // a server before the field: by the id's class (the server itself sets band from the class)
     expect(isBand({ ...blocked, band: undefined } as never)).toBe(false);
     expect(isBand({ ...incident(), band: undefined } as never)).toBe(true);
     expect(isBand(incident({ id: "core:scheduler" }))).toBe(true);
@@ -81,7 +81,7 @@ describe("the indicator", () => {
     expect(foldedByIncident(activityOf(), "ingest run failed")).toBe(false);
   });
 
-  it("says what the lanes knew until the read arrives (or an older the server)", () => {
+  it("says what the lanes knew until the read arrives (or an older server)", () => {
     expect(indicator(null, { ...LANES, afkRunning: "ingest", reading: "source 1 of 8" }, "", NOW).detail).toBe("reading your sources · source 1 of 8");
     expect(indicator(null, { ...LANES, afkRunning: "radar" }, "", NOW).detail).toBe("working");
     expect(indicator(null, LANES, "", NOW)).toMatchObject({ state: "quiet", detail: null });

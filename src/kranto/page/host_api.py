@@ -1,5 +1,5 @@
 """What Kranto (the host, the server) may use of the page: exactly these names, nothing else
-(S-12; CR-REVIEW A-8). the server imports from here only, so the page's modules can move
+(S-12; CR-REVIEW A-8). The server imports from here only, so the page's modules can move
 without breaking the host; a test in each repo pins the set.
 
 Each name is imported when it is first read (PEP 562), so ``import kranto.page.host_api`` costs
@@ -22,7 +22,7 @@ _NAMES = {
     "stream": ("kranto.page.ui.api", "stream"),               # the live feed (/api/stream)
     # the post-update self-check's reads of the mount (the server web/selfcheck_api.py, RCA D1)
     "selfcheck_paths": ("kranto.page.ui.api", "selfcheck_paths"),
-    # the page's settings file, loop.yaml (the console's term and ask sections): read and one
+    # The page's settings file, loop.yaml (the console's term and ask sections): read and one
     # key written (the server setup.py, wizard.py, web/verbs_api.py)
     "Config": ("kranto.page.settings.store", "Config"),
     "write_setting": ("kranto.page.settings.write", "write"),
@@ -47,7 +47,7 @@ _NAMES = {
     "telemetry_sink": ("kranto.page.telemetry", "set_sink"),
     "telemetry_schema": ("kranto.page.telemetry", "schema"),
     "telemetry_facts": ("kranto.page.telemetry", "facts"),
-    # the server's stop (the server stopping.py): the detached jobs it leaves running
+    # The server's stop (the server stopping.py): the detached jobs it leaves running
     "detached_jobs": ("kranto.page.proc", "detached"),
     # ... and the terminals it ends: their records say "ended: restart" before the signal
     "term_shutdown": ("kranto.page.ui.api", "stop_terms"),

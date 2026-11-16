@@ -16,7 +16,7 @@ export interface Starter {
 }
 
 export interface StarterPlace {
-  /** the page's route (location.hash without "#/"), its path parts */
+  /** The page's route (location.hash without "#/"), its path parts */
   path: string[];
   /** the selection in the address (sel=), when there is one */
   sel?: string | null;

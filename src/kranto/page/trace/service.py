@@ -124,7 +124,7 @@ class Traces:
     def __init__(self, index_path: Path | None = None, page_kb: int = 64,
                  payload_max_mb: int = 2, loop_home: Path | None = None, afk_fetch=None,
                  afk_mirror=None, archive: Path | None = None):
-        self.afk_fetch = afk_fetch                 # GET a the server path as the owner
+        self.afk_fetch = afk_fetch                 # GET a server path as the owner
         self.afk_mirror = afk_mirror               # () -> the server's activity.json, or None
         self.archive = Path(archive) if archive is not None else None
         self.loop_home = Path(loop_home) if loop_home is not None else None   # term/ sessions
@@ -181,12 +181,12 @@ class Traces:
         return o
 
     def _afk(self, uuid: str):
-        """A the server run, read through the server's API (``afk_fetch``), never its file."""
+        """A server run, read through the server's API (``afk_fetch``), never its file."""
         import re as _re
 
         from .afk import AfkTrace
         if self.afk_fetch is None or not _re.fullmatch(r"[A-Za-z0-9-]{8,64}", uuid or ""):
-            raise TraceError(404, f"no the server run {uuid!r}")
+            raise TraceError(404, f"no server run {uuid!r}")
 
         def fetch(path: str) -> dict:
             try:
@@ -348,7 +348,7 @@ class Traces:
         return out
 
     def _afk_rows(self, red: Redactor, limit: int) -> list[dict]:
-        """the server's runs (``GET /api/runs``, the owner's read), newest first; none when
+        """The server's runs (``GET /api/runs``, the owner's read), newest first; none when
         the server is not known here or cannot be read."""
         from .afk import _ts
         if self.afk_fetch is None:
@@ -437,7 +437,7 @@ class Traces:
                 "files": self.files(t), "cursor": encode_cursor(o.rev, -1, o.epoch),
                 "running": t.running,
                 "note": red.text(t.summary["note"]) if t.summary.get("note") else None,
-                # a the server run's plain head line and its Stop, while it runs
+                # a server run's plain head line and its Stop, while it runs
                 "line": red.text(t.summary["line"]) if t.summary.get("line") else None,
                 "stop": t.summary.get("stop")}
 

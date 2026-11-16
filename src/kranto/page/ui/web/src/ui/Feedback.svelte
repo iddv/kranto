@@ -42,7 +42,7 @@
   const facts = $derived({ ...base, version: upd ? upd.version : host() && !updRead ? "reading…" : st ? `the page ${st.version}` : "reading…", update: upd ? upd.update : null });
   const reach = $derived(online && (!st || st.reachable));
   const can = $derived(!!st && st.can_file && reach);
-  // the page's version of the issue: what File it files, and (fitted) what the link carries
+  // The page's version of the issue: what File it files, and (fitted) what the link carries
   const full = $derived(issue(draft, facts, machine, names, 0, repText));
   const fit = $derived(fitted(draft, facts, machine, names, repo, undefined, repText));
   const shown = $derived(can ? full : fit.issue);
