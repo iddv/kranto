@@ -206,7 +206,7 @@ if [ "$("$TOOL_PY" -P -c 'from kranto.page.ui.routes import static; print(hasatt
   echo "ok: this kranto.page has no web UI build to check"
   exit 0
 fi
-# the page is at / (the old address /brb/ redirects there)
+# Kranto is served at / (the old address /brb/ redirects there)
 page="$(curl -sfL "http://127.0.0.1:$PORT/")"
 asset="$(printf '%s' "$page" | grep -o 'static/v[A-Za-z0-9._-]*/app/app-[A-Za-z0-9_-]*\.js' | head -n 1 || true)"
 if [ -z "$asset" ]; then

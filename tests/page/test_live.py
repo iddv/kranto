@@ -249,4 +249,4 @@ def test_the_page_says_kranto_s_own_version():
     from kranto.page.ui.routes import static
     assert __version__ == kranto.__version__
     want = re.sub(r"[^A-Za-z0-9._-]", "-", kranto.__version__)
-    assert static.VERSION == want
+    assert want == static.VERSION

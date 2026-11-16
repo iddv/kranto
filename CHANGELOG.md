@@ -41,7 +41,7 @@ wheel (it is not on PyPI); `docs/setup.md` has every step.
   Bluesky, Mastodon, X, Threads and LinkedIn. A voice card and samples of your own writing;
   a checker that underlines what reads like AI and what breaks a site's limits; the fix; a
   time to send at. **Nothing is posted without your yes:** Open hands the draft to the site, or,
-  with an account connected, Kranto posts it after your press.
+  with an account connected, Kranto posts it once you approve.
 - **The console.** Claude Code beside every page (✦, or ⌘J). It runs as you, not in a
   sandbox (`docs/threat-model.md`). What an assistant changes that costs money or shapes your
   posts waits for your yes on Needs you; the spend caps and the update settings are yours only.

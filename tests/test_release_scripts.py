@@ -167,7 +167,7 @@ def test_the_release_build_builds_the_web_ui_and_the_smoke_loads_it():
     smoke = (SCRIPTS / "smoke.sh").read_text()
     assert "/app/app-" in smoke and 'curl -sf -o /dev/null "http://127.0.0.1:$PORT/brb/$asset"' \
         in smoke
-    # the page is at / (/brb/ only redirects there, and curl without -L reads an empty body)
+    # Kranto is served at / (/brb/ only redirects there; curl without -L reads an empty body)
     assert 'page="$(curl -sfL "http://127.0.0.1:$PORT/")"' in smoke
 
 
