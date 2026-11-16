@@ -92,7 +92,7 @@ grants first:
 
 | `ctx.` | Does |
 |---|---|
-| `read.topics()`, `.observations(…)`, `.search(q)`, `.themes()`, `.ideas(editor_class=…)`, `.idea(id)`, `.briefs(…)`, `.brief(id)`, `.object(kind, id)` (an observation, idea, theme, brief, or a build, product or project by the loop's id), `.get(name, **params)` | the read surface; text comes back fenced |
+| `read.topics()`, `.observations(…)`, `.search(q)`, `.themes()`, `.ideas(editor_class=…)`, `.idea(id)`, `.briefs(…)`, `.brief(id)`, `.object(kind, id)` (an observation, idea, theme or brief; a build, product or project answers none since builds left Kranto), `.get(name, **params)` | the read surface; text comes back fenced |
 | `events.read(kind)`, `.ack(kind, last_id)`, `.publish(kind, payload, subject=, dedupe=)` | the bus, at least once |
 | `model.complete(purpose=, tier=, messages=, max_tokens=, schema=)` | the metered model: no tools, no model of its own |
 | `search(q, kind=)`, `http.get(url)` | live search; a GET to a declared host |
@@ -251,8 +251,8 @@ Kranto ships three cubs to read and to start from, in `kranto paths examples`:
 - **toot**: a short post about an idea card when you ask (Write a post as a short post, or the
   console's `post.write`): a caption from one model call over the card's title and one-liner,
   cut to the instance's limit by the cub's own code, a draft in Kranto, and one `post.mastodon`
-  ticket. (Its daily job still looks for the weekly editor's pick, which finds none while builds
-  are off.)
+  ticket. (Its daily job still looks for the weekly editor's pick, which finds none: the weekly
+  editor left Kranto with builds.)
 - **blog**: a blog post about an idea card (`cards.get`: the card with its sources), a news item,
   a week of briefs, or your own markdown, written for your site (`blog.site`) in your voice:
   one model call, the card's or the item's own sources linked under it by the cub's code, a

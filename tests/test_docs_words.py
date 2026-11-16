@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-HISTORY = {"docs/design/DESIGN.md", "docs/design/DECISIONS.md", "docs/OPERATING.md"}
+HISTORY = {"docs/design/DESIGN.md", "docs/design/DECISIONS.md"}
 
 RETIRED = re.compile("|".join((
     r"Settings › Sources", r"Settings › Connections", r"^#+ Connections\b", r"Home and feed",
