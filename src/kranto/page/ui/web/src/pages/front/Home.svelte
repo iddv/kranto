@@ -102,7 +102,9 @@
   const away = $derived(!today && d?.away ? d.away : null);
   const briefs = $derived(d?.briefs && d.briefs.topics ? d.briefs : null);
   const ideas = $derived(d?.ideas && d.ideas.rows ? d.ideas : null);
-  const quiet = $derived(d?.quiet ? quietLine(d.quiet) : "");
+  // the first read runs now: the foot line says so rather than "not read yet"
+  const reading = $derived(!!first && (!!first.read || (first.rows || []).some((r) => r.key === "read" && r.state === "running")));
+  const quiet = $derived(d?.quiet ? quietLine(d.quiet, new Date(), reading) : "");
 
   /** the visit is marked: the ordinary home as it draws, once a page load */
   let marked = false;
@@ -163,7 +165,7 @@
     {@const line = firstLine(first)}
     {#snippet topicLink()}<a href={href("topics/" + first.topic!.id)} class="g-link" id="home-first-topic">The topic's page ›</a>{/snippet}
     {#snippet foot()}<p class="g-foot muted" id="home-first-foot">{`${first.quiet ? first.quiet + " " : ""}You can close this page; ${PRODUCT} keeps reading.`}</p>{/snippet}
-    <Group id="home-first" title="The first hour" count={first.topic!.name} right={topicLink} {foot}>
+    <Group id="home-first" title="The first hour" count={first.topic!.name} right={topicLink} {foot} kind="start">
       {#if line}<li class="gempty" id="home-first-read"><span>{line}</span></li>{/if}
       {#each first.rows || [] as r (r.key)}
         <Row title={r.title} meta={r.words} age={r.at ? (r.state === "done" ? ago(dt(r.at)) : at(r.at)) : ""}>{#snippet st()}{@render state(r.state === "done" ? "✓" : r.state === "running" ? "◐" : "○", r.state === "done" ? "done" : r.state === "running" ? "now" : "next", r.state === "done" ? "green" : r.state === "running" ? "blue" : "grey")}{/snippet}</Row>

@@ -21,7 +21,7 @@
   import { SOURCES_API } from "../settings/sources.svelte";
   import TopicAside from "./TopicAside.svelte";
   import { PRODUCT, Product } from "../../lib/product";
-  import { afkJob, afterTopics, newStep, SUGGEST, TOPIC, type Scouted } from "./welcome.svelte";
+  import { afkJob, afterTopics, newStep, RESTORE, restoreStep, SUGGEST, takeScouted, TOPIC, type Scouted } from "./welcome.svelte";
 
   let { view, mode = "page" }: { view: View; mode?: "page" | "welcome" } = $props();
   const welcome = $derived(mode === "welcome");
@@ -61,6 +61,33 @@
     }
   });
 
+  // step 2 after a reload: setup's topic and its proposals read back from the server (a scout
+  // still running is waited for again), once a page load, before setup is done
+  $effect(() => {
+    if (!welcome || !host || RESTORE.tried) return;
+    const t = TOPIC.t;
+    if (!t) return;
+    if (t.id || t.name) {
+      RESTORE.tried = true;
+      return;
+    }
+    const s = read<{ done?: boolean; topics?: number }>(SETUP_API, 30000);
+    if (!s.data && !s.error) return;
+    RESTORE.tried = true;
+    const L = app();
+    if (!L || !s.data || s.data.done || !(s.data.topics || 0)) return;
+    void restoreStep(L, t)
+      .then(async (r) => {
+        if (!r?.running || !t.id) return;
+        scouting = "Finding places to read…";
+        const x = await afkJob<Scouted>(L, { job: r.running }, `/api/topics/${t.id}/scout`, "Finding places to read", (w) => (scouting = w));
+        takeScouted(t, x);
+        L.afkDrop();
+      })
+      .catch(() => undefined) // nothing read back: the form stays empty, as before
+      .finally(() => (scouting = null));
+  });
+
   function pick(n: string, d: string): void {
     T.name = n;
     T.desc = d;
@@ -84,11 +111,7 @@
       const first = (t.id ? await L.api(`/api/topics/${t.id}/scout`, {}) : await L.api("/api/topics", { name, description: desc, scout: true })) as { id: number };
       if (!t.id) t.id = first.id;
       const x = await afkJob<Scouted>(L, first, `/api/topics/${t.id}/scout`, "Finding places to read", (w) => (scouting = w));
-      const known = new Set(t.rows.map((p) => p.id));
-      t.rows = [...t.rows, ...x.proposals.filter((p) => !known.has(p.id))];
-      for (const p of x.proposals) if (p.pretick && !known.has(p.id)) t.ticked.add(p.id);
-      t.message = x.message;
-      t.invalid = x.invalid || 0;
+      takeScouted(t, x);
       L.afkDrop();
     }).finally(() => {
       scouting = null;

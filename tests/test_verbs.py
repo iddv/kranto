@@ -164,6 +164,23 @@ def test_a_prepared_press_is_dismissed_and_expires(rt, app):
     assert all(r["available"] for r in rows)
 
 
+def test_a_prepared_item_names_what_it_acts_on(rt, app):
+    """Needs you says "Archive: Padel", not "topic #15". The name is read with the
+    rows (never stored), so an item prepared before says it too; a kind with no name here, a
+    row that is gone and an odd id read as None."""
+    tid = library.add_topic(rt.store, rt.embedder, "Padel  courts", "Padel clubs.")
+    for uuid, kind, sid in (("t", "topic", str(tid)), ("gone", "topic", "999999"),
+                            ("cub", "cub", "blog"), ("odd", "topic", "x1")):
+        rt.store.insert("prepared", {
+            "prepared_uuid": uuid, "state": "open", "verb": "topic.archive",
+            "subject_kind": kind, "subject_id": sid, "fields": "{}",
+            "expires_at": None, "created_at": "2026-11-14T22:00:00Z"})
+    with web_client(app, BASE) as page:
+        rows = {r["uuid"]: r for r in page.get("/api/prepared").json()["prepared"]}
+    assert rows["t"]["subject_name"] == "Padel courts"
+    assert [rows[u]["subject_name"] for u in ("gone", "cub", "odd")] == [None, None, None]
+
+
 def test_a_prepared_item_whose_verb_left_is_no_longer_available_and_dismissed(rt, app):
     """CUT (``prepared``): live holds six open ``b.factory_issue`` rows from before
     builds left. Each is listed as no longer available, with Dismiss only, never an error; it

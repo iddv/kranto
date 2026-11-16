@@ -251,10 +251,12 @@ export function nextWords(at: string, now: Date = new Date()): string {
   return `on ${week ? d.toLocaleDateString("en-GB", { weekday: "long" }) : dayMonth(d)} at ${hhmm(d)}`;
 }
 
-/** the quiet line: "5 topics and 153 sources, read 2 hours ago. Next: ideas tonight at 22:00." */
-export function quietLine(q: { topics?: number; sources?: number; read_at?: string | null; next?: { words: string; at: string } | null }, now: Date = new Date()): string {
+/** the quiet line: "5 topics and 153 sources, read 2 hours ago. Next: ideas tonight at 22:00."
+ * A home never read whose first read runs now (the server's `reading`, or the first hour's read
+ * row: `reading`) says "reading now", not "not read yet" */
+export function quietLine(q: { topics?: number; sources?: number; read_at?: string | null; reading?: boolean; next?: { words: string; at: string } | null }, now: Date = new Date(), reading = false): string {
   if (q.topics == null || q.sources == null) return "";
-  const read = q.read_at ? `, read ${agoWords(q.read_at, now.getTime())}` : ", not read yet";
+  const read = q.read_at ? `, read ${agoWords(q.read_at, now.getTime())}` : reading || q.reading ? ", reading now" : ", not read yet";
   const head = `${plural(q.topics, "topic")} and ${plural(q.sources, "source")}${read}.`;
   return q.next ? `${head} Next: ${q.next.words} ${nextWords(q.next.at, now)}.` : head;
 }

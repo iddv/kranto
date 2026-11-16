@@ -2385,10 +2385,12 @@ export interface HomeNext {
   at: string;
 }
 
+/** The home's quiet line; ``reading``: a read runs now (absent from an older server). */
 export interface HomeQuiet {
   topics?: number;
   sources?: number;
   read_at?: string | null;
+  reading?: boolean;
   next?: HomeNext | null;
   error?: string;
   error_id?: string;
