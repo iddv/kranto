@@ -48,7 +48,7 @@ mcp = ["mcp>=1.8"]
 
 [dependency-groups]
 # The page in a real browser (tests/page/test_browser_*.py): only its CI job installs it
-browser = ["playwright==1.63.0"]
+browser = ["playwright==1.65.1"]
 
 [project.scripts]
 kranto = "kranto.launcher:main"
