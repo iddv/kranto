@@ -31,8 +31,17 @@ def test_the_block_installs_a_releases_verified_wheel():
     assert download.startswith('gh release download "$tag" -R iddv/kranto')
     assert "'*.whl'" in download and "SHA256SUMS" in download
     assert check == '(cd "kranto-$tag" && sha256sum -c SHA256SUMS)'
-    # the one wheel, by path (a name on an index could be another project's)
-    assert install == 'uv tool install --python 3.12 "kranto-$tag"/kranto-*.whl'
+    # the one wheel, by path (a name on an index could be another project's), with the extras
+    # install.sh installs (connections: a posting account; notify; mcp), so both installs are one
+    assert install == ('uv tool install --python 3.12 "kranto[connections,notify,mcp] @ '
+                       'file://$(ls "$PWD/kranto-$tag"/kranto-*.whl)"')
+    assert "kranto[connections,notify,mcp] @ file://$WHEEL" in (ROOT / "install.sh").read_text()
+
+
+def test_the_readme_s_three_lines_install_the_same_extras():
+    readme = (ROOT / "README.md").read_text()
+    assert ('uv tool install --python 3.12 "kranto[connections,notify,mcp] @ '
+            'file://$(ls "$PWD"/kranto-*.whl)"') in readme
 
 
 def test_no_doc_installs_kranto_from_git():

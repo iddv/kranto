@@ -89,18 +89,19 @@ Run these in a folder where you keep downloads (they make a `kranto-v0.x.y` fold
 tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)
 gh release download "$tag" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "kranto-$tag"
 (cd "kranto-$tag" && sha256sum -c SHA256SUMS)
-uv tool install --python 3.12 "kranto-$tag"/kranto-*.whl
+uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$(ls "$PWD/kranto-$tag"/kranto-*.whl)"
 kranto --version
 ```
 
 **You should see:** one `OK` line from `sha256sum`, a list of packages, then the
-executables uv installed, among them `kranto`, and then `kranto 0.x.y`. It takes under a minute.
+executables uv installed: `kranto`, and the command's name from before the rename (kept for
+installs made then; it runs the same program), and then `kranto 0.x.y`. It takes under a minute.
 If your shell then says `kranto: command not found`, run `uv tool update-shell` and open a new
 terminal. The downloaded folder can be deleted afterwards.
 
-If you plan to let an assistant use Kranto over MCP (step 9), install `kranto[mcp]`: in the
-`uv tool install` line, replace the last argument, `"kranto-$tag"/kranto-*.whl`, with
-`"kranto[mcp] @ $(ls "$PWD/kranto-$tag"/kranto-*.whl)"`. `kranto update` keeps the extra.
+The three extras are what `install.sh` installs too: `connections` (posting accounts, their
+tokens encrypted), `notify` (messages to your phone or chat) and `mcp` (step 9). `kranto update`
+keeps them.
 
 **Later:** once the repository is public, the same commands work without an invitation
 (and the wheels can also be downloaded from the release page in a browser). Once Kranto is on
@@ -122,7 +123,7 @@ kranto home: /home/you/.kranto (new)
   wrote /home/you/.kranto/loop/
   wrote /home/you/.kranto/tasks/
   wrote /home/you/.kranto/loop/loop.yaml
-  made the ui, mcp, cli token(s) in /home/you/.config/kranto/tokens
+  made the ui, mcp, console, cli token(s) in /home/you/.config/kranto/tokens
 ```
 
 and then one of two endings:
@@ -133,11 +134,14 @@ and then one of two endings:
   The terminal is free again.
 - **Without a systemd user manager** (a container, WSL without systemd, or a shell whose `HOME`
   is not your login home): `not using systemd: <the reason>; serving in the foreground (Ctrl-C
-  stops it)`, then `kranto on http://127.0.0.1:8765`. Kranto runs only as long as that terminal
-  does: leave it open, and use a second terminal for the next steps.
+  stops it)`, then `kranto on http://127.0.0.1:8765` and its log, ending with `Sign a browser in
+  with 'kranto open'`. Kranto runs only as long as that terminal does: leave it open, and use a
+  second terminal for the next steps (step 5 prints the sign-in link).
 
 Useful options: `kranto up --port 8790` for another port, `kranto up --no-browser` to print the
-sign-in link instead of opening a browser. Kranto only ever listens on 127.0.0.1.
+sign-in link instead of opening a browser. Kranto only ever listens on 127.0.0.1. Choose the port
+on the first `kranto up`: the home keeps it, and a later `--port` does not change what
+`kranto open` prints (Known rough edges).
 
 `kranto up` rewrites and restarts the unit only when the unit runs this same `kranto` (or the
 old command beside it). Run from a checkout or a second tool while another install's command
@@ -152,9 +156,10 @@ kranto doctor
 
 **You should see:** one line per check, each `ok`, `warn` or `FAIL`, and every `FAIL` names its
 fix. On a fresh install, before Welcome, lines like these are expected until you finish the
-next steps:
+next steps (the model is chosen in step 6; until then the default provider's key is missing):
 
 ```
+FAIL  api key        $OPENROUTER_API_KEY is not set (shell or /home/you/.kranto/.env)
 warn  sources        none approved; add a topic or a pack                               -> step 7
 warn  claude         Claude Code is not installed; kranto works without it. For the console: ...
 ```
@@ -165,7 +170,8 @@ while any check fails.
 
 ## 5. Sign your browser in (person)
 
-`kranto up` opens (or prints) a one-time sign-in link. For a new one at any time:
+`kranto up` with systemd opens (or prints) a one-time sign-in link; in the foreground it tells
+you to run `kranto open`. For a new one at any time:
 
 ```sh
 kranto open --no-browser
@@ -215,8 +221,8 @@ sentence beside it; never preselected). Clicking **Test and save** with nothing 
    shared with your own Claude Code; when a usage window closes, watching
    pauses until it reopens. Anthropic's terms describe subscription login as meant for
    ordinary, individual use and ask developers building products to use API keys. Its calls
-   cost nothing in dollars here: Settings › Spend shows how many there were and what they would
-   have cost at API list prices. Each call is `claude -p` with no tools, no MCP server and no
+   cost nothing in dollars here: Settings › Spend shows how many there were, and `kranto doctor`
+   what they would have cost at API list prices. Each call is `claude -p` with no tools, no MCP server and no
    settings, in an empty folder of the kranto home; `llm.claude_code.sandbox: true` also runs it
    in bubblewrap.
 
@@ -254,13 +260,16 @@ finds"); stay on the page.
 
 **You should see:** `Proposed for "<your topic>"` and a list of places, each with how well it
 fits. A topic that watches nothing yet has at most the five that fit best ticked (its first read,
-and so its first brief, stays short); the rest stay proposed. Tick the ones to watch and click **Watch these**; nothing is watched until you tick it.
+and so its first brief, stays short); the rest stay proposed. Tick the ones to watch and click
+**Watch these and continue** (on the topic's Sources page later: **Watch these**); nothing is
+watched until you tick it.
 The page estimates how many items a day that brings. If you left the page while it scouted,
 open the topic (**Watch › Topics**, then its name, then **Sources**): the proposals wait there.
 
 Then Kranto reads every 3 hours and keeps what fits your sentence. The first brief is written as
 soon as the first read has kept 8 items, and once more over the whole read when it ends; idea cards come after the first night's map once 30 items
-are kept. Ideas show under **Ideas** and under each topic. Grade them (**▲ Useful**, **▼ Not useful**, or the
+are kept (with only the five best places ticked, that can take a day or two: tick more to go
+faster). Ideas show under **Ideas** and under each topic. Grade them (**▲ Useful**, **▼ Not useful**, or the
 weekly queue under **Ideas › Review**): your grades reorder the cards.
 
 ### Read X (optional, paid, person)
@@ -330,10 +339,13 @@ words; Settings › Posting changes it later). Either way the home shows **The f
 read as it goes and the topic's four rows, Sources, First read, First brief (as soon as 8 items
 are kept), First ideas (after the map, once 30 items are kept). The status bar says "Reading for
 the first time" until the first read ends. The console stays on its rail, starting nothing,
-until setup is done.
+until setup is done; then, with Claude Code installed and signed in, it **starts by itself**
+beside the page (untick Settings › Assistant › **Open the console when Kranto opens** to stop
+that): Claude Code, as you,
+not in a sandbox, asking once whether to trust Kranto's folder.
 
-**You should see:** the home, with **Needs you** at its top, and `Set up. The first ingest is running; what it keeps
-shows under Topics within a few minutes.` (**Watch › Topics**).
+**You should see:** the home, with **Needs you** at its top, `Kranto is reading <your topic> for
+the first time.` and **The first hour**.
 
 ## 9. Let an assistant or a script use Kranto
 
@@ -431,6 +443,24 @@ print the homes in use.
 
 The page has help too: `?` on any page lists its keys, and the `?` tips explain each setting.
 
+### Updating
+
+`kranto update` installs the newest release on your channel (stable unless you chose nightly in
+Settings › System), checks every page on your data, and goes back by itself if anything fails.
+`kranto update --rollback` goes back to the version before by hand. If an update is cut off while
+it installs, `kranto status` names `update/RECOVER.txt`: `sh` it (Troubleshooting).
+
+**An install made before the rename** keeps its old command, its folders and its service. It
+crosses in two steps, each with the way back:
+
+1. the nightly build in the old shape (three wheels, the only shape its own update helper
+   installs): its old command's `update --to vX.Y.0-devN --yes`; back: `update --rollback --yes`;
+2. the next release, one wheel: `kranto update --yes`; back: `kranto update --rollback --yes`.
+
+Its settings must name this repository first (`update.repo: iddv/kranto` in its settings file),
+or it never sees a Kranto release. Both commands, and both the old and the new names of the
+environment variables, keep working after the crossing.
+
 ## 12. Remove Kranto
 
 ```sh
@@ -465,6 +495,10 @@ loginctl disable-linger    # only if nothing else of yours needs it
   step 6, or in `kranto setup`'s Spend section.
 - **`kranto down` stops Kranto until the next boot.** `kranto down --disable` keeps it stopped;
   `kranto uninstall` removes the service (step 12).
+- **The port is the first `kranto up`'s.** A later `kranto up --port N` serves on N, but
+  `kranto open` and `kranto doctor` still use the port the home was made with (`notify.base_url`
+  in `kranto.yaml`). If the first `kranto up` stopped at `port 8765 is already in use`, set
+  `base_url: http://127.0.0.1:N` under `notify:` in `~/.kranto/kranto.yaml`, then `kranto up --port N`.
 - **Several places.** Data is in one home (`~/.kranto`), but tokens, the service, the program and
   the caches live elsewhere: see step 10.
 
@@ -477,7 +511,7 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | The page says `this kranto was installed without its web page` | It was installed from git, which carries no built page: install from a release (step 2). |
 | `kranto: command not found` after installing | `uv tool update-shell`, then open a new terminal. |
 | `not using systemd: …; serving in the foreground` | Expected without a systemd user manager: keep that terminal open. With a `HOME` that is not your login home, systemd is skipped on purpose. |
-| `port 8765 is already in use` | Another program (or another Kranto) holds it: `kranto up --port 8790`. |
+| `port 8765 is already in use` | Another program (or another Kranto) holds it: `kranto up --port 8790` (and see Known rough edges: the home keeps the first port). |
 | `kranto.service runs …, not this kranto` from `kranto up` | Another install's command runs the unit (you ran a checkout or a second tool): run that one's `kranto up`, or `kranto up --adopt` to make the one you ran the unit's command. |
 | `an update was cut off while it installed`, or `kranto status` names `RECOVER.txt` | `sh ~/.kranto/update/RECOVER.txt` (the path it names): it puts the previous version back and removes the file. |
 | `FAIL  api key` in `kranto doctor`, or `Scouting failed: no API key: set $OPENROUTER_API_KEY` (or `$ANTHROPIC_API_KEY`) | Paste the key in Welcome › Watching, or Settings › Watching › Watching model (step 6). |

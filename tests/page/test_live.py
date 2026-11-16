@@ -239,3 +239,14 @@ def test_the_producer_reads_files_only(app, monkeypatch):
     w.changes()
     assert w.changes() is None
     assert os.environ.get("KRANTO_NO_NETWORK", "1")     # the suite's own guard is on as well
+
+
+def test_the_page_says_kranto_s_own_version():
+    """The page is in Kranto's one wheel: its version is Kranto's, never a fixed 0.0.0 (a
+    lookup of a distribution that no longer exists left every release at one static address,
+    cached for good, and an open page never reloaded after an update)."""
+    import kranto
+    from kranto.page.ui.routes import static
+    assert __version__ == kranto.__version__
+    want = re.sub(r"[^A-Za-z0-9._-]", "-", kranto.__version__)
+    assert want == static.VERSION

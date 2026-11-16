@@ -6,17 +6,18 @@
 **Kranto reads the sources you pick, tells you each day what happened and what it suggests, and
 drafts the post about it for you to approve.**
 
-It runs on your own Linux machine as one page in your browser. It needs one model key and costs
-cents a day. Nothing is sent until you click Send.
+It runs on your own Linux machine as one page in your browser. It needs one model (a key, or
+your Claude Code login) and costs cents a day. Nothing is posted until you say yes.
 
 ```
 gh release download -R iddv/kranto -p 'kranto-*.whl'
-uv tool install --python 3.12 kranto-*.whl
+uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$(ls "$PWD"/kranto-*.whl)"
 kranto up
 ```
 
-`kranto up` starts Kranto and signs your browser in at http://127.0.0.1:8765/. Linux only, for
-now. Step by step, with what you should see: [docs/setup.md](docs/setup.md).
+`kranto up` starts Kranto at http://127.0.0.1:8765/ and signs your browser in (`kranto open`
+prints a new sign-in link). Linux only, for now. Step by step, with what you should see:
+[docs/setup.md](docs/setup.md).
 
 ## Who it is for
 
@@ -34,11 +35,15 @@ read every item (use a feed reader) or schedule posts across many networks (use 
   line linked to the item behind it.
 - **Ideas.** Once about 30 items are kept, Kranto writes idea cards: what the news suggests,
   linked to the items it came from.
-- **Post.** On any card or brief, ask for a draft: a blog post or a short post. You read it, edit
-  it, and click Send, or copy the text when no account is connected.
+- **Post.** On any card or brief, ask for a draft: a blog post, a newsletter, or short posts for
+  Bluesky, Mastodon, X, Threads and LinkedIn, in your voice, checked for what reads like AI. You
+  read it and edit it; then Open hands it to the site, or, with an account connected, Kranto
+  posts it once you approve. With nothing connected, copy the text.
 - **The console.** Your own Claude Code in a panel beside every page, working on the same
   library through the same tools. It runs as you, not in a sandbox
-  ([docs/threat-model.md](docs/threat-model.md)). Optional: Kranto works without it.
+  ([docs/threat-model.md](docs/threat-model.md)), and opens by itself once setup is done
+  (Settings › Assistant turns that off). What it changes that costs money or shapes your posts
+  waits for your yes. Optional: Kranto works without it.
 
 ## What it costs, and how long it takes
 
@@ -74,9 +79,12 @@ release's `SHA256SUMS` first:
 tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)
 gh release download "$tag" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "kranto-$tag"
 (cd "kranto-$tag" && sha256sum -c SHA256SUMS)
-uv tool install --python 3.12 "kranto-$tag"/kranto-*.whl
+uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$(ls "$PWD/kranto-$tag"/kranto-*.whl)"
 kranto up
 ```
+
+The extras are posting accounts (`connections`), messages to your phone or chat (`notify`) and
+`kranto mcp` (`mcp`); `install.sh` and `kranto update` install the same.
 
 Every release also carries `install.sh`, which installs uv when you have none, checks every file
 against `SHA256SUMS`, installs Kranto and runs `kranto setup`:
@@ -129,6 +137,7 @@ made this way, Kranto is not for you, and that is fine.
 [docs/README.md](docs/README.md) lists every page. To start with:
 
 - [docs/setup.md](docs/setup.md): installing, step by step, with what you should see.
+- [CHANGELOG.md](CHANGELOG.md): what each release changed, and what is still unproven.
 - [docs/faq.md](docs/faq.md): "isn't this just…", answered.
 - [docs/scope.md](docs/scope.md): what Kranto will not do.
 - [docs/GLOSSARY.md](docs/GLOSSARY.md): the words Kranto uses.

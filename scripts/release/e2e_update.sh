@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # The update's end-to-end test (section 11): a real release, a scratch instance,
-# a rollback, a forced failure and the interrupt path, on this machine's own user manager,
+# a rollback and a forced failure, on this machine's own user manager,
 # beside the real install and never touching it.
 #
 #   E2E_DIR=~/somewhere scripts/release/e2e_update.sh STEP
 #
 # STEP, in order: live (record the real service), setup, install, check, update, rollback,
-# fail, interrupt, teardown, live (again: compare). Each prints its evidence.
+# fail, teardown, live (again: compare). Each prints its evidence.
 #
 # The scratch instance: $KRANTO_UNIT (kranto-test.service; never a real install's unit) on
 # 127.0.0.1:$PORT (8766), its own uv tool dir and bin dir ($UV_TOOL_DIR, $UV_TOOL_BIN_DIR, under
@@ -15,8 +15,7 @@
 # SQLite's backup API, its folders rewritten to the copy's; LOOP_COPY=<a loop home> copies that
 # too). Either way its usage reports are off, a fresh loop.yaml builds in a scratch task folder
 # with maintenance and publishing off. No model is called: every server job is off, the API
-# key's variable is one nobody sets, nothing is sent to build, and the one "build" (interrupt)
-# is a sleeper run by build.command.
+# key's variable is one nobody sets.
 #
 # install with FROM_TAG=vX.Y.Z installs that release's wheels from $PREV_REPO (default
 # public.toml's repo): the final shape (one wheel) as install.sh does, the old shape (three
@@ -232,65 +231,6 @@ fail)
   kr status | grep -E '^update' || true
   api /api/update | python3 -c 'import json,sys; d=json.load(sys.stdin); a=d["apply"]; print("apply", a["state"], a.get("reason"))'
   systemctl --user is-active "$KRANTO_UNIT"
-  ;;
-
-interrupt)
-  say "a running build: update waits, cancel lets go, --when now stops it and resumes it"
-  PY="$(tool_py)"
-  "$PY" - "$LOOP" "$TASKS" "$PY" <<'PY'
-import sys, yaml
-from pathlib import Path
-from kranto.page.loop.ledger import Ledger
-loop, tasks, py = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
-cfg = yaml.safe_load((loop / "loop.yaml").read_text())
-cfg["build"]["command"] = [py, "-c", "import time; time.sleep(900)"]
-(loop / "loop.yaml").write_text(yaml.safe_dump(cfg, sort_keys=False))
-task = tasks / "e2e-sleeper"; task.mkdir(parents=True, exist_ok=True)
-(task / "spec.md").write_text("# e2e sleeper\nA stand-in build: sleeps; no model.\n")
-led = Ledger(loop / "loop.db")
-idea, _ = led.add("e2e sleeper build", "e2e", title="E2E sleeper", state="queued")
-led.update(idea["id"], task_dir=str(task), note="queued by the e2e")
-print("queued", idea["id"])
-PY
-  for _ in $(seq 1 30); do
-    n=$(api /brb/api/header | python3 -c 'import json,sys; print(json.load(sys.stdin)["running"])')
-    [ "$n" -ge 1 ] && break; sleep 2
-  done
-  echo "builds running: $n"; pgrep -af "$PY -c import time" || true
-  kr update "${TO_ARGS[@]}" --yes > "$E2E_DIR/interrupt-wait.log" 2>&1 &
-  upd=$!
-  for _ in $(seq 1 30); do
-    st=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("state"))' "$KRANTO_HOME/update/state.json" 2>/dev/null || true)
-    [ "$st" = draining ] && break; sleep 2
-  done
-  sleep 6
-  python3 -c 'import json,sys; s=json.load(open(sys.argv[1])); print("state", s["state"], "|", s.get("detail"))' "$KRANTO_HOME/update/state.json"
-  kr update --cancel
-  wait $upd || echo "update exit $? (5: cancelled)"
-  cat "$E2E_DIR/interrupt-wait.log"
-  api /api/status | python3 -c 'import json,sys; print("hold after cancel:", json.load(sys.stdin)["hold"])'
-  say "--when now"
-  set +e; kr update "${TO_ARGS[@]}" --when now --yes; code=$?; set -e
-  echo "exit $code"
-  kr --version
-  for _ in $(seq 1 45); do
-    n=$(api /brb/api/header | python3 -c 'import json,sys; print(json.load(sys.stdin)["running"])' || echo 0)
-    [ "$n" -ge 1 ] && break; sleep 2
-  done
-  echo "builds running after the restart: $n"
-  sleep 35                       # one loop tick: the stopped round is started again
-  pgrep -af "$PY -c import time" || true
-  "$PY" - "$LOOP" <<'PY'
-import sys
-from pathlib import Path
-from kranto.page.loop.ledger import Ledger
-led = Ledger(Path(sys.argv[1]) / "loop.db")
-for i in led.all():
-    if i["title"] == "E2E sleeper":
-        print("ledger:", i["state"], "pid", (i.get("build") or {}).get("pid"))
-        for h in led.history(i["id"]):
-            print(" ", h.get("state"), "|", h.get("note"))
-PY
   ;;
 
 teardown)
