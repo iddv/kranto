@@ -9,7 +9,7 @@ requests they carry.
 
 Nothing yet.
 
-## 0.7.0 — the first release
+## 0.7.0 — 2026-11-16
 
 ### What it is
 
