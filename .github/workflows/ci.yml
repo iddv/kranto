@@ -1,7 +1,8 @@
 name: ci
-# Every pull request and every push to main. Each job runs on the runner the repository variable
-# RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, and for a run
-# started by hand with "hosted", on GitHub's own runner. The required checks are eight of the jobs
+# Every pull request and every push to main. Each job but sandbox runs on the runner the repository
+# variable RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, and for a
+# run started by hand with "hosted", on GitHub's own runner. sandbox always runs on GitHub's own
+# runner (it needs a fresh /proc inside bubblewrap). The required checks are eight of the jobs
 # below: test, fast, slow, browser, frontend, lint, gitleaks and sandbox (install is not required
 # yet). A skipped required job is never green.
 on:

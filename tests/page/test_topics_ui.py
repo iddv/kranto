@@ -89,10 +89,14 @@ def test_the_key_is_never_kept_by_the_page():
     # the names of groups, never their rows), and Feedback's draft (FB: the person's own words, kept in this
     # browser while the sheet is closed, cleared once filed), and when the viewer last opened
     # Activity (a time, so the top bar's red dot goes; never a run), and the
-    # last topic looked at in Watch (WT: its id, so the Watch door comes back to it)
+    # last topic looked at in Watch (WT: its id, so the Watch door comes back to it), and the
+    # words typed into a draft's Edit and not saved yet (the person's own words, by the draft's
+    # id, cleared on Save or Cancel)
     uses = re.findall(r"localStorage\.\w+\(([^,)]*)", JS)
     assert uses and set(uses) == {"THEME_KEY", "LOOK_KEY", "LOOK_CUSTOM_KEY", "TERMW_KEY",
-                                  "FOLD_KEY", "OPEN_KEY", "DRAFT_KEY", "SEEN_KEY", "WATCH_KEY"}, uses
+                                  "FOLD_KEY", "OPEN_KEY", "DRAFT_KEY", "SEEN_KEY", "WATCH_KEY",
+                                  "EDIT_KEY"}, uses
+    assert "const EDIT_KEY = `${COMMAND}.edit.words`;" in JS
     assert 'const WATCH_KEY = "kranto.watch.topic";' in JS
     assert 'export const SEEN_KEY = "kranto.activity.seen";' in JS
     assert 'const DRAFT_KEY = "kranto.feedback.draft";' in JS

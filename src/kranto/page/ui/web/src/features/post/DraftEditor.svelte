@@ -11,18 +11,38 @@
   import { app } from "../../lib/shell.svelte";
   import ProseFlags from "./ProseFlags.svelte";
   import { learnFrom, siteOf } from "./prose";
-  import { editPath, type PostEdited, type PostSheet } from "./post";
+  import { editPath, keepWords, type KeptWords, type PostEdited, type PostSheet } from "./post";
 
-  let { s, close, saved }: { s: PostSheet; close: () => void; saved: (to: number) => void } = $props();
+  // kept: words typed here before and not saved (another page, Back, a reload): the editor
+  // opens with them and says so
+  let { s, close, saved, kept = null }: { s: PostSheet; close: () => void; saved: (to: number) => void; kept?: KeptWords | null } = $props();
   const long = $derived(s.edit?.body != null);
   // the words the editor opens with, read once (the box is the owner's from then on); SOCIAL's
   // parts when the read carries them, else the editor's own (one part)
   const first = untrack(() => ({ title: s.edit?.title ?? "", body: s.edit?.body ?? "",
     parts: s.parts?.map((p) => ({ text: p.text })) || s.edit?.parts?.map((p) => ({ text: p.text })) || [{ text: "" }],
     before: s.edit?.body ?? s.edit?.parts?.map((p) => p.text).join("\n\n") ?? "" }));
-  let title = $state(first.title);
-  let body = $state(first.body);
-  let parts = $state(first.parts);
+  const back = untrack(() => kept);
+  let title = $state(back ? back.title : first.title);
+  let body = $state(back ? back.body : first.body);
+  let parts = $state(back && back.parts.length ? back.parts : first.parts);
+  // the words differ from the draft's: kept in this browser as they are typed, and a reload asks first
+  const dirty = $derived(title !== first.title || body !== first.body || JSON.stringify(parts) !== JSON.stringify(first.parts));
+  $effect(() => {
+    const id = untrack(() => s.id);
+    keepWords(id, dirty ? { title, body, parts: parts.map((p) => ({ text: p.text })) } : null);
+  });
+  $effect(() => {
+    if (!dirty) return;
+    const ask = (e: BeforeUnloadEvent): void => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", ask);
+    return () => window.removeEventListener("beforeunload", ask);
+  });
+  /** Cancel: the words typed here are forgotten, the draft stays as it was */
+  function cancel(): void {
+    keepWords(s.id, null);
+    close();
+  }
   let said = $state("");
   const max = $derived(s.limit?.max ?? null);
   const site = $derived(s.site || siteOf(s.kind));
@@ -38,6 +58,7 @@
     await L.act(btn, () => L.api(editPath(s.id), what), (r) => {
       const got = r as PostEdited;
       if (!extra) learnFrom(before, text);
+      keepWords(s.id, null);
       afkDropPrefix("/api/post");
       L.say(got.say);
       saved(got.id);
@@ -46,6 +67,7 @@
 </script>
 
 <form class="draft-editor" id="draft-editor" onsubmit={(e) => { e.preventDefault(); void save(e.currentTarget.querySelector("#draft-save") as HTMLElement); }}>
+  {#if back}<p class="small c-amber" id="draft-edit-back">Your words from before are back, not saved yet: Save keeps them, Cancel forgets them.</p>{/if}
   {#if s.edit?.title != null}<label class="de-l small" for="draft-edit-title">Title</label><input id="draft-edit-title" class="wide" type="text" maxlength="200" bind:value={title} />{/if}
   {#if long}
     <label class="de-l small" for="draft-edit-body">The words (markdown)</label>
@@ -58,9 +80,9 @@
     {/each}
   {/if}
   {#each s.extras || [] as x (x.key)}<p class="muted small de-extra">{x.words}{#if x.drop}{" "}<button type="button" class="linkish small" onclick={(e) => void save(e.currentTarget, { drop: x.key })}>Remove</button>{/if}</p>{/each}
-  <ProseFlags {text} {site} id="draft-edit-flags" fix={(t, say) => { if (long) body = t; else if (parts[0]) parts[0].text = t; said = say; }} />
+  <ProseFlags {text} {site} parts={long ? null : parts.map((p) => p.text)} id="draft-edit-flags" fix={(t, say) => { if (long) body = t; else if (parts[0]) parts[0].text = t; said = say; }} />
   {#if said}<p class="muted small" id="draft-edit-said">{said} Save keeps it; Cancel leaves the draft as it was.</p>{/if}
-  <p class="acts de-foot"><button type="button" class="btn sm" id="draft-cancel" onclick={close}>Cancel</button><button type="submit" class="btn sm primary" id="draft-save" disabled={over || empty}>Save</button></p>
+  <p class="acts de-foot"><button type="button" class="btn sm" id="draft-cancel" onclick={cancel}>Cancel</button><button type="submit" class="btn sm primary" id="draft-save" disabled={over || empty}>Save</button></p>
   <p class="muted small">Saved, your version waits on Post in its place; the original stays under Earlier drafts.</p>
 </form>
 

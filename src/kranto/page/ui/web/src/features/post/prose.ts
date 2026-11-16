@@ -27,10 +27,14 @@ async function post<T>(path: string, body: unknown): Promise<T | null> {
   }
 }
 /** prose.check (a read): the flags and the line, or null when there is no answer */
-export const checkProse = async (text: string, site: string, sources: string | null = null): Promise<ProseCheck | null> => {
+export const checkProse = async (text: string, site: string, sources: string | null = null, parts: string[] | null = null): Promise<ProseCheck | null> => {
   if (!text.trim()) return null;
-  // sources: what a short post was written from; a name it uses that they lack is flagged
-  const got = await post<ProseCheck>("/api/prose/check", sources ? { text, site, sources } : { text, site });
+  // sources: what a short post was written from; a name it uses that they lack is flagged.
+  // parts: a thread's posts, so the site's limit is each post's, never their sum
+  const body: Record<string, unknown> = { text, site };
+  if (sources) body.sources = sources;
+  if (parts && parts.length > 1) body.parts = parts;
+  const got = await post<ProseCheck>("/api/prose/check", body);
   return got && Array.isArray(got.flags) && typeof got.verdict === "string" ? got : null;
 };
 /** Fix them: revise the flagged spans only (one model call, at most two rounds); stores nothing */

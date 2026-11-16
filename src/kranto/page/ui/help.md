@@ -243,7 +243,9 @@ box of markdown; a short post is a box with its count, red past the site's limit
 what reads like AI, underlined with its plain fix, with **Fix them** (it rewrites only those
 words; nothing is kept until you choose Save). **Save** keeps your words as the draft that waits
 (it is "edited by you"); the original stays under Earlier drafts, and "Start again from the
-original" brings its words back. A send that was waiting for your yes is withdrawn first, and the
+original" brings its words back. Words you typed and did not save are kept in this browser tab:
+go to another page, go Back or reload, and Edit opens again with them (**Cancel** forgets
+them). A send that was waiting for your yes is withdrawn first, and the
 page says so. When your assistant (over `kranto mcp`, the console or an agent) asks to change a
 draft's words, nothing changes until you approve it in Needs you; the draft then says "edited by
 your assistant (mcp)", never "edited by you", and still waits for your yes before it goes. In
@@ -436,8 +438,8 @@ with the link counted as 23), and each says how much of its limit it uses. Copy 
 words on any draft. On the preview Open is off and says nothing is posted.
 
 **At an hour.** In the dialog of a post Kranto posts directly, **Schedule** takes a day and time
-on your own clock; after your yes the draft waits under **Scheduled** ("Goes Monday 16 Nov, 09:00
-· Bluesky") with **Cancel**, and goes then. To change its words, cancel first: an edited draft
+on your own clock; after your yes the draft waits under **Scheduled** ("Mon 16 Nov, 09:00 ·
+Bluesky") with **Cancel**, and goes then. To change its words, cancel first: an edited draft
 needs a new yes. If Kranto was stopped at that hour it does not post late: the draft waits again,
 saying its hour passed, and Needs you says so. **Sent** shows a post's replies, reposts and likes
 where its site gives them (Bluesky, Mastodon, Threads), read once a day; LinkedIn and X give none,

@@ -3,8 +3,9 @@ flags and Fix, and Welcome's "How you write" step (PROSE's PR 2), and for the ve
 
 - ``GET /api/prose``: the profile (voice card, switches with their words, the checker's
   strictness and rules, guides per site, the lists, samples, disclosure, take, open proposals).
-- ``POST /api/prose/check`` ``{text, site?, kind?, take?, limits?, strictness?}``: the flags
-  (verb ``prose.check``, read).
+- ``POST /api/prose/check`` ``{text, site?, kind?, take?, limits?, strictness?, parts?}``: the
+  flags (verb ``prose.check``, read). ``parts``: a thread's posts, each checked against the
+  site's length limit on its own.
 - ``POST /api/prose/voice``: a change to the profile, ``profile.change``'s keys (verb
   ``prose.voice``, reversible).
 - ``POST /api/prose/learn``: ``{draft, sent}`` gives proposals; ``{proposal, answer}`` a yes or
@@ -126,7 +127,17 @@ def check(rt, body: dict) -> dict[str, Any]:
     return prose.check(_text(body), _opt(body, "site", str), prose.load(rt.cfg, rt.store),
                        kind=_opt(body, "kind", str), limits=_opt(body, "limits", dict),
                        take=_opt(body, "take", str), strictness=body.get("strictness"),
-                       sources=_opt(body, "sources", str))
+                       sources=_opt(body, "sources", str), parts=_parts(body))
+
+
+def _parts(body: dict) -> list[str] | None:
+    """A thread's posts (``parts``: a list of texts), so the site's limit is each post's."""
+    v = body.get("parts")
+    if v is None:
+        return None
+    if not isinstance(v, list) or not all(isinstance(x, str) for x in v) or len(v) > 50:
+        raise ProseError("parts is a list of texts, one a post of the thread")
+    return v
 
 
 def voice(rt, body: dict) -> dict[str, Any]:

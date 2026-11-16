@@ -1,6 +1,6 @@
 """CI for strangers: no job names a self-hosted runner in the tree (each reads the repository's
-RUNNER variable, falling back to GitHub's own runner), no workflow hands a secret to a pull
-request's code, and the required jobs are the eight."""
+RUNNER variable, falling back to GitHub's own runner; ci.yml's sandbox always runs on GitHub's),
+no workflow hands a secret to a pull request's code, and the required jobs are the eight."""
 from __future__ import annotations
 
 import re

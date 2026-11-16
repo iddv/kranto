@@ -19,13 +19,26 @@ export function draftHref(d: Pick<PostDraft, "id" | "cub" | "ref">): string {
 /** whether a draft opens in the page's sheet route (else the ask's own dialog opens it) */
 export const hasSheet = (): boolean => !!matchRoute(["post", "d", "1"]);
 
-/** a sent post's line: the platform's own words, else what happened, else "Sent"; a short post
- * says where it went first ("Posted to Bluesky · posted by you") */
+/** a sent post's line, where it went and how: "X · posted by you", "Bluesky · 12 likes · Sent";
+ * the platform's own words, else what happened, else "Sent". It is the row's title (the post's
+ * own title is its fact), so a narrow screen keeps it whole */
 export function sentLine(d: PostDraft): string {
   const said = d.note || d.said || "Sent";
   // its numbers, where its site gives them, before the address (which the row may cut)
   const counted = d.reach && d.reach.words ? [d.reach.words] : [];
-  return d.site_word ? [`Posted to ${d.site_word}`, ...counted, said].join(" · ") : [...counted, said].join(" · ");
+  return [d.site_word || "", ...counted, said].filter(Boolean).join(" · ");
+}
+/** a scheduled post's when and where, short enough for a phone's row: "Tue 17 Nov, 09:00 ·
+ * Bluesky" on the person's own clock (the server's due_words when the time does not read) */
+export function dueWhen(d: Pick<PostDraft, "due" | "due_words" | "site_word">): string {
+  const t = d.due ? new Date(d.due) : null;
+  let when = d.due_words || "Scheduled";
+  if (t && !Number.isNaN(t.getTime())) {
+    const day = t.toLocaleDateString("en-GB", { weekday: "short" });
+    const date = t.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    when = `${day} ${date}, ${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
+  }
+  return [when, d.site_word || ""].filter(Boolean).join(" · ");
 }
 /** a scheduled post's line: "Monday 16 Nov, 09:00 · Bluesky" (the person's own time) */
 export function dueLine(d: Pick<PostDraft, "due_words" | "site_word">): string {

@@ -24,7 +24,7 @@
   import { ui } from "../../lib/shell.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { dismissWrite, retryWrite, writeAny } from "../../features/post/post";
-  import { cancelHour, draftFact, draftHref, dueLine, dueShort, failedAbout, failedTitle, fixWords, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
+  import { cancelHour, draftFact, draftHref, dueWhen, failedAbout, failedTitle, fixWords, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
 
   let { view }: { view: View } = $props();
   const host = $derived(!!ui.facts?.header.host);
@@ -94,14 +94,16 @@
       <Group id="post-scheduled" title="Scheduled" count={String(d.scheduled.length)}>
         {#each d.scheduled as x (x.id)}
           {#snippet end()}<button type="button" class="btn sm" data-act="post-cancel" onclick={(e) => cancelHour(e.currentTarget, x.id)}>Cancel</button>{/snippet}
-          <Row title={x.title} href={sheet ? draftHref(x) : null} meta={dueLine(x)} age={dueShort(x.due)} {end} />
+          <!-- when and where is the row's title, so a phone keeps it; the post's title is its fact -->
+          <Row title={dueWhen(x)} href={sheet ? draftHref(x) : null} meta={x.title} {end} />
         {/each}
       </Group>
     {/if}
     <Group id="post-sent" title="Sent" count={String(d.sent.length)}>
       {#each d.sent as x (x.id)}
         {#snippet end()}{#if x.link}<a class="btn sm quiet" href={x.link} target="_blank" rel="noopener noreferrer" title="Where it went">↗</a>{/if}{/snippet}
-        <Row title={x.title} href={sheet ? draftHref(x) : null} meta={sentLine(x)} age={ago(dt(x.at))} {end} />
+        <!-- where and how it went is the row's title ("X · posted by you"); the post's title is its fact -->
+        <Row title={sentLine(x)} href={sheet ? draftHref(x) : null} meta={x.title} age={ago(dt(x.at))} {end} />
       {/each}
       {#if !d.sent.length}<li class="gempty"><span class="muted">Nothing sent yet. A sent post shows here with where it went and how many it reached.</span></li>{/if}
       {#if d.sent.length && d.reach_foot}<li class="gempty" id="post-reach-foot"><span class="muted small">{d.reach_foot}</span></li>{/if}
@@ -123,6 +125,21 @@
 <style>
   /* a failed write's reason, its own line under its row (desktop and phone alike) */
   .row-why { list-style: none; color: var(--red, var(--ink)); padding: 0 8px 6px 34px; overflow-wrap: anywhere; }
+  /* a failed write's reason and where posts go are read whole: the fact takes its own line
+     under the title, wrapped, at every width (they were cut to a few letters) */
+  :global(section[aria-labelledby="post-failed"] .lr .c-main),
+  :global(section[aria-labelledby="post-accounts"] .lr .c-main) { flex-wrap: wrap; row-gap: 2px; }
+  :global(section[aria-labelledby="post-failed"] .lr .c-meta),
+  :global(section[aria-labelledby="post-accounts"] .lr .c-meta) { flex: 1 1 100%; white-space: normal; overflow: visible; text-overflow: clip; }
+  :global(section[aria-labelledby="post-failed"] .lr .r-title) { white-space: normal; }
+  /* a phone hides a row's fact; a failed write keeps its reason, under its title (as "Where posts
+     go" keeps its line) */
+  @media (max-width: 759px) {
+    :global(section[aria-labelledby="post-failed"] .lr .c-main) { display: flex; flex-direction: column; -webkit-line-clamp: unset; line-clamp: unset; }
+    :global(section[aria-labelledby="post-failed"] .lr .c-main .c-meta) { display: block; white-space: normal; overflow: visible; }
+    :global(section[aria-labelledby="post-failed"] .lr .c-end) { grid-column: 4 / 8; grid-row: 2; justify-self: start; }
+    :global(section[aria-labelledby="post-failed"] .row.lr) { row-gap: 4px; }
+  }
   /* a phone (the mock,): a group's note goes to its own line under the heading, and a
      draft's kind is its glyph (the word is its label) so its title keeps the room */
   @media (max-width: 700px) {

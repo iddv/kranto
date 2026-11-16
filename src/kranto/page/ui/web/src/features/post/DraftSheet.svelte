@@ -29,7 +29,7 @@
   import DraftEditor from "./DraftEditor.svelte";
   import ProseFlags from "./ProseFlags.svelte";
   import { siteOf } from "./prose";
-  import { copyText, downloadHref, editPath, partsText, sheetPath, type PostEdited, type PostSheet } from "./post";
+  import { copyText, downloadHref, editPath, keepWords, keptWords, partsText, sheetPath, type KeptWords, type PostEdited, type PostSheet } from "./post";
   import { cancelHour } from "../../pages/post/post";
 
   // titled: the sheet's own title (off on the draft's page, whose head has it)
@@ -41,6 +41,22 @@
   const s = $derived(c?.data || null);
   let all = $state(false);
   let editing = $state(false);
+  // words typed into Edit and not saved (another page, Back, a reload): Edit opens again with
+  // them, once the draft is read and can still be edited
+  let kept = $state<KeptWords | null>(null);
+  let looked = $state<string | null>(null);
+  $effect(() => {
+    if (!s || looked === String(s.id)) return;
+    looked = String(s.id);
+    const k = keptWords(s.id);
+    if (k && s.can_edit && s.group === "waiting") {
+      kept = k;
+      editing = true;
+    } else {
+      kept = null;
+      if (k) keepWords(s.id, null);              // the draft moved on: its old words are not offered
+    }
+  });
   // the draft as drawn: its "# Title" line left out (the head says it); Copy and Download keep it
   const parts = $derived(s ? s.markdown.split(/\n{2,}/).filter((p, i) => !(i === 0 && p.trim() === `# ${s.title}`)) : []);
   const folded = $derived(!all && parts.length > 4);
@@ -56,6 +72,8 @@
   const askPosted = $derived(!!s && short && !!s.posted_by_you && !notYet && (opened || s.group === "waiting"));
   // the words PROSE checks: the editor's own (sources by outlet), else the markdown
   const words = $derived(s ? (s.edit?.body ?? s.edit?.parts?.map((p) => p.text).join("\n\n") ?? s.markdown) : "");
+  // a thread's posts, each checked against the site's limit on its own (never their sum)
+  const threadParts = $derived(s && s.edit?.body == null ? (s.edit?.parts?.map((p) => p.text) ?? (s.parts || []).map((p) => p.text)) : null);
   let copied = $state(false);
 
   async function copy(): Promise<void> {
@@ -122,7 +140,7 @@
     <p class="muted small" id="draft-facts">{facts}</p>
     {#if s.siblings?.length}<p class="muted small" id="draft-siblings">{#each s.siblings as x, i (x.id)}{#if i}{" · "}{/if}{#if String(x.id) === String(s.id)}<b>{x.word || x.site}{x.state === "sent" ? " ✓" : ""}</b>{:else}<a href={href(`post/d/${x.id}`)}>{(x.word || x.site) + (x.state === "sent" ? " ✓" : "")}</a>{/if}{/each}</p>{/if}
     {#if editing}
-      <DraftEditor {s} close={() => (editing = false)} saved={moved} />
+      <DraftEditor {s} {kept} close={() => { editing = false; kept = null; }} saved={(to) => { kept = null; moved(to); }} />
     {:else}
       {#if short && posts.length}
         <div class="draft-text" id="draft-text">
@@ -139,9 +157,9 @@
       {/if}
       {#if folded && !short}<p><button type="button" class="linkish small" id="draft-show-all" onclick={() => (all = true)}>{`Show all ${s.words} words`}</button></p>{/if}
       {#each s.extras || [] as x (x.key)}<p class="muted small draft-extra">{x.words}</p>{/each}
-      {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} sources={s.sources ?? null} id="draft-flags" />{/if}
+      {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} sources={s.sources ?? null} parts={threadParts} id="draft-flags" />{/if}
       {#if s.missed}<p class="small c-amber" id="draft-missed">{s.missed}</p>{/if}
-      {#if s.group === "scheduled"}<p class="acts small" id="draft-due"><span>{`Goes ${s.due_words || "at the time you chose"}. Nothing goes before then, and you can cancel it until then.`}</span> <button type="button" class="btn sm" id="draft-cancel" onclick={(e) => cancelHour(e.currentTarget, s.id)}>Cancel</button> <button type="button" class="linkish small" id="draft-retime" onclick={(e) => send(e.currentTarget)}>Change the time</button></p>{/if}
+      {#if s.group === "scheduled"}<p class="acts small" id="draft-due"><span>{`Goes ${s.due_words || "at the time you chose"}. Nothing goes before then, and you can cancel it until then.`}</span> <button type="button" class="btn sm" id="draft-cancel" onclick={(e) => cancelHour(e.currentTarget, s.id)}>Cancel</button> <button type="button" class="linkish small" id="draft-retime" onclick={(e) => openAsk({ cub: s.cub, ticket: s.ticket, again: s.again }, e.currentTarget, s.due || null)}>Change the time</button></p>{/if}
       <p class="acts" id="draft-verbs">
         {#if short && waits}
           {#if s.open}<a class="btn sm primary" id="draft-open" href={s.open} target="_blank" rel="noopener noreferrer" onclick={() => (opened = true)}>{`Open in ${s.site_word || s.site}`}</a>

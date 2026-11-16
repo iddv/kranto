@@ -5,6 +5,7 @@ import { openDialog } from "../../ui/dialog.svelte";
 import { toast } from "../../ui/toast.svelte";
 import { app } from "../../lib/shell.svelte";
 import { afkDropPrefix } from "../../lib/app/data";
+import { COMMAND } from "../../lib/product";
 import WritePostDialog from "./WritePostDialog.svelte";
 import AboutWhatDialog from "./AboutWhatDialog.svelte";
 
@@ -77,6 +78,36 @@ export interface PostSheet extends PostDraft {
 /** the edit route's answer (post.edit) */
 export interface PostEdited { ok: boolean; id: number; ref: string; ticket: number; withdrew: boolean; say: string }
 export const editPath = (id: number | string): string => `${sheetPath(id)}/edit`;
+
+/** words typed into a draft's Edit and not saved yet: kept in this browser (one key, the drafts'
+ * words by their id) as they are typed, so going to another page, Back or a reload brings them
+ * back to the draft's Edit; Save or Cancel forgets them, as a draft that no longer waits does.
+ * Nothing leaves the browser, and never a key or a token: a draft's own words only. */
+export interface KeptWords { title: string; body: string; parts: { text: string }[] }
+const EDIT_KEY = `${COMMAND}.edit.words`;
+function keptAll(): Record<string, unknown> {
+  try {
+    const v = JSON.parse(localStorage.getItem(EDIT_KEY) || "{}") as unknown;
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+export function keepWords(id: number | string, w: KeptWords | null): void {
+  try {
+    const all = keptAll();
+    if (w) all[String(id)] = w;
+    else delete all[String(id)];
+    if (Object.keys(all).length) localStorage.setItem(EDIT_KEY, JSON.stringify(all));
+    else localStorage.removeItem(EDIT_KEY);
+  } catch { /* storage off: the words stay in this view only */ }
+}
+export function keptWords(id: number | string): KeptWords | null {
+  const v = keptAll()[String(id)] as Partial<KeptWords> | null | undefined;
+  if (!v || typeof v !== "object") return null;
+  const parts = Array.isArray(v.parts) ? v.parts.filter((p) => !!p && typeof p.text === "string").map((p) => ({ text: p.text })) : [];
+  return { title: typeof v.title === "string" ? v.title : "", body: typeof v.body === "string" ? v.body : "", parts };
+}
 
 export const POST = "/api/post";
 /** Settings › Posting's sites (the server's GET /api/post/sites) */

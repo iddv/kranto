@@ -97,7 +97,8 @@ class Flag:
 
 # -- splitting ----------------------------------------------------------------------------------
 
-_SENT = re.compile(r"[^.!?\n]+(?:[.!?]+[\"'”’)\]]*|$)", re.M)
+# a full stop between two digits is a decimal point ("34.46p", "6.5-second"), not a sentence's end
+_SENT = re.compile(r"(?:[^.!?\n]|(?<=\d)\.(?=\d))+(?:[.!?]+[\"'”’)\]]*|$)", re.M)
 _URL = re.compile(r"https?://\S+|www\.\S+")
 _CODE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
 _QUOTE = re.compile(r"\"[^\"\n]{1,400}\"|“[^”\n]{1,400}”")
@@ -351,8 +352,13 @@ def site_length(text: str, unit: str) -> int:
 
 def check(text: str, site: str | None = None, profile: Profile | None = None, *,
           kind: str | None = None, limits: dict | None = None, take: str | None = None,
-          strictness: str | None = None, sources: str | None = None) -> dict:
+          strictness: str | None = None, sources: str | None = None,
+          parts: list[str] | None = None) -> dict:
     """``{score, verdict, flags[], counts, grade}`` for a piece of text.
+
+    ``parts``: a thread's posts, when ``text`` is a thread (its parts joined): the site's length
+    limit is then each part's, and a part over it is named ("part 2 of 3"); every other check
+    reads the whole text.
 
     ``limits`` overrides the site's (SOCIAL passes its registry's: ``max_chars``, ``unit``,
     ``links``, ``hashtags``, ``max_words``). ``take`` is the person's own line for this piece,
@@ -393,7 +399,7 @@ def check(text: str, site: str | None = None, profile: Profile | None = None, *,
     if sources is not None:
         for s, e in people_not_in(text, sources):
             add("salt.person", s, e, protect=False)
-    _site(text, p, lim, add)
+    _site(text, p, lim, add, [x for x in parts if isinstance(x, str)] if parts else None)
     flags.sort(key=lambda f: (f.start, f.end, f.rule))
     flags = _dedupe(flags)
     score = 100
@@ -442,7 +448,8 @@ Since Until Because Although Though Even Still Yet Just Only Also More Less Both
 I We You They He She It Is Are Was Were Be Do Does Did Has Have Had Can Could Will Would Should
 May Might Must Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March
 April May June July August September October November December Nobody Everyone Someone Anyone
-Everybody Somebody Me Him Us Them"""
+Everybody Somebody Me Him Us Them Jan Feb Mar Apr Jun Jul Aug Sep Sept Oct Nov Dec Mon Tue Tues
+Wed Thu Thur Thurs Fri Sat Sun"""
 _NOT_FIRST = frozenset(_NOT_FIRST_WORDS.split())
 # a second word that names a place, a product or an organisation, not a person ("New York",
 # "Visual Studio", "Open Source"): a two-word term ending in one is not read as a name
@@ -513,7 +520,8 @@ def _dedupe(flags: list[Flag]) -> list[Flag]:
     different fix)."""
     seen, out = set(), []
     for f in flags:
-        k = (f.start, f.end, f.rule)
+        # a site's flags say which part they are about: two parts over the limit are two flags
+        k = (f.start, f.end, f.rule, f.words if f.group == "site" else "")
         if k not in seen:
             seen.add(k)
             out.append(f)
@@ -776,13 +784,24 @@ def _cv(xs: list[int]) -> float:
     return math.sqrt(sum((x - m) ** 2 for x in xs) / len(xs)) / m
 
 
-def _site(text: str, p: Profile, lim: dict, add) -> None:
+def _site(text: str, p: Profile, lim: dict, add, parts: list[str] | None = None) -> None:
     max_chars, unit = lim.get("max_chars"), str(lim.get("unit") or "characters")
+    # what a person reads: a grapheme is a character as you see it
+    said = "characters" if unit == "graphemes" else unit.split(',')[0]
     if isinstance(max_chars, int):
-        n = site_length(text, unit)
-        if n > max_chars:
-            add("site.length", 0, len(text), scope="text", protect=False,
-                words=f"{n} {unit.split(',')[0]}; the site takes {max_chars}")
+        if parts and len(parts) > 1:
+            # a thread: each post against the site's limit, never their sum
+            for i, part in enumerate(parts):
+                n = site_length(part, unit)
+                if n > max_chars:
+                    add("site.length", 0, len(text), scope="text", protect=False,
+                        words=f"part {i + 1} of {len(parts)}: {n} {said}; the site takes "
+                              f"{max_chars}")
+        else:
+            n = site_length(text, unit)
+            if n > max_chars:
+                add("site.length", 0, len(text), scope="text", protect=False,
+                    words=f"{n} {said}; the site takes {max_chars}")
     max_words = lim.get("max_words")
     if isinstance(max_words, int):
         n = words_in(text)

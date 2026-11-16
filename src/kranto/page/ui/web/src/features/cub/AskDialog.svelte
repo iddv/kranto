@@ -11,25 +11,34 @@
   // (practice)" in the same place, never like a send. The audit facts are behind Details. Only the
   // page's own session approves (the server refuses any other door).
   import { openDetails } from "../../ui/details.svelte";
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import DialogFrame from "../../ui/DialogFrame.svelte";
   import ReadBack from "../../ui/ReadBack.svelte";
   import { app } from "../../lib/shell.svelte";
   import { CONNECTIONS_API, type Connections, type Field } from "../../pages/settings/connections";
   import { NEWSLETTER_API, type Newsletter } from "../../pages/settings/newsletter";
-  import { askPath, outcomeLine, whenOf, type AskView } from "../ask";
+  import { askPath, inputOf, outcomeLine, sameWords, whenOf, type AskView } from "../ask";
   import { CUBS_API } from "../cub";
   import { href } from "../../lib/router";
   import { FEATURES_API } from "../index";
 
-  let { id, close }: { id: number; close: () => void } = $props();
+  // retime: a scheduled post's hour (UTC), when the dialog opens from its Change the time: titled
+  // so, its When already open and filled with the hour it has, Schedule its button
+  let { id, close, retime = null }: { id: number; close: () => void; retime?: string | null } = $props();
   // a post Kranto holds for its hour: the dialog's Schedule is typed in the person's own time
   let v = $state<AskView | null>(null);
   let err = $state<string | null>(null);
   let view = $state<"ask" | "connect" | "done">("ask");
   let result = $state<{ text: string; tone: string } | null>(null);
-  let scheduling = $state(false);
+  const retiming = untrack(() => !!retime);
+  let scheduling = $state(untrack(() => !!retime));
   let at = $state("");
+  // the hour it has, in the box once the ask says whose clock it is typed in
+  $effect(() => {
+    const z = v?.ask?.zone;
+    if (!retiming || at || !v) return;
+    at = inputOf(untrack(() => retime), z);
+  });
   let details = $state(false);
   let busy = $state(false);
   // Connect, in place: the newsletter's platforms to choose from, then the provider's own form
@@ -164,7 +173,7 @@
   {/if}
 {/snippet}
 
-<DialogFrame title={a ? a.question : "Loading…"} {more} close={close} cancelText={view === "done" || (a && !a.open) ? "Close" : "Cancel"}
+<DialogFrame title={a ? (retiming && a.open ? "Change the time" : a.question) : "Loading…"} {more} close={close} cancelText={view === "done" || (a && !a.open) ? "Close" : "Cancel"}
   okText={!a || view === "done" || !a.open ? "" : view === "connect" ? (provider ? "Save and test" : "") : needs ? needs.button : scheduling ? "Schedule" : a.verb}
   disabled={busy}
   ok={(btn) => (view === "connect" ? saveConnect(btn.closest("dialog") || document.body) : needs ? openConnect() : approve())}>
@@ -194,13 +203,14 @@
         {#if a.practice.switch}
           <label class="ask-real" for="ask-real"><input id="ask-real" type="checkbox" checked={!a.practice.on} disabled={busy} onchange={(e) => void setReal(e.currentTarget.checked)} /> <span><b>Send for real</b> <span class="muted small">{a.practice.switch.words}</span></span></label>
         {/if}
-        {#if a.practice.on}<p class="ask-line muted" id="ask-practice">{a.practice.words}</p>{/if}
+        <!-- a refusal in the same words as this line (the preview's) is said once: this line, in red -->
+        {#if a.practice.on}<p class={"ask-line " + (err && sameWords(err, a.practice.words) ? "c-red" : "muted")} id="ask-practice" role={err && sameWords(err, a.practice.words) ? "alert" : null}>{a.practice.words}</p>{/if}
       {/if}
       {#if scheduling}
         <div class="field ask-when"><label for="ask-at">{a.zone === "local" ? "When (your time)" : "When, in UTC"}</label><input id="ask-at" type="datetime-local" bind:value={at} /></div>
       {/if}
     {/if}
-    {#if err}<p class="ask-line c-red" role="alert">{err}</p>{/if}
+    {#if err && !(a.practice?.on && a.open && view === "ask" && sameWords(err, a.practice.words))}<p class="ask-line c-red" role="alert">{err}</p>{/if}
     <button type="button" class="linkish small" id="ask-details" aria-expanded={details} onclick={() => (details = !details)}>Details</button>
     {#if details}
       <dl class="ask-facts" id="ask-facts">

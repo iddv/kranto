@@ -73,11 +73,13 @@ export function cubObjectAct(x: FeatureRow, ac: ActionDecl, o: Record<string, un
 }
 /** what a cub asks, in its one dialog (AskDialog): an open one at once; a draft offered again is
  * asked for again first, by this click (the server files it with the same fields: no cub run) */
-export function openAsk(ref: AskRef, btn: HTMLElement | null = null): void {
+/** ``retime``: a scheduled post's hour, when its Change the time opens the dialog (titled "Change
+ * the time", When filled with that hour) */
+export function openAsk(ref: AskRef, btn: HTMLElement | null = null, retime: string | null = null): void {
   const L = app();
   if (!L) return;
   if (ref.ticket) {
-    openDialog(AskDialog, { id: ref.ticket });
+    openDialog(AskDialog, { id: ref.ticket, retime });
     return;
   }
   if (!ref.again) return;
