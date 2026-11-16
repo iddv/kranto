@@ -253,8 +253,9 @@ posts, blog posts, the newsletter, the Mastodon post on a card) writes with Kran
 model until you choose another there; for a model on OpenAI, paste your OpenAI key under it and
 choose **Save and test**: it is tested, kept, and never shown again. **Disclosure**: the words
 each site's posts end with, where you switched it on in Settings › Posting. Under Advanced: the
-other switches (among them **Salt**: plain, wry or salty, and **More salt on thin items**), the
-checker's strictness and rules, your never, keep and always lists, and the guides each site
+other switches (among them **Salt**: plain, wry or salty, and **More salt on thin items**, off until you
+turn it on; a salty post that names a person its material does not is flagged "names a person
+the sources don't name" on its draft), the checker's strictness and rules, your never, keep and always lists, and the guides each site
 follows. Save keeps what you changed.
 
 **Needs you** shows in the top bar as "Needs you 4" while something waits (a dot on the

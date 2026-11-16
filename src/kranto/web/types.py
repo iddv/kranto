@@ -2553,6 +2553,8 @@ class PostSheet(PostDraft):
     # a short post's draft page (``post_api.short_sheet``)
     parts: NotRequired[list[PostCounted]]
     extras: NotRequired[list[PostExtra]]
+    # what a short post was written from (the page's check reads it); None: from before
+    sources: NotRequired[str | None]
     siblings: NotRequired[list[PostSibling]]
     open: NotRequired[str | None]
     open_off: NotRequired[str | None]

@@ -44,13 +44,14 @@ SWITCHES: dict[str, tuple[str, ...]] = {
     "hashtags": ("never", "site"),
     "links": ("post", "reply"),
     # round 3: how much wit and bite (plain until the owner says otherwise), and whether a thin
-    # item (few facts, a product note, a small tool) may take one step more
+    # item (few facts, a product note, a small tool) may take one step more (off by default: a
+    # stored "on" is kept)
     "salt": ("plain", "wry", "salty"),
     "salt_thin": ("on", "off"),
 }
 SWITCH_DEFAULTS = {"length": "medium", "register": "neutral", "opinions": "mine",
                    "emoji": "never", "hashtags": "site", "links": "post", "grade": 8,
-                   "salt": "plain", "salt_thin": "on"}
+                   "salt": "plain", "salt_thin": "off"}
 SWITCH_WORDS = {
     "length": "how long: short, medium or long",
     "register": "how formal: casual, neutral or formal",

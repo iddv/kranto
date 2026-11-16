@@ -85,6 +85,13 @@ class Material:
     headline: str = ""             # what Post's row says: the post's or the card's title alone
 
 
+def material_text(m: Material, angle: str = "") -> str:
+    """The words a post is written from, as the checker reads them (``sources``): the
+    material's title and facts and the owner's angle. A name the post uses that is not in them
+    is flagged (``salt.person``)."""
+    return "\n".join(x for x in (m.title, m.facts, angle) if x)
+
+
 def headline_of(m: Material) -> str:
     """The write's title for Post's row: ``headline``, else the material's first line."""
     first = (m.title or "").strip().splitlines()
@@ -171,6 +178,11 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
     site = choice.site
     thread_ok = choice.direct and site.thread
     first_room = sites_mod.room(site, m.link)
+    if m.link and first_room < site.limit // 2:
+        # the post would be mostly link, or "…" (a negative room): refused in words
+        raise SocialError(f"the link is too long for {site.name}: it would take "
+                          f"{site.limit - first_room} of the post's {site.limit} "
+                          f"{site.unit}", 422)
     if site.id == "mastodon" and choice.direct:
         # post.mastodon's ask holds the text as written (500 characters), the link in full
         first_room = min(first_room, 500 - len(f"\n\n{m.link}" if m.link else ""))
@@ -191,6 +203,9 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
     if not thread_ok:
         parts = parts[:1]
     allowed = {u for u in (m.link,) if u}
+    # what the post is written from, for the checker's salt.person: a post names the people its
+    # material (or the owner's own angle) names, and nobody else
+    sources = material_text(m, angle)
     out_parts: list[str] = []
     removed: list[str] = []
     left: list[str] = []
@@ -199,22 +214,25 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
     for i, text in enumerate(parts):
         room_i = first_room if i == 0 else site.limit
         lim_i = {**limits, "max_chars": room_i}
-        text, gone = sites_mod.clean(site, text, allowed)
+        text, gone = sites_mod.clean(site, text, allowed, sources)
         removed += gone
-        got = prose.check(text, site.id, profile, kind="short", limits=lim_i, take=angle)
+        got = prose.check(text, site.id, profile, kind="short", limits=lim_i, take=angle,
+                          sources=sources)
         if _span_flags(got.get("flags") or []):
             fixed = prose.revise(text, got["flags"], profile, complete=complete, site=site.id,
                                  kind="short", limits=lim_i, take=angle)
             rounds += int(fixed.get("rounds") or 0)
             text = str(fixed.get("text") or text).strip()
-            text, gone = sites_mod.clean(site, text, allowed)
+            text, gone = sites_mod.clean(site, text, allowed, sources)
             removed += gone
-            got = prose.check(text, site.id, profile, kind="short", limits=lim_i, take=angle)
+            got = prose.check(text, site.id, profile, kind="short", limits=lim_i, take=angle,
+                              sources=sources)
         text, cut = sites_mod.fit(site, text, room_i)
         if cut:
             removed.append("the end of a sentence past the limit")
             # what is stored is the check of the words kept, not of the words before the cut
-            got = prose.check(text, site.id, profile, kind="short", limits=lim_i, take=angle)
+            got = prose.check(text, site.id, profile, kind="short", limits=lim_i, take=angle,
+                              sources=sources)
         left += [str(f.get("rule")) for f in got.get("flags") or []
                  if f.get("rule") != "site.length"]
         if i == 0:
@@ -233,7 +251,7 @@ def write_variant(rt, choice: sites_mod.Choice, m: Material, angle: str, *, comp
         else:
             extras.append({"key": "disclose", "words": "No disclosure line: the post had no room "
                                                        "for it", "drop": False})
-    if m.link and not site.open_takes_url:
+    if m.link and not site.open_takes_url and not any(m.link in p for p in out_parts):
         out_parts[0] = f"{out_parts[0]}\n\n{m.link}"
     if m.link:
         where = "your blog post" if m.link_to == "post" else "the source"
@@ -267,6 +285,8 @@ def file_variant(store, choice: sites_mod.Choice, v: dict[str, Any], m: Material
         "site": site.id, "group": group, "about": about, "about_title": headline_of(m),
         "parts": [{"text": p} for p in parts], "text": text, "link": m.link,
         "link_to": m.link_to, "extras": v["extras"], "prose": v["prose"],
+        # what it was written from: the draft page's check reads it (salt.person)
+        "sources": material_text(m, str(v["prose"].get("angle") or "")),
         "language": language, "blog_draft": m.blog_draft}
     if choice.direct and site.id in CARDS and m.card:
         content["card"] = m.card

@@ -125,7 +125,7 @@ def salt_of(p: Profile, material: dict[str, Any]) -> str:
     salty) on a thin piece when their ``salt_thin`` switch is on."""
     sw = p.switches
     base = str(sw.get("salt")) if sw.get("salt") in SALT_STEPS else "plain"
-    if sw.get("salt_thin", "on") == "on" and thin(material):
+    if sw.get("salt_thin", "off") == "on" and thin(material):
         return SALT_STEPS[min(SALT_STEPS.index(base) + 1, len(SALT_STEPS) - 1)]
     return base
 

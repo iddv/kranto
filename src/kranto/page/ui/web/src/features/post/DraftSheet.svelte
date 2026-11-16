@@ -139,7 +139,7 @@
       {/if}
       {#if folded && !short}<p><button type="button" class="linkish small" id="draft-show-all" onclick={() => (all = true)}>{`Show all ${s.words} words`}</button></p>{/if}
       {#each s.extras || [] as x (x.key)}<p class="muted small draft-extra">{x.words}</p>{/each}
-      {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} id="draft-flags" />{/if}
+      {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} sources={s.sources ?? null} id="draft-flags" />{/if}
       {#if s.missed}<p class="small c-amber" id="draft-missed">{s.missed}</p>{/if}
       {#if s.group === "scheduled"}<p class="acts small" id="draft-due"><span>{`Goes ${s.due_words || "at the time you chose"}. Nothing goes before then, and you can cancel it until then.`}</span> <button type="button" class="btn sm" id="draft-cancel" onclick={(e) => cancelHour(e.currentTarget, s.id)}>Cancel</button> <button type="button" class="linkish small" id="draft-retime" onclick={(e) => send(e.currentTarget)}>Change the time</button></p>{/if}
       <p class="acts" id="draft-verbs">

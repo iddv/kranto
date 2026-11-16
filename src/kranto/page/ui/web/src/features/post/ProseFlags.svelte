@@ -5,14 +5,14 @@
   // draft's page; the editor hosts it under its box and checks again as the owner types.
   import { checkProse, lineOf, reviseProse, spans, type ProseCheck } from "./prose";
 
-  let { text, site, fix = null, id = "prose-flags" }: { text: string; site: string; fix?: ((text: string, say: string) => void) | null; id?: string } = $props();
+  let { text, site, fix = null, id = "prose-flags", sources = null }: { text: string; site: string; fix?: ((text: string, say: string) => void) | null; id?: string; sources?: string | null } = $props();
   let got = $state<ProseCheck | null>(null);
   let fixing = $state(false);
   let timer: ReturnType<typeof setTimeout> | null = null;
   $effect(() => {
-    const t = text, s = site;
+    const t = text, s = site, src = sources;
     if (timer) clearTimeout(timer);
-    timer = setTimeout(() => void checkProse(t, s).then((c) => { if (t === text) got = c; }), fix ? 500 : 0);
+    timer = setTimeout(() => void checkProse(t, s, src).then((c) => { if (t === text) got = c; }), fix ? 500 : 0);
     return () => { if (timer) clearTimeout(timer); };
   });
   const marks = $derived(got ? spans(text, got.flags) : []);

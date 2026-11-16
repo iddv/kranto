@@ -2628,6 +2628,7 @@ export interface PostSheet {
   original_draft: number;
   parts?: PostCounted[];
   extras?: PostExtra[];
+  sources?: string | null;
   siblings?: PostSibling[];
   open?: string | null;
   open_off?: string | null;
