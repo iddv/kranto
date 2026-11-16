@@ -66,6 +66,24 @@ describe("the console's place", () => {
     pressed.v = false;
   });
 
+  // a first run: after setup the read-and-approve sheet covered half the home on a phone, from a
+  // place kept as "open"; a phone opens it only when ✦ is pressed in this page's life
+  it("on a phone, a place kept as open starts minimized until a press opens it", () => {
+    pressed.v = false;
+    loadPlace(store({ "kranto.console": "open" }));
+    firstPlace(settings(true), { classic: false, width: 390 });
+    expect(consoleUi.place).toBe("min");
+    firstPlace(settings(true), { classic: false, width: 390 });   // the next poll keeps it there
+    expect(consoleUi.place).toBe("min");
+    loadPlace(store({ "kranto.console": "open" }));
+    firstPlace(settings(true), { classic: false, width: 1400 });  // a wider window keeps its own
+    expect(consoleUi.place).toBe("open");
+    setPlace("open", store());                                    // ✦ on the phone
+    firstPlace(settings(true), { classic: false, width: 390 });
+    expect(consoleUi.place).toBe("open");
+    pressed.v = false;
+  });
+
   it("keeps the browser's own choice after one", () => {
     const s = store({ "kranto.console": "min" });
     loadPlace(s);

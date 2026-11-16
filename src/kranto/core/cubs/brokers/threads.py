@@ -116,6 +116,8 @@ class ThreadsAdapter:
                 where = link_back[:300]
         except SourceError:
             pass
+        from ....social import reach
+        reach.sent(ctx.store, ticket["id"], SERVICE, {"id": str(mid)}, d["content"])
         return {"state": "done", "note": f"posted: {where}"}
 
     def ask(self, kind: str, fields: dict, store, rt=None) -> dict:

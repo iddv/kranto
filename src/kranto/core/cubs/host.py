@@ -364,8 +364,11 @@ class CubHost:
 
     # -- the prose engine: the person's voice and Kranto's floor ---------------
 
+    # ``sources`` (SDK 1.4): the material the text was written from, so the checker's
+    # ``salt.person`` can flag a person's name or a handle the material does not have
     _PROSE_COMMON = {"site": (str, type(None)), "kind": (str, type(None)),
-                     "limits": (dict, type(None)), "take": (str, type(None))}
+                     "limits": (dict, type(None)), "take": (str, type(None)),
+                     "sources": (str, type(None))}
 
     def _prose_profile(self):
         from ... import prose
@@ -411,9 +414,15 @@ class CubHost:
         _shape(p, {"text": (str,), **self._PROSE_COMMON}, ("text",))
         if len(p["text"]) > 100_000:
             raise _err(-32011, "the text is over 100,000 characters", limit=100_000)
+        self._sources_fit(p)
         from ... import prose
         return prose.check(p["text"], p.get("site"), self._prose_profile(), kind=p.get("kind"),
-                           limits=p.get("limits"), take=p.get("take"))
+                           limits=p.get("limits"), take=p.get("take"), sources=p.get("sources"))
+
+    @staticmethod
+    def _sources_fit(p: dict) -> None:
+        if len(p.get("sources") or "") > 100_000:
+            raise _err(-32011, "the sources are over 100,000 characters", limit=100_000)
 
     def _m_prose_revise(self, p: dict) -> dict:
         self._grant("prose.revise", p)
@@ -421,6 +430,7 @@ class CubHost:
                    "tier": (str,), **self._PROSE_COMMON}, ("text", "purpose", "tier"))
         if len(p["text"]) > 100_000:
             raise _err(-32011, "the text is over 100,000 characters", limit=100_000)
+        self._sources_fit(p)
         from ... import prose
         profile = self._prose_profile()
         flags = p.get("flags")
@@ -428,7 +438,8 @@ class CubHost:
                                     and isinstance(f.get("end"), int) for f in flags):
             # the cub's own flags are not trusted for offsets: the host checks again
             flags = prose.check(p["text"], p.get("site"), profile, kind=p.get("kind"),
-                                limits=p.get("limits"), take=p.get("take"))["flags"]
+                                limits=p.get("limits"), take=p.get("take"),
+                                sources=p.get("sources"))["flags"]
 
         def complete(messages: list[dict], schema: dict) -> dict:
             # one model call under the cub's purpose, tier, hourly window and cap, recorded

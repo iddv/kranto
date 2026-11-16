@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Facts } from "../../lib/app";
 import { ui } from "../../lib/shell.svelte";
 import { answering, draw, settle, stub, where } from "../testing.svelte";
@@ -8,6 +8,12 @@ import { HOME_API, VISIT_API } from "../../features/home";
 import { REVIEW_API } from "../review/review";
 import { TODAY_API } from "../topics/topics";
 import Home from "./Home.svelte";
+import NeedsPage from "./NeedsPage.svelte";
+import { featurePath } from "../../features/index";
+import { PREPARED_API } from "../../lib/prepared";
+import { IDEAS_API } from "../ideas/cards";
+import { UPD_API } from "../settings/updates";
+import { DISPATCH_API } from "./needs";
 import { agoWords, awaySpan, coreNeeds, cubRows, everythingLine, nextWords, quietLine, sinceWords, uniqueRows } from "./home";
 import { matchRoute, parse } from "../../lib/router";
 import { ACT_PATH } from "../../lib/activity";
@@ -157,15 +163,88 @@ describe("the home", () => {
         { key: "read", title: "First read", state: "running", words: "Reading now: source 2 of 5 · 4 kept of 19 read", at: HOURS(0) },
         { key: "brief", title: "First brief", state: "waiting", words: "As soon as 8 items are kept", at: null },
         { key: "ideas", title: "First ideas", state: "waiting", words: "After the map, once 30 items are kept. So far: 4.", at: null }] };
-    const { target, done } = await home(HOME({ first, briefs: { topics: [], more: 0 }, ideas: { rows: [], new: 0, since: null, total: 0 } }));
+    const quiet = { topics: 1, sources: 5, read_at: null, next: null };
+    const { target, done } = await home(HOME({ first, quiet, briefs: { topics: [], more: 0 }, ideas: { rows: [], new: 0, since: null, total: 0 } }));
     expect(target.querySelector("#home-sentence")?.textContent).toBe("Kranto is reading Robotics for the first time.");
     const g = target.querySelector("[aria-labelledby=home-first]")!;
     expect(g.querySelector("h2")?.textContent).toBe("The first hour");
+    // the topic page's first-hour rows (.grp.start): the time keeps its width, the words go under
+    expect(g.classList.contains("start")).toBe(true);
+    // a first run: the foot line said "not read yet" while the first read ran
+    expect(target.querySelector("#home-quiet")?.textContent).toBe("1 topic and 5 sources, reading now. Activity");
     expect(g.querySelector("#home-first-read")?.textContent).toBe("Kranto is reading · source 2 of 5 · 4 kept of 19 read · the first brief in about 3 minutes");
     expect(titles(g, "")).toEqual(["Sources", "First read", "First brief", "First ideas"]);
     expect(g.querySelector("#home-first-foot")?.textContent).toBe("You can close this page; Kranto keeps reading.");
     expect(g.querySelector("#home-first-topic")?.getAttribute("href")).toBe("#/topics/13");
     done();
+  });
+});
+
+// a tester found the home and Needs you naming different drafts: the chip, the home's
+// one thing and Needs you's Next read the same list in the same order
+describe("the one thing, on the home and on Needs you", () => {
+  const prep = (uuid: string, h: number, subject: string) => ({ uuid, verb: "topic.archive", title: "Archive topic", by_words: "by Claude Code",
+    page: "#/watch/topics", words: null, fields: {}, subject_kind: "topic", subject_id: "15", subject_name: subject, state: "open",
+    button: "Archive", available: true, created_at: HOURS(h) });
+  const READS = (prepared: unknown[]) => ({
+    [PREPARED_API]: { prepared }, [featurePath("newsletter", "rows")]: { rows: HOME().rows.needs_you.newsletter.data },
+    [IDEAS_API]: { ideas: [] }, "api/term": { enabled: false, sessions: [] }, [UPD_API]: { candidate: null }, [DISPATCH_API]: { ideas: [] },
+  });
+  /** the app, stubbed with what Needs you calls of it too (its keys, its signature) */
+  function needsApp() {
+    const L = stub({ host });
+    Object.assign(L, { pageKey: vi.fn(), sigOf: (n: Element) => n.className + "|" + (n.textContent || "") });
+    facts();
+    return L;
+  }
+  async function both(prepared: unknown[]): Promise<[string | null, string | null]> {
+    const a = await home(HOME(), READS(prepared));
+    const onHome = a.target.querySelector("#next h2")?.textContent ?? null;
+    a.done();
+    answers(HOME(), READS(prepared));
+    needsApp();
+    const b = await draw(NeedsPage, where("needs"));
+    await settle();
+    await settle();
+    const onNeeds = b.target.querySelector("#next h2")?.textContent ?? null;
+    b.done();
+    return [onHome, onNeeds];
+  }
+
+  it("names the same draft: the newsletter's draft, then the newest prepared item", async () => {
+    expect(await both([])).toEqual(["This week: Amazon grasps 66 objects", "This week: Amazon grasps 66 objects"]);
+    const [h, n] = await both([prep("p-old", 30, "Lab tools"), prep("p-new", 1, "Padel")]);
+    expect(h).toBe("Archive topic: Padel");
+    expect(n).toBe(h);
+  });
+
+  it("gives a prepared item Dismiss beside its yes on Needs you, named by its subject, and Dismiss puts it away", async () => {
+    answers(HOME(), READS([prep("p-new", 1, "Padel"), prep("p-old", 30, "Lab tools")]));
+    const L = needsApp();
+    const page = await draw(NeedsPage, where("needs"));
+    await settle();
+    await settle();
+    const t = page.target;
+    const yes = t.querySelector("[data-prepared-act='p-old']") as HTMLButtonElement;
+    expect(yes.textContent).toBe("Archive");
+    const no = t.querySelector("[data-prepared-dismiss='p-old']") as HTMLButtonElement;
+    expect(no.textContent).toBe("Dismiss");
+    expect(no.getAttribute("aria-label")).toBe("Dismiss Archive topic: Lab tools");
+    expect(no.parentElement).toBe(yes.parentElement);                       // beside its yes
+    expect(t.querySelector("[data-prepared-dismiss='p-new']")?.getAttribute("aria-label")).toBe("Dismiss Archive topic: Padel");
+    expect(t.textContent).not.toContain("topic #15");
+    // Dismiss is the item's own (POST /api/prepared/<uuid>/dismiss), as on its page's line
+    const posted: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") posted.push(url);
+      return new Response(JSON.stringify({ state: "dismissed" }), { status: 200 });
+    }));
+    no.click();
+    await settle();
+    vi.unstubAllGlobals();
+    expect(posted).toEqual(["/api/prepared/p-old/dismiss"]);
+    expect(L.api).not.toHaveBeenCalledWith("/api/prepared/p-old/press", expect.anything());
+    page.done();
   });
 });
 
@@ -180,6 +259,11 @@ describe("the home's words", () => {
     expect(quietLine({ topics: 5, sources: 153, read_at: new Date(at.getTime() - 2 * 3600000).toISOString(), next: { words: "ideas", at: new Date(2026, 10, 11, 22, 0).toISOString() } }, at))
       .toBe("5 topics and 153 sources, read 2 hours ago. Next: ideas tonight at 22:00.");
     expect(quietLine({ topics: 1, sources: 0, read_at: null, next: null }, at)).toBe("1 topic and 0 sources, not read yet.");
+    // a first read that runs now, said by the server or by the first hour's read row
+    expect(quietLine({ topics: 1, sources: 5, read_at: null, reading: true, next: null }, at)).toBe("1 topic and 5 sources, reading now.");
+    expect(quietLine({ topics: 1, sources: 5, read_at: null, next: null }, at, true)).toBe("1 topic and 5 sources, reading now.");
+    const read = new Date(at.getTime() - 3600000).toISOString();
+    expect(quietLine({ topics: 1, sources: 5, read_at: read, reading: true, next: null }, at)).toBe("1 topic and 5 sources, read 1 hour ago.");
     expect(quietLine({}, at)).toBe("");
   });
 

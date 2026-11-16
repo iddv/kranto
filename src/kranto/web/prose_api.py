@@ -13,6 +13,12 @@ flags and Fix, and Welcome's "How you write" step (PROSE's PR 2), and for the ve
   samples given (else the saved ones); nothing is saved (``ROUTE_ALLOW``).
 - ``POST /api/prose/revise`` ``{text, site?, kind?, take?, flags?}``: the text with only its
   flagged spans rewritten, at most two calls; nothing is saved (``ROUTE_ALLOW``).
+- ``POST /api/prose/writer-key`` ``{key}``: the OpenAI key a post writer's own model uses (a
+  writer only, never the watcher's), pasted on How you write. It goes to the server once, is
+  tested (``GET /v1/models``, spending nothing), and only when it passes is kept as the command
+  line keeps it (``OPENAI_API_KEY`` in the home's ``.env``, 0600). The answer is
+  ``{ok, detail, set}``: never the key, and the key is in no log (verb ``prose.writer_key``,
+  credential, the page only). ``GET /api/prose``'s ``writer_key`` says only whether one is set.
 
 ``docs/prose.md`` describes each answer. The guard is the server's: a known Host, a same-origin
 POST, a JSON body under the limit.
@@ -77,7 +83,13 @@ def read(rt) -> dict[str, Any]:
         "writers": profile_mod.WRITER_SITE,
         # the model that writes each writer's posts (P-11); null: the reason tier's
         "writer_models": {w: p.writer_model(w) for w in profile_mod.WRITER_SITE},
+        "writer_providers": list(profile_mod.WRITER_PROVIDERS),
+        # whether an OpenAI key for a writer's own model is set: never the key itself
+        "writer_key": {"set": writer_key_set(rt)},
         "disclosure_line": profile_mod.DISCLOSURE_LINE,
+        # what a short post ends with where its site's disclosure is on and no words are set
+        # (``kranto.social.disclosure_line``)
+        "disclosure_default": _short_default(),
         "take": p.take,
         "never": list(p.never), "keep": list(p.keep), "always": list(p.always),
         "samples": [{"id": s.id, "site": s.site, "words": len(s.text.split()),
@@ -188,6 +200,58 @@ def revise(rt, body: dict) -> dict[str, Any]:
             "The model changed nothing: edit it yourself."}
 
 
+def _short_default() -> str:
+    from .. import product
+    return f"Drafted with {product.NAME}."
+
+
+def writer_key_set(rt) -> bool:
+    """Whether the OpenAI key for a writer's own model is set (the environment, or a name in
+    the home's ``.env``): the names only; the key is never read here."""
+    import os
+
+    from .. import providers
+    from ..providers.openai import KEY_ENV
+    if os.environ.get(KEY_ENV):
+        return True
+    root = getattr(getattr(rt, "cfg", None), "root", None)
+    try:
+        return root is not None and KEY_ENV in providers._dotenv_names(root)
+    except OSError:
+        return False
+
+
+def writer_key(rt, body: dict, door: str | None) -> dict[str, Any]:
+    """``POST /api/prose/writer-key``: test the pasted key and keep it only when it passes.
+    From the page's own session only (a credential: never the command line's token, an agent,
+    the console or a cub). The key is not echoed, logged or sent back; a refusal's words are
+    scrubbed of it."""
+    from .. import providers, setup
+    if door != "ui":
+        raise ProseError("The OpenAI key is pasted on the page only (Settings › Posting › How "
+                         "you write), never by a token, an assistant or a cub.", 403)
+    raw = body.get("key")
+    if not isinstance(raw, str) or not raw.strip():
+        raise ProseError("Paste the key first.")
+    key = raw.strip()
+    root = getattr(getattr(rt, "cfg", None), "root", None)
+    if root is None:
+        raise ProseError("This Kranto has no home to keep a key in.", 409)
+    try:
+        got = providers.openai_key(root, key)
+    except setup.SetupError as exc:
+        raise ProseError(setup.scrub_key(str(exc), key)) from None
+    except OSError as exc:
+        raise ProseError(setup.scrub_key(f"the key works but could not be kept: {exc}", key),
+                         500) from None
+    detail = setup.scrub_key(str(got.get("detail") or ""), key)
+    if not got.get("ok"):
+        return {"ok": False, "detail": detail, "set": writer_key_set(rt),
+                "say": f"Not kept: {detail}" if detail else "Not kept: OpenAI refused the key."}
+    return {"ok": True, "detail": detail, "set": True,
+            "say": "Kept: OpenAI answered. Choose an OpenAI model for a writer below."}
+
+
 def _key(rt) -> None:
     llm = getattr(rt, "llm", None)
     if llm is not None and not getattr(llm, "has_key", True):
@@ -237,10 +301,19 @@ class ProseAPI:
     async def revise(self, request: Request):
         return await self._run(revise, request)
 
+    async def writer_key(self, request: Request):
+        """``POST /api/prose/writer-key``: the OpenAI key for a writer's own model, tested and
+        kept (``writer_key``); never echoed."""
+        from ..core import tickets
+        from .auth import IDENTITY
+        door = tickets.door_of(request.scope.get(IDENTITY))
+        return await self._run(lambda rt, body: writer_key(rt, body, door), request)
+
     def routes(self) -> list[Route]:
         return [Route("/api/prose", self.get),
                 Route("/api/prose/check", self.check, methods=["POST"]),
                 Route("/api/prose/voice", self.voice, methods=["POST"]),
                 Route("/api/prose/learn", self.learn, methods=["POST"]),
                 Route("/api/prose/voice/draft", self.draft_voice, methods=["POST"]),
-                Route("/api/prose/revise", self.revise, methods=["POST"])]
+                Route("/api/prose/revise", self.revise, methods=["POST"]),
+                Route("/api/prose/writer-key", self.writer_key, methods=["POST"])]

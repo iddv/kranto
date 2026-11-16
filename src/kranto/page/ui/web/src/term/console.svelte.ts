@@ -205,6 +205,13 @@ export function firstPlace(settings: ConsoleSettings,
     consoleUi.place = screen.width < PHONE_MAX ? "min" : "rail";
     return;
   }
+  // a phone never opens the sheet by itself: a place kept as "open" (a press on a wider window,
+  // or on this phone another day) starts minimized, and ✦ opens it (the sheet covered half the
+  // home after setup)
+  if (screen.width < PHONE_MAX && !pressed.v && consoleUi.place === "open") {
+    consoleUi.place = "min";
+    return;
+  }
   if (consoleUi.known) return;
   if (screen.width < PHONE_MAX) {
     consoleUi.place = "min";

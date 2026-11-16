@@ -93,7 +93,7 @@ def test_the_cub_says_hello_first_with_its_manifest_and_handlers(cub):
     assert p["handlers"] == {"jobs": ["ask", "boom", "leak", "noisy", "slow", "tick"],
                              "events": ["on_resolved"], "actions": ["say"],
                              "reads": ["count"], "stages": []}
-    assert p["sdk"] == "1.3.0" and p["python"].startswith("3.")
+    assert p["sdk"] == "1.4.0" and p["python"].startswith("3.")
     assert cub.close()[0] == 0
 
 

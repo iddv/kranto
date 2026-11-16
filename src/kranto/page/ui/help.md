@@ -248,10 +248,15 @@ on it and speaks for you only from it.
 
 **Settings › Posting › How you write** is your voice card (how you write, in plain words; Draft it
 from my samples writes one for you to read), four switches (how long, how formal, opinions,
-emoji), "What do you think?" on or off, and your samples. Under Advanced: the other switches
-(among them **Salt**: plain, wry or salty, and **More salt on thin items**, off until you turn it on; a salty post that names a person its material does not is flagged "names a person the sources don't name" on its draft), the checker's
-strictness and rules, your never, keep and always lists, the guides each site follows,
-and a disclosure line for each site. Save keeps what you changed.
+emoji), "What do you think?" on or off, and your samples. **Who writes**: each writer (short
+posts, blog posts, the newsletter, the Mastodon post on a card) writes with Kranto's own writing
+model until you choose another there; for a model on OpenAI, paste your OpenAI key under it and
+choose **Save and test**: it is tested, kept, and never shown again. **Disclosure**: the words
+each site's posts end with, where you switched it on in Settings › Posting. Under Advanced: the
+other switches (among them **Salt**: plain, wry or salty, and **More salt on thin items**, off until you
+turn it on; a salty post that names a person its material does not is flagged "names a person
+the sources don't name" on its draft), the checker's strictness and rules, your never, keep and always lists, and the guides each site
+follows. Save keeps what you changed.
 
 **Needs you** shows in the top bar as "Needs you 4" while something waits (a dot on the
 wordmark on a phone), the same number as Needs you's own head. What a button in a sheet did is said in
@@ -417,6 +422,16 @@ and each short post is written from its words and links to it; with no blog, a s
 the card's source. Each site's version is written for that site (Bluesky's 300 characters, X's 280
 with the link counted as 23), and each says how much of its limit it uses. Copy gives you the
 words on any draft. On the preview Open is off and says nothing is posted.
+
+**At an hour.** In the dialog of a post Kranto posts directly, **Schedule** takes a day and time
+on your own clock; after your yes the draft waits under **Scheduled** ("Goes Monday 16 Nov, 09:00
+· Bluesky") with **Cancel**, and goes then. To change its words, cancel first: an edited draft
+needs a new yes. If Kranto was stopped at that hour it does not post late: the draft waits again,
+saying its hour passed, and Needs you says so. **Sent** shows a post's replies, reposts and likes
+where its site gives them (Bluesky, Mastodon, Threads), read once a day; LinkedIn and X give none,
+and Sent says so once. Under a site on Settings › Posting, once there are at least eight posts on
+each side, a line says what the numbers support (the better hour, one post or a thread). A week
+before your LinkedIn token runs out, Needs you says by which day to make a new one.
 
 ## Settings {#settings}
 

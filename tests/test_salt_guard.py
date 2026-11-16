@@ -71,9 +71,9 @@ CUB_HALF = pytest.mark.xfail(strict=True, reason="the cub host and the SDK pass 
                                                  "material once prose.check takes sources")
 WRITERS = [
     pytest.param("kranto/social/__init__.py", id="short posts"),
-    pytest.param("kranto/core/cubs/host.py", id="the cub host", marks=CUB_HALF),
-    pytest.param("kranto/cubs/examples/blog/main.py", id="blog", marks=CUB_HALF),
-    pytest.param("kranto/cubs/examples/toot/main.py", id="toot", marks=CUB_HALF),
+    pytest.param("kranto/core/cubs/host.py", id="the cub host"),
+    pytest.param("kranto/cubs/examples/blog/main.py", id="blog"),
+    pytest.param("kranto/cubs/examples/toot/main.py", id="toot"),
     pytest.param("kranto/cubs/examples/newsletter/main.py", id="newsletter", marks=CUB_HALF),
 ]
 

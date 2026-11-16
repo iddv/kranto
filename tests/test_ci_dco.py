@@ -102,6 +102,25 @@ def test_a_bot_commit_a_person_committed_needs_the_committers_sign_off(tmp_path)
     assert found(r) == ["no Signed-off-by line with the author's address (git commit -s)"]
 
 
+def test_a_squash_github_committed_for_a_person_passes(tmp_path):
+    """A pull request squash-merged on GitHub: the person is the author (no-reply address,
+    their sign-off in the message), GitHub the committer. The push run on main checks it."""
+    r = repo(tmp_path)
+    commit(r, PERSON, scrub.GITHUB_COMMITTER, f"Fix the start (#3)\n\n{signoff(PERSON)}")
+    assert found(r) == []
+    commit(r, PERSON, scrub.GITHUB_COMMITTER, "Fix the start again (#4)")
+    assert found(r) == ["no Signed-off-by line (git commit -s)"]
+
+
+def test_github_is_accepted_only_as_the_committer(tmp_path):
+    r = repo(tmp_path)
+    commit(r, scrub.GITHUB_COMMITTER, PERSON, f"Fix\n\n{signoff(PERSON)}")
+    assert "author email *** is not a GitHub no-reply address" in found(r)
+    look_alike = ("GitHub", "noreply@" + "example.com")
+    commit(r, PERSON, look_alike, f"Fix\n\n{signoff(PERSON)}")
+    assert found(r) == ["committer email *** is not a GitHub no-reply address"]
+
+
 def test_a_look_alike_bot_identity_is_not_the_bot(tmp_path):
     r = repo(tmp_path)
     fake = (scrub.BOT_NAME, "9+someone@" + scrub.NOREPLY_DOMAIN)

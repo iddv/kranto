@@ -14,7 +14,7 @@ its decorators, the ``ctx`` each handler gets, ``fence`` for strangers' text, th
         ...
 """
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 from .context import Context, Ticket  # noqa: E402
 from .cub import Cub  # noqa: E402
