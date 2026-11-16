@@ -3,7 +3,8 @@
 A job with ``at: "08:00"`` (and ``days: [mon]``) is due once at or after that local time on
 each listed day (every day when ``days`` is empty): its slot is the newest such time not after
 now, and it is due while no run since that slot ended ``ok``, ``degraded`` or ``skipped``. A
-failed run leaves it due, under the scheduler's back-off; a slot missed while Kranto was down is
+failed run leaves it due, under the scheduler's back-off (read from the stored runs, so a
+restart keeps it); a slot missed while Kranto was down is
 run once when Kranto is back (a Monday issue on Tuesday, not a lost week). A job without ``at``
 is due by its interval, as every job is.
 """
@@ -17,6 +18,8 @@ from ...store import Store
 
 DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 DONE = ("ok", "degraded", "skipped")
+RETRY_FIRST = timedelta(minutes=5)      # the scheduler's FIRST_BACKOFF
+RETRY_CAP = timedelta(days=1)
 
 
 def _zone(tz: str | None):
@@ -75,15 +78,37 @@ def _last_done(store: Store, kind: str) -> datetime | None:
     return datetime.fromisoformat(r["t"].replace("Z", "+00:00"))
 
 
+def _retry_at(store: Store, kind: str, slot: datetime) -> datetime | None:
+    """When a job whose runs since ``slot`` failed may be tried again: the scheduler's back-off
+    (5 minutes, doubled after each failure, at most a day) read from the stored runs, so a
+    restart does not try it again at once (it did: one model call per start). A run cut short
+    by Kranto stopping does not count: an update must not cost the week's issue."""
+    rows = store.query(
+        "SELECT finished_at, error FROM runs WHERE kind = ? AND status = 'failed' "
+        "AND finished_at >= ?", (kind, slot.astimezone(ZoneInfo("UTC")).strftime(
+            "%Y-%m-%dT%H:%M:%SZ")))
+    failed = [datetime.fromisoformat(r["finished_at"].replace("Z", "+00:00")) for r in rows
+              if not str(r["error"] or "").startswith("failed: interrupted")]
+    if not failed:
+        return None
+    return max(failed) + min(RETRY_FIRST * 2 ** (len(failed) - 1), RETRY_CAP)
+
+
 def at_due(store: Store, kind: str, at: str, days, now: datetime, tz: str | None = None
            ) -> bool:
     slot = last_slot(at, days, now, tz)
     done = _last_done(store, kind)
-    return done is None or done < slot
+    if done is not None and done >= slot:
+        return False
+    retry = _retry_at(store, kind, slot)
+    return retry is None or now >= retry
 
 
 def at_next(store: Store, kind: str, at: str, days, now: datetime, tz: str | None = None
             ) -> datetime:
     if at_due(store, kind, at, days, now, tz):
         return now
-    return next_slot(at, days, now, tz)
+    slot = last_slot(at, days, now, tz)
+    done = _last_done(store, kind)
+    retry = _retry_at(store, kind, slot) if done is None or done < slot else None
+    return retry if retry is not None else next_slot(at, days, now, tz)

@@ -304,21 +304,19 @@ def make_home(home: Path, port: int, user_home: Path) -> list[str]:
     if config_mod.config_path(home) is None:
         (home / KRANTO_CONFIG_FILENAME).write_text(home_config_text(home, port, user_home))
         written.append(str(home / KRANTO_CONFIG_FILENAME))
-    # The loop's home and the task folder are seeded inside the home only when its config puts
-    # them there: a home whose brb section points elsewhere (an adopted ~/kranto-kb with
-    # ~/kranto-loop and ~/tasks) gets no decoy loop/ or tasks/ (review D-5).
+    # The loop's home is seeded inside the home only when its config puts it there: a home
+    # whose brb section points elsewhere (an adopted ~/kranto-kb with ~/kranto-loop) gets no
+    # decoy loop/ (review D-5). The task folder was the builds'; they left, and nothing reads
+    # it, so no tasks/ is made (the config keeps its key, for a version from before).
     lay = paths.Layout(home)
-    loop_at, tasks_at = lay.loop, lay.tasks
+    loop_at = lay.loop
     try:
         cfg = config_mod.load(home, dotenv=False)
         if cfg.brb.loop_home:
             loop_at = Path(cfg.brb.loop_home).expanduser()
-        if cfg.brb.root:
-            tasks_at = Path(cfg.brb.root).expanduser()
     except Exception:  # noqa: BLE001 - an unreadable config: seed as before
         pass
-    subs = [lay.data] + [d for d, at in ((lay.loop, loop_at), (lay.tasks, tasks_at))
-                         if at.resolve() == d.resolve()]
+    subs = [lay.data] + ([lay.loop] if loop_at.resolve() == lay.loop.resolve() else [])
     for d in subs:
         if not d.is_dir():
             d.mkdir(parents=True)
@@ -327,6 +325,25 @@ def make_home(home: Path, port: int, user_home: Path) -> list[str]:
     if lay.loop in subs and not seed.exists():
         seed.write_text(loop_seed_text(home, port, user_home))
         written.append(str(seed))
+    return written
+
+
+def move_port(home: Path, old: int, new: int, user_home: Path) -> list[str]:
+    """Write port ``new`` into the home's ``notify.base_url`` (and the loop settings' own
+    addresses of this server, when that file is there). Returns what was written."""
+    written = []
+    path = config_mod.config_path(home)
+    if path is not None:
+        path.write_text(set_in_section(path.read_text(), "notify", "base_url",
+                                       f"http://127.0.0.1:{new}"))
+        written.append(f"{path} (port {new})")
+    seed = paths.LoopLayout(paths.Layout(home).loop).settings
+    if seed.exists():
+        text = seed.read_text()
+        moved = text.replace(f"http://127.0.0.1:{old}", f"http://127.0.0.1:{new}")
+        if moved != text:
+            seed.write_text(moved)
+            written.append(f"{seed} (port {new})")
     return written
 
 
@@ -663,6 +680,11 @@ def cmd_up(args, host: Host) -> int:
     cfg = config_mod.load(home, dotenv=False)
     if existing and not args.port:
         port = port_of(cfg)
+    elif existing and port != port_of(cfg):
+        # a later 'up --port N' moves the home to N: 'kranto open', doctor and the links
+        # Kranto sends read the port from notify.base_url, so it is written there too
+        written += move_port(home, port_of(cfg), port, host.home)
+        cfg = config_mod.load(home, dotenv=False)
     print(f"kranto home: {home}" + (" (new)" if not existing else ""))
     for w in written:
         print(f"  wrote {w}")
@@ -1460,15 +1482,18 @@ def console_checks(cfg: config_mod.Config, svc: tuple[dict, str] | None = None) 
             term_check(paths.loop_home(cfg.brb.loop_home), svc, dotenv_tokens(cfg.root))]
 
 
+TERM_CHECK = "open in claude code"    # doctor's line for the page's term (its sandboxed sessions)
+
+
 def console_words(status: str, detail: str) -> str:
-    """The page's ``term_doctor`` line as the doctor's console line says it: "ready: …" when
-    it is ok, else "not ready: …" with what is missing; "Open in Claude Code" is the console,
-    and where its switch lives is said without the page's file (loop.yaml)."""
+    """The page's ``term_doctor`` line as the doctor's Open in Claude Code line says it:
+    "ready: …" when it is ok, else "not ready: …" with what is missing; where its switch lives
+    is said without the page's file (loop.yaml). It is about Open in Claude Code's sandboxed
+    sessions, not the console beside every page (which needs no Claude token of Kranto's)."""
     if detail.endswith("(term.enabled)"):                 # off on purpose: ok, and not ready
         return "off (term.enabled is false)"
     text = re.sub(r"^Open in Claude Code(: | is )", "", detail.strip())
     text = re.sub(r"\s+in loop\.yaml(\s*\(Settings › Building lists it\))?", "", text)
-    text = text.replace("Open in Claude Code", "the console")
     return ("ready: " if status == "ok" else "not ready: ") + text
 
 
@@ -1483,8 +1508,8 @@ def term_check(loop_home: Path, svc: tuple[dict, str] | None = None,
     try:
         from kranto.page.host_api import term_doctor
     except ImportError:
-        return Check(WARN, "console",
-                     "not ready: this version of Kranto has no console; update Kranto")
+        return Check(WARN, TERM_CHECK,
+                     "not ready: this version of Kranto does not have it; update Kranto")
     env, where = svc or (None, "")
     try:
         try:
@@ -1492,11 +1517,11 @@ def term_check(loop_home: Path, svc: tuple[dict, str] | None = None,
         except TypeError:                                   # a version of the page before TK
             status, detail = term_doctor(loop_home, environ=env)
     except Exception as exc:  # noqa: BLE001 - a doctor line, never a crash
-        return Check(WARN, "console", f"not ready: could not check it: {exc}")
+        return Check(WARN, TERM_CHECK, f"not ready: could not check it: {exc}")
     words = console_words(status, detail)
     if where and not detail.endswith("(term.enabled)"):
         words += f" (checked: {where})"
-    return Check({"ok": OK, "warn": WARN, "fail": FAIL}.get(status, WARN), "console", words)
+    return Check({"ok": OK, "warn": WARN, "fail": FAIL}.get(status, WARN), TERM_CHECK, words)
 
 
 def service_checks(host: Host) -> list[Check]:

@@ -342,6 +342,19 @@ def test_the_cli(tmp_path, capsys):
     assert tokens.Store().value("agent:RC") is None
 
 
+def test_token_add_names_the_file_where_kranto_tokens_dir_puts_it(tmp_path, capsys,
+                                                                    monkeypatch):
+    """The hint 'Authorization: Bearer $(cat …)' names the file in $KRANTO_TOKENS_DIR, not the
+    default folder (a newcomer's install found the two the same, so it stays pinned)."""
+    elsewhere = tmp_path / "elsewhere"
+    monkeypatch.setenv("KRANTO_TOKENS_DIR", str(elsewhere))
+    host = launcher.Host(home=tmp_path / "h", run=lambda *a, **k: None)
+    assert launcher.main(["token", "add", "agent:helper"], host) == 0
+    out = capsys.readouterr().out
+    assert f"$(cat {elsewhere}/agent-helper.token)" in out, out
+    assert ".config/kranto" not in out
+
+
 def test_the_update_helper_says_who_it_is(tmp_path, monkeypatch):
     seen = []
     tokens.Store().ensure_doors()

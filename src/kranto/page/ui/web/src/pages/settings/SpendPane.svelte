@@ -88,7 +88,6 @@
       {#snippet section(s)}
         {#if s.id === "cap"}
           {#if x.key === "x" && !xLine(reads.w?.data?.x)}<p class="muted small">X is not connected: this cap applies once it is (Settings › Sources › Accounts › X).</p>{/if}
-          {#if x.key === "dive" && reads.w?.data && !reads.w.data.deep_dive.enabled}<p class="muted small">Deep dives are off (Settings › Watching › Deep dives); this applies when they are on.</p>{/if}
           <SettingField id={fid} label={x.word} kind="money" value={fid in CAPS ? CAPS[fid]! : capText(now)} input={(v) => (CAPS[fid] = v)} now={capWord(now)} empty="no cap" />
           <SaveBar id="save-cap" note="Empty is no cap." effect={x.effect} save={(b) => saveCap(b, x, now)} />
         {:else}{@render month()}{/if}

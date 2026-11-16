@@ -141,8 +141,8 @@ def test_it_is_on_by_itself_where_bubblewrap_and_a_token_are_there(tmp_path, mon
     tok = {"CLAUDE_CODE_OAUTH_TOKEN": "set"}
     assert launch.offered({"enabled": None}, tok, True) == (True, None)
     on, why = launch.offered({"enabled": None}, {}, True)
-    assert not on and why.endswith("this install lacks a Claude token (kranto doctor says how), "
-                                    "or set term.enabled: true in loop.yaml.")
+    assert not on and why.endswith("this install lacks a Claude token ('kranto setup claude' "
+                                    "adds a token), or set term.enabled: true in loop.yaml.")
     on, why = launch.offered({"enabled": None}, tok, False)
     assert not on and "lacks bubblewrap (" in why and "term.enabled: true" in why
     on, why = launch.offered({"enabled": None}, {}, False)
