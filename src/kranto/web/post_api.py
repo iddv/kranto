@@ -1050,8 +1050,17 @@ def posting_read(store) -> dict[str, Any]:
     ticked = {s for s in row.sites or [] if isinstance(s, str)}
     direct = row.direct if isinstance(row.direct, dict) else {}
     disclose = row.disclose if isinstance(row.disclose, dict) else {}
+    from ..prose.profile import load_row
     from ..social import reach
     taught = {x["site"]: [ln["words"] for ln in x["lines"]] for x in reach.learned(store)["sites"]}
+    # the person's own disclosure words per site (How you write): a value stored as null or not
+    # as text reads as none, and the site's posts end with Kranto's default line
+    own = load_row(store).disclosure
+    own = own if isinstance(own, dict) else {}
+
+    def words_of(site_id: str) -> str:
+        v = own.get(site_id)
+        return v.strip() if isinstance(v, str) and v.strip() else f"Drafted with {product.NAME}."
     out = []
     for s in sites.offered():
         conn = connection_of(store, s.direct) if s.direct else None
@@ -1067,6 +1076,9 @@ def posting_read(store) -> dict[str, Any]:
                     "instance": row.instance if s.needs == "instance" else None,
                     "limit": s.limit, "unit": s.unit,
                     "disclose": disclose.get(s.id) is True,
+                    # the words this site's posts end with when disclose is on: the person's
+                    # own for the site (How you write), else Kranto's default
+                    "disclosure_words": words_of(s.id),
                     # what the sent posts' numbers support (``reach.learned``): none until at
                     # least 8 posts a side
                     "learned": taught.get(s.id, [])})

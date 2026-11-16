@@ -476,6 +476,10 @@ CORE: tuple[Verb, ...] = (
     Verb("setup.search", "Save", "Choose the live search provider and keep its key (pasted by "
          "you).", "credential", "POST", "/api/setup/search", doors=PAGE_ONLY,
          page="#/settings/tools"),
+    Verb("prose.writer_key", "Save and test", "Keep the OpenAI key a post writer's own model "
+         "uses (pasted by you; a writer's only, never the watcher's): tested, then kept as the "
+         "command line keeps it, never shown again.", "credential", "POST",
+         "/api/prose/writer-key", doors=PAGE_ONLY, page="#/settings/posting/voice"),
     Verb("token.add", "Add token", "Make a token for an agent.", "credential", "POST",
          "/api/tokens", doors=OWNERS_ONLY, page="#/settings/access"),
     Verb("token.change", "Rotate or revoke", "Rotate, revoke or limit a token.", "credential",

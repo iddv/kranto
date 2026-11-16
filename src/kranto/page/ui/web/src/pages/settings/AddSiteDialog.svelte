@@ -25,7 +25,7 @@
       {#each p.sites as s (s.id)}
         <li data-site={s.id}><b>{s.name}</b>{" "}<span class="muted small">{s.ways.includes("open") ? `opens ${s.name} with the draft ready` : ""}{s.can_direct ? ", or Kranto posts it after your yes" : ""}</span>{" "}
           <button type="button" class="btn sm" data-act="site-toggle" onclick={(e) => toggle(e.currentTarget, s.id, s.name)}>{s.ticked ? "Remove" : "Add"}</button>
-          {#if s.ticked}<label class="inline small"><input type="checkbox" data-act="site-disclose" checked={s.disclose} onchange={(e) => savePosting(e.currentTarget, { disclose: { [s.id]: e.currentTarget.checked } })} /> End with “{p.disclosure}”</label>{/if}
+          {#if s.ticked}<label class="inline small"><input type="checkbox" data-act="site-disclose" checked={s.disclose} onchange={(e) => savePosting(e.currentTarget, { disclose: { [s.id]: e.currentTarget.checked } })} /> End with “{s.disclosure_words || p.disclosure}”</label>{/if}
         </li>
       {/each}
     </ul>

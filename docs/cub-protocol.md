@@ -208,17 +208,20 @@ The owner's prose profile ([prose.md](prose.md)): their voice card, samples, lis
 prose.compose  params {"material": {"take"?, "title"?, "facts"?, "format"?, "hint"?: <str>}, "site"?: <str>, "kind"?: <str>,
                        "task"?: <str: the writer's instruction>, "language"?: <str>, "limits"?: <object>, "features"?: <str>}
                result {"messages": [{"role", "content"}], "take": <bool: the owner wants to be asked>, "disclosure": <str|null>}
-prose.check    params {"text": <str ≤ 100,000>, "site"?, "kind"?, "limits"?, "take"?: <str>}
+prose.check    params {"text": <str ≤ 100,000>, "site"?, "kind"?, "limits"?, "take"?: <str>,
+                       "sources"?: <str ≤ 100,000: the material the text was written from (SDK 1.4)>}
                result {"score": 0..100, "verdict": <str>, "flags": [{"start", "end", "text", "rule", "words", "fix", "group",
                        "strength", "scope"}], "counts", "grade", "words", "strictness", "site", "kind"}  (local: no model call)
 prose.revise   params {"text", "flags"?: <list: from prose.check; else the host checks>, "purpose", "tier", "site"?, "kind"?,
-                       "limits"?, "take"?}
+                       "limits"?, "take"?, "sources"?}
                result {"text", "flags", "score", "verdict", "rounds": 0..2, "changed": [{"start", "end", "before", "after"}]}
 errors  -32001 (no model purpose granted; revise: its purpose or tier not granted), -32602, -32011 (too large);
         revise also model.complete's -32002, -32004, -32008
 grant   model: a cub that may write may use the profile; revise's calls are model.complete's under the cub's purpose and cap,
         each recorded in cub_calls as one
 ```
+
+With `sources` (SDK 1.4.0), `check` also flags a person's name or a handle the material does not have (`salt.person`: salt jabs at the thing, never at a person); the blog and toot cubs pass their card's or item's words. A host before it refuses the key (-32602).
 
 `compose` puts the writer's task first, then Kranto's floor and the guides the owner chose for the site, their voice card, the switches in words, the site's limits and features as given, the 3 samples closest to the material (by embedding) inside `<example>` fences, and the material with the take first, fenced. `revise` rewrites only the flagged spans: every byte outside them is the input's.
 
