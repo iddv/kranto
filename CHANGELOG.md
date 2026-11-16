@@ -1,0 +1,82 @@
+# Changelog
+
+What changed in each release of Kranto, for the person who runs it. Versions follow
+[semantic versioning](https://semver.org/); until 1.0 anything may change. Nightly builds
+(`vX.Y.0-devN`, GitHub prereleases) are not listed one by one: their notes name the pull
+requests they carry.
+
+## Unreleased
+
+Nothing yet.
+
+## 0.7.0 — the first release
+
+### What it is
+
+Kranto runs on your own Linux machine as one page in your browser, on 127.0.0.1. You describe
+the topics you follow; it proposes places to read and reads only the ones you tick. Every few
+hours a cheap model keeps the few items that matter, each with its link, in a library on your
+machine. From that it writes a short brief a day per topic and idea cards: what the news
+suggests, each line linked to the items behind it. On a card or a brief you can ask for a draft
+(a blog post, a newsletter, or short posts for the sites people use); Kranto checks the draft
+against your voice and against the usual tells of machine writing, and nothing is posted until
+you say yes. Your own Claude Code can sit beside every page as the console, working on the same
+library with the same tools.
+
+It needs Linux, Python 3.12 and [uv](https://docs.astral.sh/uv/), and one model for reading: an
+Anthropic or OpenRouter key, another OpenAI-compatible endpoint, or your Claude Code login. The
+console needs the Claude Code CLI, signed in. It is installed from this repository's release
+wheel (it is not on PyPI); `docs/setup.md` has every step.
+
+### What is in it
+
+- **Watch.** Topics in a sentence; proposed sources (feeds, Hacker News searches, YouTube
+  channels, blogs, GitHub, arXiv and more), each test-read before you tick it; a library of
+  kept items with their links, a map of themes, and how much each source costs.
+- **News.** A cited brief per topic at the hour you choose, and fuller articles for the items
+  with the most behind them.
+- **Ideas.** Idea cards from the library, each linked to its items; a review queue with keys;
+  your ratings steer what is kept next.
+- **Post.** Drafts from a card or a brief: your blog, a newsletter, and short posts for
+  Bluesky, Mastodon, X, Threads and LinkedIn. A voice card and samples of your own writing;
+  a checker that underlines what reads like AI and what breaks a site's limits; the fix; a
+  time to send at. **Nothing is posted without your yes:** Open hands the draft to the site, or,
+  with an account connected, Kranto posts it after your press.
+- **The console.** Claude Code beside every page (✦, or ⌘J). It runs as you, not in a
+  sandbox (`docs/threat-model.md`). What an assistant changes that costs money or shapes your
+  posts waits for your yes on Needs you; the spend caps and the update settings are yours only.
+- **Your own assistant.** `kranto mcp` gives Claude Code, Codex or any MCP client the same
+  tools under the same rules (`docs/assistant.md`).
+- **Spend.** Every model call is metered; every cap is a setting, none is set unless you set
+  one (Settings › Spend).
+- **Updates and the way back.** `kranto update` installs a newer release, checks every page and
+  rolls back by itself on a failure; `kranto update --rollback` goes back by hand; an update cut
+  off while it installs leaves `update/RECOVER.txt`, which puts the previous version back.
+- **An install made before the rename** crosses over
+  with its data, settings, connections and service unit kept; both commands and both sets of
+  variable names keep working.
+- **Usage reports are off** until you choose otherwise; `DO_NOT_TRACK=1` wins over every
+  setting (`docs/privacy/what-kranto-sends.md`).
+
+### What it is not
+
+- Not a hosted service, not for teams, not a phone app: one person, one machine, loopback only.
+- Not for macOS or Windows yet.
+- Not a scheduler for many networks and not a feed reader for reading everything.
+
+### What is unproven
+
+- **One install's record.** The costs in the README (about 70 cents a day for five topics) and
+  the idea cards' rate were measured on the maintainer's own install. Whether the cards are good
+  for anyone else is not measured.
+- **Posting for real** has been rehearsed with stand-ins and the preview's switch; each site's
+  direct posting needs your own app or token, and the sites' terms change (`docs/accounts.md`).
+- The console starts Claude Code with your own login and plan; what it may do by itself is a
+  setting (Settings › Assistant), and its default is the safe side.
+
+### Before you upgrade from an install made before the rename
+
+Read `docs/setup.md` › "Updating" first: its settings must name this repository
+(`update.repo: iddv/kranto`), or it never sees a Kranto release. The crossing is two releases: a nightly build in the
+old shape (three wheels, for the old update helper), then the one-wheel release. `kranto update
+--rollback` goes back at each step.

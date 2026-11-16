@@ -1,6 +1,6 @@
 {
  "about": "mypy errors per file; a count may only fall (scripts/ci/typecheck.py)",
- "total": 512,
+ "total": 511,
  "files": {
   "src/kranto/cli.py": 14,
   "src/kranto/config.py": 1,
@@ -25,7 +25,7 @@
   "src/kranto/core/cubs/inspect.py": 6,
   "src/kranto/core/cubs/kv.py": 1,
   "src/kranto/core/cubs/narrow.py": 1,
-  "src/kranto/core/cubs/process.py": 13,
+  "src/kranto/core/cubs/process.py": 12,
   "src/kranto/core/cubs/runtime.py": 13,
   "src/kranto/core/cubs/sandbox.py": 1,
   "src/kranto/core/cubs/updates.py": 1,

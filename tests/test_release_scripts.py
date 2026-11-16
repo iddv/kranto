@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import re
 import subprocess
 import tomllib
 from datetime import UTC, datetime
@@ -166,6 +167,21 @@ def test_the_release_build_builds_the_web_ui_and_the_smoke_loads_it():
     smoke = (SCRIPTS / "smoke.sh").read_text()
     assert "/app/app-" in smoke and 'curl -sf -o /dev/null "http://127.0.0.1:$PORT/brb/$asset"' \
         in smoke
+    # the page is at / (/brb/ only redirects there, and curl without -L reads an empty body)
+    assert 'page="$(curl -sfL "http://127.0.0.1:$PORT/")"' in smoke
+
+
+def test_every_kranto_import_in_the_release_scripts_exists():
+    """A release script's inline Python imports only what the wheel has (the smoke once asked
+    for the retired build policy, ``kranto.page.resources``, and stopped every cut)."""
+    for script in sorted(SCRIPTS.glob("*.sh")):
+        for mod, names_ in re.findall(r"^\s*from (kranto[\w.]*) import ([\w, ]+)$",
+                                      script.read_text(), re.M):
+            assert importlib.util.find_spec(mod), (script.name, mod)
+            m = importlib.import_module(mod)
+            for n in (x.strip() for x in names_.split(",")):
+                assert hasattr(m, n) or importlib.util.find_spec(f"{mod}.{n}"), \
+                    (script.name, f"{mod}.{n}")
 
 
 def test_users_never_need_node():

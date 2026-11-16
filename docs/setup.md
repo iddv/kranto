@@ -431,6 +431,24 @@ print the homes in use.
 
 The page has help too: `?` on any page lists its keys, and the `?` tips explain each setting.
 
+### Updating
+
+`kranto update` installs the newest release on your channel (stable unless you chose nightly in
+Settings › System), checks every page on your data, and goes back by itself if anything fails.
+`kranto update --rollback` goes back to the version before by hand. If an update is cut off while
+it installs, `kranto status` names `update/RECOVER.txt`: `sh` it (Troubleshooting).
+
+**An install made before the rename** keeps its old command, its folders and its service. It
+crosses in two steps, each with the way back:
+
+1. the nightly build in the old shape (three wheels, the only shape its own update helper
+   installs): its old command's `update --to vX.Y.0-devN --yes`; back: `update --rollback --yes`;
+2. the next release, one wheel: `kranto update --yes`; back: `kranto update --rollback --yes`.
+
+Its settings must name this repository first (`update.repo: iddv/kranto` in its settings file),
+or it never sees a Kranto release. Both commands, and both the old and the new names of the
+environment variables, keep working after the crossing.
+
 ## 12. Remove Kranto
 
 ```sh
