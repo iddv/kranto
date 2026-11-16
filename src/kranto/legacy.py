@@ -9,6 +9,7 @@ Standard library only, imports nothing of Kranto but ``product``.
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -52,6 +53,18 @@ LOOP_HOME = "~/brb-loop"
 COOKIE = f"{_OLD}_session"
 MCP_SERVER = _OLD
 DISTS = (f"{_OLD}afk", _OLD, f"{_OLD}brb")             # distributions an old install has
+# The folder a cub Kranto ships was added from, inside an installed tool: the old server's
+# package or Kranto's (``<site-packages>/<package>/cubs/examples/<id>``). An update moves the
+# tool (the crossing replaces the old tool), so the folder an install recorded is gone after it.
+SHIPPED_CUB = re.compile(
+    rf"/site-packages/(?:{_OLD}afk|{product.COMMAND})/cubs/examples/(?P<cid>[A-Za-z0-9_-]+)/?$")
+
+
+def shipped_cub(path: str) -> str | None:
+    """The cub's id when ``path`` is the folder of a cub an installed Kranto (or the old server)
+    ships, else None."""
+    m = SHIPPED_CUB.search(str(path or "").replace("\\", "/"))
+    return m.group("cid") if m else None
 # The page's settings file (loop.yaml): its section for the server, on an old install
 LOOP_SECTION = f"{_OLD}afk"
 # stored outside Kranto: the draft's field in a Sanity document, the keys of exported traces

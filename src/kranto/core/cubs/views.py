@@ -151,11 +151,15 @@ def row(rt: Any, cid: str, r: dict[str, Any] | None = None) -> dict[str, Any] | 
 
 
 def _gone(cid: str, row: Any) -> dict[str, Any] | None:
-    from .updates import folder_gone, gone_words
-    if row["state"] == "removed":
+    from .updates import folder_gone, gone_words, shipped_now
+    if row["state"] == "removed" or registry.is_site_row(row):
+        # the owner's site cub reads as Kranto's own blog writer and never updates from its old
+        # source (updates.check says the same of it)
         return None
     path = folder_gone(row)
-    return gone_words(cid, path) if path else None
+    # a cub Kranto ships, added from a tool an update replaced: its next look for an update
+    # reads this Kranto's own copy (updates.check), so nothing is gone
+    return gone_words(cid, path) if path and not shipped_now(cid, path) else None
 
 
 def _cap(rt: Any, cub: Any) -> float | None:

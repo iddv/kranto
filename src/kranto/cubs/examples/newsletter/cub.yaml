@@ -13,12 +13,13 @@
 # floor, a check and a fix of only what reads like AI); newsletter.intro moved into the card.
 # 1.5.2: the intro's check gets the headlines it was written from, so a person they never name
 # is flagged.
+# 1.5.3: tested with Kranto 0.7 (its range holds the first release; outside it a cub runs dry).
 schema: 1
 api: cub/1
 id: newsletter
 name: local/newsletter
-version: 1.5.2
-bears: ">=0.5.19,<0.7"
+version: 1.5.3
+bears: ">=0.5.19,<0.8"
 title: Newsletter
 says: Monday's issue from the week's News briefs, assembled item by item from what the briefs say, for you to read and send through your newsletter platform.
 entry: main.py
