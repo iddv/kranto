@@ -531,6 +531,9 @@ def test_the_review_queue_answers_its_keys(browser, page_base):
     assert posts[-1]["target"] == "idea" and posts[-1]["value"] == "useful" and posts[-1]["origin"] == "review"
     assert page.inner_text("#rows li.row >> nth=0").strip().endswith("useful")
     page.wait_for_selector("#dscroll .qlast >> text=Just graded card")
+    # a's chip exists once the chips' vocabulary is read (its own request); pressed sooner, a
+    # finds no chip and does nothing, as it should
+    page.wait_for_selector("#dscroll .qlast button.chip")
     page.keyboard.press("a")
     until(page, "document.querySelector('#dscroll .qlast button.chip[aria-pressed=true]') !== null")
     assert posts[-1]["reasons"] == ["novel"]
