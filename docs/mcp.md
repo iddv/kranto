@@ -21,10 +21,9 @@ tool search) the few generic tools only (`kranto_status`, `kranto_reads`, `krant
 
 It needs the MCP extra (the official Python SDK). Without it, `kranto mcp` says how to get it:
 
-Install `kranto[mcp]` from the release's wheels, as the
-[setup guide](https://github.com/iddv/kranto/blob/main/docs/setup.md#2-install) shows (step 2:
-the `uv tool install` line's last argument becomes `"kranto[mcp] @ $(ls "$PWD/kranto-$tag"/kranto-*.whl)"`).
-`kranto update` keeps the extra.
+The [setup guide](https://github.com/iddv/kranto/blob/main/docs/setup.md#2-install)'s install
+line (step 2) and `install.sh` install it (`kranto[connections,notify,mcp]`); `kranto update`
+keeps it.
 
 `kranto doctor` says whether the extra is installed.
 

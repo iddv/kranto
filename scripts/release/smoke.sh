@@ -16,13 +16,13 @@
 # but the pieces a bare machine lacks (claude, gh, the model key), SIGTERM stops the wizard and
 # its server, a second run writes nothing, and nothing listens on PORT at the end.
 #
-# Checks: 'kranto --version' names VERSION; the build policy's prompts are in the
-# installed the page; 'kranto up --foreground' on a new home in WORK answers /api/status with
-# version VERSION and mounts the builds UI (/brb/api/header 200) within 60 s, and /brb/ links
+# Checks: 'kranto --version' names VERSION; 'kranto up --foreground' on a new home in WORK
+# answers /api/status with version VERSION and /brb/api/header 200 (the page's header, which an
+# install made before the rename checks after its update) within 60 s, and the page at / links
 # and serves the web UI's built module from the wheel. The server is
 # bound to 127.0.0.1 and stopped at the end. HOME is WORK/home for the server, so nothing is
-# written to the real ~/.config/kranto. No model is called: the new home has no key and sends
-# nothing to build. Only PyPI is reached (third-party dependencies).
+# written to the real ~/.config/kranto. No model is called: the new home has no key.
+# Only PyPI is reached (third-party dependencies).
 set -euo pipefail
 
 : "${VERSION:?}" "${DIST:?}" "${WORK:?}"
@@ -58,15 +58,6 @@ for c in "${cmds[@]}"; do
   fi
   echo "ok: $c --version: $got"
 done
-
-# -P: not the current directory first on sys.path (run from a checkout, the check
-# would find the checkout's policies instead of the installed wheel's)
-"$TOOL_PY" -P - <<'PY'
-from kranto.page import resources
-p = resources.POLICIES / "v5" / "prompts"
-assert p.is_dir(), f"no build policy prompts at {p}"
-print(f"ok: build policy at {p}")
-PY
 
 if [ "${1:-}" = setup ]; then
   S="$WORK/setup"
@@ -180,7 +171,7 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 if [ -z "$ok" ]; then
-  echo "smoke: the server did not answer as $VERSION with the builds UI within 60 s" >&2
+  echo "smoke: the server did not answer as $VERSION with the page's header within 60 s" >&2
   tail -n 40 "$WORK/serve.log" >&2
   exit 1
 fi
@@ -215,14 +206,22 @@ if [ "$("$TOOL_PY" -P -c 'from kranto.page.ui.routes import static; print(hasatt
   echo "ok: this kranto.page has no web UI build to check"
   exit 0
 fi
-page="$(curl -sf "http://127.0.0.1:$PORT/brb/")"
+# Kranto is served at / (the old address /brb/ redirects there)
+page="$(curl -sfL "http://127.0.0.1:$PORT/")"
 asset="$(printf '%s' "$page" | grep -o 'static/v[A-Za-z0-9._-]*/app/app-[A-Za-z0-9_-]*\.js' | head -n 1 || true)"
 if [ -z "$asset" ]; then
-  echo "smoke: /brb/ links no built UI module (static/v<version>/app/app-<hash>.js)" >&2
+  echo "smoke: the page at / links no built UI module (static/v<version>/app/app-<hash>.js)" >&2
   exit 1
 fi
+# at this version's address: a new release is a new address, so a browser never keeps the old
+# page's files (they are cached for good)
+case "$asset" in
+  "static/v${VERSION//[^A-Za-z0-9._-]/-}/app/"*) ;;
+  *) echo "smoke: the page links $asset, not at this version's address (static/v$VERSION/)" >&2
+     exit 1 ;;
+esac
 curl -sf -o /dev/null "http://127.0.0.1:$PORT/brb/$asset" || {
   echo "smoke: /brb/$asset is not served" >&2
   exit 1
 }
-echo "ok: /brb/ loads the built UI ($asset)"
+echo "ok: the page at / loads the built UI ($asset)"

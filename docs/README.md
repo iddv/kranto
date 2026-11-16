@@ -52,6 +52,8 @@ Every page in this repository, by what you are trying to do.
 | Page | What it covers |
 |---|---|
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Setup, the rules the code depends on, merging and releasing, pull requests from forks |
+| [RELEASING.md](RELEASING.md), [../CHANGELOG.md](../CHANGELOG.md) | Cutting a release, the first one (0.7.0) step by step; what each release changed |
+| [releases/0.7.0.md](releases/0.7.0.md) | The opening of 0.7.0's release notes (`RELEASE_INTRO`) |
 | [OPERATING.md](OPERATING.md) | The operator manual: the data model, jobs, money, runbooks, invariants |
 | [preview.md](preview.md) | The preview: a second Kranto built from a branch, on a copy of your data, that cannot send (`kranto-preview`) |
 | [../SECURITY.md](../SECURITY.md) | Reporting a vulnerability privately, and each security check in detail |

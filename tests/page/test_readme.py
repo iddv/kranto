@@ -11,7 +11,9 @@ INSTALL = ("tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)\n
            "gh release download \"$tag\" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "
            "\"kranto-$tag\"\n"
            "(cd \"kranto-$tag\" && sha256sum -c SHA256SUMS)\n"
-           "uv tool install --python 3.12 \"kranto-$tag\"/kranto-*.whl\n"
+           # the extras install.sh installs (a posting account needs connections)
+           "uv tool install --python 3.12 \"kranto[connections,notify,mcp] @ "
+           "file://$(ls \"$PWD/kranto-$tag\"/kranto-*.whl)\"\n"
            "kranto up")
 
 

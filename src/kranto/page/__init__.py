@@ -1,7 +1,5 @@
-"""The page: the build side of Kranto."""
-try:                                     # the installed distribution's (set from the tag)
-    from importlib.metadata import PackageNotFoundError
-    from importlib.metadata import version as _version
-    __version__ = _version("kranto.page")
-except PackageNotFoundError:             # a git checkout that isn't installed
-    __version__ = "0.0.0+unknown"
+"""The page: Kranto's web UI and the server side it talks to."""
+# Kranto's one version (the installed distribution's, set from the tag; kranto/__init__.py). The
+# page ships inside the same wheel: its scripts' address (static/v<version>/) and the live
+# stream's "host" event (an open page reloads when it changes after an update) both use it.
+from .. import __version__  # noqa: F401
