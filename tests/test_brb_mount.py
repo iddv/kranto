@@ -259,6 +259,31 @@ def test_mounts_api_version_2(rt, fake_api):
         assert web.get("/").status_code == 200
 
 
+def test_the_start_log_names_where_the_page_is_served(rt, fake_api, caplog):
+    """A newcomer's first log said "the page mounted at /brb/", an address that now only
+    redirects to the page at /."""
+    with caplog.at_level("INFO", logger="kranto.web.brb"), client(rt) as web:
+        assert web.get("/").status_code == 200
+    said = [r.getMessage() for r in caplog.records if r.name == "kranto.web.brb"]
+    assert any("the page is served at /" in m for m in said), said
+    assert not any("/brb/" in m for m in said)
+
+
+def test_the_full_text_reader_starts_without_a_socks_warning(tmp_path):
+    """Without the optional PySocks, trafilatura's import of urllib3's SOCKS support warned at
+    every start of a fresh install (whose trafilatura is not the locked one): noise in a
+    newcomer's first log. Kranto never uses SOCKS; importing kranto quiets that one warning."""
+    import subprocess
+    import sys
+    code = ("import sys, warnings; sys.modules['socks'] = None; warnings.simplefilter('always');"
+            " import kranto\ntry:\n import urllib3.contrib.socks\nexcept ImportError:\n pass\n"
+            "import kranto.sources.fulltext, kranto.sources.gather")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=120,
+                       cwd=tmp_path)
+    assert r.returncode == 0, r.stderr
+    assert "SOCKS" not in r.stderr, r.stderr
+
+
 def test_shared_header_on_kranto_pages(rt, fake_api):
     with client(rt) as web:
         page = web.get("/connections").text

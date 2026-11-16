@@ -51,7 +51,7 @@ describe("Settings › Spend (the server's alone)", () => {
     expect([...target.querySelectorAll(".grp .ghd .n")].map((n) => n.textContent)).toEqual(["$2.00 of $10.00", "4"]);
     expect(target.querySelector('[data-sel="t2"] .c-num')?.textContent).toBe("$1.25");
     expect([...target.querySelectorAll('[data-sel^="ecap:"] .r-title')].map((r) => r.textContent)).toEqual(
-      ["Watching a month", "X a month", "Live search a month", "Deep dives a day"]);
+      ["Watching a month", "X a month", "Live search a month"]);
     expect(target.querySelector('[data-sel="ecap:watch"] .c-meta')?.textContent).toBe("$10.00");
     expect(target.querySelector('[data-sel="ecap:x"] .c-meta')?.textContent).toBe("no cap · X is not connected");
     expect(target.textContent).not.toMatch(/\b[Bb]uilds?\b|[Pp]roject/);

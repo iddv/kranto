@@ -1026,7 +1026,7 @@ CUT_KEEP = [
 DOCTOR_BUILDS = re.compile(r"builds: this feature is not part of Kranto any more", re.I)
 # doctor's own console check, by its name ("ok    console        ready: …"); never another line
 # that mentions a console (X's "the Developer Console is the bill")
-DOCTOR_CONSOLE = re.compile(r"^\s*ok\s+console\s+ready\b")
+DOCTOR_CONSOLE = re.compile(r"^\s*ok\s+open in claude code\s+ready\b")
 
 
 def _doctor() -> tuple[int, str]:
@@ -1149,13 +1149,13 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
                 f"no prepared item of a verb that left on this copy ({len(rows)} open)",
             )
         )
-    # doctor says the console is ready; the answer itself is the owner's
+    # doctor says Open in Claude Code is ready; the answer itself is the owner's
     code, said = _doctor()
     line = next((ln.strip() for ln in said.splitlines() if DOCTOR_CONSOLE.search(ln)), "")
     out.append(
         ok(
             "CUT-2",
-            "`kranto doctor` says the console is ready",
+            "`kranto doctor` says Open in Claude Code is ready",
             bool(line),
             line or said.strip().splitlines()[-1:][0] if said.strip() else "no output",
         )

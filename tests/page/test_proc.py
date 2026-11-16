@@ -42,6 +42,21 @@ def test_a_detached_job_runs_in_its_own_session_and_logs_after_a_banner(tmp_path
     assert not proc.alive(p.pid)
 
 
+def test_stop_returns_once_a_killed_job_is_gone(tmp_path):
+    """After the grace, stop SIGKILLs what is left; it returned at once, while the kernel had
+    not yet ended (and we not yet reaped) the job, so 'alive' right after a stop could still
+    say yes (the detached-job test above flaked so under CI load). It waits for the end."""
+    for n in range(5):
+        p = proc.spawn_detached([sys.executable, "-c",
+                                 "import signal, time; signal.signal(signal.SIGTERM, "
+                                 "signal.SIG_IGN); time.sleep(60)", f"deaf-{n}"],
+                                log=tmp_path / "l")
+        assert wait_exec(p.pid, f"deaf-{n}")
+        time.sleep(0.3)                                      # let it install its handler
+        assert proc.stop(p.pid, grace_s=0, marker=f"deaf-{n}")
+        assert not proc.alive(p.pid)
+
+
 def test_stop_refuses_a_pid_that_is_no_longer_the_job(tmp_path):
     p = proc.spawn_detached([*SLEEPER, "mine"], log=tmp_path / "l")
     try:

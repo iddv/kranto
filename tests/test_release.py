@@ -100,9 +100,23 @@ def test_doctor_catches_dead_key_and_unknown_model(tmp_path, store, monkeypatch)
     assert checks["api key"].status == doctor.FAIL
     assert checks["reason model"].status == doctor.FAIL
     monkeypatch.delenv("TEST_KEY")
+    store.set_setting("setup.done", "2026-11-16T00:00:00Z")
     checks = by_name(doctor.run(cfg(tmp_path), store, transport=provider(),
                                 check_embedder=False))
     assert checks["api key"].status == doctor.FAIL
+
+
+def test_doctor_before_a_model_is_chosen_says_so_instead_of_failing_a_key(tmp_path, store,
+                                                                          monkeypatch):
+    """A fresh install, before Welcome's model step: doctor failed "api key $OPENROUTER_API_KEY
+    is not set" against a default nobody picked (and said "ok provider OpenRouter")."""
+    monkeypatch.delenv("TEST_KEY", raising=False)
+    checks = by_name(doctor.run(cfg(tmp_path), store, transport=provider(),
+                                check_embedder=False))
+    assert "api key" not in checks and "provider" not in checks, list(checks)
+    assert checks["model"].status == doctor.WARN
+    assert checks["model"].detail.startswith("none chosen yet")
+    assert not [c for c in checks.values() if c.status == doctor.FAIL], checks
 
 
 def test_doctor_flags_missing_prices(tmp_path, store, monkeypatch):
