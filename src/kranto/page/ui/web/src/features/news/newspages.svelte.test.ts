@@ -12,7 +12,7 @@ import NewsToday from "./NewsToday.svelte";
 import NewsTopics from "./NewsTopics.svelte";
 import NewsTopicPane from "./NewsTopicPane.svelte";
 import NewsEarlier from "./NewsEarlier.svelte";
-import { LATEST, ROWS, articlePath, articlesPath, briefPagePath, minutesWords, outletOf, outletsLine, type Article, type Brief, type StoryIdea, type TopicRows } from "./news";
+import { LATEST, ROWS, articlePath, articlesPath, briefPagePath, ideaLabel, minutesWords, outletOf, outletsLine, type Article, type Brief, type StoryIdea, type TopicRows } from "./news";
 import { featurePath } from "../index";
 import { closeDialog, dlg } from "../../ui/dialog.svelte";
 
@@ -49,6 +49,24 @@ const ok = { id: 7, status: "ok" as const, kind: "paper", headline: "Six models"
 const IDEAS = "/api/ideas?embedding=ref";
 
 describe("News › Today: one line a story", () => {
+  it("keeps the good brief when a newer try failed, with one line under it saying why and where to fix it", async () => {
+    stub();
+    hosted();
+    const why = "Claude Code is not installed on this machine. Install it, or choose another provider on Settings › Watching.";
+    answering({ [LATEST]: { topics: [{ topic: { id: 3, name: "Robotics" }, brief: brief(), failed: { id: 13, created_at: NOW, why, fix: "settings/watching" } }] },
+      [ROWS]: rows(true), [IDEAS]: { ideas: [] } });
+    const { target, done } = await draw(NewsToday, where("news"));
+    await settle();
+    // the good brief's stories are still there
+    expect(target.querySelectorAll("section.brief li.story").length).toBeGreaterThan(0);
+    const line = target.querySelector("p.failed-try")!;
+    expect(line.textContent).toContain("A newer brief could not be written at");
+    expect(line.textContent).toContain("Claude Code is not installed on this machine");
+    expect(line.querySelector("a")?.getAttribute("href")).toBe("#/settings/watching");
+    expect(target.querySelector(".quiet-topic")).toBeNull();
+    done();
+  });
+
   it("says how much there is, opens the first story, and draws the others as one line each", async () => {
     stub();
     hosted();
@@ -112,10 +130,28 @@ describe("News › Today: one line a story", () => {
     const { target, done } = await draw(NewsToday, where("news"));
     await settle();
     const open = target.querySelector("li.story.open")!;
-    expect(open.querySelector(".st-idea")?.textContent).toBe("Idea · #133 Failure-targeted data collection · waiting · and 2 more ›");
+    // rule 3: a card of the story's theme, said as such (never as made from the story)
+    expect(open.querySelector(".st-idea")?.textContent).toBe("An idea on the same theme · #133 Failure-targeted data collection · waiting · and 2 more ›");
     expect(open.querySelector(".st-idea a")?.getAttribute("href")).toBe("#/ideas/133");
     expect([...open.querySelectorAll(".st-verbs .btn")].map((b) => b.textContent)).not.toContain("Idea from this");
     done();
+  });
+
+  // a card only on the same map theme read as "Idea from this"
+  it("says how a story's idea was found, on the brief's item and the story's page", async () => {
+    expect(ideaLabel(1)).toBe("Idea from this story");
+    expect(ideaLabel(2)).toBe("An idea that cites this story");
+    expect(ideaLabel(3)).toBe("An idea on the same theme");
+    for (const [rule, words] of [[1, "Idea from this story"], [2, "An idea that cites this story"], [3, "An idea on the same theme"]] as const) {
+      stub();
+      hosted();
+      const idea = { id: 133, title: "Failure-targeted data collection", state: "waiting", rule, more: 0 };
+      answering({ [briefPagePath(12)]: brief({ stories: stories({ "0": { idea } }) }), [ROWS]: rows(true) });
+      const { target, done } = await draw(StoryPage, where("news/i/12/0"));
+      await settle();
+      expect(target.querySelector("#story-idea")?.textContent?.startsWith(`${words} · #133`)).toBe(true);
+      done();
+    }
   });
 
   it("says when a new topic's first brief comes, and marks the first read's", async () => {
@@ -193,7 +229,7 @@ describe("a story's page", () => {
     const { target, done } = await draw(StoryPage, where("news/i/12/0"));
     await settle();
     expect(target.querySelector("h1")?.textContent).toBe("A humanoid ships");
-    expect(target.querySelector(".lsub")?.textContent).toContain("closed-loop controllers");
+    expect(target.querySelector("#story-summary")?.textContent).toContain("closed-loop controllers");
     expect(target.textContent).toMatch(/Story 1 of 2 · 5 sources · 3 min read · written/);
     expect(target.querySelector("#story-write")?.textContent).toContain("Write a post");
     expect(target.querySelectorAll(".btn.primary").length).toBeLessThanOrEqual(1);
@@ -215,6 +251,8 @@ describe("a story's page", () => {
     const { target, done } = await draw(StoryPage, where("news/i/12/1"));
     await settle();
     expect(target.querySelector("#story-full")?.textContent).toBe("Write the full story");
+    // the summary the brief shows stays on the story's own page
+    expect(target.querySelector("#story-summary")?.textContent).toBe("Something else happened.");
     expect(target.querySelector("#story-idea-from")).toBeNull();
     expect(target.querySelector("#story-no-idea")?.textContent).toBe("An idea needs this story on the map: after tonight's map.");
     done();

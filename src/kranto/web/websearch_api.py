@@ -105,6 +105,9 @@ class WebSearchAPI:
         raw = body.get("key")
         key = str(raw) if raw not in (None, "") else None
         provider = str(body.get("provider") or "")
+        from .. import preview
+        if key is not None and preview.enabled(self.app.rt.cfg.root):
+            return JSONResponse({"error": preview.NO_KEY_TEST}, status_code=409)
         try:
             result = await run_in_threadpool(
                 wsetup.choose, self.app.rt.cfg.root, provider, key=key,

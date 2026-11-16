@@ -242,6 +242,13 @@ class FeatureContext:
     def cfg(self) -> Any:
         return self.rt.cfg
 
+    def model_trouble(self, error: Any) -> dict[str, Any] | None:
+        """A model's error in the owner's words for the provider in use (``model_trouble.said``:
+        ``{words, fix, key}``), or None when it is no model trouble Kranto knows. A feature
+        says a failed run this way without reaching past its context."""
+        from .. import model_trouble
+        return model_trouble.said(error, model_trouble.provider_of(self.rt))
+
     def now(self) -> datetime:
         return self.clock()
 
@@ -388,6 +395,10 @@ class FeatureContext:
                     summary = dict(r.result)
                     got = summary.pop("status", "ok")
                     status = got if got in ("ok", "degraded", "failed", "skipped") else "ok"
+                    # a failed or degraded result may say why (``error``): the run's reason
+                    why = summary.get("error")
+                    if status in ("failed", "degraded") and isinstance(why, str) and why:
+                        error = str(summary.pop("error"))[:300]
                 if r.stop_requested():
                     status = "skipped"
                     summary = {**summary, "stopped_by": r.stopped_by or "owner"}

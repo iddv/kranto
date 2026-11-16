@@ -129,6 +129,12 @@ export interface StoryIdea {
   /** brief:<id>:<item>, the item counted from 1 */
   story: string;
 }
+/** how a story's idea was found, said on the brief's item and the story's page (a
+ * card only on the same map theme read as made from the story): rule 1 a card made from this
+ * story, 2 a card citing its evidence, 3 a card of its theme */
+export function ideaLabel(rule: number | null | undefined): string {
+  return rule === 1 ? "Idea from this story" : rule === 2 ? "An idea that cites this story" : "An idea on the same theme";
+}
 export interface Brief {
   id: number;
   /** each item's article, by the item's number as text (briefs.get and latest) */
@@ -172,9 +178,19 @@ export interface TopicRows {
   search_off: string | null;
   spend: { month_usd: number; today_usd: number; calls: number; equiv_usd: number } | null;
 }
+/** a topic's newest try when it failed: one line under the good brief it never replaces
+ * (the server 0.6.x: ``failed``, absent from an older one) */
+export interface FailedTry { id: number; created_at: string; why: string; fix: string | null }
 export interface Latest {
-  topics: { topic: { id: number; name: string }; brief: Brief | null }[];
+  topics: { topic: { id: number; name: string }; brief: Brief | null; failed?: FailedTry | null }[];
 }
+/** the failed try's line: "A newer brief could not be written at 14:05: ‹why›" */
+export function failedTryLine(f: FailedTry, at: (iso: string) => string): string {
+  const why = f.why.replace(/[.\s]+$/, "");
+  return `A newer brief could not be written at ${at(f.created_at)}: ${why}.`;
+}
+/** the words of the failed try's link: the page its fix is on */
+export const fixPlace = (fix: string | null | undefined): string => fix === "settings/spend" ? "Settings › Spend ›" : "Settings › Watching ›";
 
 export const ROWS = featurePath("news", "topic_rows");
 export const LATEST = featurePath("news", "latest");

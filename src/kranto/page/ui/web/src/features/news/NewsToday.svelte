@@ -22,7 +22,7 @@
   import { IDEAS_API } from "../../pages/ideas/cards";
   import { HOME_API, type HomeAnswer } from "../home";
   import type { Snippet } from "svelte";
-  import { LATEST, ROWS, briefPagePath, clock, earlyWords, deepDive, ideaFromThis, ideaHref, longDay, minutesWords, okArticle, outletsDays, outletsLine, storyHref, storyKey, storyWords, whyNothingRuns, type Brief, type BriefItem, type Latest, type TopicRows } from "./news";
+  import { LATEST, ROWS, briefPagePath, clock, earlyWords, deepDive, ideaFromThis, ideaHref, ideaLabel, longDay, minutesWords, okArticle, outletsDays, outletsLine, storyHref, storyKey, storyWords, whyNothingRuns, failedTryLine, fixPlace, type Brief, type BriefItem, type Latest, type TopicRows } from "./news";
 
   // bid: one brief's own day (#/news/b/<id>,), drawn in Today's layout
   let { view, bid = "", details }: { view: View; bid?: string; details?: Snippet<[Brief]> } = $props();
@@ -129,7 +129,7 @@
         <p class="st-body">{x.body}</p>
         {#if x.why}<p class="why"><strong>Why it matters ·</strong> {x.why}</p>{/if}
         <p class="muted small st-src">{outletsDays(x.sources)}</p>
-        {#if s?.idea}<p class="small st-idea">Idea · <a href={ideaHref(s.idea.id)}>{`#${s.idea.id} ${shortName(s.idea.title)}`}</a>{s.idea.state ? ` · ${s.idea.state}` : ""}{#if s.idea.more}{" · "}<a href={href("ideas", { topic: String(b.topic_id) })}>{`and ${s.idea.more} more ›`}</a>{/if}</p>{/if}
+        {#if s?.idea}<p class="small st-idea">{ideaLabel(s.idea.rule)} · <a href={ideaHref(s.idea.id)}>{`#${s.idea.id} ${shortName(s.idea.title)}`}</a>{s.idea.state ? ` · ${s.idea.state}` : ""}{#if s.idea.more}{" · "}<a href={href("ideas", { topic: String(b.topic_id) })}>{`and ${s.idea.more} more ›`}</a>{/if}</p>{/if}
         <p class="acts st-verbs">
           {#if art}<a class="btn sm" href={storyHref(b.id, n)} data-act="read">{`Read the story · ${art.minutes} min`}</a>{:else if (x.observation_ids || []).length}<button type="button" class="btn sm" data-act="full-story" onclick={(e) => deepDive(e.currentTarget, b.id, n, x.headline)}>Write the full story</button>{/if}
           <button type="button" class="btn sm" data-act="write" onclick={() => writePost({ brief: b.id, n, title: x.headline, sources: x.sources.filter((q) => q.url).length })}>Write a post</button>
@@ -158,11 +158,12 @@
         <section class="brief day" aria-labelledby={"brief-" + b.id} data-brief={String(b.id)}>
           <h2 id={"brief-" + b.id}>{t.topic.name}<span class="muted small">{` · written at ${clock(b.created_at)}`}</span>{#if w}<a class="small day-ideas" href={href("ideas", { topic: String(t.topic.id) })}>{`${w} ${w === 1 ? "idea" : "ideas"} from ${t.topic.name} ${w === 1 ? "waits" : "wait"} ›`}</a>{/if}</h2>
           {#if b.trigger === "first_read"}<p class="muted small first-read">From the first read. Tomorrow's covers a day.</p>{:else if b.trigger === "first_early"}<p class="muted small first-read">{earlyWords(b)}</p>{/if}
+          {#if t.failed && t.failed.id > b.id}<p class="muted small failed-try" data-failed={String(t.failed.id)}>{failedTryLine(t.failed, clock)}{" "}{#if t.failed.fix}<a href={"#/" + t.failed.fix}>{fixPlace(t.failed.fix)}</a>{:else}<a href={href("news/topics")}>News › Topics ›</a>{/if}</p>{/if}
           <ol class="stories">{#each fresh(b) as s (s.n)}{@render story(b, s.x, s.n)}{/each}</ol>
           {#if bg.length}<details class="earlier-stories" open={bg.some((s) => open === storyKey(b.id, s.n))}><summary class="small muted">{`${bg.length} from earlier ▾`}</summary><ol class="stories">{#each bg as s (s.n)}{@render story(b, s.x, s.n)}{/each}</ol></details>{/if}
         </section>
       {/each}
-      {#each quiet as t (t.topic.id)}<p class="muted small quiet-topic" data-topic={String(t.topic.id)}>{t.brief!.status === "quiet" ? `${t.topic.name}: a quiet day. ${t.brief!.quiet || ""}` : `${t.topic.name}'s brief could not be written. `}{#if t.brief!.status !== "quiet"}<a href={href("news/topics")}>News › Topics ›</a>{/if}</p>{/each}
+      {#each quiet as t (t.topic.id)}<p class="muted small quiet-topic" data-topic={String(t.topic.id)}>{t.brief!.status === "quiet" ? `${t.topic.name}: a quiet day. ${t.brief!.quiet || ""}` : `${t.topic.name}'s brief could not be written${t.failed ? `: ${t.failed.why.replace(/[.\s]+$/, "")}` : ""}. `}{#if t.brief!.status !== "quiet"}{#if t.failed?.fix}<a href={"#/" + t.failed.fix}>{fixPlace(t.failed.fix)}</a>{:else}<a href={href("news/topics")}>News › Topics ›</a>{/if}{/if}</p>{/each}
       {#if bid && one?.data && details}{@render details(one.data)}{/if}
       {#each bid ? [] : coming as t (t.id)}{#if stuck}<p class="muted small first-brief" data-topic={String(t.id)}>{`No brief for ${t.name} yet. ${stuck.text} `}{#if stuck.link}<a href={stuck.link.href}>{stuck.link.w}</a>{/if}</p>{:else}<p class="muted small first-brief" data-topic={String(t.id)}>{firstReading(t.id, t.name)}</p>{/if}{/each}
       <p class="muted small news-foot">{bid ? "" : "Written every day at the topic's hour · "}<a href={href("news/earlier")}>Earlier days ›</a></p>

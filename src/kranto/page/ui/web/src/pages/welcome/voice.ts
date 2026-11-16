@@ -21,6 +21,19 @@ export const switchLabel = (k: string): string => LABELS[k] || k;
 export function splitSamples(text: string): string[] {
   return text.split(/^\s*-{3,}\s*$/m).map((s) => s.trim()).filter((s) => s.length >= 20).slice(0, 5);
 }
+/** the samples line under the box: how many are kept, and those left out and why (a short
+ * sample was dropped without a word) */
+export function samplesLine(text: string): string {
+  const parts = text.split(/^\s*-{3,}\s*$/m).map((s) => s.trim()).filter(Boolean);
+  const kept = splitSamples(text).length;
+  if (!parts.length) return "Three to five is best.";
+  const short = parts.filter((s) => s.length < 20).length;
+  const over = Math.max(0, parts.length - short - 5);
+  const out = [`${kept} of 3 to 5 pasted.`];
+  if (short) out.push(`${short} left out: under 20 characters.`);
+  if (over) out.push(`${over} left out: five at most.`);
+  return out.join(" ");
+}
 /** the read as it goes, in one line: "Kranto is reading · source 2 of 5 · 4 kept of 19 read · the
  * first brief in about 3 minutes"; once enough are kept, that it is being written */
 export function firstLine(f: HomeFirst | null | undefined): string {

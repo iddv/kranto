@@ -15,7 +15,7 @@
   import UsageChoice from "../settings/UsageChoice.svelte";
   import { PRIVACY_API, type Privacy } from "../settings/privacy";
   import { free, SETUP_API, type Setup } from "../settings/keys.svelte";
-  import { afterReady, CONSOLE_INSTALL, STARTED, TOPIC } from "./welcome.svelte";
+  import { afterReady, briefLine, CONSOLE_INSTALL, STARTED, TOPIC } from "./welcome.svelte";
   import { PRODUCT, PRODUCTS } from "../../lib/product";
   import { consoleWaits } from "../../term/console.svelte";
 
@@ -32,7 +32,8 @@
   const p = $derived(pc.data || null);
   const keyed = $derived(!s || !s.key || !!s.key.set);
   const cc = $derived(s?.logins?.claude || null);
-  const minutes = $derived(s?.first_brief_minutes ?? 5);
+  // the first brief: when it comes, or what is still missing for it (no promise it cannot keep)
+  const brief = $derived(s ? briefLine(s) : null);
   /** the usage line: off until chosen; DO_NOT_TRACK says itself (fix 15) */
   const usage = $derived(!p ? "" : p.why === "DO_NOT_TRACK" ? "Off: DO_NOT_TRACK is set on this machine."
     : p.answered && p.mode !== "off" && p.mode !== "local" ? `${p.meaning.replace(/^./, (x) => x.toUpperCase())}.`
@@ -71,12 +72,12 @@
 {:else}
   <div class="narrow"><div class="ph"><h1>Ready</h1></div>
     <ul class="ready-lines">
-      <li id="ready-brief"><strong>The first brief</strong> {`In about ${minutes} minutes.`}</li>
+      <li id="ready-brief"><strong>The first brief</strong> <span id="ready-brief-line">{brief?.text || ""}</span>{#if brief?.href} <a href={brief.href}>{brief.link}</a>{/if}</li>
       <!-- the cost's words are the server's (/api/setup's cost): the page holds no price of its own -->
       {#if s.cost}<li id="ready-cost"><strong>What it costs</strong> <span id="cost-line">{s.cost}</span> <a href="#/settings/spend">Spend ›</a></li>{/if}
-      <li id="ready-claude"><strong>The console</strong> <span id="claude-state">{#if !cc || cc.ok}{`Claude Code is ready. It asks once whether to trust ${PRODUCTS} folder; that is expected.`}{:else if cc.installed === false}{`Not installed; ${PRODUCT} works without it. To add it: `}<code>{CONSOLE_INSTALL}</code>, then run <code>claude</code> once.{:else}{`Installed, not signed in; ${PRODUCT} works without it. Run `}<code>claude</code> once to sign in.{/if}</span>{#if cc && !cc.ok} <button type="button" class="btn sm" id="check-again" disabled={checking} onclick={(e) => again(e.currentTarget)}>{checking ? "Checking…" : "Check again"}</button>{/if}</li>
+      <li id="ready-claude"><strong>The console</strong> <span id="claude-state">{#if !cc || cc.ok}{`Claude Code is ready. It asks once whether to trust ${PRODUCTS} folder; that is expected.`}{:else if cc.installed === false}{s.key?.provider === "claude_code" ? "Not installed, and it is the model that reads for you here: nothing is read until it is. To add it: " : `Not installed; ${PRODUCT} works without it. To add it: `}<code>{CONSOLE_INSTALL}</code>, then run <code>claude</code> once.{:else}{`Installed, not signed in; ${PRODUCT} works without it. Run `}<code>claude</code> once to sign in.{/if}</span>{#if cc && !cc.ok} <button type="button" class="btn sm" id="check-again" disabled={checking} onclick={(e) => again(e.currentTarget)}>{checking ? "Checking…" : "Check again"}</button>{/if}</li>
       {#if p}<li id="usage-reports"><strong>Usage reports</strong> <span id="usage-line">{usage}</span> <details class="inline-more"><summary>What they hold ›</summary><UsageChoice {p} /></details></li>{/if}
     </ul>
-    <div class="inline wizard-foot"><a class="btn" href="#/welcome/topics">Back</a><span class="grow"></span>{#if !keyed}<a class="small" id="finish-needs-key" href="#/welcome">Start reading needs a model from step 1 ›</a>{/if}<button class="btn primary" id="finish" disabled={!keyed} title={keyed ? undefined : "Needs a model from step 1"} onclick={(e) => start(e.currentTarget)}>Start reading</button></div>
+    <div class="inline wizard-foot"><a class="btn" href="#/welcome/topics">Back</a><span class="grow"></span>{#if !keyed}<a class="small" id="finish-needs-key" href="#/welcome">Start reading needs a model from step 1 ›</a><a class="small" id="finish-voice" href="#/welcome/voice">How you write ›</a>{/if}<button class="btn primary" id="finish" disabled={!keyed} title={keyed ? undefined : "Needs a model from step 1"} onclick={(e) => start(e.currentTarget)}>Start reading</button></div>
   </div>
 {/if}

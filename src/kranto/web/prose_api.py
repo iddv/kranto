@@ -237,6 +237,9 @@ def writer_key(rt, body: dict, door: str | None) -> dict[str, Any]:
     root = getattr(getattr(rt, "cfg", None), "root", None)
     if root is None:
         raise ProseError("This Kranto has no home to keep a key in.", 409)
+    from .. import preview
+    if preview.enabled(root):
+        raise ProseError(preview.NO_KEY_TEST, 409)
     try:
         got = providers.openai_key(root, key)
     except setup.SetupError as exc:
@@ -279,6 +282,12 @@ class ProseAPI:
                 await run_in_threadpool(fn, self.rt)
         except ProseError as exc:
             return _error(exc.words, exc.code)
+        except Exception as exc:  # noqa: BLE001 - a model's trouble (voice card, Fix), in words
+            from .. import model_trouble
+            t = model_trouble.said(str(exc), model_trouble.provider_of(self.rt))
+            if t is None:
+                raise
+            return _error(t["words"], 502)
         return JSONResponse(out)
 
     async def get(self, request: Request):

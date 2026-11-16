@@ -13,7 +13,9 @@ Every click, MCP tool and agent request carries a token. Kranto acts as that tok
 whatever the request claims, and a request without one is refused.
 
 This browser signs in once with the link `kranto open` prints on the machine Kranto runs on (it
-expires in 10 minutes); its code also works in the sign-in box at the top of the list.
+expires in 10 minutes); its code also works in the sign-in box at the top of the list. Until it
+is signed in, every page it opens says "Not signed in: this browser can look, not act" with that
+box (✕ puts the line away for that page), and a save it tries is refused in those words.
 Fetching the page itself hands out nothing. Agents never use the sign-in box: each sends its
 own token (`kranto token add agent:<name>`, or Settings › Privacy & access › Add an agent).
 
@@ -221,8 +223,11 @@ Send. **Write draft** answers at once ("Writing the draft. It will be on Post in
 and the post is written in the background: one model call, in your site's name and tone
 (Settings › Posting), with the card's or the item's own sources linked under it by Kranto, never
 by the model. The blog writer is Kranto's own: it is added the first time you ask for a blog post.
-When the draft is on Post the page says so; when none could be written (the model did not
-answer, say, on an install with no model key) a red line says why and what to check.
+When the draft is on Post the page says so; when none could be written a red line says why and
+what to check, for the provider you use: "Claude Code is not installed on this machine", with
+how to install it or choose another provider, when Claude Code reads for you and is missing;
+"no model key is set" only for a provider that takes a key. The write stays on Post under **No
+draft written**, its reason on a line of its own, with a link to Settings › Watching.
 The console does the same with `post.write`.
 
 **A draft waits until it is seen.** A draft's ask has no time limit. It leaves the drafts that
@@ -275,15 +280,18 @@ One story is open at a time (the first when the page opens): what happened, **Wh
 its outlets and days, its idea when it has one, and three plain buttons: **Read the story** (or
 **Write the full story**, which asks first: about 10 cents), **Write a post**, and **Idea from
 this**. Click another line, or use the keys `j` and `k`, to open another; the address keeps the open one
-(`#/news?s=<brief>.<n>`).
+(`#/news?s=<brief>.<n>`). A newer brief that could not be written (no working model, say) never
+takes a good one off Today: the good brief stays, with one line under it saying when the try
+failed, why, and a link to where it is fixed; Activity marks that run failed, with its reason.
 
 **A story's page** (`#/news/i/<brief>/<n>`; an article's old address `#/news/a/<id>` lands here) is
 the story whole: its summary, Why it matters (with the idea the full story found in it, and the
 story's idea or Idea from this), the full story when there is one (What happened and its numbers,
 the rest under "Read on"), its sources (four shown, then all of them, "in your library ›" opening
 your own record of a line), and Next. **A story's idea** is chosen by rule, never by a model: a
-card made from the story, else a card citing one of its lines, else a card of the theme its lines
-sit in on the latest map. **Idea from this** writes one card on that theme (about 6 cents, it asks
+card made from the story ("Idea from this story"), else a card citing one of its lines ("An idea
+that cites this story"), else a card of the theme its lines sit in on the latest map ("An idea on
+the same theme"): the line says which. **Idea from this** writes one card on that theme (about 6 cents, it asks
 first); a story that is on no theme yet says why ("after tonight's map"). A card's page says
 which story is "In the news" for it.
 
@@ -529,8 +537,8 @@ On the preview (a second Kranto built from a branch, on a copy of your data, `kr
 Kranto's `docs/preview.md`) this is the status bar's first cell, and on the phone a strip above
 the doors. There nothing is posted: an approval says "This is the preview: nothing is sent", no
 kind can be turned live, no report or update goes out, and Check for updates says updates are off.
-A model key's test still asks its provider (that is how a key is checked). Every other install
-never shows it.
+A key pasted there is not tested or kept (testing it would send a request to its provider):
+the page says so. Every other install never shows it.
 
 **Healthy, Degraded or Paused, and why.** The status bar's first word (and the home's line, in
 both layouts and on the phone) is Kranto's health. When it is not Healthy, the words after it say

@@ -85,6 +85,10 @@ export function failedTitle(f: Pick<PostFailed, "as" | "title">): string {
   const what = f.as === "toot" ? "a short post" : f.as === "short" ? "short posts" : "a blog post";
   return `Write ${what} about ${f.title || "this"}: no draft`;
 }
+/** the words of the link beside a failed write's line: the page its fix is on */
+export function fixWords(fix: string | null | undefined): string {
+  return fix === "settings/spend" ? "Settings › Spend" : "Settings › Watching";
+}
 /** what a failed write was about, as Write a post's question knows it (Try again asks the same) */
 export function failedAbout(f: Pick<PostFailed, "about" | "title">): About {
   const m = /^card:(\d+)$/.exec(f.about), b = /^brief:(\d+):(\d+)$/.exec(f.about);

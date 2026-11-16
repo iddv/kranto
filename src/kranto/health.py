@@ -235,7 +235,33 @@ def served(app: Any, now: datetime | None = None) -> dict[str, Any]:
     from .config import builds_on
     home = (paths.loop_home(app.rt.cfg.brb.loop_home)
             if app.brb.mounted and builds_on(app.rt.cfg) else None)
-    return health(app.rt.store, now=now, loop=loop_state(home))
+    h = health(app.rt.store, now=now, loop=loop_state(home))
+    if h["word"] in ("Healthy", FIRST_READ):
+        missing = model_missing(app.rt)
+        if missing:
+            return _word("Degraded", missing)
+    return h
 
 
-__all__ = ["health", "loop_state", "served"]
+def model_missing(rt: Any) -> str | None:
+    """Why the watcher's model cannot be called right now, when Claude Code is the model and
+    this machine's check (``setup.logins``, cached) says it is not installed or not signed in;
+    None otherwise. The bar said Healthy, and Watching "Works", with every model call failing.
+    A key provider's trouble is the key's incident, from its first failure."""
+    try:
+        if rt.cfg.llm.provider_name != "claude_code":
+            return None
+        from . import setup
+        cc = setup.logins().get("claude") or {}
+    except Exception:  # noqa: BLE001 - a check that cannot say says nothing
+        return None
+    if cc.get("ok") is not False:
+        return None
+    if cc.get("installed") is False:
+        return ("Claude Code, the model that reads for you, is not installed on this machine: "
+                "nothing is read until it is (Settings › Watching)")
+    return ("Claude Code, the model that reads for you, is not signed in on this machine: "
+            "nothing is read until it is (Settings › Watching)")
+
+
+__all__ = ["health", "loop_state", "model_missing", "served"]

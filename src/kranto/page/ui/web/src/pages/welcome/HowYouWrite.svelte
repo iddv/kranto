@@ -16,7 +16,7 @@
   import { HOME_API, type HomeAnswer } from "../../features/home";
   import { free } from "../settings/keys.svelte";
   import { PRODUCT } from "../../lib/product";
-  import { firstLine, PROSE_API, SWITCH_SHOWN, splitSamples, switchLabel, type Prose } from "./voice";
+  import { firstLine, PROSE_API, SWITCH_SHOWN, samplesLine, splitSamples, switchLabel, type Prose } from "./voice";
 
   let { view }: { view: View } = $props();
   const pc = $derived.by(() => {
@@ -78,7 +78,7 @@
   <p class="ph-meta">{`The posts ${PRODUCT} drafts for you should sound like you. Paste a few things you wrote, and set four switches. You can skip this and do it later.`}</p>
   {#if !p}<Loading error={pc.error} />{:else}
     <section class="box"><div class="box-b">
-      <div class="field"><label for="voice-samples">Things you wrote <span class="muted small">(posts, a page, emails; put <code>---</code> on a line between them)</span></label><textarea id="voice-samples" style="min-height:120px;width:100%" value={text} oninput={(e) => { text = e.currentTarget.value; card = null; }}></textarea><p class="muted small">{samples.length ? `${samples.length} of 3 to 5 pasted.` : "Three to five is best."}</p></div>
+      <div class="field"><label for="voice-samples">Things you wrote <span class="muted small">(posts, a page, emails; put <code>---</code> on a line between them)</span></label><textarea id="voice-samples" style="min-height:120px;width:100%" value={text} oninput={(e) => { text = e.currentTarget.value; card = null; }}></textarea><p class="muted small">{samplesLine(text)}</p></div>
       <div class="voice-switches">{#each SWITCH_SHOWN as k (k)}<label class="field" for={"voice-" + k}><span class="lbl">{switchLabel(k)}</span><select id={"voice-" + k} value={now(k)} onchange={(e) => { chosen = { ...chosen, [k]: e.currentTarget.value }; }}>{#each p.switch_choices[k] || [] as v (String(v))}<option value={String(v)}>{String(v) === "mine" ? "only mine" : String(v) === "suggest" ? "suggest one for me" : String(v)}</option>{/each}</select></label>{/each}</div>
       <div class="inline"><button type="button" class="btn" id="voice-draft" disabled={!samples.length || drafting} onclick={(e) => draft(e.currentTarget)}>{drafting ? "Reading them…" : card ? "Try again" : "Show my voice card"}</button><span class="muted small">One short model call; nothing is kept until you save.</span></div>
       {#if card}<blockquote class="voice-card" id="voice-card">{card}</blockquote>{/if}

@@ -11,8 +11,8 @@ import { SETUP_API, type Setup } from "../settings/keys.svelte";
 import { PRIVACY_API } from "../settings/privacy";
 import { answering, draw, settle, stub, where } from "../testing.svelte";
 import Welcome from "./Welcome.svelte";
-import { TOPIC, newStep } from "./welcome.svelte";
-import { firstLine, PROSE_API, splitSamples } from "./voice";
+import { TOPIC, briefLine, modelWorks, newStep } from "./welcome.svelte";
+import { firstLine, PROSE_API, samplesLine, splitSamples } from "./voice";
 
 const COST = "About $5 to $8 a month for one topic with ten sources, on your own model key. No cap is set; set one in Spend.";
 const S = (claude: Setup["logins"]["claude"]): Setup => ({
@@ -139,5 +139,45 @@ describe("Welcome", () => {
     expect(firstLine({ topic: { id: 1, name: "x" }, read: { source_index: 1, sources: 5, kept: 9, judged: 30, started_at: null }, brief_minutes: null, early_kept: 8 }))
       .toBe("Kranto is reading · source 1 of 5 · 9 kept of 30 read · the first brief is being written");
     expect(firstLine({ topic: { id: 1, name: "x" }, read: null, brief_minutes: 5 })).toBe("Kranto is reading · the first brief in about 5 minutes");
+  });
+});
+
+// Ready promised "The first brief in about 5 minutes" with no topic and no model
+describe("Ready's first brief", () => {
+  it("promises a time only when a brief can come; else it says what is still missing", async () => {
+    stubbed();
+    const cc = { ok: false, installed: false, detail: "Claude Code is not installed (no claude on PATH)", command: "claude auth login" };
+    const base = S(cc);
+    answering({ [SETUP_API]: { ...base, topics: 0, key: { ...base.key, provider: "claude_code", choice: "claude_code" } }, [PRIVACY_API]: PRIVACY });
+    const { target, done } = await draw(Welcome, at("welcome/finish"));
+    await settle();
+    const line = target.querySelector("#ready-brief")!.textContent || "";
+    expect(line).not.toMatch(/minutes/);
+    expect(line).toContain("Claude Code, which reads for you, is not installed on this machine");
+    expect(line).toContain("a topic to watch (step 2)");
+    expect(target.querySelector("#ready-brief a")?.getAttribute("href")).toBe("#/welcome");
+    expect(target.querySelector("#claude-state")?.textContent).not.toContain("works without it");
+    done();
+  });
+
+  it("words each case", () => {
+    const ok = { set: true, provider: "anthropic", test: null };
+    expect(briefLine({ topics: 1, scheduler: true, key: ok, first_brief_minutes: 5 }).text).toBe("In about 5 minutes.");
+    expect(briefLine({ topics: 0, scheduler: true, key: ok }).text).toBe("No brief yet. Still missing: a topic to watch (step 2).");
+    expect(briefLine({ topics: 0, scheduler: true, key: ok }).href).toBe("#/welcome/topics");
+    expect(briefLine({ topics: 1, scheduler: true, key: { set: false, provider: "openrouter" } }).text).toBe("No brief yet. Still missing: a model that works (step 1).");
+    expect(briefLine({ topics: 1, scheduler: false, key: ok }).text).toMatch(/^When you choose Run now/);
+    expect(modelWorks({ key: { ...ok, test: { ok: false } } })).toBe(false);
+    expect(modelWorks({ key: { set: true, provider: "claude_code" }, logins: { claude: { ok: false, installed: true } } })).toBe(false);
+    expect(modelWorks({ key: ok })).toBe(true);
+  });
+});
+
+describe("How you write's samples line", () => {
+  it("says the samples left out and why", () => {
+    const long = "A sample long enough to be kept as one.";
+    expect(samplesLine("")).toBe("Three to five is best.");
+    expect(samplesLine(`${long}\n---\nshort\n---\n${long}`)).toBe("2 of 3 to 5 pasted. 1 left out: under 20 characters.");
+    expect(samplesLine(Array(6).fill(long).join("\n---\n"))).toBe("5 of 3 to 5 pasted. 1 left out: five at most.");
   });
 });

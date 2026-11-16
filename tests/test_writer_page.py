@@ -112,3 +112,16 @@ def test_the_route_is_listed_for_usage_reports_and_the_privacy_page():
     assert "/api/prose/writer-key" in json.dumps(schema)
     assert "/api/prose/writer-key" in (root / "docs" / "privacy" / "what-kranto-sends.md"
                                        ).read_text()
+
+
+def test_a_preview_tests_no_writer_key(rt, openai_answers, monkeypatch):  # noqa: F811
+    from kranto import preview
+    state, seen = openai_answers
+    monkeypatch.setenv(preview.ENV, "1")
+    key = _key()
+    with _client(rt) as client:
+        r = client.post("/api/prose/writer-key", json={"key": key})
+        assert r.status_code == 409 and r.json()["error"] == preview.NO_KEY_TEST
+        assert key not in r.text
+    assert seen == []
+

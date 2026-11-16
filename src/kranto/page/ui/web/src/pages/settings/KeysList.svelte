@@ -26,7 +26,7 @@
 {:else if !s}
   <List title="Keys" crumb="Settings"><Loading error={c?.error} /></List>
 {:else}
-  {@const kw = keyWords(s.key)}
+  {@const kw = keyWords(s.key, Date.now(), s.logins?.claude ?? null)}
   <List title="Keys" crumb="Settings">
     <Group id="k-key" title="Provider and key" count="1" kind="sets">
       <SetRow key="key" word="Provider and key" summary={kw.line} state={kw.st} />

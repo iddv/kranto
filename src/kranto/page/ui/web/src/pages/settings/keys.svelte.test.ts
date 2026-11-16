@@ -221,6 +221,11 @@ describe("Settings › Watching", () => {
 
   it("words Claude Code as the watcher: billed to the plan", () => {
     expect(keyWords({ ...S.key, provider: "claude_code", choice: "claude_code", env: "", test: null }).line).toBe("Claude Code. Uses your Claude Code login; billed to your plan.");
+    // Claude Code gone since its last check: the login read just now wins over "Works"
+    const ok = { ...S.key, provider: "claude_code", choice: "claude_code", env: "", test: { ok: true, detail: "Claude Code 2.1, signed in", base_url: "claude_code", at: new Date(NOW - 4 * 3600e3).toISOString() } };
+    expect(keyWords(ok, NOW).st[2]).toBe("Works");
+    expect(keyWords(ok, NOW, { ok: false, installed: false })).toEqual({ st: ["x", "red", "Can't be used"], line: "Claude Code. Not installed on this machine: Kranto reads nothing until it is. Install it, or choose another provider." });
+    expect(keyWords(ok, NOW, { ok: false, installed: true }).line).toMatch(/Not signed in on this machine/);
   });
 
   it("has no logins pane: an old selection of them shows nothing", async () => {
