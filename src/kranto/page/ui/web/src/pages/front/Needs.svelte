@@ -26,7 +26,7 @@
   import { ACT_PATH, bandOf } from "../../lib/activity";
   import IncidentBand from "../../shell/IncidentBand.svelte";
   import { dismissIncident } from "../../shell/incidents";
-  import { gone, lineOf, PREPARED_API, waitingItems, whoOf, type Prepared } from "../../lib/prepared";
+  import { gone, lineOf, PREPARED_API, waitingItems, whoOf, whyOf, type Prepared } from "../../lib/prepared";
   import { actPrepared, openPrepared, refusedPrepared } from "../../ui/prepared.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { put, read } from "../../lib/reads.svelte";
@@ -328,7 +328,7 @@
   {@const r = x.r}
   {@const tone = x.want === "approve" ? "violet" : x.want === "fix" ? "amber" : "blue"}
   {#snippet main()}{@render verb(x, true)}{/snippet}
-  {#if x.kind === "prep" && r}<Next kind={kindLine(x)} title={r.title} href={r.href} why={[r.prepared!.says, `Nothing happens until you choose ${r.verb}.`].filter(Boolean).join(" ")} details={"prep:" + r.prepared!.uuid} sel={x.key} {tone} act={main} />
+  {#if x.kind === "prep" && r}<Next kind={kindLine(x)} title={r.title} href={r.href} why={whyOf(r.prepared!, r.verb || "")} details={"prep:" + r.prepared!.uuid} sel={x.key} {tone} act={main} />
   {:else if r}<Next kind={kindLine(x)} title={r.title} href={r.href} why={r.meta || null} sel={x.key} {tone} act={main} />
   {:else if x.kind === "failing"}<Next kind={kindLine(x)} title={`${x.f!.label} failed ${x.f!.failing_runs} runs in a row`} href={"#/settings/sources/" + x.f!.id} why={x.f!.error ? cut(x.f!.error, 90) : null} details={"s" + x.f!.id} sel={x.key} {tone} act={main} />
   {:else if x.kind === "remove"}<Next kind={kindLine(x)} title={`Remove ${x.rm!.label}?`} href={"#/settings/sources/" + x.rm!.id} why={`${x.rm!.down} of its ${x.rm!.down + x.rm!.up} graded posts were not useful.`} details={"s" + x.rm!.id} sel={x.key} {tone} act={main} />{/if}

@@ -35,6 +35,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Match, Route
 
 from .. import config as config_mod
+from ..core import changes as changes_mod
 from ..core import verbs
 from ..store import iso, utcnow
 from ..stored.prepared import PreparedFields, VerbsMirror
@@ -85,6 +86,17 @@ def why_of(status: int, answer: Any, title: str = "") -> str:
         what = f"{title} did not happen" if title else "it did not happen"
         return f"{what}: Kranto answered {status} and gave no reason"
     return text
+
+
+def started_only(answer: Any) -> bool:
+    """Whether a route's answer says it only started work that runs on (a job still running:
+    Write a post's ``{job: {state: running}}``, Brief now's ``{started, running: true}``)."""
+    if not isinstance(answer, dict):
+        return False
+    job = answer.get("job")
+    if isinstance(job, dict) and job.get("state") in ("running", "queued"):
+        return True
+    return answer.get("running") is True
 
 
 class VerbError(Exception):
@@ -471,11 +483,20 @@ class VerbsAPI:
                 # word (the owner read "Press" and did not know what it meant); a locked
                 # kind (a key, consent) is approved in its own dialog only
                 d["button"] = button_words(d["title"])
-                d["says"] = v.says
                 d["ladder"] = v.ladder
                 d["locked"] = bool(verbs.choice_for(self.rt.cfg, v).locked)
             if not isinstance(d.get("subject_name"), str) or not d["subject_name"]:
                 d["subject_name"] = self._subject_name(d.get("subject_kind"), d.get("subject_id"))
+            if v is not None:
+                # what this press will change, in plain words: one sentence for Needs you's row
+                # (it was the verb's documentation: "samples (samples_add [{text, site}]…)") and
+                # every field with its new value for the Save dialog (a bundled field was left
+                # out of it)
+                sid = d.get("subject_id")
+                about = d["subject_name"] or (str(sid) if isinstance(sid, str | int) and
+                                              not isinstance(sid, bool) else None)
+                d["changes"] = changes_mod.changes(str(kind), d["fields"])
+                d["says"] = changes_mod.summary(str(kind), v.title, d["fields"], about)
             d["uuid"] = d.pop("prepared_uuid")
             out.append(d)
         return out
@@ -633,9 +654,10 @@ class VerbsAPI:
             status, answer = await self._perform(verb, sid, fields, identity, by=by, skind=skind)
             return self._answer(verb, status, answer, sid, fields, by, skind)
         if door == "mcp" and verb.ladder != "read" and await run_in_threadpool(self._reads_only):
-            raise VerbError("kranto mcp reads only here (mcp.actions: false, Settings › "
-                            "Building): your own assistant may read, not act", 403,
-                            refusal="reads_only", page="#/settings/building", choice="never",
+            raise VerbError("kranto mcp reads only here (mcp.actions: false in your settings, "
+                            "said on Settings › Privacy & access): your own assistant may read, "
+                            "not act", 403,
+                            refusal="reads_only", page="#/settings/privacy", choice="never",
                             locked=False)
         choice = verbs.choice_for(self.rt.cfg, verb, fields)
         if choice.choice == "never":
@@ -756,13 +778,25 @@ class VerbsAPI:
             sid = got if isinstance(got, str | int) and not isinstance(got, bool) else None
         page = verbs.fill(verb.page, sid, fields)
         why = None if ok else why_of(status, answer, verb.title)
+        started = ok and started_only(answer)
+        if started:
+            # the press only started work in the background (Write a post, Brief now): "done"
+            # would say the draft or the brief exists when it may still fail
+            said = answer.get("say") if isinstance(answer, dict) else None
+            say = (f"{verb.title}: started, not finished yet."
+                   + (f" {said}" if isinstance(said, str) and said.strip() else "")
+                   + f" When it is done it shows on {page}; if it fails, Activity and Needs you "
+                     "say why.")
+        else:
+            say = (f"{verb.title}: done. It shows on {page}." if ok else
+                   f"{verb.title} did not happen: {why}")
         out: dict[str, Any] = {
             "ok": ok, "verb": verb.kind, "status": status,
             "subject": {"kind": skind or verb.subject, "id": sid},
             "page": page, "mark": verbs.fill(verb.mark, sid, fields), "by": by,
-            "undo": verb.undo, "answer": answer,
-            "say": (f"{verb.title}: done. It shows on {page}." if ok else
-                    f"{verb.title} did not happen: {why}")}
+            "undo": verb.undo, "answer": answer, "say": say}
+        if started:
+            out["started"] = True
         if not ok:
             out["error"] = why          # PAR: the words every client reads first
         if isinstance(answer, dict) and answer.get("_run"):

@@ -21,7 +21,7 @@
   import { activityRows, awaySpan, briefFact, cardHref, coreNeeds, dayTitle, everythingLine, everythingParts, homeRows, itemHref, nextLine, orderNeeds, preparedRows, quietLine, rowCubs, sentence, sinceWords, uniqueRows, type HomeRow } from "./home";
   import { openPrepared, refusedPrepared } from "../../ui/prepared.svelte";
   import { openAsk } from "../../features/cubverbs";
-  import { PREPARED_API, waitingItems, type Prepared } from "../../lib/prepared";
+  import { PREPARED_API, waitingItems, whyOf, type Prepared } from "../../lib/prepared";
   import { dismissIncident } from "../../shell/incidents";
   import type { Activity } from "../../api/types.gen";
   import { ACT_PATH, bandOf } from "../../lib/activity";
@@ -135,7 +135,7 @@
 
 {#snippet nextBox()}
   {#if nx}{@const r = nx}{#snippet main()}{@render verb(r)}{/snippet}
-    <Next kind={nextLine(r)} title={r.title} href={r.href} why={r.prepared ? [r.prepared.says, `Nothing happens until you choose ${r.verb}.`].filter(Boolean).join(" ") : r.meta || null} details={r.prepared ? "prep:" + r.prepared.uuid : null} sel={r.key} tone={r.want === "approve" ? "violet" : r.want === "fix" ? "amber" : "blue"} act={main} />
+    <Next kind={nextLine(r)} title={r.title} href={r.href} why={r.prepared ? whyOf(r.prepared, r.verb || "") : r.meta || null} details={r.prepared ? "prep:" + r.prepared.uuid : null} sel={r.key} tone={r.want === "approve" ? "violet" : r.want === "fix" ? "amber" : "blue"} act={main} />
     {#if r.prepared && refusedPrepared[r.prepared.uuid]}<p class="c-amber" role="alert">{refusedPrepared[r.prepared.uuid]}</p>{/if}
   {/if}
 {/snippet}

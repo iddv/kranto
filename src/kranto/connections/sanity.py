@@ -3,7 +3,7 @@
 Connected with a pasted robot token (Sanity › Manage › API › Tokens; an **Editor** token on
 the Free plan, which has no draft-only role: Kranto's ``sanity`` broker offers no publish, no
 delete, and writes only documents whose id starts with ``drafts.kranto-``). The project id and
-the dataset name the connection (``ueyw95bi/production``); requests carry the token only to
+the dataset name the connection (``yourprojectid/production``); requests carry the token only to
 ``<project>.api.sanity.io``.
 
 Save and test only reads: one GROQ count over the drafts, which a public dataset answers
@@ -88,7 +88,7 @@ class SanityProvider(Provider):
         dataset = str(fields.get("dataset") or "production").strip().lower()
         if not PROJECT.fullmatch(project):
             raise OAuthError("The project id is the short name in Sanity's Manage page and "
-                             "in sanity.config (letters and digits, like ueyw95bi)")
+                             "in sanity.config (letters and digits, like abc123de)")
         if not DATASET.fullmatch(dataset):
             raise OAuthError("The dataset is a name like production")
         return f"{project}/{dataset}"
@@ -163,7 +163,7 @@ INFO = {
               "confirm can link to them. Click Save and test: Kranto only reads.",
               "A cub's Send to Sanity is practice (nothing is sent) until you turn on Send for "
               "real."],
-    "fields": [{"key": "project", "label": "Project id", "placeholder": "ueyw95bi"},
+    "fields": [{"key": "project", "label": "Project id", "placeholder": "yourprojectid"},
                {"key": "dataset", "label": "Dataset", "placeholder": "production"},
                {"key": "token", "label": "Token", "secret": True},
                {"key": "studio", "label": "Studio address (optional)",

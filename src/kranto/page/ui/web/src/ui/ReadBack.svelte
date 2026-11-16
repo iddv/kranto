@@ -4,21 +4,25 @@
   // a few lines with Show all. One look for every approval dialog.
   import Md from "./Md.svelte";
 
-  let { subject = null, keys = [], longs = [] }: { subject?: string | null; keys?: [string, string][]; longs?: [string, string][] } = $props();
+  // named: each long text says what it is above it (a prepared change's new voice card), where a
+  // single body needs no name (a factory issue's text)
+  let { subject = null, keys = [], longs = [], named = false }: { subject?: string | null; keys?: [string, string][]; longs?: [string, string][]; named?: boolean } = $props();
   let all = $state(false);
 </script>
 
 {#if subject}<p class="pd-subject"><strong>{subject}</strong></p>{/if}
 {#if keys.length}
-  <dl class="pd-keys">{#each keys as [k, v] (k)}<dt>{k}</dt><dd>{v}</dd>{/each}</dl>
+  <dl class="pd-keys">{#each keys as [k, v], i (i + ":" + k)}<dt>{k}</dt><dd>{v}</dd>{/each}</dl>
 {/if}
-{#each longs as [k, text] (k)}
+{#each longs as [k, text], i (i + ":" + k)}
+  {#if named}<p class="pd-name">{k}</p>{/if}
   <div class={"pd-body" + (all ? " open" : "")} data-field={k}><Md {text} /></div>
 {/each}
 {#if longs.length}<button type="button" class="linkish small" id="pd-all" aria-expanded={all} onclick={() => (all = !all)}>{all ? "Show less" : "Show all"}</button>{/if}
 
 <style>
   .pd-subject { margin: 0 0 8px; }
+  .pd-name { margin: 8px 0 2px; font-size: 13px; color: var(--muted); }
   .pd-keys { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 0 0 10px; font-size: 13px; }
   .pd-keys dt { color: var(--muted); }
   .pd-keys dd { margin: 0; overflow-wrap: anywhere; }

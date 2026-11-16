@@ -3,9 +3,10 @@
 // means"): one line wherever it shows, with the action's own button; its dialog reads it back once,
 // the body as markdown, collapsed; the toast says what an assistant just prepared and goes by itself.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { flushSync } from "svelte";
+import { flushSync, mount, unmount } from "svelte";
 import type { Facts } from "../lib/app";
-import { buttonOf, gone, keyFields, lineOf, longFields, PREPARED_API, preparedHere, toastLine, type Prepared } from "../lib/prepared";
+import { buttonOf, dialogTitle, gone, keyFields, lineOf, longFields, PREPARED_API, preparedHere, toastLine, whyOf, type Prepared } from "../lib/prepared";
+import PreparedDialog from "./PreparedDialog.svelte";
 import { preparedRows } from "../pages/front/home";
 import { ui } from "../lib/shell.svelte";
 import { answering, draw, settle, stub, where } from "../pages/testing.svelte";
@@ -202,9 +203,56 @@ describe("an assistant's new words for a draft and its voice card", () => {
     expect(JSON.stringify(keyFields(edit))).not.toContain("object Object");
     const one = P({ verb: "post.edit", title: "Save", subject_id: "7", fields: { parts: [{ text: "Short." }] } });
     expect(keyFields(one)).toContainEqual(["parts", "Short."]);
-    const voice = P({ verb: "prose.voice", title: "Save", fields: { voice: "Write like a pirate." } });
-    expect(lineOf(voice)).toBe("Change your voice card: how every later post is written");
-    expect(keyFields(voice)).toContainEqual(["voice", "Write like a pirate."]);
+  });
+});
+
+// a voice card prepared together with Salt (the second outside try: the dialog showed the voice
+// card only, so approving it changed Salt unsaid); the server says each change in words
+const VOICE = P({ uuid: "v1", verb: "prose.voice", title: "Save", page: "#/settings/posting", button: "Save",
+  says: "Change your voice card, set Salt to salty and set the disclosure line on Bluesky.",
+  fields: { voice: "Short, dry, first person.", switches: { salt: "salty" }, disclosure: { bluesky: "Drafted with help." } },
+  changes: [{ label: "Voice card", value: "Short, dry, first person.", long: false }, { label: "Salt", value: "salty", long: false },
+    { label: "Disclosure line on Bluesky", value: "Drafted with help.", long: false }] });
+
+describe("a prepared change of several fields", () => {
+  it("says in one plain sentence what will change, with no field names or API words", () => {
+    expect(lineOf(VOICE)).toBe("Change your voice card, set Salt to salty and set the disclosure line on Bluesky");
+    expect(lineOf(VOICE)).not.toMatch(/switches|disclosure:|samples_add|\[|\]/);
+    expect(whyOf(VOICE, "Save")).toBe("Nothing happens until you choose Save.");
+    expect(dialogTitle(VOICE)).toBe("Change your voice card, set Salt to salty and set the disclosure line on Bluesky?");
+  });
+
+  it("lists every field it will change, with its new value, in its Save dialog", () => {
+    expect(keyFields(VOICE)).toEqual([["Voice card", "Short, dry, first person."], ["Salt", "salty"],
+      ["Disclosure line on Bluesky", "Drafted with help."], ["where", "shows on #/settings/posting"]]);
+    const target = document.createElement("div");
+    document.body.append(target);
+    const app = mount(PreparedDialog, { target, props: { p: VOICE, title: dialogTitle(VOICE), okText: "Save", onOk: () => {}, close: () => {} } });
+    flushSync();
+    const text = target.textContent || "";
+    for (const c of VOICE.changes!) {
+      expect(text).toContain(c.label);
+      expect(text).toContain(c.value);
+    }
+    void unmount(app);
+    target.remove();
+  });
+
+  it("an approved new words for a draft moves the page from the replaced draft to the new one", async () => {
+    stub({ host: {} });
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => new Response(url.endsWith("/press")
+      ? JSON.stringify({ ok: true, state: "pressed", answer: { id: 12, ref: "draft:12" } }) : "{}", { status: 200 })));
+    location.hash = "#/post/d/7";
+    expect(await actPrepared(P({ uuid: "e1", verb: "post.edit", title: "Save", subject_id: "7", page: "#/post/d/7", fields: { body: "New." } }), "approve")).toBe(true);
+    expect(location.hash).toBe("#/post/d/12");
+    vi.unstubAllGlobals();
+  });
+
+  it("a long new value is drawn as its own text, not dropped", () => {
+    const long = "A voice card of many words. ".repeat(10).trim();
+    const p = { ...VOICE, changes: [{ label: "Voice card", value: long, long: true }, { label: "Salt", value: "salty" }] };
+    expect(keyFields(p).map(([k]) => k)).toEqual(["Salt", "where"]);
+    expect(longFields(p)).toEqual([["Voice card", long]]);
   });
 });
 

@@ -5,7 +5,7 @@
 // hovering pauses it, and on time out nothing happens: the item stays in Needs you.
 import { afkStale, api, load } from "../lib/app/data";
 import { ApiError } from "../api/client";
-import { buttonOf, gone, plainTitle, PREPARED_API, type Prepared } from "../lib/prepared";
+import { buttonOf, dialogTitle, gone, plainTitle, PREPARED_API, type Prepared } from "../lib/prepared";
 import { drop } from "../lib/reads.svelte";
 import { app } from "../lib/shell.svelte";
 import type { VerbLine } from "../term/reflect.svelte";
@@ -55,6 +55,11 @@ export async function actPrepared(p: Prepared, what: "approve" | "dismiss"): Pro
     } else if (what === "approve" && job && job.state === "failed") {
       app()?.say(`${plainTitle(p)} did not work: ${job.error || "it failed"}.`, "red");
     } else app()?.say(what === "approve" ? `${plainTitle(p)}: done.` : `${plainTitle(p)}: put away; nothing happened.`, what === "approve" ? "green" : "grey");
+    // an assistant's new words for a draft are filed as the next draft: the page that showed the
+    // old one moves to it, as the owner's own Save does (it stayed on the replaced draft)
+    const moved = (r?.answer as { id?: unknown } | undefined)?.id;
+    if (what === "approve" && p.verb === "post.edit" && typeof moved === "number" && location.hash.split("?")[0] === `#/post/d/${p.subject_id}`)
+      location.hash = `#/post/d/${moved}`;
     delete refusedPrepared[p.uuid];
     ok = true;
   } catch (e) {
@@ -79,7 +84,7 @@ export function openPrepared(p: Prepared): void {
     void actPrepared(p, "dismiss"); // nothing to read back: its one button puts it away
     return;
   }
-  openDialog(PreparedDialog, { p, title: `${plainTitle(p)}?`, okText: buttonOf(p), onOk: (_b: HTMLElement, close: () => void) => {
+  openDialog(PreparedDialog, { p, title: dialogTitle(p), okText: buttonOf(p), onOk: (_b: HTMLElement, close: () => void) => {
     close();
     return actPrepared(p, "approve");
   } });

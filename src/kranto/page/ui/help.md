@@ -242,8 +242,12 @@ original" brings its words back. A send that was waiting for your yes is withdra
 page says so. When your assistant (over `kranto mcp`, the console or an agent) asks to change a
 draft's words, nothing changes until you approve it in Needs you; the draft then says "edited by
 your assistant (mcp)", never "edited by you", and still waits for your yes before it goes. In
-the same way, an assistant's change to your voice card, the lines every post keeps or a
-disclosure line waits for your approval, and a disclosure line never carries a web address. Write a post's question has one optional line, "What do you think?" (and, while How you write is not set up, a "Set up how you write" link): the post builds
+the same way, an assistant's change to how you write (your voice card, a switch such as Salt,
+the checker, the lists, the lines every post keeps, a disclosure line) waits for your approval,
+and so do its changes to the model a role uses, how often Kranto reads, Kranto's prompts, a
+spending cap and how Kranto updates. Needs you says each in one sentence, and its dialog lists
+every change with its new value before you choose Save. A disclosure line never carries a web
+address. Write a post's question has one optional line, "What do you think?" (and, while How you write is not set up, a "Set up how you write" link): the post builds
 on it and speaks for you only from it.
 
 **Settings › Posting › How you write** is your voice card (how you write, in plain words; Draft it

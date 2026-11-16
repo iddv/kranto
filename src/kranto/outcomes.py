@@ -42,7 +42,9 @@ KINDS = ("editor", "signals", "decision", "pitch", "intake", "build", "gate", "p
 LOOP_ONLY = ("intake", "pitch", "build", "gate", "publish", "verdict", "research", "editor",
              "signals")
 WRITABLE = tuple(k for k in KINDS if k not in LOOP_ONLY)
-SOURCES = ("kranto.page", "ui", "cli")
+# who wrote an outcome: the page, the command line, or an assistant (kranto mcp, the console,
+# an agent: its Later was recorded as the page's before)
+SOURCES = ("kranto.page", "ui", "cli", "assistant")
 WEEK = re.compile(r"\d{4}-W(0[1-9]|[1-4]\d|5[0-3])")
 MAX_VALUE = 120
 MAX_DETAIL = 4000

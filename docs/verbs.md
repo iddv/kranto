@@ -43,7 +43,7 @@ Each verb has a **kind**, and for each kind you choose what an assistant does:
 |---|---|---|
 | Reads | a preview, a check | Do it |
 | Changes you can undo | add or edit a topic, approve a source, pause, save a setting | Do it |
-| Spending | a scout, Run now, Card it now, a cap | Do it (the cost is said first) |
+| Spending | a scout, Run now, Card it now, the model a role uses, how often Kranto reads | Do it (the cost is said first) |
 | What leaves Kranto | usage reports, installing a cub, an audience, new words for a waiting post | Ask me in the UI |
 | What cannot be undone | archive, remove, roll back, disconnect | Ask me in the UI |
 | Keys, tokens and logins | a provider key, a token, an account's credentials | Never (locked) |
@@ -54,7 +54,9 @@ fields, and waits on its page and in Needs you for 24 hours until you click it (
 dialog) or dismiss it; the assistant is told that nothing has happened. **Never** refuses and
 names the setting. A verb can differ from its kind (`verbs: {topic.add: ask}`).
 
-A few fields wait for you whatever their kind says: `prose.voice`'s `voice`, `disclosure`, `always_add` and `always_remove` (they put words in every later post) are prepared, not done, when an assistant sends them, unless you chose for `prose.voice` itself. An action an assistant prepared and you approved keeps who asked for it: an edited draft says "edited by your assistant".
+A few verbs wait for you whatever their kind says, unless you chose for the verb itself (`verbs: {prose.voice: do}`): **how you write** (`prose.voice`, every field: the voice card, the switches such as Salt, the checker, the lists, the samples, the disclosure lines), **the model a role uses** (`settings.models`: a model choice changes what Kranto spends), **how often Kranto reads** (`settings.reading`), **Kranto's prompts** (`prompt.save`, `prompt.reset`, `prompt.restore`), **an answer to a rule Kranto learned** from your edits (`prose.learn` with an answer) and **an assistant's own words for a post** (a feature action with a markdown field, such as the blog's Keep this markdown as a draft, which is also *what leaves Kranto*). An action an assistant prepared and you approved keeps who asked for it: an edited draft says "edited by your assistant".
+
+Needs you says a prepared action in one plain sentence ("Change your voice card and set Salt to salty"), and its dialog lists **every** field it will change with its new value before you choose its button (`GET /api/prepared`: `says` and `changes`, from `core/changes.py`).
 
 An action is prepared only when its action would take it: its fields are checked as the route
 checks them (their type, their choices, their limits, a field of several the route needs, the
@@ -63,9 +65,11 @@ in words for every caller, never a status or a response body, and an assistant's
 is in Activity (an assistant's action, skipped, with why). `tests/test_verbs.py`
 and `tests/test_parity.py` keep this true.
 
-Three things are locks, not settings: a key, a token or a login is made and pasted by you; a
+These are locks, not settings: a key, a token or a login is made and pasted by you; a
 house confirm (a cub going live, the cubs' master
-switch) is always prepared for your approval; and **your usage-report consent**: choosing what
+switch) is always prepared for your approval; **the spending caps** (`settings.spend`) and **how
+Kranto updates** (`update.settings`: the line, updating by itself, its window) are always
+prepared for your approval; and **your usage-report consent**: choosing what
 Kranto sends (`settings.telemetry`) is always prepared for your approval on Settings › Privacy &
 access, whatever the ladder says, while turning reports off (`telemetry.off`, a change you can
 undo) is done at once. What a feature or a cub asks you (send an issue,

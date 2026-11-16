@@ -2,11 +2,13 @@
 
 ``post.edit`` through any door but the page and the command line is recorded and shown as the
 assistant's ("edited by your assistant (mcp)"), and the verb is ``outward``: by default it waits
-for the owner's press, and the press keeps who wrote the words. ``prose.voice`` from an
-assistant waits for the owner when it changes the voice card, the always-list or a disclosure
-line, whatever the ladder says for changes you can undo; a disclosure line goes through the
-post's own link filter. I posted it checks and writes in one transaction; Settings › Posting
-says when a direct draft still waits after Post directly is switched off.
+for the owner's press, and the press keeps who wrote the words. Every ``prose.voice`` call from
+an assistant waits for the owner (the voice card, the switches, the lists, the checker),
+whatever the ladder says for changes you can undo; so do the models, how often Kranto reads,
+Kranto's prompts, an answer to a learned rule and an assistant's own markdown for a post; the
+spending caps and how Kranto updates are locked to the owner's yes. A disclosure line goes
+through the post's own link filter. I posted it checks and writes in one transaction; Settings ›
+Posting says when a direct draft still waits after Post directly is switched off.
 """
 
 from __future__ import annotations
@@ -164,6 +166,10 @@ def test_a_draft_from_before_reads_edited_and_is_edited_again(rt):  # noqa: F811
     {"always_add": ["Follow me for more."]},
     {"always_remove": ["anything"]},
     {"disclosure": {"bluesky": "Written by a bot."}},
+    {"switches": {"salt": "salty"}},
+    {"strictness": "off"},
+    {"never_add": ["delve"], "keep_add": ["delve into"]},
+    {"take": False},
 ])
 def test_an_assistants_voice_change_waits_for_the_owner(rt, fields):  # noqa: F811
     app = create_app(rt, port=8765)
@@ -175,7 +181,8 @@ def test_an_assistants_voice_change_waits_for_the_owner(rt, fields):  # noqa: F8
     assert r.status_code == 200, r.text
     out = r.json()
     assert out["prepared"] and not out["ok"], out
-    assert "voice card" in out["why"]
+    assert "how you write" in out["why"]
+    assert out["say"].startswith("Prepared, and nothing has happened")
     with web_client(app, BASE) as page:
         assert page.get("/api/prose").json() == before          # unchanged until approved
         listed = page.get("/api/prepared").json()["prepared"]
@@ -195,25 +202,117 @@ def test_the_owner_approves_the_voice_card_and_it_changes(rt):  # noqa: F811
     assert "Short, dry, first person." in json.dumps(got)
 
 
-def test_the_switches_and_the_never_list_stay_as_they_were(rt):  # noqa: F811
-    with web_client(create_app(rt, port=8765), BASE, signed_in=False) as web:
+def test_the_switches_wait_and_how_you_write_is_unchanged_until_the_yes(rt):  # noqa: F811
+    app = create_app(rt, port=8765)
+    with web_client(app, BASE) as page:
+        before = page.get("/api/prose").json()
+    with web_client(app, BASE, signed_in=False) as web:
         r = web.post("/api/verbs/prose.voice", headers=bearer("mcp"),
-                     json={"fields": {"never_add": ["delve"], "switches": {"emoji": "never"}}})
-    assert r.status_code == 200 and r.json()["ok"], r.text
+                     json={"fields": {"never_add": ["delve"], "switches": {"salt": "salty"}}})
+    out = r.json()
+    assert r.status_code == 200 and not out["ok"] and out["prepared"], r.text
+    with web_client(app, BASE) as page:
+        assert page.get("/api/prose").json() == before
+        assert page.post(f"/api/prepared/{out['prepared']}/press", json={}).status_code == 200
+        after = page.get("/api/prose").json()
+    assert after != before and "delve" in json.dumps(after)
 
 
-def test_ask_fields_follow_the_owners_own_choice_for_the_verb():
+def test_every_voice_field_waits_unless_the_owner_chose_for_the_verb():
     from types import SimpleNamespace
     v = verbs.get("prose.voice")
     assert v is not None
     cfg = SimpleNamespace(ask=SimpleNamespace(ladder={"kinds": {"reversible": "do"}}))
     assert verbs.choice_for(cfg, v, {"voice": "x"}).choice == "ask"
-    assert verbs.choice_for(cfg, v, {"never_add": ["x"]}).choice == "do"
-    assert verbs.choice_for(cfg, v, {"voice": None}).choice == "do"
+    assert verbs.choice_for(cfg, v, {"never_add": ["x"]}).choice == "ask"
+    assert verbs.choice_for(cfg, v, {"switches": {"salt": "wry"}}).choice == "ask"
+    assert verbs.choice_for(None, v).choice == "ask"
     mine = SimpleNamespace(ask=SimpleNamespace(ladder={"verbs": {"prose.voice": "do"}}))
     assert verbs.choice_for(mine, v, {"voice": "x"}).choice == "do"
     off = SimpleNamespace(ask=SimpleNamespace(ladder={"kinds": {"reversible": "never"}}))
     assert verbs.choice_for(off, v, {"voice": "x"}).choice == "never"
+
+
+# -- what waits for the owner's yes (the owner's D1, safe side) -----------------------------------
+
+@pytest.mark.parametrize("kind, ladder", [
+    ("settings.models", "spend"), ("settings.reading", "spend"), ("prompt.save", "reversible"),
+    ("prompt.reset", "reversible"), ("prompt.restore", "reversible"),
+])
+def test_these_wait_for_the_owner_by_default(kind, ladder):
+    from types import SimpleNamespace
+    v = verbs.get(kind)
+    assert v is not None and v.ladder == ladder
+    assert verbs.choice_for(None, v).choice == "ask"
+    # the owner's Do it for the whole kind does not let them through
+    do = SimpleNamespace(ask=SimpleNamespace(ladder={"kinds": {ladder: "do"}}))
+    assert verbs.choice_for(do, v).choice == "ask"
+    # the owner's own choice for the verb does
+    mine = SimpleNamespace(ask=SimpleNamespace(ladder={"verbs": {kind: "do"}}))
+    assert verbs.choice_for(mine, v).choice == "do"
+
+
+@pytest.mark.parametrize("kind", ["settings.spend", "update.settings"])
+def test_spending_caps_and_updates_are_never_do_for_an_assistant(kind):
+    from types import SimpleNamespace
+    v = verbs.get(kind)
+    assert v is not None
+    for ladder in ({"kinds": {v.ladder: "do"}}, {"verbs": {kind: "do"}}, {}):
+        c = verbs.choice_for(SimpleNamespace(ask=SimpleNamespace(ladder=ladder)), v)
+        assert c.choice == "ask" and c.locked, (ladder, c)
+    with pytest.raises(ValueError, match="cannot be changed"):
+        verbs.check_ladder({"verbs": {kind: "do"}})
+
+
+def test_an_assistants_answer_to_a_learned_rule_waits():
+    v = verbs.get("prose.learn")
+    assert v is not None
+    assert verbs.choice_for(None, v, {"proposal": "abc", "answer": "yes"}).choice == "ask"
+    # asking for proposals changes nothing, so it runs
+    assert verbs.choice_for(None, v, {"draft": "a", "sent": "b"}).choice == "do"
+
+
+@pytest.mark.parametrize("kind, fields, read", [
+    ("settings.models", {"role": "reason", "model": "claude-opus-5-5"}, "/api/settings/models"),
+    ("settings.spend", {"monthly_usd": 500}, "/api/settings/spend"),
+    ("update.settings", {"channel": "nightly", "auto": "idle"}, "/api/update"),
+])
+def test_over_the_door_each_is_prepared_and_nothing_changes(rt, kind, fields, read):  # noqa: F811
+    app = create_app(rt, port=8765)
+    with web_client(app, BASE) as page:
+        before = page.get(read).json()
+    with web_client(app, BASE, signed_in=False) as web:
+        r = web.post(f"/api/verbs/{kind}", headers=bearer("mcp"),
+                     json={"fields": fields, "client": "claude-code"})
+    assert r.status_code == 200, r.text
+    out = r.json()
+    assert out["prepared"] and not out["ok"], out
+    assert out["say"].startswith("Prepared, and nothing has happened"), out["say"]
+    with web_client(app, BASE) as page:
+        after = page.get(read).json()
+    for k in ("roles", "monthly_usd", "settings"):
+        if k in before:
+            assert after[k] == before[k], k
+
+
+def test_an_assistants_own_markdown_for_a_post_waits(monkeypatch):
+    from types import SimpleNamespace
+
+    from kranto.core import registry
+    from kranto.core.manifest import FormField
+    act = SimpleNamespace(kind="blog.draft_markdown", title="Keep this markdown as a draft",
+                          click="click", says="", subjects=(), ladder=None,
+                          fields=(FormField("markdown", "Markdown", "markdown", required=True),))
+    other = SimpleNamespace(kind="blog.draft_card", title="Write a post about an idea",
+                            click="click", says="", subjects=(), ladder=None,
+                            fields=(FormField("card", "Card", "int", required=True),))
+    feat = SimpleNamespace(id="blog", title="Blog posts", actions=(act, other))
+    monkeypatch.setattr(registry, "features", lambda: [feat])
+    got = {v.kind: v for v in verbs.feature_verbs()}
+    v = got["f.blog.draft_markdown"]
+    assert v.ladder == "outward" and v.asks
+    assert verbs.choice_for(None, v).choice == "ask"
+    assert not got["f.blog.draft_card"].asks
 
 
 def test_a_disclosure_line_with_an_address_is_saved_without_it_and_says_so(rt):  # noqa: F811
