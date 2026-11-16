@@ -105,6 +105,9 @@ class LinkedInAdapter:
             urn = str(r.headers.get("x-restli-id") or "")
             where = f"https://www.linkedin.com/feed/update/{urn}/" if URN.fullmatch(urn) \
                 else "on your LinkedIn profile"
+            from ....social import reach
+            reach.sent(ctx.store, ticket["id"], SERVICE,
+                       {"urn": urn} if URN.fullmatch(urn) else {}, d["content"])
             return {"state": "done", "note": f"posted: {where}"}
         msg = _json(r).get("message")
         said = scrub(msg)[:160] if isinstance(msg, str) and msg else \

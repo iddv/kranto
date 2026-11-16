@@ -10,6 +10,8 @@
 | POST /api/post/angles          | ``{about, as}``: three proposed angles (one model call, no row) |
 | POST /api/post/write/dismiss   | ``{about, as}``: a failed write's line on Post put away        |
 | POST /api/post/d/{id}/posted   | I posted it: the person posted an opened draft themselves     |
+| POST /api/post/d/{id}/cancel   | a scheduled post's Cancel: nothing is sent; the draft waits   |
+| GET  /api/post/learned         | what the sent posts' numbers support, per site (reach)        |
 | GET  /api/post/sites           | Settings › Posting's sites: ticked, the ways, the accounts    |
 | POST /api/post/sites           | the person's choices: sites, direct, instance, disclose |
 
@@ -22,6 +24,10 @@ a ``cub_drafts`` row; where it stands is its newest ask's (``core.tickets``, ``c
 - **waiting**: its ask is open, or practiced or refused and may be offered again (the row offers
   Send again). A draft's ask has no time limit, so a draft leaves this group only when it is
   sent, declined, or replaced by the next draft of its series;
+- **scheduled**: its ask waits, and the person said yes to send it at an hour
+  (``kranto.social.hours``): "Tuesday 17 Nov, 09:00 · Bluesky", with Cancel (and the dialog
+  again to change the time). A held post whose hour passed while Kranto was stopped is back in
+  **waiting**, saying so (``missed``), until the person says yes again;
 - **sent**: its ask was done ("Sent on 3 Nov", the platform's own words and the link they hold);
 - **earlier**: the rest, newest first: replaced by a newer draft, declined, not sure it went out,
   a draft with no ask. Each can still be opened, copied and downloaded.
@@ -205,7 +211,8 @@ def _group(store, t: dict[str, Any] | None) -> str:
     if t is None:
         return "earlier"
     if t["state"] == tickets.OPEN:
-        return "waiting"
+        from ..social import hours
+        return "scheduled" if hours.held_of(store, t["id"]) else "waiting"
     if t["state"] == "done":
         return "sent"
     if t["state"] in asks.AGAIN and asks.again_why_not(store, t) is None:
@@ -218,7 +225,7 @@ def _row(rt, d: dict[str, Any], t: dict[str, Any] | None, accounts: dict[str, di
     """A draft's row. Its ask's line and button only while it waits: an earlier draft's line
     is what happened to it (``said``)."""
     kind = "short" if d["cub"] == SOCIAL else kind_of(t["kind"] if t else None, d["service"])
-    ask = asks.row(rt, t) if t and group == "waiting" else None
+    ask = asks.row(rt, t) if t and group in ("waiting", "scheduled") else None
     note = str((t or {}).get("note") or "")
     link = URL.search(note) if t and t["state"] == "done" else None
     acct = accounts.get(kind)
@@ -231,7 +238,36 @@ def _row(rt, d: dict[str, Any], t: dict[str, Any] | None, accounts: dict[str, di
             "note": note or None if t and t["state"] in ("done", "unknown") else None,
             "link": link.group(0) if link else None,
             "account": bool(acct and acct["state"] == "connected") or kind == "short",
+            **_hour_of(rt.store, t, group),
+            "reach": _reach_of(rt.store, t),
             **_short_row(d, t)}
+
+
+def _reach_of(store, t: dict[str, Any] | None) -> dict[str, Any] | None:
+    """A sent post's newest numbers (``kranto.social.reach``), or None."""
+    if t is None or t["state"] != "done":
+        return None
+    from ..social import reach
+    return reach.newest(store, t["id"])
+
+
+def _hour_of(store, t: dict[str, Any] | None, group: str) -> dict[str, Any]:
+    """A row's hour (``kranto.social.hours``): ``due`` (UTC) and ``due_words`` ("Tuesday 17
+    Nov, 09:00", the person's own time) while it is scheduled; ``missed`` (the words) when the
+    hour passed while Kranto was stopped and the draft waits for a new yes. All None else."""
+    from ..social import hours
+    out: dict[str, Any] = {"due": None, "due_words": None, "missed": None}
+    if t is None or t["state"] != tickets.OPEN:
+        return out
+    h = hours.held_of(store, t["id"]) if group == "scheduled" else None
+    if h:
+        out.update(due=h["due_at"], due_words=hours.said_at(h["due_at"]))
+    elif group == "waiting":
+        m = hours.missed_of(store, t["id"])
+        if m:
+            out["missed"] = (f"{hours.MISSED_WORDS} ({hours.said_at(m['due_at'])}): "
+                             "post it now or choose a new time.")
+    return out
 
 
 def _short_row(d: dict[str, Any], t: dict[str, Any] | None) -> dict[str, Any]:
@@ -255,19 +291,27 @@ def _short_row(d: dict[str, Any], t: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def post_read(rt, jobs=None) -> dict[str, Any]:
-    """``GET /api/post``: the drafts waiting, sent and earlier (newest first), the accounts,
-    and the writes that failed (``failed``)."""
+    """``GET /api/post``: the drafts waiting, scheduled (soonest first), sent and earlier
+    (newest first), the accounts, and the writes that failed (``failed``)."""
     store = rt.store
     accounts = {k: account_of(store, k) for k, _ in ACCOUNTS}
-    groups: dict[str, list] = {"waiting": [], "sent": [], "earlier": []}
+    groups: dict[str, list] = {"waiting": [], "scheduled": [], "sent": [], "earlier": []}
     for d in _drafts(store):
         t = _newest_ask(store, d["cub"], d["ref"])
         group = _group(store, t)
         groups[group].append(_row(rt, d, t, accounts, group))
     return {"line": LINE, "drafts": _one_row_a_write(store, groups["waiting"]),
+            "scheduled": sorted(groups["scheduled"], key=lambda r: r["due"] or ""),
             "sent": groups["sent"], "earlier": groups["earlier"],
+            "reach_foot": _reach_foot(groups["sent"]),
             "accounts": [accounts[k] for k, _ in ACCOUNTS], "sites": sites_line(store),
             "failed": failed_writes(store, jobs)}
+
+
+def _reach_foot(sent: list[dict[str, Any]]) -> str | None:
+    """The Sent group's foot, once: the sites sent to whose numbers Kranto cannot read."""
+    from ..social import reach
+    return reach.foot({r["site"] for r in sent if isinstance(r.get("site"), str)})
 
 
 def _one_row_a_write(store, waiting: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -496,6 +540,8 @@ def editable(store, d: dict[str, Any], t: dict[str, Any] | None, group: str,
     why = None
     if t is not None and t["state"] == "confirmed":
         why = "This draft is being sent."
+    elif group == "scheduled":
+        why = "It is scheduled: cancel its time first to edit it."
     elif group != "waiting":
         why = "Only a draft that waits can be edited: copy this one instead."
     edited_from = content.get("edited_from")
@@ -1031,11 +1077,30 @@ def posted_by_you(rt, draft_id: int, identity: dict[str, Any] | None) -> dict[st
             "ticket": t["id"]}
 
 
+def cancel_hour(rt, draft_id: int, identity: dict[str, Any] | None) -> dict[str, Any]:
+    """A scheduled post's Cancel (``POST /api/post/d/{id}/cancel``): the hold ends, nothing is
+    sent, and the draft waits on Post as before (its ask still open). From the page only."""
+    from ..social import hours
+    store = rt.store
+    r = store.query_one("SELECT * FROM cub_drafts WHERE id = ?", (int(draft_id),))
+    if r is None:
+        raise WriteError("no such draft", 404)
+    t = _newest_ask(store, r["cub"], r["ref"])
+    if t is None or hours.held_of(store, t["id"]) is None:
+        raise WriteError("nothing is scheduled for this post", 409)
+    try:
+        hours.cancel(store, t["id"], door=tickets.door_of(identity))
+    except hours.HoursError as exc:
+        raise WriteError(exc.words, exc.code) from None
+    return {"ok": True, "ticket": t["id"],
+            "say": "Cancelled: nothing is sent. The draft waits on Post."}
+
+
 def posting_read(store) -> dict[str, Any]:
     """``GET /api/post/sites``: every site with the person's choices. ``sites``: the offered
     ones, each ``{id, name, ways, ticked, direct, can_direct, account, needs, instance, limit,
-    unit, disclose}``; ``not_offered``: ``{id, name, why, later}``; ``disclosure``: the line a
-    post ends with where it is switched on (off by default)."""
+    unit, disclose, learned}``; ``not_offered``: ``{id, name, why, later}``; ``disclosure``: the
+    line a post ends with where it is switched on (off by default)."""
     from .. import product
     from ..core import sites
     from ..core.cubs.brokers.base import connection_of
@@ -1044,6 +1109,17 @@ def posting_read(store) -> dict[str, Any]:
     ticked = {s for s in row.sites or [] if isinstance(s, str)}
     direct = row.direct if isinstance(row.direct, dict) else {}
     disclose = row.disclose if isinstance(row.disclose, dict) else {}
+    from ..prose.profile import load_row
+    from ..social import reach
+    taught = {x["site"]: [ln["words"] for ln in x["lines"]] for x in reach.learned(store)["sites"]}
+    # the person's own disclosure words per site (How you write): a value stored as null or not
+    # as text reads as none, and the site's posts end with Kranto's default line
+    own = load_row(store).disclosure
+    own = own if isinstance(own, dict) else {}
+
+    def words_of(site_id: str) -> str:
+        v = own.get(site_id)
+        return v.strip() if isinstance(v, str) and v.strip() else f"Drafted with {product.NAME}."
     out = []
     for s in sites.offered():
         conn = connection_of(store, s.direct) if s.direct else None
@@ -1059,7 +1135,13 @@ def posting_read(store) -> dict[str, Any]:
                     "instance": row.instance if s.needs == "instance" else None,
                     "limit": s.limit, "unit": s.unit,
                     "disclose": disclose.get(s.id) is True,
-                    "waiting_direct": _waiting_direct(store, s.direct_kind)})
+                    "waiting_direct": _waiting_direct(store, s.direct_kind),
+                    # the words this site's posts end with when disclose is on: the person's
+                    # own for the site (How you write), else Kranto's default
+                    "disclosure_words": words_of(s.id),
+                    # what the sent posts' numbers support (``reach.learned``): none until at
+                    # least 8 posts a side
+                    "learned": taught.get(s.id, [])})
     gone = [{"id": s.id, "name": s.name, "why": s.not_offered, "later": s.later}
             for s in sites.NOT_OFFERED.values()]
     return {"sites": out, "not_offered": gone,
@@ -1331,6 +1413,22 @@ class PostAPI:
             return JSONResponse({"error": exc.words}, status_code=exc.code)
         return JSONResponse(out)
 
+    async def learned(self, request: Request):
+        """``GET /api/post/learned``: per site, what the sent posts' numbers support
+        (``kranto.social.reach.learned``)."""
+        from ..social import reach
+        return JSONResponse(await run_in_threadpool(reach.learned, self.rt.store))
+
+    async def cancel(self, request: Request):
+        """``POST /api/post/d/{id}/cancel``: a scheduled post's Cancel (``cancel_hour``)."""
+        from .auth import IDENTITY
+        try:
+            out = await run_in_threadpool(cancel_hour, self.rt, request.path_params["id"],
+                                          request.scope.get(IDENTITY))
+        except WriteError as exc:
+            return JSONResponse({"error": exc.words}, status_code=exc.code)
+        return JSONResponse(out)
+
     async def sites(self, request: Request):
         """``GET /api/post/sites`` (Settings › Posting) and ``POST`` (the person's choices)."""
         if request.method == "GET":
@@ -1362,5 +1460,7 @@ class PostAPI:
                 Route("/api/post/d/{id:int}.md", self.download),
                 Route("/api/post/d/{id:int}/edit", self.edit, methods=["POST"]),
                 Route("/api/post/d/{id:int}/posted", self.posted, methods=["POST"]),
+                Route("/api/post/d/{id:int}/cancel", self.cancel, methods=["POST"]),
+                Route("/api/post/learned", self.learned),
                 Route("/api/post/sites", self.sites, methods=["GET", "POST"]),
                 Route("/api/post/d/{id:int}", self.sheet)]

@@ -11,7 +11,9 @@ Every variant Kranto's writer makes (``kranto.social``) is a ``cub_drafts`` row 
   after the person's yes, when they switched the site to Post directly.
 
 Every posting kind waits until it is answered (no time limit), is confirmed on the page only,
-and is refused on the preview before anything is written (``core.tickets.confirm``).
+and is refused on the preview before anything is written (``core.tickets.confirm``). Each site's
+own send may go at an hour the person chooses in the dialog (``meta.holds``: Kranto keeps the
+yes and presses it then, ``kranto.social.hours``); I posted it goes now.
 """
 
 from __future__ import annotations
@@ -69,7 +71,7 @@ def register_kinds() -> None:
         expires_hours=None, per_day=30, first_party_only=True,
         meta={"verb": "Post to Bluesky", "button": "Post to Bluesky", "noun": "post",
               "done": "Posted", "not_done": "not posted",
-              "question": "Post this to Bluesky?"}))
+              "question": "Post this to Bluesky?", "schedules": True, "holds": True}))
     for kind, name, most in (("post.linkedin", "LinkedIn", 3000), ("post.threads", "Threads", 500)):
         tickets.register(tickets.Kind(
             kind, f"Post to {name}", {
@@ -78,7 +80,8 @@ def register_kinds() -> None:
             expires_hours=None, per_day=30, first_party_only=True,
             meta={"verb": f"Post to {name}", "button": f"Post to {name}", "noun": "post",
                   "done": "Posted", "not_done": "not posted",
-                  "question": f"Post this to {name}?"}))
+                  "question": f"Post this to {name}?", "schedules": True,
+                  "holds": True}))
 
 
 def parts_of(content: dict) -> list[str]:

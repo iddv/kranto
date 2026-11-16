@@ -8,8 +8,11 @@
   // the P2: Copy, Download, Send, Decline, Details); before that route is there, Open is the
   // ask's own dialog (Send there opens SEND's dialog unchanged), or the cub's page for an earlier
   // draft. A write's short posts are one row naming its sites ("Bluesky ✓ · Mastodon · X"); the
-  // accounts are one line, "Where posts go", with one control to Settings › Posting. Nothing here
-  // sends: Send is always the owner's click in the dialog.
+  // accounts are one line, "Where posts go", with one control to Settings › Posting. Scheduled
+  // (only when something is): a post the person said yes to at an hour, "Monday 16 Nov, 09:00 ·
+  // Bluesky", with Cancel; Sent says a post's numbers where its site gives them, and once, at the
+  // foot, which sites give none. Nothing here sends: Send is always the owner's click in the
+  // dialog, now or at the hour they chose there.
   import Group from "../../ui/Group.svelte";
   import List from "../../ui/List.svelte";
   import Row from "../../ui/Row.svelte";
@@ -21,7 +24,7 @@
   import { ui } from "../../lib/shell.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { dismissWrite, retryWrite, writeAny } from "../../features/post/post";
-  import { draftFact, draftHref, failedAbout, failedTitle, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
+  import { cancelHour, draftFact, draftHref, dueLine, dueShort, failedAbout, failedTitle, hasSheet, POST_API, sentLine, whereLine, type Post, type PostDraft } from "./post";
 
   let { view }: { view: View } = $props();
   const host = $derived(!!ui.facts?.header.host);
@@ -30,12 +33,12 @@
     return host ? read<Post>(POST_API, 15000) : null;
   });
   // every list read as a list, whatever shape came (an older server, a fake): never a crash
-  const d = $derived.by((): Post | null => {
+  const d = $derived.by((): (Post & { scheduled: PostDraft[]; reach_foot: string | null }) | null => {
     const x = r?.data as Partial<Post> | undefined | null;
     if (!x) return null;
     const list = <T,>(v: T[] | undefined): T[] => (Array.isArray(v) ? v : []);
     const sites = x.sites && typeof x.sites === "object" && typeof x.sites.line === "string" ? x.sites : { line: "No sites chosen for short posts yet.", ticked: 0 };
-    return { line: typeof x.line === "string" ? x.line : "Drafts wait here until you have seen them.", drafts: list(x.drafts), sent: list(x.sent), earlier: list(x.earlier), accounts: list(x.accounts), sites, failed: list(x.failed) };
+    return { line: typeof x.line === "string" ? x.line : "Drafts wait here until you have seen them.", drafts: list(x.drafts), scheduled: list(x.scheduled), sent: list(x.sent), earlier: list(x.earlier), accounts: list(x.accounts), sites, failed: list(x.failed), reach_foot: typeof x.reach_foot === "string" ? x.reach_foot : null };
   });
   const sheet = $derived(hasSheet());
   const STATE: Record<string, string> = { newsletter: "✉", mastodon: "✎", blog: "✎", short: "✎" };
@@ -56,8 +59,9 @@
 
 {#snippet draftRow(x: PostDraft, main: boolean)}
   {#snippet end()}{@render open(x, main)}{/snippet}
-  <Row title={x.title} href={sheet ? draftHref(x) : null} meta={draftFact(x)} age={ago(dt(x.at))} {end}>
-    {#snippet st()}<span class="gl c-violet" role="img" aria-label={x.word}><span class="hglyph" aria-hidden="true">{STATE[x.kind] || "•"}</span><span class="gl-w" aria-hidden="true">{x.word}</span></span>{/snippet}
+  <Row title={x.title} href={sheet ? draftHref(x) : null} meta={x.missed || draftFact(x)} age={ago(dt(x.at))} {end}>
+    <!-- a post whose hour passed while Kranto was stopped: an amber mark a phone keeps too -->
+    {#snippet st()}{#if x.missed}<span class="gl c-amber" role="img" aria-label="its hour passed"><span class="hglyph" aria-hidden="true">!</span><span class="gl-w" aria-hidden="true">hour passed</span></span>{:else}<span class="gl c-violet" role="img" aria-label={x.word}><span class="hglyph" aria-hidden="true">{STATE[x.kind] || "•"}</span><span class="gl-w" aria-hidden="true">{x.word}</span></span>{/if}{/snippet}
   </Row>
 {/snippet}
 
@@ -82,12 +86,22 @@
       {#each d.drafts as x, i (x.id)}{@render draftRow(x, i === 0)}{/each}
       {#if !d.drafts.length}<li class="gempty"><span class="muted">No draft waits. A draft comes when you choose Write a post on a story or an idea, or with the weekly issue.</span></li>{/if}
     </Group>
+    <!-- a post the person said yes to at an hour: it goes then, and can be cancelled until then -->
+    {#if d.scheduled.length}
+      <Group id="post-scheduled" title="Scheduled" count={String(d.scheduled.length)}>
+        {#each d.scheduled as x (x.id)}
+          {#snippet end()}<button type="button" class="btn sm" data-act="post-cancel" onclick={(e) => cancelHour(e.currentTarget, x.id)}>Cancel</button>{/snippet}
+          <Row title={x.title} href={sheet ? draftHref(x) : null} meta={dueLine(x)} age={dueShort(x.due)} {end} />
+        {/each}
+      </Group>
+    {/if}
     <Group id="post-sent" title="Sent" count={String(d.sent.length)}>
       {#each d.sent as x (x.id)}
         {#snippet end()}{#if x.link}<a class="btn sm quiet" href={x.link} target="_blank" rel="noopener noreferrer" title="Where it went">↗</a>{/if}{/snippet}
-        <Row title={x.title} meta={sentLine(x)} age={ago(dt(x.at))} {end} />
+        <Row title={x.title} href={sheet ? draftHref(x) : null} meta={sentLine(x)} age={ago(dt(x.at))} {end} />
       {/each}
       {#if !d.sent.length}<li class="gempty"><span class="muted">Nothing sent yet. A sent post shows here with where it went and how many it reached.</span></li>{/if}
+      {#if d.sent.length && d.reach_foot}<li class="gempty" id="post-reach-foot"><span class="muted small">{d.reach_foot}</span></li>{/if}
     </Group>
     <Group id="post-accounts" title="Accounts" says="optional: every draft can be copied without one">
       <Row title="Where posts go" meta={whereLine(d)} end={sitesEnd} />

@@ -163,6 +163,11 @@ class MastodonAdapter:
             url = _json(r).get("url")
             where = url if isinstance(url, str) and url.startswith("https://") \
                 and len(url) <= 300 else f"on {ctx.instance}"
+            sid = _json(r).get("id")
+            if isinstance(sid, str) and sid.isdigit() and len(sid) <= 30:
+                from ....social import reach
+                reach.sent(ctx.store, ticket["id"], SERVICE,
+                           {"id": sid, "instance": ctx.instance or ""}, c)
             return {"state": "done", "note": f"posted: {where}"}
         if r.status_code == 422:
             error = _json(r).get("error")
