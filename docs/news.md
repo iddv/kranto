@@ -131,10 +131,12 @@ Each item takes ▲ or ▼ with a reason (off topic, said before, not what the s
 long), recorded in the same grades table as everything else (target `news_item`). An article
 takes its own (target `news_article`, the article's id) with one more reason, wrong figure.
 
-An item can also become an idea: **New idea from this…** (Kranto UI) opens New idea
-filled with the item's words and the observations it rests on; the loop keeps the idea with
-its source `brief` and the ref `brief:<brief id>:<item>`, so the same item is one idea, and
-the brief's sheet lists the ideas made from it.
+An item can also lead to an idea card: **Idea from this** (on a story whose theme has no card
+yet) asks first, then writes one card from the story's theme, with the article's idea or the
+headline as a hint (one card call and its check, about 6 cents; the card shows on Ideas in a
+minute). **Write a post** drafts a post about the item ([posting.md](posting.md)). Typed ideas
+(**New idea from this…**) left Kranto with builds; ideas made that way before keep their source
+`brief` and the ref `brief:<brief id>:<item>`.
 
 ## The eval
 

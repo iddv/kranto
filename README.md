@@ -121,7 +121,7 @@ off`); either wins over every setting.
 ## Where things live
 
 Everything is in one home, `~/.kranto` (or `$KRANTO_HOME`): `kranto.yaml` and `.env`, `data/`
-(the library) and `loop/`. Its tokens are in `~/.config/kranto/`. `kranto status` shows the home,
+(the library) and `loop/` (the page's settings file, `loop.yaml`). Its tokens are in `~/.config/kranto/`. `kranto status` shows the home,
 the service, the jobs and the spend on one screen; `kranto doctor` checks everything and names the
 fix for each failure.
 

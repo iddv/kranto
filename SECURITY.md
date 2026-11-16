@@ -33,8 +33,10 @@ body, says who acts: the browser's session cookie, or
 `Authorization: Bearer` (`kranto mcp`, the command line, a named agent). The
 tokens live in `~/.config/kranto/tokens/` (directory mode 700, files 600); the
 index keeps only their SHA-256. A browser signs in once through a one-time
-link that `kranto open` (or `kranto up`) prints, valid for 10 minutes. MCP and
-agent tokens may only run actions (`POST /brb/api/act`), within their limits.
+link that `kranto open` (or `kranto up`) prints, valid for 10 minutes. MCP,
+console and agent tokens may only run Kranto's verbs (`POST /api/verbs/<kind>`),
+where your ladder decides what they may do by themselves; an agent token stays
+within the actions it was given.
 `api.require_token: false` in `kranto.yaml` turns this off. What it is not:
 
 - **Reads need no token.** Any process or user that can reach the port can

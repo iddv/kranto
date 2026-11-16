@@ -169,7 +169,7 @@ addresses are refused, because scout-proposed URLs come from a model.
 - A model whose cost cannot be determined is refused rather than counted as
   free.
 - A rejected key, exhausted credit or missing model stops the run
-  immediately and marks it failed on the Health page. Items Kranto had not
+  immediately and marks it failed under Health (Settings › System). Items Kranto had not
   finished are not marked as seen, so nothing is lost.
 - Most items never reach a model: each is first compared with your topics
   using the local embedding model, and only similar ones (plus a small random
@@ -186,8 +186,8 @@ addresses are refused, because scout-proposed URLs come from a model.
   lookups); `look.enabled: false` goes back to one judge call per item.
 - Spend passing 80% of the budget, and running out, each raise an alarm.
 
-Costs depend on your sources and models; the Health page shows actual spend
-per run. The tier-1 model (`llm.models.judge`) judges items; the tier-2 model
+Costs depend on your sources and models; Settings › Spend shows actual spend,
+and Health (Settings › System) each run's. The tier-1 model (`llm.models.judge`) judges items; the tier-2 model
 (`llm.models.reason`) scouts sources, explains clusters and writes idea
 cards.
 
