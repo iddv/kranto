@@ -9,7 +9,8 @@
 #   is never edited). Refused once a final release exists (guards.py shape: the releases come
 #   from gh, or from RELEASES_JSON, a file of GitHub's release list, for a build with no gh).
 #
-# Tags the checkout locally (annotated, tagger "<name> release"); publish.py pushes the tag.
+# Tags the checkout locally (annotated; tagger RELEASE_TAGGER_NAME <RELEASE_TAGGER_EMAIL>, by
+# default "<name> release"); publish.py pushes the tag.
 # The version comes from the tag through hatch-vcs; SETUPTOOLS_SCM_PRETEND_VERSION makes it
 # exact. The page's web UI is built first and the wheel carries its built files: users of the
 # release never need Node. manifest.json is written by publish.py manifest (its one writer).
@@ -37,14 +38,18 @@ fi
 mkdir -p "$DIST"
 rm -f "$DIST"/*.whl "$DIST"/SHA256SUMS "$DIST"/manifest.json
 
-export GIT_COMMITTER_NAME="$NAME release" GIT_COMMITTER_EMAIL="release@$NAME.invalid"
+# the tag's tagger: RELEASE_TAGGER_NAME / RELEASE_TAGGER_EMAIL (the maintainer's public
+# identity, e.g. a GitHub no-reply address), else "<name> release"; never the machine's own
+TAGGER_NAME="${RELEASE_TAGGER_NAME:-$NAME release}"
+TAGGER_EMAIL="${RELEASE_TAGGER_EMAIL:-release@$NAME.invalid}"
+export GIT_COMMITTER_NAME="$TAGGER_NAME" GIT_COMMITTER_EMAIL="$TAGGER_EMAIL"
 if git -C "$SRC" rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
   if [ "$(git -C "$SRC" rev-parse "$TAG^{commit}")" != "$(git -C "$SRC" rev-parse HEAD)" ]; then
     echo "build: $SRC has $TAG at another commit than HEAD" >&2
     exit 2
   fi
 else
-  git -C "$SRC" -c user.name="$NAME release" -c user.email="release@$NAME.invalid" \
+  git -C "$SRC" -c user.name="$TAGGER_NAME" -c user.email="$TAGGER_EMAIL" \
     tag -a "$TAG" -m "$NAME $VERSION"
 fi
 
