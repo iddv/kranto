@@ -479,10 +479,15 @@ def status_line(home: Path) -> str:
     here = f"{inst.get('version')} ({inst.get('channel')}{moving(home, inst)})"
     state = st.get("state", "idle")
     if state in ("rolled_back", "failed"):
+        # after a rollback, or the way back by hand (RECOVER.txt, which removes itself), the
+        # version that runs is not the one the update went to: say which one is back
+        back = inst.get("version") if inst.get("version") and st.get("to") \
+            and inst.get("version") != st.get("to") and not st.get("recover") else None
         return (f"{here} · update to {st.get('to')} {state.replace('_', ' ')}: "
                 f"{st.get('reason') or 'see kranto-update in the journal'}"
                 + (f" · the way back by hand: {st['recover']} (sh {st['recover']})"
-                   if st.get("recover") else ""))
+                   if st.get("recover") else "")
+                + (f" · {back} is back and running" if back else ""))
     if state not in ("idle", "done", "cancelled"):
         return f"{here} · updating to {st.get('to')}: {state}" + \
             (f" ({st['detail']})" if st.get("detail") else "")

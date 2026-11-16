@@ -121,7 +121,6 @@ kranto home: /home/you/.kranto (new)
   wrote /home/you/.kranto/kranto.yaml
   wrote /home/you/.kranto/data/
   wrote /home/you/.kranto/loop/
-  wrote /home/you/.kranto/tasks/
   wrote /home/you/.kranto/loop/loop.yaml
   made the ui, mcp, console, cli token(s) in /home/you/.config/kranto/tokens
 ```
@@ -139,9 +138,9 @@ and then one of two endings:
   second terminal for the next steps (step 5 prints the sign-in link).
 
 Useful options: `kranto up --port 8790` for another port, `kranto up --no-browser` to print the
-sign-in link instead of opening a browser. Kranto only ever listens on 127.0.0.1. Choose the port
-on the first `kranto up`: the home keeps it, and a later `--port` does not change what
-`kranto open` prints (Known rough edges).
+sign-in link instead of opening a browser. Kranto only ever listens on 127.0.0.1. The home keeps
+the port: a later `kranto up --port N` moves it to N (it says `wrote … kranto.yaml (port N)`), and
+`kranto open` and `kranto doctor` follow.
 
 `kranto up` rewrites and restarts the unit only when the unit runs this same `kranto` (or the
 old command beside it). Run from a checkout or a second tool while another install's command
@@ -156,10 +155,10 @@ kranto doctor
 
 **You should see:** one line per check, each `ok`, `warn` or `FAIL`, and every `FAIL` names its
 fix. On a fresh install, before Welcome, lines like these are expected until you finish the
-next steps (the model is chosen in step 6; until then the default provider's key is missing):
+next steps (the model is chosen in step 6):
 
 ```
-FAIL  api key        $OPENROUTER_API_KEY is not set (shell or /home/you/.kranto/.env)
+warn  model          none chosen yet: Welcome's first step (Which model reads for you?) chooses one; ...
 warn  sources        none approved; add a topic or a pack                               -> step 7
 warn  claude         Claude Code is not installed; kranto works without it. For the console: ...
 ```
@@ -495,10 +494,6 @@ loginctl disable-linger    # only if nothing else of yours needs it
   step 6, or in `kranto setup`'s Spend section.
 - **`kranto down` stops Kranto until the next boot.** `kranto down --disable` keeps it stopped;
   `kranto uninstall` removes the service (step 12).
-- **The port is the first `kranto up`'s.** A later `kranto up --port N` serves on N, but
-  `kranto open` and `kranto doctor` still use the port the home was made with (`notify.base_url`
-  in `kranto.yaml`). If the first `kranto up` stopped at `port 8765 is already in use`, set
-  `base_url: http://127.0.0.1:N` under `notify:` in `~/.kranto/kranto.yaml`, then `kranto up --port N`.
 - **Several places.** Data is in one home (`~/.kranto`), but tokens, the service, the program and
   the caches live elsewhere: see step 10.
 
@@ -511,7 +506,7 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | The page says `this kranto was installed without its web page` | It was installed from git, which carries no built page: install from a release (step 2). |
 | `kranto: command not found` after installing | `uv tool update-shell`, then open a new terminal. |
 | `not using systemd: …; serving in the foreground` | Expected without a systemd user manager: keep that terminal open. With a `HOME` that is not your login home, systemd is skipped on purpose. |
-| `port 8765 is already in use` | Another program (or another Kranto) holds it: `kranto up --port 8790` (and see Known rough edges: the home keeps the first port). |
+| `port 8765 is already in use` | Another program (or another Kranto) holds it: `kranto up --port 8790` (the home then keeps 8790). |
 | `kranto.service runs …, not this kranto` from `kranto up` | Another install's command runs the unit (you ran a checkout or a second tool): run that one's `kranto up`, or `kranto up --adopt` to make the one you ran the unit's command. |
 | `an update was cut off while it installed`, or `kranto status` names `RECOVER.txt` | `sh ~/.kranto/update/RECOVER.txt` (the path it names): it puts the previous version back and removes the file. |
 | `FAIL  api key` in `kranto doctor`, or `Scouting failed: no API key: set $OPENROUTER_API_KEY` (or `$ANTHROPIC_API_KEY`) | Paste the key in Welcome › Watching, or Settings › Watching › Watching model (step 6). |

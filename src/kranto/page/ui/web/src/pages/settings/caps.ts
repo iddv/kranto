@@ -21,8 +21,6 @@ export const CAP_DEFS: CapDef[] = [
     hint: "X bills your developer account per post read. Reached, X sources wait until the first of next month; the Developer Console's own spending limit stops X itself." },
   { key: "search", word: "Live search a month", field: "search_monthly_usd", effect: "now", get: (w) => w?.search?.monthly_usd,
     hint: "Paid web searches (Exa with a key, Brave, Tavily, Anthropic's tool) pause for the month at this; Exa's free mode and Hacker News, GitHub and arXiv are free and keep answering. Paused, a caller says its results are from model memory." },
-  { key: "dive", word: "Deep dives a day", field: "deep_dive_daily_usd", effect: "now", get: (w) => w?.deep_dive.daily_usd,
-    hint: "Deep dives stop for the day at this, within watching's monthly cap." },
 ];
 export const capDef = (k: string): CapDef | null => CAP_DEFS.find((d) => d.key === k) || null;
 

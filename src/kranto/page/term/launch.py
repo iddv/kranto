@@ -321,7 +321,7 @@ def offered(cfg: dict, environ=None, sandboxed: bool | None = None) -> tuple[boo
     missing = " and ".join(w for w, ok in (("bubblewrap", box), ("a Claude token", tok))
                            if not ok)
     return False, (f"Open in Claude Code turns on by itself where Kranto has bubblewrap and a "
-                   f"Claude token; this install lacks {missing} (kranto doctor says how), or set "
+                   f"Claude token; this install lacks {missing} ('kranto setup claude' adds a token), or set "
                    "term.enabled: true in loop.yaml.")
 
 

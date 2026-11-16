@@ -124,7 +124,9 @@ def test_a_new_home_is_a_workspace_with_the_loop_on(user_home):
     assert seed["kranto"] == {"url": "http://127.0.0.1:8800"}
     assert seed["intake"]["auto"]["mode"] == "manual"
     assert seed["feed"]["ui_url"] == "http://127.0.0.1:8800/brb/"
-    assert (home / "data").is_dir() and (home / "tasks").is_dir()
+    assert (home / "data").is_dir()
+    # the task folder was the builds'; they left, and nothing reads it: no empty tasks/
+    assert not (home / "tasks").exists()
     assert oct(home.stat().st_mode & 0o777) == "0o700"
     assert launcher.make_home(home, 8800, user_home) == []  # idempotent
 
@@ -296,6 +298,26 @@ def test_up_refuses_a_port_in_use(user_home, monkeypatch, capsys):
     assert launcher.main(["up", "--no-browser"], host) == 2
     assert "port 8765 is already in use" in capsys.readouterr().err
     assert ["enable", "--now", "kranto.service"] not in [c[2:] for c in host.machine.calls]
+
+
+def test_a_later_up_with_another_port_moves_the_home_to_it(user_home, monkeypatch, capsys):
+    """The first 'up' finds 8765 taken after it wrote the home; 'up --port N' then serves on N,
+    and 'kranto open' (and every reader of notify.base_url) must point at N, not 8765."""
+    taken = {8765}
+    monkeypatch.setattr(launcher, "port_in_use", lambda port, host="127.0.0.1": port in taken)
+    host = make_host(user_home)
+    assert launcher.main(["up", "--no-browser"], host) == 2
+    capsys.readouterr()
+    assert launcher.main(["up", "--no-browser", "--port", "8790"], host) == 0
+    out = capsys.readouterr().out
+    assert "(port 8790)" in out, out
+    cfg = config_mod.load(user_home / ".kranto", dotenv=False)
+    assert launcher.port_of(cfg) == 8790
+    assert "--port 8790" in (user_home / ".config/systemd/user/kranto.service").read_text()
+    assert "127.0.0.1:8765" not in (user_home / ".kranto/loop/loop.yaml").read_text()
+    # and a plain 'up' afterwards keeps 8790
+    assert launcher.main(["up", "--no-browser"], host) == 0
+    assert "127.0.0.1:8790" in capsys.readouterr().out
 
 
 def test_up_in_a_scratch_home_serves_in_the_foreground(user_home, tmp_path, monkeypatch, capsys):
@@ -485,34 +507,38 @@ def test_doctor_says_the_console_is_ready(user_home, monkeypatch):
         term_doctor=lambda loop_home, environ=None, dotenv=(): said["line"],
     )
     checks = by_name(launcher.console_checks(cfg))
-    assert set(checks) == {"kranto.page", "console"}
+    assert set(checks) == {"kranto.page", "open in claude code"}
     assert checks["kranto.page"].status == OK
-    assert (checks["console"].status, checks["console"].detail) == (
+    term = checks["open in claude code"]
+    assert (term.status, term.detail) == (
         OK,
         "ready: sandboxed, its Claude login token by pipe, ptrace_scope 1",
     )
     said["line"] = (
         "warn",
         "Open in Claude Code turns on by itself where Kranto has bubblewrap "
-        "and a Claude token; this install lacks a Claude token (kranto doctor "
-        "says how), or set term.enabled: true in loop.yaml.",
+        "and a Claude token; this install lacks a Claude token ('kranto setup "
+        "claude' adds a token), or set term.enabled: true in loop.yaml.",
     )
-    c = by_name(launcher.console_checks(cfg))["console"]
+    c = by_name(launcher.console_checks(cfg))["open in claude code"]
     assert (
         c.status == WARN
         and c.detail.startswith("not ready: ")
         and "lacks a Claude token" in c.detail
         and "loop.yaml" not in c.detail
     )
+    # the line is Open in Claude Code's: the console beside every page may well be running
+    assert "the console" not in c.detail and "Open in Claude Code" in c.detail
     said["line"] = (
         "warn",
         "Open in Claude Code is off: set term.enabled: true in loop.yaml "
         "(Settings › Building lists it) and restart Kranto.",
     )
-    c = by_name(launcher.console_checks(cfg))["console"]
+    c = by_name(launcher.console_checks(cfg))["open in claude code"]
     assert c.detail == "not ready: off: set term.enabled: true and restart Kranto."
     said["line"] = ("ok", "Open in Claude Code is off (term.enabled)")
-    assert by_name(launcher.console_checks(cfg))["console"].detail == "off (term.enabled is false)"
+    assert by_name(launcher.console_checks(cfg))["open in claude code"].detail == \
+        "off (term.enabled is false)"
     brbfake.missing(monkeypatch)  # no page at all
     assert [(c.status, c.name) for c in launcher.console_checks(cfg)] == [(FAIL, "kranto.page")]
 

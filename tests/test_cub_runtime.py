@@ -422,6 +422,34 @@ def test_a_missed_slot_runs_once_when_kranto_is_back(rt):  # noqa: F811
     assert schedule.at_due(rt.store, "y.weekly", "08:00", ["mon"], tue, "UTC")
 
 
+def test_a_failed_weekly_run_is_not_tried_again_on_every_start(rt):  # noqa: F811
+    """The scheduler's back-off lives in memory, so after a failed weekly run every restart
+    tried it again at once (a model call per start). The stored failures now set the wait;
+    a run cut short by Kranto stopping does not count."""
+    store = rt.store
+
+    def failed(n, at, error="failed: the model did not answer"):
+        store.insert("runs", {"run_uuid": f"f{n}", "kind": "z.weekly", "status": "failed",
+                              "started_at": at, "finished_at": at, "summary": "{}",
+                              "error": error})
+    failed(1, "2026-10-19T09:00:00Z")
+    soon = datetime(2026, 10, 19, 9, 1, tzinfo=UTC)         # a restart a minute later
+    assert not schedule.at_due(store, "z.weekly", "08:00", ["mon"], soon, "UTC")
+    assert schedule.at_next(store, "z.weekly", "08:00", ["mon"], soon, "UTC") == datetime(
+        2026, 10, 19, 9, 5, tzinfo=UTC)
+    assert schedule.at_due(store, "z.weekly", "08:00", ["mon"],
+                           datetime(2026, 10, 19, 9, 5, tzinfo=UTC), "UTC")
+    failed(2, "2026-10-19T09:05:00Z")                        # the wait doubles
+    assert not schedule.at_due(store, "z.weekly", "08:00", ["mon"],
+                               datetime(2026, 10, 19, 9, 14, tzinfo=UTC), "UTC")
+    assert schedule.at_due(store, "z.weekly", "08:00", ["mon"],
+                           datetime(2026, 10, 19, 9, 15, tzinfo=UTC), "UTC")
+    # cut short by an update's stop: tried again straight after the restart
+    failed(3, "2026-10-26T08:00:30Z", "failed: interrupted (Kranto was stopping)")
+    assert schedule.at_due(store, "z.weekly", "08:00", ["mon"],
+                           datetime(2026, 10, 26, 8, 1, tzinfo=UTC), "UTC")
+
+
 def test_a_failed_run_raises_to_the_scheduler_for_its_back_off(rt, cubs, monkeypatch):  # noqa: F811
     install(rt, "echo")
 

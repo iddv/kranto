@@ -293,8 +293,15 @@ def stop(pid: int | None, grace_s: float = 20.0, marker: str | Path | None = Non
         alive(pid)                                 # reaps our own child
         time.sleep(0.2)
     finish(procs)
-    alive(pid)
+    # a SIGKILL is not instant: wait (briefly) until they are gone and our own child reaped,
+    # so 'alive' after a stop says no
+    deadline = time.time() + KILLED_WAIT_S
+    while (alive(pid) or any(same(p) for p in procs)) and time.time() < deadline:
+        time.sleep(0.02)
     return True
+
+
+KILLED_WAIT_S = 5.0
 
 
 def kill(pid: int | None, marker: str | Path, grace_s: float = KILL_GRACE_S) -> list[dict]:

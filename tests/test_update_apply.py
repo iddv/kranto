@@ -1263,3 +1263,21 @@ def test_the_way_back_s_lines_work(world, tmp_path):
     assert calls[2] == f"up up --no-browser {world.home} {legacy.UNIT} {world.home}"
     assert not path.exists() and not (world.bin / "kranto").exists()
 
+
+def test_status_after_the_way_back_names_the_version_that_is_back(world, monkeypatch):
+    """After ``sh RECOVER.txt`` the state file still says the update failed; status said only
+    "update to X failed" while the earlier version ran again. It names the one that is back."""
+    old_install(world)
+    assert world.helper(to="v0.7.0-dev1").run_all() == "done"
+    kill_at_install(world)
+    with pytest.raises(Killed):
+        world.helper(to="v0.7.0-dev2").run_all()
+    st = json.loads(apply.state_path(world.home).read_text())
+    apply.write_json(apply.state_path(world.home), {**st, "pid": 2**22 + 7})   # its helper gone
+    apply.recover_path(world.home).unlink()                  # the way back ran (it removes itself)
+    monkeypatch.setattr(check, "installed_here",
+                        lambda: {"version": "0.7.0.dev1", "channel": "dev"})
+    said = check.status_line(world.home)
+    assert "update to 0.7.0.dev2 failed" in said
+    assert "0.7.0.dev1 is back and running" in said, said
+

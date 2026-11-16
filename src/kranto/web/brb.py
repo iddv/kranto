@@ -134,7 +134,7 @@ def load(cfg, bind_host: str | None, port: int | None = None,
     if "builds" in params:
         kwargs["builds"] = False
     api.configure(cfg.root, cfg.harness, cfg.loop_home, **kwargs)
-    log.info("the page mounted at /brb/ (API version %s)", version)
+    log.info("the page is served at / (API version %s)", version)
     return Brb("mounted", api=api)
 
 

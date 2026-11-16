@@ -1,7 +1,6 @@
 <script lang="ts">
-  // Settings › Watching › Reading: how often the sources are read and whether
-  // deep dives run, each a row whose pane is its field and Save (UP #3; the server's
-  // /api/settings/reading writes them).
+  // Settings › Watching › Reading: how often the sources are read, a row whose pane is its
+  // field and Save (UP #3; the server's /api/settings/reading writes it). Deep dives left.
   import Group from "../../ui/Group.svelte";
   import SetRow from "../../ui/SetRow.svelte";
   import type { View } from "../../lib/pages.svelte";
@@ -20,8 +19,7 @@
 </script>
 
 {#if host}
-  <Group id="w-read" title="Reading" count="2" kind="sets">
+  <Group id="w-read" title="Reading" count="1" kind="sets">
     <SetRow key="read:every" word="How often sources are read" summary={d ? `every ${d.every_hours} h` : r?.error ? "Could not read: " + r.error : "reading…"} state={d && d.every_hours !== 3 ? SET_ST.set : SET_ST.dflt} />
-    <SetRow key="read:dive" word="Deep dives" summary={d ? (d.deep_dive.enabled ? "on" : "off") : "reading…"} state={d?.deep_dive.enabled ? SET_ST.ok : SET_ST.off} />
   </Group>
 {/if}

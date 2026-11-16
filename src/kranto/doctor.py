@@ -345,6 +345,20 @@ def retired_sections(cfg: Config) -> list[Check]:
             for name in getattr(cfg, "retired", ()) if name in RETIRED]
 
 
+def not_chosen(cfg: Config, store: Store) -> bool:
+    """No model chosen yet: setup not done, no Claude Code login chosen, and no key for any
+    provider the config names (the page's "Not chosen yet")."""
+    from .setup import DONE
+    if store.get_setting(DONE):
+        return False
+    in_use = cfg.llm.providers_in_use()
+    if "claude_code" in in_use:
+        return False
+    if "anthropic" in in_use and os.environ.get(cfg.llm.anthropic.api_key_env):
+        return False
+    return not cfg.llm.api_key()
+
+
 def run(cfg: Config, store: Store, *, transport: httpx.BaseTransport | None = None,
         check_embedder: bool = True) -> list[Check]:
     checks: list[Check] = [Check(OK, "workspace", str(cfg.root))]
@@ -358,7 +372,16 @@ def run(cfg: Config, store: Store, *, transport: httpx.BaseTransport | None = No
         checks.append(Check(OK, "library", f"schema v{store.schema_version()}, "
                             f"{counted['n']} observations"))
     in_use = cfg.llm.providers_in_use()
-    checks.append(provider_line(cfg))
+    if not_chosen(cfg, store):
+        # a fresh install before Welcome's model step: the default provider is nobody's choice,
+        # so its missing key is not a failure (Welcome: "Kranto reads nothing until a model is
+        # chosen")
+        checks.append(Check(WARN, "model", "none chosen yet: Welcome's first step (Which model "
+                                           "reads for you?) chooses one; Kranto reads nothing "
+                                           "until then"))
+        in_use = []
+    else:
+        checks.append(provider_line(cfg))
     ledger = ledger_line(cfg, store)
     if ledger is not None:
         checks.append(ledger)
