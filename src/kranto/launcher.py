@@ -230,9 +230,11 @@ def _section_span(lines: list[str], name: str) -> tuple[int, int] | None:
 
 def brb_block(loop_home: str, root: str, harness: str = "claude-code") -> str:
     return ("brb:\n"
-            "  # the page's build loop and builds UI at /brb/, written by kranto up or Kranto\n"
-            "  # adopt. Only mounted when the server is bound to loopback. The loop's own\n"
-            "  # settings are in <loop_home>/loop.yaml (Settings › Building lists them).\n"
+            "  # the page: Kranto's web UI with its console, written by kranto up or kranto\n"
+            "  # adopt. Served only when the server is bound to loopback (enabled: false serves\n"
+            "  # the server alone, with no console). loop_home is the page's own folder: its\n"
+            "  # settings file loop.yaml, its database and its console sessions. root is the\n"
+            "  # task folder of an earlier release's builds.\n"
             "  enabled: true\n"
             f"  loop_home: {json.dumps(loop_home)}\n"
             f"  root: {json.dumps(root)}\n"
@@ -270,9 +272,9 @@ def set_in_section(text: str, name: str, key: str, value: str) -> str:
 def home_config_text(home: Path, port: int, user_home: Path) -> str:
     """kranto.yaml for a new home: the server's default config with the brb section on."""
     text = config_mod.DEFAULT_CONFIG_YAML.replace(
-        "# the server workspace configuration.",
-        "# Kranto configuration (the server's settings plus the brb section). The loop's\n"
-        "# settings are in loop/loop.yaml (Settings › Building lists them).", 1)
+        "# The server workspace configuration.",
+        "# Kranto configuration: the server's settings, then the brb section (the page and\n"
+        "# its console). The page keeps its own settings in loop/loop.yaml.", 1)
     text = set_section(text, "brb", brb_block(tilde(home / "loop", user_home),
                                               tilde(home / "tasks", user_home)))
     return set_in_section(text, "notify", "base_url", f"http://127.0.0.1:{port}")
@@ -282,10 +284,10 @@ def loop_seed_text(home: Path, port: int, user_home: Path) -> str:
     """The loop's settings for a new home: its task folder inside the home, the server's cards
     through this server's API (so a ``brb loop`` command run by hand never opens the
     database either), one build at a time, nothing pitched until the owner sends it."""
-    return ("# The build loop's settings (any subset of the page's loop DEFAULTS), written once\n"
-            "# by kranto up. Settings › Building lists them all; the Spend, Projects and\n"
-            "# Maintenance pages set their own keys here, and the rest are edited by hand (the\n"
-            "# loop reads this file again on its next tick).\n"
+    return ("# The page's own settings (any subset of its DEFAULTS), written once by kranto up:\n"
+            "# kranto.url is where the page reaches this server; the other keys below were for\n"
+            "# an earlier release's builds. kranto setup writes some keys here;\n"
+            "# the rest are edited by hand (no Settings page lists this file).\n"
             f"tasks_dir: {json.dumps(tilde(home / 'tasks', user_home))}\n"
             "concurrency: 1\n"
             "intake:\n  auto:\n    mode: manual\n"
@@ -2619,8 +2621,8 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
     s.add_argument(
         "--data",
         action="store_true",
-        help="also delete the data (the home, the "
-        "loop, ~/.config/kranto, the cache) after "
+        help="also delete the data (the home, the page's own folder, "
+        "~/.config/kranto, the cache) after "
         "you type the home's path",
     )
     s.add_argument("--confirm", metavar="PATH", help="with --data: the home's path, for a script")
@@ -2786,14 +2788,14 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
 
     s = sub.add_parser(
         "trace",
-        help="agent traces: a build's sessions, turns and tool calls, "
-        "its cost and where it failed (brb trace)",
+        help="agent traces: an assistant session's turns and tool calls, its cost and "
+        "where it failed",
     )
     s.add_argument(
         "rest",
         nargs=argparse.REMAINDER,
-        help="list [--since 7d] [--state error] | show build:KEY/N [--errors] "
-        "[--span ID [--raw]] [--json] | export build:KEY/N --otlp URL "
+        help="list [--since 7d] [--state error] | show session:ID [--errors] "
+        "[--span ID [--raw]] [--json] | export session:ID --otlp URL "
         "[--content]",
     )
     s.set_defaults(func=cmd_trace)

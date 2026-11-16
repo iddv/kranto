@@ -34,7 +34,7 @@
   import { candidateRead, confirmWords, promoteRow, PROMOTE_API, type Candidate } from "./promote";
   import { confirmThen } from "../../ui/dialog.svelte";
   import { setSource } from "../settings/sourceverbs";
-  import { activityRows, cubOf, isFix, preparedRows, type HomeRow } from "./home";
+  import { activityRows, askedBy, isFix, preparedRows, type HomeRow } from "./home";
   import { dispatchNew, messageListed, msgMark, nextOf, projectProposed, reviewCount, termRead, termWaits, updateOffer, waitingCards,
     type Want, type Host, type TermWait, type Today, type TodayTopic } from "./needs";
 
@@ -193,13 +193,11 @@
       L.toast(`Kept ${r.label}. Kranto asks again only if ${r.down >= 3 ? "three" : "more"} more of its posts are downvoted.`);
     });
   }
-  /** a cub's name, from its tag ("Newsletter · yours", or an ask's "Newsletter") */
-  const cubName = (r: HomeRow): string => cubOf(r);
   /** the one thing's muted line: what it is and who raised it, and when */
   const kindLine = (x: Item): string => {
     const when = x.at ? (ago(x.at) === "now" ? ", just now" : `, ${ago(x.at)} ago`) : "";
     if (x.kind === "prep") return `prepared by ${whoOf(x.r!.prepared!)}${when}`;
-    if (x.kind === "cub") return `${cubName(x.r!)} asks${when}`;
+    if (x.kind === "cub") return askedBy(x.r!, when);
     if (x.kind === "failing") return "a source failing run after run";
     if (x.kind === "act") return "a run that keeps failing";
     return "your grades on a source";

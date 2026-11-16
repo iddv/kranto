@@ -739,7 +739,7 @@ def stop(rt: Any, cid: str, note: str | None = None) -> dict[str, Any]:
         rt.cubs._end(cid, "stop", kill=True)
     new = registry.append(rt.store, row, state="paused", note=words) \
         if row["state"] != "paused" or row["note"] != words else row
-    tickets.expire_all(rt.store, cub=cid, note="the cub was stopped")
+    tickets.expire_all(rt.store, cub=cid, note="it was stopped")
     events.core_publish(rt.store, "cub.stopped", {"cub": cid})
     _reload(rt)
     return new
@@ -803,7 +803,7 @@ def remove(rt: Any, cid: str, *, purge: bool = False) -> dict[str, Any]:
     _step(store, job_id, "remove", cid, "queued")
     if getattr(rt, "cubs", None) is not None:
         rt.cubs._end(cid, "remove", kill=True)
-    tickets.expire_all(store, cub=cid, note="the cub was removed")
+    tickets.expire_all(store, cub=cid, note="it was removed")
     registry.append(store, row, state="removed", note=None)
     src = files.cub_dir(cfg, cid)
     gone = None

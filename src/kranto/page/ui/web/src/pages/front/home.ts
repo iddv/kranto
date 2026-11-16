@@ -141,6 +141,9 @@ export function uniqueRows(rows: HomeRow[]): HomeRow[] {
 
 /** a cub's row's cub, by name: its tag's first part ("Newsletter · yours"; an older "cub · …") */
 export const cubOf = (r: HomeRow): string => String(r.tags[0]?.word || "").replace(/^cub · /, "").split(" · ")[0] || r.from;
+/** who asks, as the line after "Next ·" says it: "asked by Blog posts, 3 min ago" (a feature's
+ * name may be plural, so never "Blog posts asks"; the same shape as "prepared by …") */
+export const askedBy = (r: HomeRow, when: string): string => `asked by ${cubOf(r)}${when}`;
 
 /** a cub's rows of one group, from its read, under its allowance and tagged with its trust and mode */
 export function cubRows(f: FeatureRow, rows: CubRow[], group: "needs_you" | "new"): HomeRow[] {
@@ -203,7 +206,7 @@ export function rowCubs(f: Features | null, a: Arrangement | null, group: "needs
 export function sentence(needs: number, cubNeeds: number, newKept: number, briefs: number): string {
   const lead = needs ? `${needs <= 10 ? WORDS[needs] : `${needs} things`} need${needs === 1 ? "s" : ""} you.` : "Nothing needs you.";
   const parts = [briefs ? `${briefs === 1 ? "A brief is" : plural(briefs, "brief") + " are"} ready` : null,
-    cubNeeds ? `${cubNeeds === 1 ? "a cub" : plural(cubNeeds, "cub")} asked for you` : null,
+    cubNeeds ? `${cubNeeds === 1 ? "a feature" : plural(cubNeeds, "feature")} asked for you` : null,
     newKept ? `Kranto kept ${newKept.toLocaleString("en-GB")} new since your last visit` : null].filter(Boolean) as string[];
   if (!parts.length) return lead;
   const tail = parts.length > 1 ? parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1] : parts[0]!;
@@ -215,7 +218,7 @@ export function sentence(needs: number, cubNeeds: number, newKept: number, brief
 export function nextLine(r: HomeRow): string {
   const when = r.age ? (r.age === "now" ? ", just now" : `, ${r.age} ago`) : "";
   if (r.prepared) return `prepared ${r.prepared.by_words || "by an assistant"}${when}`;
-  if (r.from !== "core") return `${cubOf(r)} asks${when}`;
+  if (r.from !== "core") return askedBy(r, when);
   if (r.want === "decision") return `it asks you${when}`;
   return (r.word || "it waits") + when;
 }

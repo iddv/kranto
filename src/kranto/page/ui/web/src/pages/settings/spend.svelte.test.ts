@@ -59,6 +59,17 @@ describe("Settings › Spend (the server's alone)", () => {
     done();
   });
 
+  it("labels a past project's topic as earlier, never \"(project)\"", async () => {
+    stub();
+    hosted();
+    answering({ [TOPICS]: { ...T, topics: [...T.topics, { id: 7, name: "Receipts (project)", usd: 0.75, calls: 9 }] }, [WATCH]: W });
+    const { target, done } = await draw(SpendList, where("settings/spend"));
+    expect(target.querySelector('[data-sel="t7"] .r-title')?.textContent).toBe("Receipts (earlier)");
+    expect(target.querySelector('[data-sel="t2"] .r-title')?.textContent).toBe("Local-first");
+    expect(target.textContent).not.toMatch(/\(project\)/);
+    done();
+  });
+
   it("without the server says spend is the server's, and lists no cap", async () => {
     stub();
     answering({});

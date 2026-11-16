@@ -134,6 +134,18 @@ def test_the_dialog_is_plain_and_says_what_stops_it(rt):  # noqa: F811
     assert "publish in Studio" in post["to"]
 
 
+def test_a_fresh_blog_draft_says_what_to_do_not_a_platform(rt):  # noqa: F811
+    """No blog was ever set (Post says "Blog: not set"): the draft's line says copy it or choose
+    where blog posts go, never "needs Sanity connected" and never Post's own words again."""
+    x = live(rt)
+    t2 = tickets.get(rt.store, x["t2"])
+    a = asks.ask(rt, t2)
+    assert a["needs"]["line"] == "copy it, or choose where blog posts go"
+    assert "Sanity" not in a["needs"]["line"] and "not set" not in a["needs"]["line"]
+    assert asks.row(rt, t2)["meta"] == "copy it, or choose where blog posts go"
+    assert plain([a["needs"]["line"], a["needs"]["words"]]) == []
+
+
 def test_a_draft_is_offered_again_on_the_page_only(rt):  # noqa: F811
     x = live(rt)
     with pytest.raises(tickets.TicketError) as e:

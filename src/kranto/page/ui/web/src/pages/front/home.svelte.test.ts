@@ -14,7 +14,7 @@ import { PREPARED_API } from "../../lib/prepared";
 import { IDEAS_API } from "../ideas/cards";
 import { UPD_API } from "../settings/updates";
 import { DISPATCH_API } from "./needs";
-import { agoWords, awaySpan, coreNeeds, cubRows, everythingLine, nextWords, quietLine, sinceWords, uniqueRows } from "./home";
+import { agoWords, awaySpan, coreNeeds, cubRows, everythingLine, nextLine, nextWords, quietLine, sinceWords, uniqueRows, type HomeRow } from "./home";
 import { matchRoute, parse } from "../../lib/router";
 import { ACT_PATH } from "../../lib/activity";
 import { activityOf, incident } from "../../lib/activity.fixtures";
@@ -76,6 +76,15 @@ async function home(read: unknown, extra: Record<string, unknown> = {}) {
 }
 const titles = (el: Element, sel: string) => [...el.querySelectorAll(`${sel} .r-title`)].map((x) => x.textContent);
 
+describe("the one thing's line", () => {
+  it("says who asks in a shape that fits a plural name: never \"Blog posts asks\"", () => {
+    const r = { key: "blog:d1", title: "A post", meta: "", href: "#/post", from: "blog", age: "3 min", tags: [{ word: "Blog posts", tone: "owner" }] } as unknown as HomeRow;
+    expect(nextLine(r)).toBe("asked by Blog posts, 3 min ago");
+    expect(nextLine({ ...r, age: "now" })).toBe("asked by Blog posts, just now");
+    expect(nextLine(r)).not.toMatch(/\basks\b/);
+  });
+});
+
 describe("the home", () => {
   it("draws the date and sentence, the one thing, today's brief, five new ideas and the quiet line, and nothing else", async () => {
     const { L, target, done } = await home(HOME());
@@ -83,7 +92,7 @@ describe("the home", () => {
     expect(target.querySelector("#home-sentence")?.textContent).toBe("Today's brief is ready, and one draft waits for you.");
     // the one thing: the draft that waits, the page's one primary
     expect(target.querySelector("#next h2")?.textContent).toBe("This week: Amazon grasps 66 objects");
-    expect(target.querySelector("#next .nk")?.textContent).toMatch(/^Next · Newsletter asks/);
+    expect(target.querySelector("#next .nk")?.textContent).toMatch(/^Next · asked by Newsletter, /);
     expect(target.querySelectorAll(".btn.primary").length).toBe(1);
     const brief = target.querySelector("[aria-labelledby=home-brief-26]")!;
     expect(brief.querySelector("h2")?.textContent).toBe("Today's brief");

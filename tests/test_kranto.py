@@ -374,6 +374,24 @@ def test_the_written_configs_never_say_build_rules_writes_loop_yaml(user_home):
     assert "the rest are edited by hand" in seed
 
 
+def test_the_written_configs_name_no_page_that_left(user_home):
+    """kranto.yaml's header and its brb section, and the page's seed, say what they are now:
+    no Settings › Building (gone), no build loop or builds UI; the keys are as they were."""
+    home = user_home / ".kranto"
+    seed = launcher.loop_seed_text(home, 8765, user_home)
+    config = launcher.home_config_text(home, 8765, user_home)
+    block = launcher.brb_block("~/kranto-loop", "~/tasks")
+    for text in (seed, config, block):
+        comments = "\n".join(ln for ln in text.splitlines() if ln.lstrip().startswith("#"))
+        for gone in ("Settings › Building", "build loop", "builds UI", "plus the brb section"):
+            assert gone not in comments, gone
+    assert "Projects" not in seed and "Maintenance" not in seed
+    assert "the page and\n# its console" in config and "loop/loop.yaml" in config
+    assert yaml.safe_load(block)["brb"] == {"enabled": True, "loop_home": "~/kranto-loop",
+                                            "root": "~/tasks"}
+    assert set(yaml.safe_load(seed)) == {"tasks_dir", "concurrency", "intake", "kranto", "feed"}
+
+
 def test_status_when_the_server_is_down(user_home, monkeypatch, capsys):
     launcher.make_home(user_home / ".kranto", 8765, user_home)
     host = make_host(user_home, status="down")

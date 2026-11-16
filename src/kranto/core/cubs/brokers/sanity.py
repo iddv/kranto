@@ -297,10 +297,16 @@ class SanityAdapter:
         d = draft_of(store, fields["draft_ref"]) or {"content": {}}
         conn = connection_of(store, "sanity")
         needs = None
-        if conn is None or conn["state"] != "connected":
-            needs = {"connect": "sanity", "line": "needs Sanity connected",
-                     "words": "Sanity is not connected"
-                              + (" any more: connect it again." if conn else "."),
+        if conn is None:
+            # a fresh install: no blog was ever set (Post's line says "Blog: not set"), so
+            # the row says what to do, not a platform the owner never chose
+            needs = {"connect": "sanity", "line": "copy it, or choose where blog posts go",
+                     "words": "No blog is set yet: copy the post, or choose where blog posts "
+                              "go (Sanity) and send it there.",
+                     "button": "Connect Sanity"}
+        elif conn["state"] != "connected":
+            needs = {"connect": "sanity", "line": "needs Sanity connected again",
+                     "words": "Sanity is not connected any more: connect it again.",
                      "button": "Connect Sanity"}
         url = post_link(store, fields["slug"])
         to = (f"a draft in {conn['account']}" if conn else "a draft in your Sanity project") \

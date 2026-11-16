@@ -306,8 +306,8 @@ PROVIDER_INFO = [
               "Separate from the read-only Mastodon connection.",
      "scopes": list(MastodonPostProvider.scopes),
      "reads": "Which account it is, and the instance's character limit.",
-     "never": "Never posts without your approval, and never while the cub is in practice (the "
-              "default: nothing is sent) or cubs.STOP exists. Never follows, boosts, favourites, "
+     "never": "Never posts without your approval, and never while posting is in practice (the "
+              "default: nothing is sent) or stopped. Never follows, boosts, favourites, "
               "deletes or reads your messages.",
      "revoke_at": "Preferences, then Development (a token you made) or Account, then "
                   "Authorized apps, on your instance.",
@@ -319,7 +319,7 @@ PROVIDER_INFO = [
                "Open the application and copy Your access token.",
                "Paste your instance (for example mastodon.social) and the token below and "
                "click Save and test. Kranto names the connection @you@instance.",
-               "A cub's posts are practice (nothing is sent) until you turn on Send for real."],
+               "Posts are practice (nothing is sent) until you turn on Send for real."],
      "fields": [{"key": "instance", "label": "Instance", "placeholder": "mastodon.social"},
                 {"key": "token", "label": "Access token", "secret": True}],
      "sources": []},

@@ -73,7 +73,7 @@ Segments in November 2025); Kranto calls it the audience.
    - the audience's subscriber count, and a reminder to import when it is 0.
    **Check again** reads again after you fix something.
 8. **Send for real.** Open the issue's Send dialog and turn on **Send for real** (or on the
-   cub's page: Home › Cubs › Newsletter › Settings). `kranto cub dry newsletter
+   newsletter's page: Home › Post › Newsletter › Settings). `kranto cub dry newsletter
    send.newsletter` turns it back to practice from a terminal.
 
 ### What each action does

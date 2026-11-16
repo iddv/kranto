@@ -79,7 +79,7 @@
       "Remove", () => L.act(btn, () => L.api(cubPath(id, "remove"), { confirm: true }), () => {
         fresh();
         L.flash(`${title} is removed.`);
-        location.hash = "#/cubs";
+        location.hash = "#/post";
       }), "danger");
   }
 </script>
@@ -94,7 +94,7 @@
           <span class="ctl"><button class="btn sm sw" role="switch" id={"live-" + k} aria-checked={on ? "true" : "false"} onclick={(e) => live(k, !on, e.currentTarget)}>{on ? "For real" : "Practice"}</button></span></div>
       {/each}
       {#if !kinds.length}<p class="muted small">It asks you for nothing.</p>{/if}
-      <h3 class="box-h">The cub</h3>
+      <h3 class="box-h">The feature</h3>
     {/if}
     <p class="small" id="cub-state">{cub.state === "paused" ? `Paused: ${cub.paused?.note || "by the core"}.` : "Running when it is due."}{cub.tree_ok ? "" : " Its files no longer match what you approved."}</p>
     {#if cub.source_gone}<p class="small c-amber" id="cub-source-gone">{cub.source_gone.words}</p>{/if}

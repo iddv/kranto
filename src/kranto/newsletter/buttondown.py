@@ -86,9 +86,9 @@ INFO = {
              "issue, and sends it with this key only when you approve that issue "
              "(Send now).",
     "scopes": list(SCOPES),
-    "reads": "Your newsletter's name and subscriber count; the drafts a cub made.",
-    "never": "Never sends without your approval, and never while the cub is in practice (the "
-             "default: nothing is sent) or cubs.STOP exists. Never edits subscribers.",
+    "reads": "Your newsletter's name and subscriber count; the drafts Kranto made.",
+    "never": "Never sends without your approval, and never while the newsletter is in practice "
+             "(the default: nothing is sent) or stopped. Never edits subscribers.",
     "revoke_at": "buttondown.com, Settings, API: rotate the key.",
     "expiry": "no expiry",
     "steps": ["Sign in at buttondown.com and open Settings, then API "
@@ -96,7 +96,7 @@ INFO = {
               "Copy the API key.",
               "Paste it below and click Save and test. Kranto checks it with one call and "
               "names the connection after your newsletter.",
-              "A cub's issues are practice (nothing is sent) until you turn on Send for real."],
+              "Issues are practice (nothing is sent) until you turn on Send for real."],
     "fields": [{"key": "key", "label": "API key", "secret": True}],
     "sources": [],
 }

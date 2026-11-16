@@ -281,7 +281,7 @@ describe("an installed cub's Settings page", () => {
     answering({ [FEATURES_API]: FEATURES(toot), [SHELL_API]: shell });
     const { target, done } = await draw(FeaturePage, where("settings/nope"));
     await settle();
-    expect(target.textContent).toContain("There is no feature or cub called nope on this Kranto.");
+    expect(target.textContent).toContain("There is no feature called nope on this Kranto.");
     done();
   });
 });

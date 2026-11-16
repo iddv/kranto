@@ -48,6 +48,10 @@ export function otherRows(xs: TopicSpend["other"]): { purpose: string; word: str
   return out;
 }
 
+/** a topic's row by its name; a topic the earlier product made for a project ("Receipts
+ * (project)") is labelled as earlier: projects are not part of Kranto any more */
+export const topicWord = (name: string): string => name.replace(/\s*\(project\)\s*$/i, " (earlier)");
+
 /** what is typed in a cap field, by its id, kept until Save (across redraws and groups) */
 export const CAPS = $state<Record<string, string>>({});
 /** a cap field's value: dollars above 0, or null for no cap */

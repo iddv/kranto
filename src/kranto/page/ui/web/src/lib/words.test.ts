@@ -97,6 +97,17 @@ describe("Settings' words", () => {
     expect(bad).toEqual([]);
   });
 
+  it("a feature's page, its crumb and its Settings say feature, never cub (the owner: plain words, no house jargon)", () => {
+    const files = import.meta.glob(["../features/cub/CubPage.svelte", "../features/cub/CubObjectPage.svelte", "../features/cub/CubPane.svelte", "../features/cub/CubControls.svelte",
+      "../features/cub.ts", "../pages/settings/FeaturePage.svelte", "../pages/settings/FeaturePane.svelte", "../pages/settings/NewsletterPane.svelte"], { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+    expect(Object.keys(files).length).toBe(8);
+    // names of the code a person never reads: routes and ids (cub/<id>, cub-sheet, ?cub=), a key's
+    // name drawn from parts (cubs.<id>.<cap>), a property read inside a nested template (j.cub.diff)
+    const code = /[\w-]*\bcubs?[-/=][\w${}/.=-]*|[\w-]+-cubs?\b|\bcubs\.(?=[\s.]|$)[ .]*|[\w$]+\.cubs?\b/g;
+    const bad = Object.entries(files).flatMap(([f, raw]) => shownIn(f, raw).filter((s) => /\bcubs?\b/i.test(s.replace(code, ""))).map((s) => `${f}: ${s.trim().slice(0, 90)}`));
+    expect(bad).toEqual([]);
+  });
+
   it("no page says monitoring, a budget, or a file name where it means watching, a cap or your settings", () => {
     const files = import.meta.glob(["../**/*.svelte", "../**/*.ts", "!../**/*.test.ts", "!../**/*.gen.ts", "!./words.ts"], { query: "?raw", import: "default", eager: true }) as Record<string, string>;
     const bad: string[] = [];
