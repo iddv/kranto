@@ -30,6 +30,7 @@
   import ProseFlags from "./ProseFlags.svelte";
   import { siteOf } from "./prose";
   import { copyText, downloadHref, editPath, partsText, sheetPath, type PostEdited, type PostSheet } from "./post";
+  import { cancelHour } from "../../pages/post/post";
 
   // titled: the sheet's own title (off on the draft's page, whose head has it)
   let { id, tick = 0, titled = true }: { id: number | string; tick?: number; titled?: boolean } = $props();
@@ -139,6 +140,8 @@
       {#if folded && !short}<p><button type="button" class="linkish small" id="draft-show-all" onclick={() => (all = true)}>{`Show all ${s.words} words`}</button></p>{/if}
       {#each s.extras || [] as x (x.key)}<p class="muted small draft-extra">{x.words}</p>{/each}
       {#if s.group === "waiting"}<ProseFlags text={words} site={s.site || siteOf(s.kind)} id="draft-flags" />{/if}
+      {#if s.missed}<p class="small c-amber" id="draft-missed">{s.missed}</p>{/if}
+      {#if s.group === "scheduled"}<p class="acts small" id="draft-due"><span>{`Goes ${s.due_words || "at the time you chose"}. Nothing goes before then, and you can cancel it until then.`}</span> <button type="button" class="btn sm" id="draft-cancel" onclick={(e) => cancelHour(e.currentTarget, s.id)}>Cancel</button> <button type="button" class="linkish small" id="draft-retime" onclick={(e) => send(e.currentTarget)}>Change the time</button></p>{/if}
       <p class="acts" id="draft-verbs">
         {#if short && waits}
           {#if s.open}<a class="btn sm primary" id="draft-open" href={s.open} target="_blank" rel="noopener noreferrer" onclick={() => (opened = true)}>{`Open in ${s.site_word || s.site}`}</a>
@@ -155,6 +158,7 @@
       </p>
       {#if askPosted}<p class="acts small" id="draft-posted"><button type="button" class="btn sm" id="draft-posted-yes" onclick={(e) => posted(e.currentTarget)}>I posted it</button><button type="button" class="linkish small" id="draft-posted-no" onclick={() => (notYet = true)}>Not yet</button></p>{/if}
       {#if s.edited && s.can_edit && s.original_draft != null && s.original_draft !== s.id}<p class="small" id="draft-again"><a href={href(`post/d/${s.original_draft}`)}>The original draft ›</a>{" · "}<button type="button" class="linkish small" onclick={again}>Start again from the original</button></p>{/if}
+      {#if s.reach?.words}<p class="small" id="draft-reach">{`${s.reach.words} (read ${rel(dt(s.reach.read_at))})`}</p>{/if}
       {#if s.link}<p class="small" id="draft-link"><a href={s.link} target="_blank" rel="noopener noreferrer">Where it went ↗</a></p>{/if}
     {/if}
   </section>

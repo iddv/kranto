@@ -104,6 +104,17 @@ class TicketFields(Stored):
 
 
 @dataclass(frozen=True)
+class PostReachShape(Stored):
+    """A sent post's shape, kept with its first ``post_reach`` row (``kranto.social.reach``):
+    ``site``, ``ids`` (the site's own: Bluesky's ``uri``, Mastodon's ``id`` and ``instance``,
+    Threads' ``id``, LinkedIn's ``urn``), ``parts``, ``card``, ``length``, ``weekday``, ``hour``
+    and ``angle``. A reading's row stores ``{}``."""
+
+    COLUMN = ("post_reach", "shape")
+    extra: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class TicketBecause(Stored):
     """Why a ticket was filed: its provenance (the run, the cited objects)."""
 

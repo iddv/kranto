@@ -2472,7 +2472,7 @@ export interface PostAccount {
   platform: string | null;
 }
 
-/** One site of a write's short posts: its newest draft, the site, its name and where the draft stands (``waiting``, ``sent``, ``earlier``). */
+/** One site of a write's short posts: its newest draft, the site, its name and where the draft stands (``waiting``, ``scheduled``, ``sent``, ``earlier``). */
 export interface PostSibling {
   id: number;
   site: string;
@@ -2509,6 +2509,21 @@ export interface PostDraft {
   write?: string | null;
   way?: "open" | "direct";
   sites?: PostSibling[];
+  due?: string | null;
+  due_words?: string | null;
+  missed?: string | null;
+  reach?: PostReach | null;
+}
+
+/** A sent post's numbers, its newest reading: each count None where the site gives none; ``words`` the row's line ("4 replies, 9 reposts, 31 likes"), ``read_at`` when it was read. */
+export interface PostReach {
+  replies: number | null;
+  reposts: number | null;
+  likes: number | null;
+  quotes: number | null;
+  views: number | null;
+  read_at: string;
+  words: string;
 }
 
 export interface PostFailed {
@@ -2520,15 +2535,17 @@ export interface PostFailed {
   fix: string | null;
 }
 
-/** ``GET /api/post``: the drafts waiting (a draft's ask has no time limit), sent and earlier, newest first, the three accounts, and the writes that failed in the last week and were not dismissed (``failed``). */
+/** ``GET /api/post``: the drafts waiting (a draft's ask has no time limit), scheduled (soonest first), sent and earlier, newest first, the three accounts, and the writes that failed in the last week and were not dismissed (``failed``). */
 export interface Post {
   line: string;
   drafts: PostDraft[];
+  scheduled?: PostDraft[];
   sent: PostDraft[];
   earlier: PostDraft[];
   accounts: PostAccount[];
   sites: PostSitesLine;
   failed: PostFailed[];
+  reach_foot?: string | null;
 }
 
 /** One part of a short post or a thread: its words. */
@@ -2592,6 +2609,10 @@ export interface PostSheet {
   write?: string | null;
   way?: "open" | "direct";
   sites?: PostSibling[];
+  due?: string | null;
+  due_words?: string | null;
+  missed?: string | null;
+  reach?: PostReach | null;
   group: "waiting" | "sent" | "earlier";
   markdown: string;
   filename: string;
@@ -2630,6 +2651,7 @@ export interface PostingSite {
   limit: number;
   unit: string;
   disclose: boolean;
+  learned?: string[];
 }
 
 /** A site Kranto does not offer, with why, and what would make it possible. */

@@ -624,6 +624,9 @@ ROUTE_ALLOW: dict[tuple[str, str], str] = {
     ("POST", "/api/post/d/{id:int}/posted"): "I posted it: the person's own record, on the page "
                                              "only, that they posted a draft in the site "
                                              "themselves; never an assistant's (nothing is sent)",
+    ("POST", "/api/post/d/{id:int}/cancel"): "a scheduled post's Cancel, on the page: it only "
+                                             "takes back the person's yes for an hour (nothing "
+                                             "is sent); never a send",
     ("POST", "/api/post/sites"): "Settings › Posting's choices (the sites ticked, Post "
                                  "directly): the person's, on the page; an assistant may read "
                                  "them (GET), never switch on a send",

@@ -216,7 +216,9 @@ register(Kind("post.mastodon", "Publish this post", {
     "language": _F("str", pattern=r"[a-z]{2}(-[A-Za-z]{2})?", max_len=5, label="Language")},
     expires_hours=None, per_day=5,
     meta={"verb": "Post toot", "button": "Post toot", "noun": "toot", "done": "Posted",
-          "not_done": "not posted", "question": "Post this toot?"}))
+          "not_done": "not posted", "question": "Post this toot?",
+          # sent at an hour the person chose: Kranto holds the yes (``kranto.social.hours``)
+          "schedules": True, "holds": True}))
 register(Kind("book.propose", "Propose this trip", {
     "legs": _F("str", max_len=400, label="Legs"),
     "total": _F("float", lo=0, hi=1000000, label="Total"),
@@ -613,6 +615,57 @@ def confirm(store: Store, ticket_id: int, *, identity: dict[str, Any] | None, co
     if preview.enabled(getattr(cfg, "root", None)):
         # the preview never performs: refused before any state is written, so the ask stays
         raise TicketError(preview.NOTHING_SENT + ".", 409)
+    if chosen and chosen != "now" and spec.meta.get("holds"):
+        # a kind Kranto holds for its hour (the posting sends): the yes is recorded for that
+        # time and those words (``kranto.social.hours``); the ask stays open, and is pressed
+        # at its hour by ``press_held``, only if nothing changed and Kranto was running then
+        if t["state"] != OPEN:
+            raise TicketError(f"this was answered already ({t['state']}): an approval happens "
+                              "once", 409)
+        from ..social import hours
+        try:
+            held = hours.hold(store, t, when=chosen, door=door, now=now)
+        except hours.HoursError as exc:
+            raise TicketError(exc.words, exc.code) from exc
+        return {**(get(store, ticket_id, now=now) or {}),
+                "outcome": {"state": "scheduled", "note": held["said"]}, "mode": "held"}
+    return _press(store, t, spec, door=door, context=context, now=now, chosen=chosen)
+
+
+def press_held(store: Store, ticket_id: int, *, context: object = None,
+               now: datetime | None = None, yes: dict[str, Any]) -> dict[str, Any]:
+    """Press a held ask at its hour (``kranto.social.hours``'s lane): the person's yes was
+    given on the page (``yes``: the ``post_due`` row, with its door and time) for exactly these
+    fields. Refused, writing nothing, when the ask is no longer open or its words changed;
+    otherwise the same press as ``confirm``: one ``confirmed`` row inside one transaction, then
+    the performer in the mode of the moment. Never on the preview."""
+    kind_names()
+    now = now or utcnow()
+    t = get(store, ticket_id, now=now)
+    if t is None:
+        raise TicketError("not found", 404)
+    spec = KINDS.get(t["kind"])
+    if spec is None or spec.perform is None or not spec.meta.get("holds"):
+        raise TicketError(f"{t['kind']} is not sent at an hour", 409)
+    if yes.get("door") != "ui" or int(yes.get("ticket_id") or 0) != int(ticket_id):
+        raise TicketError("the yes was not given on the page", 403)
+    row = store.query_one("SELECT fields_hash FROM cub_tickets WHERE id = ?", (int(ticket_id),))
+    if row is None or row["fields_hash"] != yes.get("fields_hash"):
+        raise TicketError("the words changed after your yes", 409)
+    from .. import preview
+    if preview.enabled(getattr(getattr(context, "cfg", None), "root", None)):
+        raise TicketError(preview.NOTHING_SENT + ".", 409)
+    return _press(store, t, spec, door="ui", context=context, now=now,
+                  chosen=str(yes.get("due_at") or ""),
+                  said_at=str(yes.get("created_at") or ""))
+
+
+def _press(store: Store, t: dict[str, Any], spec: Kind, *, door: str | None, context: object,
+           now: datetime, chosen: str | None, said_at: str | None = None) -> dict[str, Any]:
+    """The press itself, after the door, the answer and the time were checked: ``confirmed``
+    once inside a transaction, then the performer, then its outcome as a state row."""
+    ticket_id = int(t["id"])
+    cfg = getattr(context, "cfg", None)
     mode, why = press_mode(store, cfg, t)
     with store.tx():
         st = state_of(store, ticket_id)
@@ -626,7 +679,8 @@ def confirm(store: Store, ticket_id: int, *, identity: dict[str, Any] | None, co
             _append_state(store, ticket_id, "expired", door="core", now=now)
         else:
             _append_state(store, ticket_id, "confirmed", door=door,
-                          note=f"mode: {mode}" + (f"; when: {chosen}" if chosen else ""),
+                          note=f"mode: {mode}" + (f"; when: {chosen}" if chosen else "")
+                          + (f"; your yes at {said_at}" if said_at else ""),
                           now=now)
     if expired:
         _resolved(store, t, "expired")

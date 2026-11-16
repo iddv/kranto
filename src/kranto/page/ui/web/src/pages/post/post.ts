@@ -2,6 +2,8 @@
 // the P1): the drafts that wait (a draft's ask has no time limit), what was sent, the three
 // accounts, and the earlier drafts. Plain data and words, so the tests read them without a page.
 import { href, matchRoute } from "../../lib/router";
+import { afkDropPrefix } from "../../lib/app/data";
+import { app } from "../../lib/shell.svelte";
 import type { Post, PostAccount, PostDraft, PostFailed } from "../../api/afk.gen";
 import type { About } from "../../features/post/post";
 
@@ -21,7 +23,32 @@ export const hasSheet = (): boolean => !!matchRoute(["post", "d", "1"]);
  * says where it went first ("Posted to Bluesky · posted by you") */
 export function sentLine(d: PostDraft): string {
   const said = d.note || d.said || "Sent";
-  return d.site_word ? `Posted to ${d.site_word} · ${said}` : said;
+  // its numbers, where its site gives them, before the address (which the row may cut)
+  const counted = d.reach && d.reach.words ? [d.reach.words] : [];
+  return d.site_word ? [`Posted to ${d.site_word}`, ...counted, said].join(" · ") : [...counted, said].join(" · ");
+}
+/** a scheduled post's line: "Monday 16 Nov, 09:00 · Bluesky" (the person's own time) */
+export function dueLine(d: Pick<PostDraft, "due_words" | "site_word">): string {
+  return [d.due_words ? `Goes ${d.due_words}` : "Scheduled", d.site_word || ""].filter(Boolean).join(" · ");
+}
+/** a scheduled post's hour in the row's narrow age slot, which a phone keeps, on the person's
+ * own clock: "09:00" today, "Tue" within the week, else "17 Nov" (the row's line says it all) */
+export function dueShort(due: string | null | undefined, now: Date = new Date()): string {
+  const t = due ? new Date(due) : null;
+  if (!t || Number.isNaN(t.getTime())) return "";
+  if (t.toDateString() === now.toDateString()) return `${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
+  if (t.getTime() - now.getTime() < 6 * 86400_000) return t.toLocaleDateString("en-GB", { weekday: "short" });
+  return t.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+/** Cancel a scheduled post: nothing is sent, and the draft waits on Post again */
+export function cancelHour(btn: HTMLElement | null, id: number): void {
+  const L = app();
+  if (!L) return;
+  void L.act(btn, () => L.api(`/api/post/d/${id}/cancel`, {}), (r) => {
+    afkDropPrefix("/api/post");
+    L.afkDrop();
+    L.say((r as { say?: string } | null)?.say || "Cancelled: nothing is sent.");
+  });
 }
 /** a write's short posts as plain words, a tick on those sent: "Bluesky ✓ · Mastodon · X" */
 export function sitesWords(d: Pick<PostDraft, "sites">): string {

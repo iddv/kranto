@@ -23,6 +23,7 @@
   import { FEATURES_API } from "../index";
 
   let { id, close }: { id: number; close: () => void } = $props();
+  // a post Kranto holds for its hour: the dialog's Schedule is typed in the person's own time
   let v = $state<AskView | null>(null);
   let err = $state<string | null>(null);
   let view = $state<"ask" | "connect" | "done">("ask");
@@ -73,14 +74,15 @@
 
   async function approve(): Promise<void> {
     if (!a) return;
-    const when = a.schedule ? (scheduling ? whenOf(at) : "now") : undefined;
+    const when = a.schedule ? (scheduling ? whenOf(at, a.zone) : "now") : undefined;
     if (scheduling && !when) {
       err = "Choose the day and time to send it.";
       return;
     }
-    const r = (await act((L) => L.api(askPath(id, "confirm"), { confirm: true, ...(when ? { when } : {}) }))) as { state?: string; note?: string | null; outcome?: { note?: string } } | null;
+    const r = (await act((L) => L.api(askPath(id, "confirm"), { confirm: true, ...(when ? { when } : {}) }))) as { state?: string; note?: string | null; outcome?: { state?: string; note?: string } } | null;
     if (!r) return;
-    result = outcomeLine(r.state || "unknown", r.outcome?.note ?? r.note);
+    // a post held for its hour answers "scheduled": the ask itself still waits
+    result = outcomeLine(r.outcome?.state === "scheduled" ? "scheduled" : r.state || "unknown", r.outcome?.note ?? r.note);
     view = "done";
     app()?.render();
   }
@@ -195,7 +197,7 @@
         {#if a.practice.on}<p class="ask-line muted" id="ask-practice">{a.practice.words}</p>{/if}
       {/if}
       {#if scheduling}
-        <div class="field ask-when"><label for="ask-at">When, in UTC</label><input id="ask-at" type="datetime-local" bind:value={at} /></div>
+        <div class="field ask-when"><label for="ask-at">{a.zone === "local" ? "When (your time)" : "When, in UTC"}</label><input id="ask-at" type="datetime-local" bind:value={at} /></div>
       {/if}
     {/if}
     {#if err}<p class="ask-line c-red" role="alert">{err}</p>{/if}

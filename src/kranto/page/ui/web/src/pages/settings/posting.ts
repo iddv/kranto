@@ -14,7 +14,9 @@ export function siteLine(s: PostingSite): string {
   const open = s.ways.includes("open") ? (s.needs === "instance" && !s.instance ? "type your server to open it" : `opens ${s.name} with the draft ready`) : "";
   if (!s.direct) return open;
   const who = s.account ? `as ${s.account}` : "connect an account";
-  return [open, `Kranto posts after your yes, ${who}`].filter(Boolean).join(" · ");
+  const line = [open, `Kranto posts after your yes, ${who}`].filter(Boolean).join(" · ");
+  // what the sent posts' numbers support, once there are enough of them ("Best hour so far: …")
+  return [line, ...(s.learned || [])].join(" · ");
 }
 
 /** one change of the person's choices; the page reads Posting and Post again after it */
