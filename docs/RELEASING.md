@@ -9,6 +9,11 @@ checks are all green, numbers it (`decide.py`), makes the wheels with the page i
 uploaded to a package index. `--plan` stops after the numbering; `--dry-run` stops before
 anything is pushed or published.
 
+The release tag is annotated. Name its tagger with `RELEASE_TAGGER_NAME` and
+`RELEASE_TAGGER_EMAIL` (your public identity, such as your GitHub no-reply address); without
+them the tagger is `kranto release <release@kranto.invalid>`, never the machine's own git
+identity.
+
 ## The two lines
 
 - **Nightly:** every cut from main without a flag, `vX.Y.0-devN`, a GitHub prerelease. Installs

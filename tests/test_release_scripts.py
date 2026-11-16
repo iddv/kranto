@@ -481,6 +481,36 @@ def test_build_sh_takes_a_shape_and_writes_the_manifest():
     assert r.returncode == 2 and "final or compat" in r.stderr
 
 
+def _tagged_by(tmp_path, extra: dict) -> str:
+    """build.sh run on a bare repository: it tags first (then fails, there is nothing to
+    build); the tag's tagger line."""
+    import os
+    src = tmp_path / "src"
+    src.mkdir()
+    env = {"PATH": os.environ["PATH"], "HOME": str(tmp_path), "GIT_CONFIG_GLOBAL": os.devnull,
+           "GIT_CONFIG_NOSYSTEM": "1"}
+    git = ["git", "-C", str(src), "-c", "user.name=t", "-c", "user.email=t@example.invalid"]
+    subprocess.run(["git", "init", "-q", str(src)], check=True, env=env)
+    subprocess.run([*git, "commit", "-q", "--allow-empty", "-m", "x"], check=True, env=env)
+    subprocess.run(["bash", str(SCRIPTS / "build.sh")], capture_output=True, text=True,
+                   env={**env, **extra, "VERSION": "0.7.0.dev1", "TAG": "v0.7.0-dev1",
+                        "SRC": str(src), "DIST": str(tmp_path / "dist"), "REPO": "o/r"})
+    return subprocess.run([*git, "for-each-ref", "--format=%(taggername) %(taggeremail)",
+                           "refs/tags/v0.7.0-dev1"], capture_output=True, text=True,
+                          check=True, env=env).stdout.strip()
+
+
+def test_the_release_tag_is_made_by_the_tagger_the_maintainer_names(tmp_path):
+    got = _tagged_by(tmp_path, {"RELEASE_TAGGER_NAME": "maint",
+                                "RELEASE_TAGGER_EMAIL": "1+maint@users.noreply.github.com"})
+    assert got == "maint <1+maint@users.noreply.github.com>"
+
+
+def test_without_a_named_tagger_the_tag_is_made_by_the_release_name(tmp_path):
+    assert _tagged_by(tmp_path, {}) == \
+        f"{PRODUCT.COMMAND} release <release@{PRODUCT.COMMAND}.invalid>"
+
+
 def test_rc_check_takes_any_release_tag_and_a_scratch_place(tmp_path):
     # the check of a published build (a nightly, a held stable, an old rc); its real run is
     # seven steps on a scratch unit: install the previous release, update, roll back, update

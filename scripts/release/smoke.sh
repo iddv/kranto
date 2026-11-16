@@ -13,7 +13,8 @@
 # (WORK/setup/home, PATH = the tool's bin and /usr/bin:/bin only): 'kranto setup --yes
 # --service foreground --watch later --github later' starts the server as its child;
 # /api/status answers VERSION, GET /api/setup says needs_setup, 'kranto doctor' fails on nothing
-# but the pieces a bare machine lacks (claude, gh, the model key), SIGTERM stops the wizard and
+# but the pieces a bare machine lacks (claude, gh, the model key) and says the model is missing
+# (smoke_doctor.py: a FAIL on the key, or "none chosen yet"), SIGTERM stops the wizard and
 # its server, a second run writes nothing, and nothing listens on PORT at the end.
 #
 # Checks: 'kranto --version' names VERSION; 'kranto up --foreground' on a new home in WORK
@@ -104,19 +105,7 @@ PY
       "${bare[@]}" "$WORK/bin/kranto" doctor > "$S/doctor.log" 2>&1
       code=$?
       set -e
-      python3 - "$S/doctor.log" "$code" <<'PY'
-import re, sys
-text, code = open(sys.argv[1]).read(), int(sys.argv[2])
-failed = sorted({m.group(1).strip() for m in re.finditer(r"^\s*FAIL\s+(\S+(?: \S+)?)\s{2,}", text, re.M)})
-# what a bare machine is allowed to lack: Claude Code, gh's login, the model key
-allowed = {"claude", "gh", "api key", "key", "llm key", "openrouter"}
-if code == 0:
-    sys.exit("smoke setup: kranto doctor passed on a bare machine without a model key")
-bad = [f for f in failed if f not in allowed]
-if bad:
-    sys.exit(f"smoke setup: kranto doctor fails on {bad} (allowed on a bare machine: {sorted(allowed)})\n{text}")
-print(f"ok: kranto doctor exits {code}; FAIL only on {failed or 'what it lacks'}")
-PY
+      python3 "$HERE/smoke_doctor.py" "$S/doctor.log" "$code"
     fi
     for _ in $(seq 1 60); do     # its JSON is written once every section has run
       [ -s "$S/setup-$1.json" ] && break
