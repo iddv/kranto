@@ -235,6 +235,10 @@ jobs:
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      # build.sh tags the commit it builds; on a runner of your own the checkout keeps that tag
+      # from an earlier run, at another commit, and build.sh refuses it. It is only this job's.
+      - name: forget the pretend tag an earlier run left here
+        run: git tag -d "$TAG" 2>/dev/null || true
       - name: build the final wheel (scripts/release/build.sh)
         run: SRC="$GITHUB_WORKSPACE" DIST="$RUNNER_TEMP/dist" bash scripts/release/build.sh --shape final
       - name: install it into a scratch HOME
