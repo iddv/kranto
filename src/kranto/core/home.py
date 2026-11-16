@@ -796,11 +796,13 @@ def _away(rt: Any, rows: list[Any], ranks: dict[int, Any], at: str, now: Any) ->
 def _waiting(store: Any, now: Any) -> dict[str, int]:
     """What waits for the owner's yes, counted for the sentence: the drafts a posting cub asks
     to send (an open ask, or the newest draft of one that may be offered again: the rows Needs you
-    and the one thing draw, ``asks.latest``), and the items an assistant prepared."""
+    and the one thing draw, ``asks.latest``), and the items an assistant prepared. A post the
+    owner scheduled already has their yes (``social.hours``): it is not counted."""
+    from ..social import hours
     from ..store import iso
     from . import asks
 
-    drafts = len(asks.latest(store))
+    drafts = sum(1 for t in asks.latest(store) if hours.held_of(store, t.get("id")) is None)
     prepared = store.query_one(
         "SELECT COUNT(*) AS n FROM prepared p WHERE p.id IN (SELECT MAX(id) FROM prepared "
         "GROUP BY prepared_uuid) AND p.state = 'open' AND (p.expires_at IS NULL OR "

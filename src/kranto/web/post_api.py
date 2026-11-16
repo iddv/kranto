@@ -715,6 +715,11 @@ def _edit_short(new: dict[str, Any], content: dict[str, Any], parts: Any,
     _ = parts_of(content)
     new["parts"] = [{"text": x} for x in texts]
     new["text"] = texts[0]
+    # what Kranto took off the writer's words says nothing about the person's own
+    stored = content.get("extras")
+    if isinstance(stored, list):
+        new["extras"] = [e for e in stored
+                         if not (isinstance(e, dict) and e.get("key") == "removed")]
 
 
 # -- Write a post (the verb ``post.write``) -------------------------------------------

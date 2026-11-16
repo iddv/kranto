@@ -145,8 +145,8 @@
       <p class="acts" id="draft-verbs">
         {#if short && waits}
           {#if s.open}<a class="btn sm primary" id="draft-open" href={s.open} target="_blank" rel="noopener noreferrer" onclick={() => (opened = true)}>{`Open in ${s.site_word || s.site}`}</a>
-          {:else if s.open_off}<button type="button" class="btn sm primary" id="draft-open" disabled>{`Open in ${s.site_word || s.site}`}</button><span class="muted small" id="draft-open-off">{s.open_off}</span>{/if}
-          {#if s.direct}<button type="button" class={"btn sm" + (s.open || s.open_off ? "" : " primary")} id="draft-direct" disabled={!s.direct.ready} title={s.direct.why || ""} onclick={(e) => send(e.currentTarget)}>{s.direct.word}</button>{#if !s.direct.ready && s.direct.why}<span class="muted small" id="draft-direct-why">{s.direct.why}</span>{/if}{/if}
+          {:else if s.open_off}<button type="button" class="btn sm primary" id="draft-open" disabled>{`Open in ${s.site_word || s.site}`}</button>{" "}<span class="muted small" id="draft-open-off">{s.open_off}</span>{/if}
+          {#if s.direct}{" "}<button type="button" class={"btn sm" + (s.open || s.open_off ? "" : " primary")} id="draft-direct" disabled={!s.direct.ready} title={s.direct.why || ""} onclick={(e) => send(e.currentTarget)}>{s.direct.word}</button>{#if !s.direct.ready && s.direct.why}{" "}<span class="muted small" id="draft-direct-why">{s.direct.why}</span>{/if}{/if}
         {/if}
         {#if canSend}<button type="button" class="btn sm primary" id="draft-send" onclick={(e) => send(e.currentTarget)}>{s.ticket != null ? s.verb || "Send" : "Send again"}</button>{/if}
         <button type="button" class={"btn sm" + (canSend || (short && waits) ? "" : " primary")} id="draft-copy" onclick={() => void copy()}>{copied ? "Copied" : "Copy"}</button>
@@ -156,7 +156,7 @@
         {#if s.ticket != null}<button type="button" class="btn sm quiet" id="draft-decline" onclick={decline}>Decline</button>{/if}
         {#if (s.ticket ?? s.again) != null}<button type="button" class="linkish small" id="draft-details" onclick={() => openDetails(`ask:${s.ticket ?? s.again}`)}>Details ›</button>{/if}
       </p>
-      {#if askPosted}<p class="acts small" id="draft-posted"><button type="button" class="btn sm" id="draft-posted-yes" onclick={(e) => posted(e.currentTarget)}>I posted it</button><button type="button" class="linkish small" id="draft-posted-no" onclick={() => (notYet = true)}>Not yet</button></p>{/if}
+      {#if askPosted}<p class="acts small" id="draft-posted"><button type="button" class="btn sm" id="draft-posted-yes" onclick={(e) => posted(e.currentTarget)}>I posted it</button>{" "}<button type="button" class="linkish small" id="draft-posted-no" onclick={() => (notYet = true)}>Not yet</button></p>{/if}
       {#if s.edited && s.can_edit && s.original_draft != null && s.original_draft !== s.id}<p class="small" id="draft-again"><a href={href(`post/d/${s.original_draft}`)}>The original draft ›</a>{" · "}<button type="button" class="linkish small" onclick={again}>Start again from the original</button></p>{/if}
       {#if s.reach?.words}<p class="small" id="draft-reach">{`${s.reach.words} (read ${rel(dt(s.reach.read_at))})`}</p>{/if}
       {#if s.link}<p class="small" id="draft-link"><a href={s.link} target="_blank" rel="noopener noreferrer">Where it went ↗</a></p>{/if}

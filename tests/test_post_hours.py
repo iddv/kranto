@@ -291,6 +291,17 @@ def test_readers_of_the_ticket_states_see_a_held_ask_as_waiting(store, tmp_path,
     assert iso(NOW)  # the clock the hold used
 
 
+def test_the_homes_sentence_does_not_count_a_scheduled_post_as_waiting(store, tmp_path, sent):
+    """"… and one draft waits for you": a post the owner scheduled already has their yes."""
+    from kranto.core import home
+    rt = _rt(store, tmp_path)
+    _, tid = _ask(store)
+    _ask(store, site="x", kind="post.open", text="Another post.")
+    assert home._waiting(store, NOW)["drafts"] == 2
+    _schedule(store, tid, rt)
+    assert home._waiting(store, NOW)["drafts"] == 1
+
+
 def test_no_door_may_edit_a_scheduled_draft_so_its_time_never_carries_other_words(store, tmp_path,
                                                                                   sent):
     """``post.edit`` runs from any door (an assistant's too): a scheduled draft is refused, so a
@@ -301,6 +312,10 @@ def test_no_door_may_edit_a_scheduled_draft_so_its_time_never_carries_other_word
     for door in ("ui", "cli"):
         with pytest.raises(post_api.WriteError, match="cancel its time first"):
             post_api.edit_draft(rt, d["id"], {"parts": [{"text": "Other words."}]}, door)
+    # an assistant's edit (``edited_by``), pressed by the owner after the time was chosen
+    with pytest.raises(post_api.WriteError, match="cancel its time first"):
+        post_api.edit_draft(rt, d["id"], {"parts": [{"text": "My assistant's words."}]}, "mcp",
+                            by="mcp:claude-code")
     assert hours.held_of(store, tid) is not None
     hours.tick(store, rt, now=AT_NINE)
     assert sent == [tid]

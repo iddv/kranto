@@ -65,16 +65,14 @@ def _check_calls(path: Path) -> list[ast.Call]:
     return out
 
 
-# a cub's check goes through the SDK and the cub host; both take the material once the SDK's
-# prose.check carries it, and these marks come off then (strict: a pass fails until they do)
-CUB_HALF = pytest.mark.xfail(strict=True, reason="the cub host and the SDK pass a cub's "
-                                                 "material once prose.check takes sources")
+# a cub's check goes through the SDK and the cub host; both pass the material (SDK 1.4.0's
+# ``ctx.prose.check(sources=)``)
 WRITERS = [
     pytest.param("kranto/social/__init__.py", id="short posts"),
     pytest.param("kranto/core/cubs/host.py", id="the cub host"),
     pytest.param("kranto/cubs/examples/blog/main.py", id="blog"),
     pytest.param("kranto/cubs/examples/toot/main.py", id="toot"),
-    pytest.param("kranto/cubs/examples/newsletter/main.py", id="newsletter", marks=CUB_HALF),
+    pytest.param("kranto/cubs/examples/newsletter/main.py", id="newsletter"),
 ]
 
 

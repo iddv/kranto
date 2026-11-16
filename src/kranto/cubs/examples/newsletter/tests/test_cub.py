@@ -86,6 +86,15 @@ def test_the_planted_instruction_is_only_a_cited_item_and_files_nothing_else(hos
     host.assert_no_secret_asked()
 
 
+def test_the_intros_check_gets_the_headlines_it_was_written_from(host):
+    """salt.person: the check's sources are the headlines, so a person they lack is flagged."""
+    two_briefs(host)
+    host.run_job("compose", strict=True)
+    check = next(c for c in host.prose.calls if c["method"] == "check")
+    assert "Headline 1.1" in check["params"]["sources"]
+    assert "Headline 2.1" in check["params"]["sources"]
+
+
 def test_a_second_run_the_same_day_skips(host):
     two_briefs(host)
     host.run_job("compose", strict=True)
