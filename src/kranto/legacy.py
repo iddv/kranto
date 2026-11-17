@@ -81,6 +81,9 @@ BROWSER_KEYS = tuple(f"{_OLD}.{k}" for k in ("theme", "look", "look.custom", "la
 # in Kranto's own at its next write.
 VAULT_INFO = f"{_OLD}afk connections v1".encode()
 VAULT_AAD = f"{_OLD}afk-connections".encode()
+# the console's ``ask.config`` value for "the product's own Claude config", as the old page saved
+# it in loop.yaml (now ``kranto``)
+CONSOLE_CONFIG = _OLD
 
 
 def new_env_name(name: str) -> str | None:
