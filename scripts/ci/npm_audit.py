@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """The audit of the page's web UI lockfile, with named exceptions.
 
     python3 scripts/ci/npm_audit.py [--dir DIR] [--level high] [--allow FILE]
