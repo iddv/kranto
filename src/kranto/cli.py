@@ -101,8 +101,13 @@ def cmd_status(args) -> int:
     provider_pause = watch_pause(store)
     if provider_pause:
         print(f"provider:     {pause_words(provider_pause)}")
-    key_state = ("set" if cfg.llm.api_key() else f"missing (${cfg.llm.key_env})") \
-        if cfg.llm.key_env else "none needed"
+    from .doctor import not_chosen
+    if not_chosen(cfg, store):
+        # the default provider's variable is nobody's choice yet (doctor says the same)
+        key_state = "no model chosen yet (Welcome's first step, or 'kranto setup watching')"
+    else:
+        key_state = ("set" if cfg.llm.api_key() else f"missing (${cfg.llm.key_env})") \
+            if cfg.llm.key_env else "none needed"
     print(f"api key:      {key_state}")
     if last:
         print(f"last run:     {last['status']} at {last['finished_at']}"
@@ -261,11 +266,16 @@ def cmd_topics_archive(args) -> int:
 def cmd_topics_list(args) -> int:
     _, store = _store(args)
     kind = getattr(args, "kind", "user")
+    shown = 0
     for t in library.active_topics(store):
         if kind not in ("all", t.kind):
             continue
         tag = f"  [{t.ref}]" if t.ref else ""
         print(f"{t.id:>4}  {t.name}{tag}\n      {_short(t.description, 100)}")
+        shown += 1
+    if not shown:
+        print("no topics yet: add one on Welcome or Watch › Topics in the browser, or "
+              "'kranto watch topics add NAME DESCRIPTION'")
     return 0
 
 

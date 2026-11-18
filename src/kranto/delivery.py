@@ -37,7 +37,8 @@ MAX_ATTEMPTS = 3
 # Messages older than this are not sent: configuring a target for the first
 # time should not replay months of alarms.
 WINDOW = timedelta(days=2)
-INSTALL_HINT = "pip install 'kranto[notify]'"
+INSTALL_HINT = ("the notify extra: kranto[notify] from the release's wheels, "
+                "https://github.com/iddv/kranto/blob/main/docs/setup.md#2-install")
 
 
 def target_label(url: str) -> str:

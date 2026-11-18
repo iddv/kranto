@@ -244,7 +244,7 @@ class CubRuntime:
     def off(self, cub: registry.Installed) -> str | None:
         """Why the owner's switches keep the cub from running, or None."""
         if not cub_settings.enabled(self.rt.cfg):
-            return "cubs are off (cubs.enabled: false)"
+            return "features are off (cubs.enabled: false)"
         if not cub_settings.cub_enabled(self.rt.cfg, cub.id):
             return f"{cub.id} is off (cubs.{cub.id}.enabled: false)"
         if tickets.stop_file().exists():

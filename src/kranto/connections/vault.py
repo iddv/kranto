@@ -12,7 +12,7 @@ box) and a random 32-byte salt file ``data/secrets/salt`` (0600). A copy of
 copy of the salt alone. This defends against backups, exports and accidental
 copies, not against root on the box.
 
-Needs the ``cryptography`` package (``pip install 'kranto[connections]'``).
+Needs the ``cryptography`` package (the ``connections`` extra).
 Reads and writes take a file lock, so ``python -m kranto serve`` and a cron ``python -m kranto
 run`` that
 both refresh a token do not lose each other's writes; ``locked`` holds it across a
@@ -60,7 +60,8 @@ def _crypto():
         from cryptography.hazmat.primitives.kdf.hkdf import HKDF
     except ImportError as exc:
         raise VaultError("connected accounts need the cryptography package: "
-                         "pip install 'kranto[connections]'") from exc
+                         "install the connections extra, kranto[connections] from the "
+                         "release's wheels (docs/setup.md, step 2)") from exc
     return AESGCM, HKDF, hashes, InvalidTag
 
 

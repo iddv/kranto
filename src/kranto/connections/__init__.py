@@ -415,7 +415,8 @@ class Connections:
         if not self.enabled:
             return "connections.enabled is false in kranto.yaml"
         if not crypto_available():
-            return "the cryptography package is missing: pip install 'kranto[connections]'"
+            return ("the cryptography package is missing: install the connections extra, "
+                    "kranto[connections] from the release's wheels (docs/setup.md, step 2)")
         return None
 
     def _provider(self, provider: str) -> Provider:

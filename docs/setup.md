@@ -45,7 +45,7 @@ vX.Y.0-devN`.
 
 | Section (the Settings page it sets up) | What it does |
 |---|---|
-| System › This machine | checks Linux, uv, bubblewrap (the sandbox of the posting cubs and of Open in Claude Code), Claude Code and its login (a warn without it: Kranto works without it, the console needs it), systemd and the port; for each missing piece it prints your distribution's command (`sudo apt install bubblewrap`, ...) and waits: check again, skip for now, or stop |
+| System › This machine | checks Linux, uv, bubblewrap (the sandbox of the post writers and of Open in Claude Code), Claude Code and its login (a warn without it: Kranto works without it, the console needs it), systemd and the port; for each missing piece it prints your distribution's command (`sudo apt install bubblewrap`, ...) and waits: check again, skip for now, or stop |
 | System › Where Kranto lives | the home (`~/.kranto`), the port (127.0.0.1 only), and whether Kranto runs as a systemd user service that starts at boot |
 | Spend › Caps | **no cap is set unless you type one**; it says what Kranto costs (about $5 to $8 a month for one topic with ten sources, on your own model key) and suggests $10 a month for watching |
 | Watching › Provider and key | the watcher's model, offered in this order: the Claude API (an Anthropic key), OpenRouter, another OpenAI-compatible endpoint, Claude Code's login (never the default: it says what that means for your plan and Anthropic's terms, and you agree to it), or later. A key is read hidden, tested once (no model runs) and kept in `~/.kranto/.env` (0600). Without a terminal: `--watch anthropic\|openrouter\|endpoint\|claude_code\|later`, `--watch-key-file F`, `--watch-url U`, `--watch-accept-terms`; in an answers file `watch: {provider, key_file, base_url, terms}`. A provider chosen since in the browser stays the default |
@@ -72,9 +72,9 @@ same install by hand.
 
 | You need | Why | Check it |
 |---|---|---|
-| Linux | The posting cubs and Open in Claude Code run in a bubblewrap sandbox, which needs Linux. Without it (macOS, for one) only the watching works. | `uname -s` prints `Linux` |
+| Linux | The post writers and Open in Claude Code run in a bubblewrap sandbox, which needs Linux. Without it (macOS, for one) only the watching works. | `uname -s` prints `Linux` |
 | [uv](https://docs.astral.sh/uv/) | Installs Kranto and its Python (3.12; uv downloads it if you have none). | `uv --version` |
-| bubblewrap (`bwrap`) | The sandbox every cub and every Open in Claude Code session run in. The console is not sandboxed: it runs as you ([threat-model.md](threat-model.md)). Debian and Ubuntu: `sudo apt install bubblewrap`; Fedora: `sudo dnf install bubblewrap`; Arch: `sudo pacman -S bubblewrap`. | `bwrap --version` |
+| bubblewrap (`bwrap`) | The sandbox every post writer and every Open in Claude Code session run in. The console is not sandboxed: it runs as you ([threat-model.md](threat-model.md)). Debian and Ubuntu: `sudo apt install bubblewrap`; Fedora: `sudo dnf install bubblewrap`; Arch: `sudo pacman -S bubblewrap`. | `bwrap --version` |
 | The Claude Code CLI, signed in (optional) | The console runs it, on **your** Claude account and usage. Kranto works without it. | `claude auth status` |
 | `curl` (or a browser) | Downloading the release. No GitHub account is needed. | `curl --version` |
 | One model for watching: an Anthropic API key (the Claude API, from the [Claude Console](https://console.anthropic.com)), an [OpenRouter](https://openrouter.ai) key, a key for another OpenAI-compatible endpoint, or (an explicit choice, on your Claude plan's usage) your Claude Code login | Watching: a cheap model reads and judges what your sources publish. | You choose it in step 6. |

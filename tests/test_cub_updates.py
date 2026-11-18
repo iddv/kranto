@@ -186,7 +186,7 @@ def test_an_update_for_a_newer_kranto_or_with_auto_update_off_waits(home, tmp_pa
         "Hello 1.2.0 waits for your approval: cubs.auto_update is off"
     assert registry.latest(home.store, "hello")["version"] == "1.0.0"
     home.cfg = replace(home.cfg, cubs=cs.parse({"auto_update": False, "check_updates": False}))
-    assert updates.run(home) == {"why": "looking for the cubs' updates is off"}
+    assert updates.run(home) == {"why": "looking for the features' updates is off"}
 
 
 def test_a_failed_look_is_said_and_the_others_go_on(home, tmp_path):  # noqa: F811

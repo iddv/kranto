@@ -60,7 +60,7 @@ def status_line(cfg, store=None) -> str:
             if sandbox.limits_mode() == "scope" else "process limits cap them (no systemd scope)")
     line = f"{head}; {caps}"
     if not cub_settings.enabled(cfg):
-        line += "; cubs are off (cubs.enabled: false)"
+        line += "; features are off (cubs.enabled: false)"
     if tickets.stop_file().exists():
         line += f"; STOPPED: {tickets.stop_file()} exists"
     return line
