@@ -80,7 +80,7 @@ terminal on your machine, because it is one:
 - **It runs as you, without a sandbox,** in Kranto's home. It can read and change what you can.
 - **In a new home it waits for you.** It does not open by itself (✦ or ⌘J opens it), and it asks
   before every edit and command. Settings › Assistant can open it with the page and let it decide
-  edits and commands by itself (Claude Code's auto mode). A home made before Kranto 0.7.0 keeps
+  edits and commands by itself (Claude Code's auto mode). A home an earlier version made keeps
   what it had: it opens by itself in auto mode until you change it there. `kranto doctor` says
   which is in force. Bypassing permissions is refused.
 - **With your own configuration (the default)** it loads your login, settings, plugins and MCP
