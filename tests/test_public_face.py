@@ -45,9 +45,12 @@ def test_the_package_says_where_the_project_lives():
 
 
 def test_the_changelog_dates_only_what_is_released():
-    """The newest release heading is ``## X.Y.Z — unreleased`` until it is cut, then
-    ``## X.Y.Z — YYYY-MM-DD``; nothing else."""
+    """Above the releases there may be one ``## Unreleased``; the newest release heading is
+    ``## X.Y.Z — unreleased`` until it is cut, then ``## X.Y.Z — YYYY-MM-DD``; every older one
+    is dated."""
     heads = re.findall(r"^## (.+)$", (ROOT / "CHANGELOG.md").read_text(), re.M)
+    if heads and heads[0] == "Unreleased":
+        heads = heads[1:]
     assert heads
     assert re.fullmatch(r"\d+\.\d+\.\d+ — (unreleased|\d{4}-\d{2}-\d{2})", heads[0]), heads[0]
     for h in heads[1:]:

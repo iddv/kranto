@@ -10,6 +10,16 @@ requests they carry.
 Not released yet: the date is written here when 0.7.0 is cut. Until then this is what it
 will carry; the pre-releases `v0.7.0-devN` carry parts of it.
 
+### Fixed since the pre-release v0.7.0-dev2
+
+- An install that crossed over from before the rename keeps its connected accounts: Kranto
+  reads the secrets file the old version wrote (0.7.0.dev1 and dev2 said "cannot be decrypted
+  here") and rewrites it in its own form at the next change; `kranto doctor` says so.
+- The console's "Kranto's own Claude config" choice, saved before the rename, is read as that
+  again (it fell back to your own config).
+- The daily job that reads back the numbers of sent posts now records its run, so it runs once a
+  day instead of once a minute.
+
 ### What it is
 
 Kranto runs on your own Linux machine as one page in your browser, on 127.0.0.1. You describe

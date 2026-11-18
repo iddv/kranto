@@ -29,6 +29,7 @@ checking a release runs, `dev/` what a maintainer runs by hand.
 | `dev/gen_page_ts.py` | a maintainer, after changing `src/kranto/page/ui/types.py`; a test runs `--check` | writes the page's `types.gen.ts` |
 | `dev/fake_gh.py` | the page's tests | a stand-in `gh` that answers from fixtures |
 | `dev/make_icons.py` | a maintainer, after changing the mark | the favicons and icons, drawn from `mark.svg`'s shapes |
+| `ci/npm_audit.py`, `ci/npm_audit_allow.json` | CI (`frontend`) | `npm audit` of the page's lockfile at high and above, except the advisories named, with why and until when, in the allow file |
 | `ci/typecheck.py`, `ci/typecheck_baseline.json` | CI (`lint`) | mypy with a per-file ratchet: a file's error count may only fall |
 | `ci/stored_shape_lint.py`, `ci/stored_shape_baseline.txt` | CI (`lint`) | a stored value used as if it could not be missing, which no type checker sees |
 | `dev/odd_install.py`, `dev/odd_old.py`, `dev/odd_walk.sh` | a maintainer, before a release that touches update or install | homes in odd shapes (an older release's, a half-made one) and a walk over them |

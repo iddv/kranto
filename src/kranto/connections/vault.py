@@ -32,12 +32,20 @@ import threading
 from collections.abc import Iterator
 from pathlib import Path
 
+from .. import legacy
+
 FILENAME = "connections.json"
 SALT_FILENAME = "salt"
 LOCK_FILENAME = ".lock"
 MACHINE_ID = Path("/etc/machine-id")
+# The labels every vault is written with. The info's odd wording is kept on purpose: the first
+# Kranto releases wrote it, and a vault they wrote must keep reading.
 _INFO = b"the server connections v1"
 _AAD = b"kranto-connections"
+# What a read tries, in order: Kranto's labels, then the ones a vault written before the rename
+# carries (``legacy``). A vault read with the old ones is used as it is; the next write (every
+# write is a whole new file) puts it in Kranto's.
+LABELS = ((_INFO, _AAD), (legacy.VAULT_INFO, legacy.VAULT_AAD))
 
 
 class VaultError(Exception):
@@ -74,6 +82,9 @@ class Vault:
         # How deep this thread is inside ``locked``: the file lock is taken on the way in only
         # (a second flock on a new descriptor in the same process would wait for itself).
         self._depth = 0
+        # True when the last read found the file in the labels from before the rename (the
+        # doctor says so); a write sets it back to False.
+        self.old_labels = False
 
     # -- key -----------------------------------------------------------------------
 
@@ -98,13 +109,13 @@ class Vault:
             raise VaultError(f"{self.salt_path} is not a 32-byte salt; it was altered")
         return data
 
-    def _key(self, create: bool) -> bytes | None:
+    def _key(self, create: bool, info: bytes = _INFO) -> bytes | None:
         AESGCM, HKDF, hashes, _ = _crypto()  # noqa: N806 - class names
         salt = self._salt(create)
         if salt is None:
             return None
         return HKDF(algorithm=hashes.SHA256(), length=32, salt=salt,
-                    info=_INFO).derive(self._machine_id())
+                    info=info).derive(self._machine_id())
 
     def _ensure_dir(self) -> None:
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -147,18 +158,22 @@ class Vault:
             data = base64.b64decode(envelope["data"])
         except (OSError, ValueError, KeyError, TypeError) as exc:
             raise VaultError(f"{self.path} is not a secrets file") from exc
-        key = self._key(create=False)
-        if key is None:
-            raise VaultError(f"{self.salt_path} is missing, so {self.path} cannot be decrypted; "
-                             "disconnect and connect the accounts again")
-        try:
-            plain = AESGCM(key).decrypt(nonce, data, _AAD)
-        except InvalidTag as exc:
-            raise VaultError(f"{self.path} cannot be decrypted here: it was written on another "
-                             "machine or with another salt. Connect the accounts again.") from exc
-        return json.loads(plain)
+        for info, aad in LABELS:
+            key = self._key(create=False, info=info)
+            if key is None:
+                raise VaultError(f"{self.salt_path} is missing, so {self.path} cannot be "
+                                 "decrypted; disconnect and connect the accounts again")
+            try:
+                plain = AESGCM(key).decrypt(nonce, data, aad)
+            except InvalidTag:
+                continue
+            self.old_labels = info != _INFO
+            return json.loads(plain)
+        raise VaultError(f"{self.path} cannot be decrypted here: it was written on another "
+                         "machine or with another salt. Connect the accounts again.")
 
     def _write(self, entries: dict) -> None:
+        """The whole file, new, always in Kranto's labels (``_INFO``, ``_AAD``)."""
         AESGCM, _, _, _ = _crypto()  # noqa: N806
         key = self._key(create=True)
         nonce = secrets.token_bytes(12)
@@ -167,6 +182,7 @@ class Vault:
                                "nonce": base64.b64encode(nonce).decode(),
                                "data": base64.b64encode(data).decode()})
         _write_private(self.path, envelope.encode())
+        self.old_labels = False
 
     def get(self, key: str) -> dict | None:
         with self._locked():
