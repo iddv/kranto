@@ -27,7 +27,7 @@ def afk_client():
     asked is kept. Its own API (the snapshot) refuses to be read."""
     asked = []
 
-    def afk_get(path, query=None):
+    def server_get(path, query=None):
         asked.append(path)
         if path == "/api/ideas":
             return 200, {"ideas": CARDS, "count": len(CARDS)}
@@ -38,7 +38,7 @@ def afk_client():
     def no(*a, **k):
         raise AssertionError("the snapshot is not read for ideas")
 
-    return T.Client(get=no, post=no, afk_get=afk_get), asked
+    return T.Client(get=no, post=no, server_get=server_get), asked
 
 
 def test_the_idea_reads_are_krantos_cards_in_the_owners_order():
@@ -87,13 +87,13 @@ POST = {"drafts": [{"id": 5, "word": "newsletter", "title": "This week", "fact":
 def off_client():
     """The server with builds off (``/api/status``'s ``builds: false``): its home and Post answer;
     the build loop's snapshot is never read."""
-    def afk_get(path, query=None):
+    def server_get(path, query=None):
         return {"/api/status": (200, {"builds": False}), "/api/home": (200, HOME),
                 "/api/post": (200, POST)}.get(path, (404, {}))
 
     def no(*a, **k):
         raise AssertionError("the build loop is not read with builds off")
-    return T.Client(get=no, post=no, afk_get=afk_get)
+    return T.Client(get=no, post=no, server_get=server_get)
 
 
 def test_with_builds_off_the_console_keeps_kranto_status_and_kranto_needs_you_on_the_home():
