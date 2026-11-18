@@ -69,7 +69,7 @@ class Client:
 
 def http_client(url: str | None = None, timeout: float = 30.0,
                 token: str | None = None, door: str = "mcp") -> Client:
-    """The running service on loopback. Every POST carries ``Origin: <base>``, as the page's
+    """The running service on loopback. Every request carries ``Origin: <base>``, as the page's
     do, so it passes the host's guard, and kranto mcp's own token (OI: ``mcp.token`` in
     ``~/.config/kranto/tokens``, read at each call so a rotation counts; ``door`` console: the
     console's, ``console.token``): the service acts as ``mcp`` (or ``console``) because of the
@@ -79,7 +79,8 @@ def http_client(url: str | None = None, timeout: float = 30.0,
     def call(method: str, path: str, query=None, body=None):
         q = ("?" + urllib.parse.urlencode(query)) if query else ""
         data = json.dumps(body).encode() if body is not None else None
-        secret = token or (Store().value(door) if method == "POST" else None)
+        # every request carries the token: a live search and a page fetch are read signed in
+        secret = token or Store().value(door)
         req = urllib.request.Request(base + path + q, data=data, method=method, headers={
             "Content-Type": "application/json", "Origin": base, "Accept": "application/json",
             **({"Authorization": f"Bearer {secret}"} if secret else {})})
@@ -90,7 +91,7 @@ def http_client(url: str | None = None, timeout: float = 30.0,
             status, raw = e.code, e.read()
         except (urllib.error.URLError, ConnectionError, TimeoutError) as e:
             raise ToolError(f"Kranto is not running at {base} (start it: kranto up)") from e
-        if status == 401 and method == "POST":
+        if status == 401:
             raise ToolError(f"Kranto refused kranto mcp's token: it has none, or an old one (run "
                             f"kranto up, or kranto token rotate {door}, then restart the MCP "
                             "client)")
