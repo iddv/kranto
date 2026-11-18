@@ -208,7 +208,8 @@ def test_the_stop_writes_the_reason_before_the_program_exits(term, monkeypatch):
 def test_status_says_why_open_is_not_offered(tmp_path, monkeypatch):
     t = make_term(tmp_path, monkeypatch, token=None, sandboxed=False)
     st = t.status()
-    assert not st["available"] and "claude setup-token" in st["why"]
+    # the way on doctor names too: kranto setup claude keeps a token every Open reads
+    assert not st["available"] and "kranto setup claude" in st["why"]
     with pytest.raises(service.TermError) as e:
         t.open({"kind": "idea", "id": "i1"})
     assert e.value.code == 503

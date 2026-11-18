@@ -428,13 +428,13 @@ describe("Needs you (the one inbox)", () => {
     answering({ [IDEAS_API]: { ideas: [] } });
     const b = await draw(NeedsPage, where("needs"));
     expect(b.target.querySelector("#mark-seen")).toBeNull();
-    expect(b.target.querySelector("p.quiet-topics")?.textContent).toBe("Proposed sources, messages and the cubs' asks come from the server, which is not hosting this page.");
+    expect(b.target.querySelector("p.quiet-topics")?.textContent).toBe("Proposed sources, messages and what features ask you come from the server, which is not answering.");
     b.done();
   });
 });
 
 describe("Needs you's pane", () => {
-  it("with nothing selected: what the kranto read while the library is small, and the recent Claude Code sessions", async () => {
+  it("with nothing selected: what Kranto reads while the library is small, and the recent Claude Code sessions", async () => {
     const { openClaude } = old({ host: { ...HOST, observations: 12, runs: [{ kind: "ingest", finished_at: "2026-10-15T06:26:00Z", status: "ok" }] } as unknown as Host });
     answering({ ...READS(), "/api/setup": { done: true }, "api/term": TERM });
     const { target, done } = await draw(NeedsPane, where("needs"));
@@ -505,7 +505,7 @@ describe("Needs you's pane", () => {
     old({ host: null });
     answering({});
     const { target, done } = await draw(NeedsPane, pane("m5"));
-    expect(target.querySelector(".pane-empty p")?.textContent).toBe("This comes from the server, which is not hosting this page.");
+    expect(target.querySelector(".pane-empty p")?.textContent).toBe("This comes from the server, which is not answering.");
     done();
   });
 

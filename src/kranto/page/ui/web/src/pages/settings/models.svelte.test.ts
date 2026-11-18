@@ -64,11 +64,11 @@ describe("Settings › Watching › Models (watching's roles alone)", () => {
     stub();
     answering({});
     const l = await draw(ModelsList, where("settings/models"));
-    expect(l.target.querySelector(".tbn")?.textContent).toBe("the server is not hosting this page: its models are not shown");
+    expect(l.target.querySelector(".tbn")?.textContent).toBe("the server is not answering: its models are not shown");
     l.done();
     stub();
     const p = await draw(ModelsPane, where("settings/models", "erole:afk:judge"));
-    expect(p.target.querySelector(".pane-empty p")?.textContent).toBe("Watching's models are the server's, which is not hosting this page.");
+    expect(p.target.querySelector(".pane-empty p")?.textContent).toBe("Watching's models are the server's, which is not answering.");
     p.done();
   });
 

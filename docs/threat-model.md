@@ -103,6 +103,10 @@ not work, the session runs without those limits; `kranto doctor` checks the sand
 - Tokens of the accounts you connect are encrypted with a key derived from this machine. That
   protects a copy or a backup of the folder. It does not protect against root on the machine.
 - Kranto's own tokens live in `~/.config/kranto/tokens/` (folder 700, files 600).
+- The embedding model Kranto reads with is kept in `~/.cache/kranto/fastembed/` (folder 700),
+  not in `/tmp`, where another user of the machine could put a file first. A model an earlier
+  Kranto left in `/tmp/fastembed_cache` is copied over once, only if that folder and all in it
+  are yours.
 
 ## Updates
 

@@ -4,7 +4,7 @@
 // each door one column with its subnav and every object in one sheet. The Classic frame (the
 // navigator on the left) was cut in open-source wave 1; a file that says classic reads
 // as New. The arrangement is read once before the first draw (boot) and again after a write.
-// Without the server (brb ui alone) there are no doors: 0.4.10's pages and the tree.
+// Without the server (its status unread: it does not answer) there are no doors: the tree.
 import { put, read } from "../lib/reads.svelte";
 import { app, ui } from "../lib/shell.svelte";
 
@@ -67,7 +67,7 @@ export function layoutOf(_a: Arrangement | null): Layout {
   return "new";
 }
 /** the frame: the home at #/, the doors' heads and subnavs, the one sheet, the phone's tab bar,
- * whenever the server hosts the page (brb ui alone keeps 0.4.10's tree) */
+ * whenever the server hosts the page (without it, the tree) */
 export const frameNew = (host: boolean): boolean => shellDoors(host);
 /** the classic frame is gone: never drawn */
 export const frameClassic = (_host: boolean): boolean => false;
@@ -85,7 +85,7 @@ export function arrange(key: string, value: unknown, btn: HTMLElement | null = n
 export function arrangeReset(btn: HTMLElement | null = null): Promise<void> {
   const L = app();
   if (!L) return Promise.resolve();
-  return L.act(btn, async () => put(SHELL_API, await L.api(SHELL_API, { reset: true })), () => L.say("The home is back to its defaults: every cub in install order, Needs you by trust."));
+  return L.act(btn, async () => put(SHELL_API, await L.api(SHELL_API, { reset: true })), () => L.say("The home is back to its defaults: every added feature in install order, Needs you by trust."));
 }
 /** the pins with one moved by step (‹ -1, › +1) */
 export function moved(pins: string[], id: string, step: number): string[] {

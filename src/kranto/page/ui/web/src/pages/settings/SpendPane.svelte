@@ -56,7 +56,7 @@
 </script>
 
 {#snippet month()}
-  {#if !host}<p class="muted">Spend is the server's, which is not hosting this page.</p>
+  {#if !host}<p class="muted">Spend is the server's, which is not answering.</p>
   {:else if !reads.w?.data}<Loading error={reads.w?.error} />
   {:else}
     {@const m = reads.w.data}
@@ -75,7 +75,7 @@
   {:else if !d}
     <div class="pane-empty"><p class="empty">No such cap.</p></div>
   {:else if !host}
-    <div class="pane-empty"><p class="empty">{`${d.word} is the server's, which is not hosting this page.`}</p></div>
+    <div class="pane-empty"><p class="empty">{`${d.word} is the server's, which is not answering.`}</p></div>
   {:else if !reads.w?.data}
     <div class="pane-in"><Loading error={reads.w?.error} what="the caps" /></div>
   {:else}

@@ -46,10 +46,13 @@ TICK_S = 2.0
 ENDED = {"owner": "Ended by you", "cap": "Ended: today's spend cap was reached",
          "restart": "Ended when Kranto restarted", "error": "Claude Code could not start",
          "outside": "Continued outside"}
-NO_TOKEN = ("Open in Claude Code needs a Claude token in Kranto's environment: run `claude "
-            "setup-token`, put CLAUDE_CODE_OAUTH_TOKEN=<token> in a file Kranto's unit loads "
-            "(EnvironmentFile= in a kranto.service.d drop-in; the setup guide shows one), or "
-            "ANTHROPIC_API_KEY for a Console key, and restart Kranto.")
+# the token Kranto keeps itself (``claude_login``) is read at every start: no drop-in, no restart
+NO_TOKEN = ("Open in Claude Code needs a Claude token: kranto setup claude adds one, and the "
+            "next Open uses it.")
+# the console under "Kranto's only" configuration (``config: kranto``) needs the same token; under
+# your own configuration it uses your own Claude Code login instead
+CONSOLE_NO_TOKEN = ("The console with Kranto's only configuration needs a Claude token: kranto "
+                    "setup claude adds one, or choose Your own under Settings › Assistant.")
 NET_REFUSAL = "Kranto: this host is not allowed for this session yet; the owner can allow it in the page"
 
 
@@ -805,7 +808,7 @@ class Term:
         if spec.claude_dir is not None:              # kranto-scoped: Kranto's Claude token, piped
             cred, held = launch.login(self.cfg(), self.environ)
             if cred is None:
-                raise TermError(503, launch.WATCHERS_KEY if held else NO_TOKEN)
+                raise TermError(503, launch.WATCHERS_KEY if held else CONSOLE_NO_TOKEN)
             _config_dir(spec.claude_dir, spec.cwd)
             r, w = os.pipe()
             try:

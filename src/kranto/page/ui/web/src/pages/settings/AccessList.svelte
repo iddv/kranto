@@ -28,7 +28,7 @@
 </script>
 
 {#if !host}
-  <List title="Access" crumb="Settings"><p class="empty">The tokens are kept by the server, which is not hosting this page: kranto token list shows them.</p></List>
+  <List title="Access" crumb="Settings"><p class="empty">The tokens are kept by the server, which is not answering: kranto token list shows them.</p></List>
 {:else if !d}
   <List title="Access" crumb="Settings"><Loading error={c?.error} /></List>
 {:else}

@@ -70,7 +70,7 @@ describe("Settings › Watching", () => {
     stub();
     ui.facts = null;
     const none = await draw(KeysList, where("settings/keys"));
-    expect(none.target.querySelector("strong")?.textContent).toBe("Keys need the server. ");
+    expect(none.target.querySelector("strong")?.textContent).toBe("Keys need Kranto's server, which is not answering. ");
     none.done();
   });
 
@@ -87,7 +87,7 @@ describe("Settings › Watching", () => {
     stub();
     ui.facts = null;
     const none = await draw(KeysPane, where("settings/keys"));
-    expect(none.target.querySelector(".empty")?.textContent).toBe("Keys need the server, which is not hosting this page.");
+    expect(none.target.querySelector(".empty")?.textContent).toBe("Keys need the server, which is not answering.");
     none.done();
     stub();
     hosted();
