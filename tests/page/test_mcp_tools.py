@@ -131,14 +131,14 @@ def test_write_a_post_says_started_and_then_what_happened():
                           ({"state": "running"}, "Write a post: started, not finished yet.", None)):
         asked = []
 
-        def server_get(p, q=None, job=job):
+        def server_get(p, q=None, job=job, asked=asked):
             asked.append((p, q))
             return 200, job
         c = T.Client(get=lambda p, q=None: (404, {}), post=lambda p, b: (404, {}),
                      server_get=server_get, server_post=lambda p, b: (200, started))
         clock = iter(range(0, 100, 5))
         got = T._write_result(c, started["answer"], _sleep=lambda s: None,
-                              _clock=lambda: next(clock))
+                              _clock=lambda clock=clock: next(clock))
         assert got["say"].startswith(want), got
         assert not got["say"].startswith("Write a post: done") or ok is True
         assert got.get("ok") is ok

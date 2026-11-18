@@ -108,9 +108,8 @@ def models_for(provider: str, llm: LLMConfig) -> dict:
 
 def in_use(llm: LLMConfig) -> dict:
     """What the metered client (``llm.py``) sends with, from the same ``LLMConfig`` it is
-    built from: Settings › Watching, ``kranto doctor`` and ``python -m kranto provider show`` all
-    say
-    this and nothing else (``llm.base_url`` is only the OpenAI-style endpoint's, kept when
+    built from: Settings › Watching, ``kranto doctor`` and ``kranto watch provider show`` all
+    say this and nothing else (``llm.base_url`` is only the OpenAI-style endpoint's, kept when
     another provider is chosen)::
 
         {"provider": "anthropic",       # llm.provider, as llm_calls.provider records it

@@ -12,6 +12,7 @@ import pytest
 
 from kranto.page.mcp import tools as T
 from kranto.page.term import afk
+from kranto.page.term.service import TermError
 
 from .term_common import Screen, canary, make_repo, make_term, needs_bwrap, run
 
@@ -111,8 +112,9 @@ def test_confirm_runs_the_verb_through_krantos_door_and_dismiss_runs_nothing(ter
     assert out["proposal"]["status"] == "done"
     assert out["proposal"]["result"] == {"say": "ran source.approve", "page": "#/watch"}
     assert [p["status"] for p in T.kranto_proposals(c)["proposals"]] == ["done", "dismissed"]
-    with pytest.raises(Exception):
-        term.decide(tid, 1, confirm=True)                 # once
+    with pytest.raises(TermError, match="is done already") as again:  # once
+        term.decide(tid, 1, confirm=True)
+    assert again.value.code == 409
 
 
 def test_an_old_patch_or_action_proposal_is_no_longer_available(term):

@@ -52,7 +52,7 @@ def test_a_refused_key_is_seen_first_with_the_console_open_in_every_layout(brows
         afk = HostAfk(layout, topics=["Farming"], new_kept=3)
         afk.install(page)
         sent = []
-        page.on("request", lambda r: sent.append(f"{r.method} {r.url}")
+        page.on("request", lambda r, sent=sent: sent.append(f"{r.method} {r.url}")
                 if r.method not in ("GET", "HEAD") and "/api/term/console/open" not in r.url else None)
         page.route(re.compile(r"/api/activity(\?.*)?$"), lambda rt: rt.fulfill(
             status=200, content_type="application/json",

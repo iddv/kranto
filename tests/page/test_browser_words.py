@@ -171,7 +171,7 @@ def test_the_write_a_post_journey_from_a_card_to_the_draft_on_post(browser, page
             body = CARD if path.endswith("/api/ideas/143") else {"ideas": [CARD], "count": 1}
             rt.fulfill(status=200, content_type="application/json", body=json.dumps(body))
 
-        def writer(job):
+        def writer(job, writes=writes):
             def write(rt):
                 if rt.request.method == "POST":
                     writes.append(rt.request.post_data)

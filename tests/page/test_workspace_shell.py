@@ -33,7 +33,7 @@ def match(route: str):
         if len(pat) != len(path) or not all(p.startswith(":") or p == q for p, q in zip(pat, path)):
             continue
         params = iter(q for p, q in zip(pat, path) if p.startswith(":"))
-        node = re.sub(r":\w+", lambda _: next(params), n["node"]) if "node" in n else None
+        node = re.sub(r":\w+", lambda _, params=params: next(params), n["node"]) if "node" in n else None
         return {**n, "node": node}
     return None
 

@@ -1,7 +1,7 @@
 """OpenAI's own API, for a writer's own model only (P-11): never the watcher's.
 
-A person who wants a post writer on a GPT model pastes an OpenAI key (``kranto provider openai
---key-stdin``, kept as ``OPENAI_API_KEY`` in the home's ``.env``, 0600) and sets the writer's
+A person who wants a post writer on a GPT model pastes an OpenAI key (``kranto watch provider
+openai --key-stdin``, kept as ``OPENAI_API_KEY`` in the home's ``.env``, 0600) and sets the writer's
 model (``prose.voice`` ``writer_model``: ``{"blog": {"provider": "openai", "model": ...}}``).
 The writer's calls then go here by name, through the metered client like every other call, so
 each is an ``llm_calls`` row and counts in the budget. Kranto chooses no default model.

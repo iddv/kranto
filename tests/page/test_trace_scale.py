@@ -92,7 +92,7 @@ def test_a_50000_span_trace_with_a_20_mb_output_stays_fast(tmp_path):
     assert first < 0.05, f"the first page in {first * 1000:.0f} ms"
     cur = page["cursor"]
     for _ in range(3):                                   # a page in the middle as fast
-        page, nxt = timed(lambda: tr.spans(TID, after=cur, limit=500))
+        page, nxt = timed(lambda cur=cur: tr.spans(TID, after=cur, limit=500))
         cur = page["cursor"]
     assert nxt < 0.05, f"a later page in {nxt * 1000:.0f} ms"
     sid = span_id(TID, "tool:t7")

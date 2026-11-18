@@ -71,7 +71,9 @@ def check() -> list[dict]:
         if f.id in seen:
             raise ManifestError(f"two features are called {f.id}")
         seen.add(f.id)
-        for kind in m["events"]["publish"]:
+        # a cub's manifest is its stored data form: a key it left out (or stored as null) is
+        # read as none, as every other reader of it does
+        for kind in (m.get("events") or {}).get("publish") or ():
             if kind in kinds:
                 raise ManifestError(f"{kind} is published by {kinds[kind]} and {f.id}")
             kinds[kind] = f.id

@@ -163,13 +163,6 @@ class Trace:
         return p
 
 
-    def path_of(self, rel: str) -> Path:
-        p = (self.taskdir / rel).resolve()
-        if not str(p).startswith(str(self.taskdir.resolve()) + os.sep):
-            raise ValueError("outside the task")
-        return p
-
-
 def failed_label(t: Trace) -> str | None:
     """"verify › turn 31 › Bash" for the trace's failure point."""
     fid = t.summary.get("failed_at")

@@ -109,6 +109,25 @@ def test_the_validator_refuses_a_surface_the_core_does_not_draw(change, words, p
         _v(m)
 
 
+@pytest.mark.parametrize("events", ["absent", {}, None, {"publish": None}])
+def test_the_registry_reads_a_manifest_that_publishes_nothing(monkeypatch, events):
+    """A cub's manifest is its stored data form: ``events`` left out, empty or stored as null
+    publishes nothing. ``registry.check`` read ``m["events"]["publish"]`` and raised KeyError on
+    the first such cub another test had left loaded."""
+    real = registry.validate
+
+    def without_events(m, **kw):
+        out = real(m, **kw)
+        if out["id"] == "news":
+            out.pop("events")
+            if events != "absent":
+                out["events"] = events
+        return out
+
+    monkeypatch.setattr(registry, "validate", without_events)
+    assert "news" in {m["id"] for m in registry.check()}
+
+
 def test_news_declares_its_surfaces():
     check = {m["id"]: m for m in registry.check()}
     news = check["news"]["ui"]

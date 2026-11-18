@@ -12,6 +12,7 @@ import pytest
 import yaml
 
 from kranto.page.term import console as C
+from kranto.page.term.service import TermError
 
 from .term_common import Screen, canary, make_term
 
@@ -268,10 +269,12 @@ def test_settings_are_written_to_loop_yaml(term):
     data = yaml.safe_load(term.app.loop_cfg().layout.settings.read_text())
     assert data["ask"]["model"] == {"claude": "claude-haiku-5-5"}
     assert data["ask"]["daily_usd"] == 1.5
-    with pytest.raises(Exception):
+    with pytest.raises(TermError, match="permission is ") as bad:
         term.console_settings({"permission": "bypass"})
-    with pytest.raises(Exception):
+    assert bad.value.code == 400
+    with pytest.raises(TermError, match="nothing to set") as empty:
         term.console_settings({})
+    assert empty.value.code == 400
     term.console_here("#/watch", "Watch › Topics")
 
 
