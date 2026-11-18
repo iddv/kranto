@@ -27,7 +27,7 @@ says what each of these can reach, in plain words.
 Kranto is a single-user tool meant to run on your own machine. The points
 below are what it defends against, and what it does not.
 
-**Writes need a token; reads are open on loopback.** Since 0.3.6 every
+**Writes need a token; most reads are open on loopback.** Since 0.3.6 every
 state-changing request needs a kranto token, and the token, not the request
 body, says who acts: the browser's session cookie, or
 `Authorization: Bearer` (`kranto mcp`, the command line, a named agent). The
@@ -39,10 +39,15 @@ where your ladder decides what they may do by themselves; an agent token stays
 within the actions it was given.
 `api.require_token: false` in `kranto.yaml` turns this off. What it is not:
 
-- **Reads need no token.** Any process or user that can reach the port can
+- **Most reads need no token.** Any process or user that can reach the port can
   read your library, idea cards and settings. Nothing a read returns
   is a secret (no key, no token), but on a machine shared with other users
-  the library is readable by them.
+  the library is readable by them. The exceptions: a live web search and a
+  page fetch (they can cost money and go out from this machine) need any of
+  Kranto's tokens; traces, runs, what the console's assistant last said and
+  the model's raw answer about an item are the owner's reads. A browser makes
+  these only from Kranto's own page, never from another site or another port
+  of this machine.
 - **Not a wall between your own processes.** Anything running as you can
   read the token files or run `kranto open`.
 - **The session cookie is the UI token itself,** valid for 400 days, and

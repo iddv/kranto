@@ -198,7 +198,7 @@ open http://127.0.0.1:8765/auth/open?code=…
 ```
 
 Open that link in a browser on the same machine. **You should see** the kranto start page with a
-**Set up Kranto** button. Reading needs no sign-in; anything that changes something does, so a
+**Set up Kranto** button. Reading needs no sign-in (but for a web search and a page fetch); anything that changes something does, so a
 browser that was never signed in sees the page but cannot act.
 
 On another machine, tunnel the port first, then open the link there:
@@ -363,7 +363,8 @@ the first time.` and **The first hour**.
 
 ## 9. Let an assistant or a script use Kranto
 
-Reads need nothing. Every change needs a token, and each caller gets its own, so the record says
+Most reads need nothing (a live web search and a page fetch need a token too). Every change
+needs a token, and each caller gets its own, so the record says
 who did what:
 
 ```sh
@@ -436,7 +437,7 @@ see [archive.md](archive.md).
 | `~/.config/kranto/` | `home` (which home `kranto` uses), `tokens/` (mode 600) |
 | `~/.config/systemd/user/kranto.service` | The service, when systemd runs Kranto |
 | `~/.local/share/uv/tools/kranto/`, `~/.local/bin/kranto` | The installed program |
-| `/tmp/fastembed_cache/`, `~/.cache/Microsoft/` | The embedding model's download and its runtime's cache |
+| `~/.cache/kranto/fastembed/`, `~/.cache/Microsoft/` | The embedding model (about 500 MB, downloaded once; a copy an older Kranto left in `/tmp/fastembed_cache/` is copied here once) and its runtime's cache |
 
 An install that was switched over from an older setup with `kranto adopt` keeps its data where it
 was; `kranto status` and `kranto doctor`
@@ -495,7 +496,7 @@ uv tool uninstall kranto
 claude mcp remove --scope user kranto
 
 # 3. the data, tokens and caches, if you want them gone (this cannot be undone)
-rm -rf ~/.kranto ~/.config/kranto
+rm -rf ~/.kranto ~/.config/kranto ~/.cache/kranto
 ```
 
 **You should see:** `Kranto is stopped and will not start again.` and a line naming where your
@@ -536,7 +537,7 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | `FAIL  claude login` in `kranto doctor` | Run the command it names (`claude auth login`, or `claude update` for an old version). |
 | `Watching paused until … (spend limit set in the Claude Console reached)` in the top bar or in Health | The Claude API refused calls for a spend limit. Watching resumes by itself at that time. To go on sooner, raise the limit in the Claude Console, then click **Resume now** in Settings › System › Health (or run `kranto watch resume`). |
 | `FAIL  claude … is not signed in` | `claude auth login`, then `kranto doctor` again. |
-| The header says `Can't check for updates: GitHub answered 403 …` | GitHub allows 60 requests an hour from one address without a login, and the limit was reached. Wait an hour, then **Check for updates** (click the version, or ⌘K). With `gh` installed and logged in (`gh auth login`), Kranto asks through it and this limit does not apply. |
+| The header says `Can't check for updates: GitHub's limit on requests without a login (60 an hour for this address) is used up; it lifts at …` | Nothing is wrong with Kranto: **Check for updates** (click the version, or ⌘K) after the time it names. With `gh` installed and logged in (`gh auth login`), Kranto asks through it and the limit is thousands an hour. |
 | The header says `Can't check for updates: GitHub answered 404 …` | The release list cannot be seen without a login (a repository that is not public): `gh auth login` with an account that can see it, then **Check for updates**. |
 | The sign-in link says it expired or was used | Each link works once, within 10 minutes: `kranto open --no-browser` for a new one. |
 | A script's write answers `cross-origin request refused` | Your Kranto is older than 0.3.30: `kranto update`, or send `Origin: http://127.0.0.1:8765` (your port) with the `Authorization` header (step 9). |
