@@ -677,8 +677,10 @@ says so and changes nothing.
 ## The console {#console}
 
 The panel on the right of every page is your own Claude Code (or Codex), as it runs in a
-terminal, in Kranto's folder, with Kranto's tools. It is open when Kranto opens (Settings ›
-Assistant can say otherwise; on a phone it starts as ✦ in the bar of doors); **›** folds it to
+terminal, in Kranto's folder, with Kranto's tools. In a home made by Kranto 0.7.0 or later it
+does not open by itself and asks before every edit and command until you turn it up in Settings
+› Assistant (a home made before keeps what it had); on a phone it starts as ✦ in the bar of
+doors. **›** folds it to
 a rail, **–** to one item in the top bar (✦ and its name, beside ⚙), and this browser remembers
 which.
 Drag its left edge to make it wider or narrower (320 px to 60% of the window); this browser
