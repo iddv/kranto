@@ -1813,8 +1813,8 @@ def _split_watch(argv: Sequence[str]) -> tuple[list[str], list[str]] | None:
 
 
 def cmd_trace(args, host: Host) -> int:
-    """``kranto trace list|show``: the page's ``brb trace`` for this home: a build's agent trace
-    (sessions, turns, tool calls, cost, the failure point) read from its files, redacted."""
+    """``kranto trace list|show``: an assistant session's agent trace for this home
+    (turns, tool calls, cost, the failure point), read from its files, redacted."""
     try:
         from kranto.page.host_api import add_trace_group
     except ImportError:
