@@ -30,7 +30,7 @@ def test_the_new_home_text_closes_the_console_and_asks():
     assert s["config"] == C.DEFAULTS["config"] and s["daily_usd"] is None
     d = C.describe(raw)
     assert d["said"] is True
-    assert d["words"] == ("opens when you press ✦ (or ⌘J); asks before every edit and command "
+    assert d["words"] == ("opens when you click ✦ (or ⌘J); asks before every edit and command "
                           "(Settings › Assistant changes it)")
     assert C.CLAUDE_MODE[s["permission"]] == "default"    # Claude Code's own asking mode
 
@@ -40,7 +40,7 @@ def test_the_page_reads_a_new_homes_loop_yaml_as_closed_and_asking(tmp_path):
     (tmp_path / "loop.yaml").write_text("concurrency: 1\n" + C.NEW_HOME_YAML)
     s = C.settings(Config(tmp_path).data)
     assert s["open"] is False and s["permission"] == "ask"
-    assert C.doctor_line(tmp_path).startswith("opens when you press ✦")
+    assert C.doctor_line(tmp_path).startswith("opens when you click ✦")
 
 
 def test_the_doctor_line_reads_the_file_as_written(tmp_path):

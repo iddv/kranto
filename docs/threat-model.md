@@ -49,7 +49,7 @@ What holds:
 - **The small programs that write and send posts (cubs) never see your keys.** They run in their
   own sandbox and ask Kranto to send; Kranto sends only after your click.
 - **A cub from a source nobody reviewed does not update itself.** One added from a git address
-  waits for your press at every update, even one that asks for nothing new
+  waits for your approval at every update, even one that asks for nothing new
   (`cubs.auto_update_unreviewed` is off by default). Your own cubs, and Kranto's, update by
   themselves when the update asks for no new permission and no new kind of send.
 

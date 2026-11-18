@@ -11,7 +11,7 @@ nobody has to write any of them:
   permission and no send and runs on this Kranto; any other waits for the owner's press;
 - ``cubs.auto_update_unreviewed`` (false): the same for a cub from a source nobody reviewed (a git
   address: trust ``listed``, ``unreviewed`` or ``generated``); off, each of its updates waits for
-  the owner's press, whatever it asks;
+  the owner's approval, whatever it asks;
 - ``cubs.default_monthly_usd`` (5) and ``cubs.default_calls_per_day`` (200): what a cub that is
   not the owner's gets without a cap of its own (D6);
 - ``cubs.min_sdk`` (null): refuse an older SDK at hello;
@@ -51,7 +51,7 @@ GLOBAL: dict[str, Setting] = {
                                       "permission and no send and runs on this Kranto"),
     "cubs.auto_update_unreviewed": Setting(
         "bool", False, words="apply by itself also the update of a cub from a source nobody "
-                             "reviewed (a git address); off, its updates wait for your press"),
+                             "reviewed (a git address); off, its updates wait for your approval"),
     "cubs.check_updates": Setting("bool", True, words="look for cubs' updates daily"),
     "cubs.default_monthly_usd": Setting("usd", 5.0,
                                         words="a stranger's cub: model and search a month"),

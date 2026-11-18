@@ -109,7 +109,7 @@ def describe(cfg: dict | None) -> dict[str, Any]:
     raw = raw if isinstance(raw, dict) else {}
     s = settings(cfg)
     said = isinstance(raw.get("open"), bool) and raw.get("permission") in PERMISSIONS
-    opens = "opens by itself" if s["open"] else "opens when you press ✦ (or ⌘J)"
+    opens = "opens by itself" if s["open"] else "opens when you click ✦ (or ⌘J)"
     words = f"{opens}; {PERMISSION_WORDS[s['permission']]}"
     if not said:
         words += " (Kranto's default when loop.yaml does not say; Settings › Assistant changes it)"
