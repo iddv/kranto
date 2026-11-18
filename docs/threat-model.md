@@ -3,7 +3,7 @@
 Kranto is a program for one person, on their own Linux machine. It reads text that strangers
 wrote, and it can run an assistant with a shell beside its pages. This page says who can reach
 what, what holds when a text tries to steer a model, and what does not. It describes the code as
-of 2026-11-13. [SECURITY.md](../SECURITY.md) has the details of each check and how to report a
+of 2026-11-18. [SECURITY.md](../SECURITY.md) has the details of each check and how to report a
 problem privately.
 
 ## Who can reach Kranto
@@ -78,8 +78,11 @@ The console is your own Claude Code (or Codex) in a panel beside every page. Tre
 terminal on your machine, because it is one:
 
 - **It runs as you, without a sandbox,** in Kranto's home. It can read and change what you can.
-- **By default it decides edits and commands by itself** (Claude Code's auto mode). Settings ›
-  Assistant can make it ask before every edit and command. Bypassing permissions is refused.
+- **In a new home it waits for you.** It does not open by itself (✦ or ⌘J opens it), and it asks
+  before every edit and command. Settings › Assistant can open it with the page and let it decide
+  edits and commands by itself (Claude Code's auto mode). A home an earlier version made keeps
+  what it had: it opens by itself in auto mode until you change it there. `kranto doctor` says
+  which is in force. Bypassing permissions is refused.
 - **With your own configuration (the default)** it loads your login, settings, plugins and MCP
   servers. The other choice loads Kranto's plugin and settings only.
 - **Kranto's secrets are denied to its file tools** (`data/secrets/`, `.env`, the token files),
@@ -89,7 +92,8 @@ terminal on your machine, because it is one:
 A hostile item in your library can try to steer the console when the assistant reads it.
 Kranto's own actions still go through your ladder, and a send still waits for you. What the
 assistant does in its shell is decided by Claude Code's permission prompts alone. If you watch
-sources you do not trust, set the console to ask before edits and commands.
+sources you do not trust, keep the console asking before edits and commands (a new home's
+default).
 
 **Open in Claude Code** (on an idea) is different. Where bubblewrap works, that session runs in a
 sandbox: it cannot see your GitHub login, SSH keys, Kranto's tokens or data, or its own Claude
