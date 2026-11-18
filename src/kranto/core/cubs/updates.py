@@ -146,7 +146,7 @@ def check(rt, *, apply: bool) -> list[dict]:
         if j["state"] != "awaiting_confirm" or not j.get("cub"):
             continue
         o["version"] = j["cub"]["version"]
-        why = install.waits_why(j["cub"])
+        why = install.waits_why(j["cub"], rt.cfg)
         if why is None and not apply:
             why = "waits for your approval: cubs.auto_update is off"
         if why is not None:

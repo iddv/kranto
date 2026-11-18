@@ -61,6 +61,8 @@ HOST_API_V2 = frozenset(
         "term_cli",
         "term_mcp_main",
         "term_doctor",
+        "console_new_home_yaml",
+        "console_doctor_line",
         "mcp_available",
         "mcp_main",
         "add_trace_group",

@@ -1076,7 +1076,6 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
     from .archive_api import ArchiveAPI
     from .auth import Auth
     from .cubs_api import CubsAPI
-    from .evals_api import EvalsAPI
     from .features_api import FeaturesAPI
     from .feedback_api import FeedbackAPI
     from .ideas_api import IdeasAPI
@@ -1137,7 +1136,6 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
     search_api = SearchAPI(app)
     websearch_api = WebSearchAPI(app)
     feedback_api = FeedbackAPI(app)
-    evals_api = EvalsAPI(app)
     today_api = TodayAPI(app)
     archive_api = ArchiveAPI(app)
     prompts_api = PromptsAPI(app)
@@ -1260,7 +1258,6 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
         *search_api.routes(),
         *websearch_api.routes(),
         *feedback_api.routes(),
-        *evals_api.routes(),
         *today_api.routes(),
         *archive_api.routes(),
         *prompts_api.routes(),

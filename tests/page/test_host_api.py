@@ -14,6 +14,7 @@ CONTRACT = {
     "selfcheck_paths",    # the post-update self-check's reads of the mount (RCA D1)
     "Config", "write_setting", "mcp_available", "mcp_main",
     "term_ws", "term_ws_served", "term_cli", "term_mcp_main", "term_doctor",
+    "console_new_home_yaml", "console_doctor_line",   # kranto up's seed, doctor's console line
     "add_trace_group", "claude_print", "ClaudePrintError",
     "telemetry_sink", "telemetry_schema", "telemetry_facts", "detached_jobs", "term_shutdown"}
 

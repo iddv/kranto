@@ -103,7 +103,7 @@
   "src/kranto/web/features_api.py": 4,
   "src/kranto/web/prompts_api.py": 2,
   "src/kranto/web/settings_api.py": 5,
-  "src/kranto/web/setup_api.py": 2,
+  "src/kranto/web/setup_api.py": 1,
   "src/kranto/web/sources_api.py": 11,
   "src/kranto/web/today_api.py": 2,
   "src/kranto/web/update_api.py": 5,

@@ -353,8 +353,11 @@ Kranto, is applied by itself: Activity says "Newsletter updated to 1.2.1 by itse
 page says "Updated to 1.2.1 by itself". Its trust, its sandbox, its kinds sent for real and
 what waits for you stay as they were. Any other update waits for one click, and Needs you
 says why: "Newsletter 1.2.0 asks for one more permission · Review", "… asks to send something
-new", "… needs a newer Kranto (>=0.6)". `cubs.auto_update: false` makes every update wait for
-the action; `cubs.check_updates: false` as well stops the daily look. Clicking Update applies the
+new", "… needs a newer Kranto (>=0.6)". A cub added from a git address (trust `unreviewed`: nobody at
+Kranto has read it) is not updated by itself: its update waits for your approval even when it asks
+for nothing new, unless `cubs.auto_update_unreviewed: true`. One from your own folder (trust
+`owner`) updates by itself as above. `cubs.auto_update: false`
+makes every update wait for the action; `cubs.check_updates: false` as well stops the daily look. Clicking Update applies the
 staged update; any other job staged for the same cub at that version or older is cancelled with
 it, so the button never comes back for a version you have.
 

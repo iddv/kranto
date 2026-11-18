@@ -153,7 +153,7 @@ def test_a_long_session_is_one_batch_an_hour(tmp_path):
         A.note_verb("settings.telemetry", "console", "claude-code", "prepared", "lock", 7,
                     now=T0 + i)
     for i in range(40):
-        A.note_verb("setup.key", "mcp", "codex", "refused", "lock", 1, refusal="door",
+        A.note_verb("setup.provider", "mcp", "codex", "refused", "lock", 1, refusal="door",
                     now=T0 + i)
     spy = Spy()
     t = httpx.MockTransport(spy)
@@ -163,7 +163,7 @@ def test_a_long_session_is_one_batch_an_hour(tmp_path):
     recs = {r["kranto.verb"]: r for r in records_of(body_of(spy.requests[0]))}
     assert recs["topic.add"]["kranto.count"] == "500"
     assert recs["topic.add"]["kranto.ms_max"] == "49"
-    assert recs["setup.key"]["kranto.refusal"] == "door"
+    assert recs["setup.provider"]["kranto.refusal"] == "door"
     assert recs["settings.telemetry"]["kranto.rung"] == "lock"
     assert all(r["_t"] % (3600 * 10**9) == 0 for r in recs.values())
     assert A.flush(home, now=T0 + 3700, transport=t)["sent"] == 0      # nothing twice
