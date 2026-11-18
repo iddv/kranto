@@ -69,7 +69,7 @@ def _pending_update(store: Any, cfg: Any, cid: str) -> dict[str, Any] | None:
                     "needs": j.get("needs"),
                     "adds": [f"{block}: {', '.join(map(str, items))}"
                              for block, items in added.items()],
-                    "why": install.waits_why(c) if c else None}
+                    "why": install.waits_why(c, cfg) if c else None}
     return None
 
 

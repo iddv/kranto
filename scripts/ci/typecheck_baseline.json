@@ -51,7 +51,7 @@
   "src/kranto/page/gitcmd.py": 3,
   "src/kranto/page/mcp/tools.py": 3,
   "src/kranto/page/proc.py": 2,
-  "src/kranto/page/settings/store.py": 2,
+  "src/kranto/page/settings/store.py": 1,
   "src/kranto/page/term/asgi.py": 1,
   "src/kranto/page/term/launch.py": 3,
   "src/kranto/page/term/pty.py": 4,
