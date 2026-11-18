@@ -808,7 +808,7 @@ class VerbsAPI:
         """A press is prepared only when the press would take its fields (a factory
         issue was prepared with a fingerprint its press then refused, in 5 ms). Kranto's own
         verbs were checked above (``check_fields``, the same as the press's). The build loop's
-        verbs, which ran their own check through ``api/act``, left with builds (CUT): a verb
+        verbs, which ran their own check through ``api/act``, left with builds: a verb
         of that kind is never sent to the page's server to be checked."""
         return
 

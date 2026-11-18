@@ -1,4 +1,4 @@
-"""``--fetch-gh``: a pinned GitHub CLI into Kranto's own folder (the owner's D4).
+"""``--fetch-gh``: a pinned GitHub CLI into Kranto's own folder.
 
 For a machine without ``gh``, once the person agrees (``kranto setup`` asks first, unless
 ``--yes``): the archive for this system from github.com/cli/cli's release ``VERSION``, its

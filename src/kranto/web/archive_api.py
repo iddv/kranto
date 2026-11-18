@@ -81,7 +81,7 @@ def theme_records(store: Store) -> list[dict]:
             "trajectory": _trajectory(t["history"]),
             "dispatches": by_lineage.get(t["lineage_id"], []), "bundle": t["bundle"],
         }
-    # one theme that cannot be read is listed as such, never the whole list (RCA A3)
+    # one theme that cannot be read is listed as such, never the whole list
     return rowsafe.each(latest_themes(store, ARCHIVE), record, "theme",
                         ident=lambda t: t.get("lineage_id"),
                         keep=lambda t: {"lineage_id": t.get("lineage_id"),

@@ -80,7 +80,7 @@ def _distro() -> str:
 
 
 # The relay keeps its own copy of the list and learns ``-devN`` and ``nightly`` only when the
-# owner redeploys it (ops/telemetry/README.md); a value outside its copy refuses the whole
+# maintainer redeploys it (a separate service); a value outside its copy refuses the whole
 # report. Until then a nightly build is sent as a build from git is (X.Y.Z, channel main) and
 # the nightly channel by its old name, rc, so no report is refused. True after the redeploy.
 RELAY_KNOWS_NIGHTLY = False

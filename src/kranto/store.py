@@ -728,7 +728,7 @@ _MIGRATIONS: list[tuple[int, str]] = [
     CREATE INDEX feedback_target ON feedback (target, target_id, id);
     CREATE INDEX feedback_created ON feedback (created_at);
     """),
-    # 20: mute a source from Kranto UI (UI-v4.md 2.3, "mute…"). Append-only like
+    # 20: mute a source from Kranto UI ("mute…"). Append-only like
     # source_retention: the latest row per source wins. ``muted_until`` set: the source
     # is not fetched until then; ``read_less`` 1: it is read at half its items per run.
     # A row with neither is "back to normal", so an undo is one more row.
