@@ -120,12 +120,32 @@ def test_a_new_home_is_a_workspace_with_the_loop_on(user_home):
     assert cfg.llm.base_url == "https://openrouter.ai/api/v1"  # the llm section kept its own
     seed = yaml.safe_load((home / "loop" / "loop.yaml").read_text())
     # cards through the API, never the file (handover rule 4); no key of the builds
-    assert seed == {"kranto": {"url": "http://127.0.0.1:8800"}}
+    assert seed == {"kranto": {"url": "http://127.0.0.1:8800"},
+                    "ask": {"open": False, "permission": "ask"}}
     assert (home / "data").is_dir()
     # the task folder was the builds'; they left, and nothing reads it: no empty tasks/
     assert not (home / "tasks").exists()
     assert oct(home.stat().st_mode & 0o777) == "0o700"
     assert launcher.make_home(home, 8800, user_home) == []  # idempotent
+
+
+def test_a_new_homes_console_does_not_open_by_itself_and_asks_first(user_home):
+    """A new home's loop.yaml carries the console's lines: read through the page's own settings
+    (its DEFAULTS merged in), it opens only when pressed and asks before every edit and command;
+    a loop.yaml that exists is never rewritten; doctor says so in one line."""
+    from kranto.page.settings.store import Config as LoopConfig
+    from kranto.page.term import console
+
+    home = user_home / ".kranto"
+    launcher.make_home(home, 8765, user_home)
+    seen = console.settings(LoopConfig(home / "loop").data)
+    assert seen["open"] is False and seen["permission"] == "ask"
+    [line] = launcher.console_line(home / "loop")
+    assert line.name == "console" and line.status == OK and line.detail
+    seed = home / "loop" / "loop.yaml"
+    seed.write_text("kranto:\n  url: http://127.0.0.1:8765\n")      # a home made before
+    launcher.make_home(home, 8765, user_home)
+    assert seed.read_text() == "kranto:\n  url: http://127.0.0.1:8765\n"
 
 
 def test_a_home_whose_loop_lives_elsewhere_gets_no_decoy_loop_or_tasks(user_home, tmp_path):
@@ -411,7 +431,7 @@ def test_the_written_configs_name_no_page_that_left(user_home):
     # a new home: no task folder of the builds, in either file, and no section of a feature
     # that left (they are still read from an older file: config.FOR_OLD_FILES)
     assert yaml.safe_load(config)["brb"] == {"enabled": True, "loop_home": "~/.kranto/loop"}
-    assert set(yaml.safe_load(seed)) == {"kranto"}
+    assert set(yaml.safe_load(seed)) == {"kranto", "ask"}
     assert not set(config_mod.FOR_OLD_FILES) & set(yaml.safe_load(config))
 
 
