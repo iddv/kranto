@@ -222,11 +222,11 @@ class Scheduler:
 
     def start(self) -> None:
         if self._thread is None:
-            self._thread = threading.Thread(target=self._loop, name="afk-scheduler", daemon=True)
+            self._thread = threading.Thread(target=self._loop, name="kranto-scheduler", daemon=True)
             self._thread.start()
             for lane in self.lanes:
                 t = threading.Thread(target=self._run_lane, args=(lane,),
-                                     name=f"afk-lane-{lane.name}", daemon=True)
+                                     name=f"kranto-lane-{lane.name}", daemon=True)
                 t.start()
                 self._lane_threads.append(t)
 
@@ -246,7 +246,7 @@ class Scheduler:
     def still_running(self) -> list[str]:
         """What a stop would cut off now: the running job, each lane still ticking."""
         out = [f"the {self.running or 'scheduler'} job"] if self._busy.locked() else []
-        out += [f"the {t.name.removeprefix('afk-lane-')} lane's tick"
+        out += [f"the {t.name.removeprefix('kranto-lane-')} lane's tick"
                 for t in self._lane_threads if t.is_alive()]
         return out
 
@@ -417,7 +417,7 @@ class Scheduler:
             finally:
                 self._busy.release()
 
-        threading.Thread(target=work, name=f"afk-{kind}", daemon=True).start()
+        threading.Thread(target=work, name=f"kranto-{kind}", daemon=True).start()
         return True
 
     def next_runs(self) -> dict[str, str | None]:
