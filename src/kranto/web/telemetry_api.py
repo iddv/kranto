@@ -4,7 +4,8 @@
 |------------------------------------|-------------------------------------------------------|
 | GET  /api/settings/telemetry       | the mode and why, what each mode means, the two       |
 |                                    | sentences, what was sent, what is next                |
-| POST /api/settings/telemetry       | {mode}: the one setter (Welcome, Settings › Privacy)  |
+| POST /api/settings/telemetry       | {mode}: the one setter (Welcome, Settings › Privacy); |
+|                                    | basic or detailed only from the page signed in (403)  |
 |                                    | {dismiss: true}: Today's reminder goes for good       |
 | GET  /api/settings/telemetry/page  | the notice and the field list (Markdown)              |
 | GET  /api/settings/telemetry/report| today's report as it stands (``?day=`` another day),  |
@@ -29,6 +30,12 @@ from ..telemetry import errors, report, send
 DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
 BATCH = re.compile(r"\d{4}-\d{2}-\d{2}T\d{6}")
 MAX_VIEWS = 50
+# a mode that sends is chosen by a person: on the page signed in, or on this machine's command
+# line (``kranto telemetry basic`` writes the setting itself, without this route)
+SEND_ON_THE_PAGE = ("Usage reports that leave this machine are turned on by you: in Settings › "
+                    "Privacy & access on Kranto's page, signed in, or with `kranto telemetry "
+                    "basic` (or `detailed`) on the machine Kranto runs on. Turning them off "
+                    "works from anywhere.")
 
 
 def _error(message: str, status: int = 400) -> JSONResponse:
@@ -51,6 +58,17 @@ class TelemetryAPI:
                 "error_batches": errors.sent(self.home)[:90], "docs": telemetry.DOCS_LINK,
                 "remind": telemetry.remind(self.home, st)}
 
+    @staticmethod
+    def _from_the_page(request: Request) -> bool:
+        """Whether this request is the owner's press on the page: the browser signed in with
+        its session cookie (directly, or by approving a prepared change, which runs as the
+        press that approved it). A token in ``Authorization: Bearer`` (the command line's,
+        an assistant's) is not, and nor is nobody when ``api.require_token`` is false."""
+        from .auth import IDENTITY
+
+        ident = request.scope.get(IDENTITY) or {}
+        return ident.get("origin") == "ui" and ident.get("via") == "cookie"
+
     async def get(self, request: Request):
         return JSONResponse(await run_in_threadpool(self._status))
 
@@ -65,6 +83,8 @@ class TelemetryAPI:
         mode = body.get("mode")
         if mode not in telemetry.MODES:
             return _error(f"mode is one of {', '.join(telemetry.MODES)}")
+        if mode in telemetry.SENDING and not self._from_the_page(request):
+            return _error(SEND_ON_THE_PAGE, 403)
         try:
             await run_in_threadpool(telemetry.set_mode, self.home, mode)
         except telemetry.TelemetryError as exc:

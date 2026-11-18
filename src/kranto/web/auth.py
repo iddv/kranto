@@ -13,10 +13,14 @@ MCP, console and agent tokens may only run verbs (``POST /api/verbs/<kind>``, wh
 build loop's, gone since the cut; a version of the page from before it applies the token's limits
 there). An agent token's ``actions`` name verbs; a name from before (a build loop's action)
 is ignored and the token still signs in. Every other write is the owner's (the UI or the
-command line). Reads stay open
-on loopback: the page draws before it is signed in, ``kranto status`` and the update's health
-check read without a token, and nothing a read returns is a secret. A ``browser:<name>``
-token (the browser extension's,) may write ``POST /api/browser/captures`` and nothing
+command line). Most reads stay open on loopback: the page draws before it is signed in,
+``kranto status`` and the update's health check read without a token, and nothing such a read
+returns is a secret. Two kinds of read are checked as a write is (``check_read``): the owner's
+reads (a trace, the runs, what the browser read, what the console's assistant said), and the
+reads that do something (``SIGNED_READS``: a live web search and a page fetch, which any
+current token may make); a browser makes them only from Kranto's own page, never from another
+site or another port of this machine. A ``browser:<name>`` token (the browser extension's) may
+write ``POST /api/browser/captures`` and nothing
 else, and no other token may write there.
 
 **Signing a browser in.** The page is served to anyone on loopback and never sets the cookie,
@@ -30,6 +34,7 @@ from __future__ import annotations
 import logging
 import re
 import time
+from urllib.parse import urlparse
 
 from starlette.concurrency import run_in_threadpool
 from starlette.requests import Request
@@ -56,8 +61,17 @@ BROWSER_PREFIX = "browser:"
 # reads that carry file contents and prompts: a build's agent trace (the page decision
 # D-4; the page's api.read_needs_identity says the same of its own paths), and the runs whose
 # model calls a trace of the analyst or a cub is made of
-# and the pages the owner read in their browser, with their text (the capture log)
-OWNER_READS = ("/brb/api/traces", "/brb/api/trace", "/api/runs", "/api/browser/captures")
+# and the pages the owner read in their browser, with their text (the capture log), and what
+# the console's assistant last said (the phone's read-and-approve sheet)
+OWNER_READS = ("/brb/api/traces", "/brb/api/trace", "/api/runs", "/api/browser/captures",
+               "/brb/api/term/console/last")
+# reads that do something: a live web search (it costs what the search backend charges) and a
+# fetch of a page from this machine. Any current token may make them (the page, the command
+# line, kranto mcp's kranto_search and kranto_fetch, an agent); nobody signed out may
+SIGNED_READS = ("/api/websearch", "/api/websearch/fetch")
+# what a browser's Sec-Fetch-Site may say on a signed read: from this page, or typed in the
+# address bar; "same-site" is another port of this machine, which the cookie would ride
+OWN_FETCH_SITES = ("same-origin", "none")
 COOKIE_MAX_AGE = 400 * 86400     # the longest browsers keep a cookie
 SIGNIN_HINT = ("run 'kranto open' on the machine Kranto runs on and open the link it prints, "
                "or paste its code into the page")
@@ -166,26 +180,73 @@ class Auth:
         p = (path or "").rstrip("/")
         return p in OWNER_READS or p.startswith(("/brb/api/trace/", "/api/runs/"))
 
+    @staticmethod
+    def signed_read(path: str) -> bool:
+        """A GET that does something (a live search, a fetch): any current token, never
+        signed out."""
+        return (path or "").rstrip("/") in SIGNED_READS
+
+    def guarded_read(self, path: str) -> bool:
+        """A GET the guard checks as it checks a write (``check_read``)."""
+        return self.owner_read(path) or self.signed_read(path)
+
+    @staticmethod
+    def from_elsewhere(request: Request) -> bool:
+        """Whether a browser says this read comes from another page than Kranto's own: its
+        ``Sec-Fetch-Site`` is not same-origin (another port of this machine is "same-site",
+        and the SameSite cookie rides it), or its ``Origin``/``Referer`` names another host.
+        A client that sends none of the three (the command line, a script) is not a page."""
+        site = (request.headers.get("sec-fetch-site") or "").lower()
+        if site and site not in OWN_FETCH_SITES:
+            return True
+        host = (request.headers.get("host") or "").lower()
+        return any(came and urlparse(came).netloc.lower() != host
+                   for came in (request.headers.get("origin"), request.headers.get("referer")))
+
+    @staticmethod
+    def _read_words(path: str) -> tuple[str, str]:
+        """What a guarded read is, in the refusal's words: (as a sentence's start, inside)."""
+        p = (path or "").rstrip("/")
+        if p.startswith("/api/browser/"):
+            return "What your browser read", "what your browser read"
+        if p in SIGNED_READS:
+            return "A web search or a page fetch", "a web search or a page fetch"
+        if p.startswith("/brb/api/term/"):
+            return "What the console's assistant said", "what the console's assistant said"
+        return "A trace", "a trace"
+
     def check_read(self, request: Request) -> Response | None:
-        """None when this owner-only read may go on (the caller in ``scope[IDENTITY]``), else
-        the refusal: 401 without a token (when tokens are required), 403 for one that is not
-        the owner's (an agent's, MCP's)."""
+        """None when this guarded read may go on (the caller in ``scope[IDENTITY]``), else
+        the refusal: 403 from another site's page, 401 without a token (when tokens are
+        required), 403 for one that may not make it (an agent's or MCP's on an owner's read,
+        a browser extension's anywhere)."""
+        path = request.url.path
         ident, why = self.identify(request)
         request.scope[IDENTITY] = ident
-        # what is read, in the refusal's words: a trace, or the pages your browser read
-        mine = request.url.path.startswith("/api/browser/")
-        what = "What your browser read" if mine else "A trace"
+        lead, inside = self._read_words(path)
+        if (ident or {}).get("via") != "bearer" and self.from_elsewhere(request):
+            # a bearer token is never sent by a browser on its own; a cookie is
+            log.warning("refused %s %s: from another site's page", request.method, path)
+            return _json(403, f"cross-origin request refused: {inside} is made from Kranto's "
+                              "own page")
         if ident is None:
             if not self.require:
                 return None
-            log.warning("refused %s %s: %s", request.method, request.url.path, why)
-            return _json(401, _signed_out_words(request, why, f"{what} is read signed in."))
+            log.warning("refused %s %s: %s", request.method, path, why)
+            verb = "made" if self.signed_read(path) else "read"
+            return _json(401, _signed_out_words(request, why, f"{lead} is {verb} signed in."))
         self.last_used[ident["origin"]] = time.time()
+        origin = str(ident.get("origin") or "")
+        if self.signed_read(path) and not origin.startswith(BROWSER_PREFIX):
+            return None
         if not is_owner(ident):
-            log.warning("refused %s %s: an %s token reads no trace", request.method,
-                        request.url.path, ident["origin"])
-            return _json(403, f"{'what your browser read' if mine else 'a trace'} is the "
-                              f"owner's to read; the {ident['origin']} token does not read it")
+            log.warning("refused %s %s: an %s token may not read it", request.method, path,
+                        origin)
+            if self.signed_read(path):
+                return _json(403, f"the {origin} token only sends what its browser read; "
+                                  f"{inside} is not its to make")
+            return _json(403, f"{inside} is the owner's to read; the {origin} token does not "
+                              "read it")
         return None
 
     # -- signing in ------------------------------------------------------------------------

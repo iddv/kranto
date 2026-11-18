@@ -403,7 +403,7 @@
  "POST /api/term/open {}": [
   503,
   "application/json",
-  "error: Open in Claude Code needs Kranto itself (kranto up): `brb ui` alone has no terminal."
+  "error: Open in Claude Code needs Kranto running as itself: start it with `kranto up`."
  ],
  "POST /api/term/end {}": [
   404,
