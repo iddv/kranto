@@ -6,7 +6,7 @@ is one app: one install, one command to start it, one page in your browser at
 http://127.0.0.1:8765/. It runs on Linux.
 
 This guide is for you and, if you use one, the assistant that helps you. Every step has the
-exact commands and what you should see when it worked. Kranto is pre-release: expect rough
+exact commands and what you should see when it worked. Kranto is before 1.0: expect rough
 edges, and please report them (see the end).
 
 **For an assistant following this guide:** run the commands, compare the output with "You
@@ -16,18 +16,29 @@ a login or a key that only they can give. Never print or paste the contents of t
 
 ## The short way: install.sh
 
-Every release carries `install.sh`. Download it from the
-[latest release](https://github.com/iddv/kranto/releases/latest) in your browser (you are
-signed in on github.com and have accepted the invitations) and run:
+Every release carries `install.sh`. One line downloads the latest release's copy and runs it:
 
 ```sh
+curl -fsSL https://github.com/iddv/kranto/releases/latest/download/install.sh | sh
+```
+
+To read it before it runs, download it first:
+
+```sh
+curl -fsSLO https://github.com/iddv/kranto/releases/latest/download/install.sh
+less install.sh
 sh install.sh
 ```
 
-It installs uv when you have none, downloads the release with your `gh` login (it says how to
-get gh when you have none), checks every file against `SHA256SUMS` before anything installs,
-runs `uv tool install` exactly as step 2 below does, then runs `kranto setup`. Nothing it does
-needs sudo.
+It installs uv when you have none, downloads the release's wheel and `SHA256SUMS` (no GitHub
+account, no `gh`), checks every file against `SHA256SUMS` before anything installs, runs `uv tool
+install` exactly as step 2 below does, then runs `kranto setup`. Nothing it does needs sudo.
+`sh install.sh --version vX.Y.Z` installs that release instead of the latest; `--no-setup`
+installs only; `--help` lists the rest.
+
+A pre-release by its tag, before the repository is public (needs a logged-in `gh` that can see
+it): `gh release download vX.Y.0-devN -R iddv/kranto -p install.sh && sh install.sh --version
+vX.Y.0-devN`.
 
 **`kranto setup`** asks only what it cannot find, and every question has a default in
 `[brackets]` that Enter keeps:
@@ -65,48 +76,51 @@ same install by hand.
 | [uv](https://docs.astral.sh/uv/) | Installs Kranto and its Python (3.12; uv downloads it if you have none). | `uv --version` |
 | bubblewrap (`bwrap`) | The sandbox every cub and every Open in Claude Code session run in. The console is not sandboxed: it runs as you ([threat-model.md](threat-model.md)). Debian and Ubuntu: `sudo apt install bubblewrap`; Fedora: `sudo dnf install bubblewrap`; Arch: `sudo pacman -S bubblewrap`. | `bwrap --version` |
 | The Claude Code CLI, signed in (optional) | The console runs it, on **your** Claude account and usage. Kranto works without it. | `claude auth status` |
-| The GitHub CLI (`gh`), logged in | Downloading the release while the repository is private. | `gh auth status` |
-| Access to `iddv/kranto` | It is private before launch: accept the invitation first. | `gh repo view iddv/kranto --json name` prints `{"name":"kranto"}` |
+| `curl` (or a browser) | Downloading the release. No GitHub account is needed. | `curl --version` |
 | One model for watching: an Anthropic API key (the Claude API, from the [Claude Console](https://console.anthropic.com)), an [OpenRouter](https://openrouter.ai) key, a key for another OpenAI-compatible endpoint, or (an explicit choice, on your Claude plan's usage) your Claude Code login | Watching: a cheap model reads and judges what your sources publish. | You choose it in step 6. |
 
-## 1. Check your GitHub login
+## 1. Check uv
 
 ```sh
-gh auth status
+uv --version
 ```
 
-**You should see:** `Logged in to github.com account <you>`. If not, run `gh auth login` and
-follow it. The next step downloads Kranto with this login, so it works for the private
-repository once you have accepted the invitation.
+**You should see:** `uv 0.x.y`. If the command is not found, install uv with its own installer,
+`curl -LsSf https://astral.sh/uv/install.sh | sh`, and open a new terminal.
 
 ## 2. Install
 
 Kranto is installed from the latest release: one wheel, `kranto`, on a GitHub Release of
-`iddv/kranto`, the same file `kranto update` installs later.
-Run these in a folder where you keep downloads (they make a `kranto-v0.x.y` folder there):
+`iddv/kranto`, the same file `kranto update` installs later. Run these in an empty folder where
+you keep downloads:
 
 ```sh
-tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)
-gh release download "$tag" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "kranto-$tag"
-(cd "kranto-$tag" && sha256sum -c SHA256SUMS)
-uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$(ls "$PWD/kranto-$tag"/kranto-*.whl)"
+base=https://github.com/iddv/kranto/releases/latest/download
+curl -fsSLO "$base/SHA256SUMS"
+wheel=$(grep -o 'kranto-[^ ]*\.whl' SHA256SUMS)
+curl -fsSLO "$base/$wheel"
+sha256sum -c --ignore-missing SHA256SUMS
+uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$PWD/$wheel"
 kranto --version
 ```
+
+For one release by its tag, `base=https://github.com/iddv/kranto/releases/download/vX.Y.Z`. In a
+browser, the [release page](https://github.com/iddv/kranto/releases/latest) has the same two
+files.
 
 **You should see:** one `OK` line from `sha256sum`, a list of packages, then the
 executables uv installed: `kranto`, and the command's name from before the rename (kept for
 installs made then; it runs the same program), and then `kranto 0.x.y`. It takes under a minute.
 If your shell then says `kranto: command not found`, run `uv tool update-shell` and open a new
-terminal. The downloaded folder can be deleted afterwards.
+terminal. The downloaded files can be deleted afterwards.
 
 The three extras are what `install.sh` installs too: `connections` (posting accounts, their
 tokens encrypted), `notify` (messages to your phone or chat) and `mcp` (step 9). `kranto update`
 keeps them.
 
-**Later:** once the repository is public, the same commands work without an invitation
-(and the wheels can also be downloaded from the release page in a browser). Once Kranto is on
-PyPI, this step becomes one `uv tool install` line and this guide will say so. Until then,
-always install the wheel by path as above.
+Kranto is not on PyPI: always install the wheel by path as above (a package of the same name
+on an index could be another project's). Once Kranto is on PyPI, this step becomes one `uv tool
+install` line and this guide will say so.
 
 ## 3. Start Kranto
 
@@ -465,7 +479,7 @@ environment variables, keep working after the crossing.
 ```sh
 # 1. stop the service, keep it from starting at boot and remove its unit (your data stays).
 #    --linger-off also turns lingering off, which kranto up turned on; leave it out if anything
-#    else of yours needs it. Without systemd: click Ctrl-C in the terminal running kranto
+#    else of yours needs it. Without systemd: stop it with Ctrl-C in its terminal
 kranto uninstall --linger-off
 
 # 2. the program, and the MCP entry if you added one
@@ -501,8 +515,8 @@ loginctl disable-linger    # only if nothing else of yours needs it
 
 | You see | Do |
 |---|---|
-| `release not found`, `HTTP 404` or `could not find any release` while downloading (step 2) | `gh auth status` (step 1), and check you accepted the repository invitation. |
-| `sha256sum` says `FAILED` | The download is incomplete or altered: delete the `kranto-v…` folder and run step 2 again. |
+| `has no stable release yet`, or `curl: (22) … 404` while downloading (step 2) | No stable release is out yet: install one by its tag from the [releases](https://github.com/iddv/kranto/releases) (`sh install.sh --version <tag>`, or `base=…/releases/download/<tag>` in step 2). |
+| `sha256sum` says `FAILED` | The download is incomplete or altered: delete the downloaded files and run step 2 again. |
 | The page says `this kranto was installed without its web page` | It was installed from git, which carries no built page: install from a release (step 2). |
 | `kranto: command not found` after installing | `uv tool update-shell`, then open a new terminal. |
 | `not using systemd: …; serving in the foreground` | Expected without a systemd user manager: keep that terminal open. With a `HOME` that is not your login home, systemd is skipped on purpose. |
@@ -514,11 +528,12 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | `FAIL  claude login` in `kranto doctor` | Run the command it names (`claude auth login`, or `claude update` for an old version). |
 | `Watching paused until … (spend limit set in the Claude Console reached)` in the top bar or in Health | The Claude API refused calls for a spend limit. Watching resumes by itself at that time. To go on sooner, raise the limit in the Claude Console, then click **Resume now** in Settings › System › Health (or run `python -m kranto.cli resume`). |
 | `FAIL  claude … is not signed in` | `claude auth login`, then `kranto doctor` again. |
-| The header says `Can't check for updates: GitHub answered 404 (a private repo needs a GitHub login)` | While the repository is private, Kranto needs a GitHub login that can see it: connect GitHub in Settings › Accounts › GitHub (Kranto uses that login for updates, with or without `gh`), or `gh auth login`. Then **Check for updates** (click the version, or ⌘K). |
+| The header says `Can't check for updates: GitHub answered 403 …` | GitHub allows 60 requests an hour from one address without a login, and the limit was reached. Wait an hour, then **Check for updates** (click the version, or ⌘K). With `gh` installed and logged in (`gh auth login`), Kranto asks through it and this limit does not apply. |
+| The header says `Can't check for updates: GitHub answered 404 …` | The release list cannot be seen without a login (a repository that is not public): `gh auth login` with an account that can see it, then **Check for updates**. |
 | The sign-in link says it expired or was used | Each link works once, within 10 minutes: `kranto open --no-browser` for a new one. |
 | A script's write answers `cross-origin request refused` | Your Kranto is older than 0.3.30: `kranto update`, or send `Origin: http://127.0.0.1:8765` (your port) with the `Authorization` header (step 9). |
 | `kranto mcp: install the MCP extra` | Install `kranto[mcp]`: the command is in the message, and in step 2. |
-| `kranto down` says Kranto is not managed by systemd | It runs in the foreground: click Ctrl-C in its terminal. |
+| `kranto down` says Kranto is not managed by systemd | It runs in the foreground: stop it with Ctrl-C in its terminal. |
 
 ## Reporting
 
