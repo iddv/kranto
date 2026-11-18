@@ -73,7 +73,7 @@ describe("Settings › System › Updates", () => {
     stub();
     ui.facts = { header: { host: null } } as unknown as Facts;
     const { target, done } = await draw(UpdatesList, where("settings/updates"));
-    expect(target.querySelector("strong")?.textContent).toBe("Updates need the server. ");
+    expect(target.querySelector("strong")?.textContent).toBe("Updates need Kranto's server, which is not answering. ");
     ui.facts = null;
     done();
   });

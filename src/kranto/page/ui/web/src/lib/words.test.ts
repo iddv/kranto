@@ -108,6 +108,27 @@ describe("Settings' words", () => {
     expect(bad).toEqual([]);
   });
 
+  // every file the page is drawn from, its tests, generated types and fixtures aside
+  const pageFiles = () => import.meta.glob(["../**/*.svelte", "../**/*.ts", "!../**/*.test.ts", "!../**/*.gen.ts", "!../**/testing*.ts", "!../**/*.fixtures.ts"], { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+  // names of the code a person never reads: routes and ids (cub/<id>, cub-sheet, ?cub=), a key's
+  // name drawn from parts (cubs.<id>.<cap>), a property read in a template (j.cub.diff), the command
+  // line's own words (kranto cub new, kranto cub dry), a file's name (cub.yaml, cubs.STOP)
+  const CUB_CODE = /[\w-]*\bcubs?[-/=][\w${}/.=-]*|[\w-]+-cubs?\b|\bcubs\.(?=[\s.]|$)[ .]*|[\w$]+\.cubs?\b|\bkranto cub \w+|\bcubs?\.(yaml|STOP|enabled|developer)\b/g;
+
+  it("no page says cub: an add-on is a feature, on every page (the owner: plain words; KPUB S3)", () => {
+    const bad = Object.entries(pageFiles()).flatMap(([f, raw]) => shownIn(f, raw).filter((s) => /\bcubs?\b/i.test(s.replace(CUB_CODE, ""))).map((s) => `${f}: ${s.trim().slice(0, 90)}`));
+    expect(bad).toEqual([]);
+  });
+
+  it("no page carries the rename's damage, an old program's name or a version promise already passed (KPUB S3)", () => {
+    // each was on a page: "The kranto read nothing", "kranto' memory", "brb ui on its own, … afk
+    // serve", "opens at 0.7" (this is 0.7), "in 0.6", "which is not hosting this page" (one server
+    // serves the page and its data: when a read fails, the server is not answering)
+    const damage = /\bthe kranto\b|\bkranto' |Kranto's needs|\b(brb|afk) (ui|serve)\b|\bbrb\.enabled\b|\b(opens|comes|arrives) (at|in) 0\.\d\b|\bin 0\.[5-7]\b|not hosting this page|not hosted here|octo-owner/i;
+    const bad = Object.entries(pageFiles()).flatMap(([f, raw]) => shownIn(f, raw).filter((s) => damage.test(s)).map((s) => `${f}: ${s.trim().slice(0, 90)}`));
+    expect(bad).toEqual([]);
+  });
+
   it("no page says monitoring, a budget, or a file name where it means watching, a cap or your settings", () => {
     const files = import.meta.glob(["../**/*.svelte", "../**/*.ts", "!../**/*.test.ts", "!../**/*.gen.ts", "!./words.ts"], { query: "?raw", import: "default", eager: true }) as Record<string, string>;
     const bad: string[] = [];

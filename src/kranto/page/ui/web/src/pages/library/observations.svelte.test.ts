@@ -50,7 +50,7 @@ describe("Library › Observations", () => {
     stub();
     answering({});
     const { target, done } = await draw(ObsList, where("library"));
-    expect(target.querySelector("[data-title=Library] strong")?.textContent).toBe("The library needs the server. ");
+    expect(target.querySelector("[data-title=Library] strong")?.textContent).toBe("The library needs Kranto's server, which is not answering. ");
     done();
   });
 

@@ -85,7 +85,7 @@ export function arrange(key: string, value: unknown, btn: HTMLElement | null = n
 export function arrangeReset(btn: HTMLElement | null = null): Promise<void> {
   const L = app();
   if (!L) return Promise.resolve();
-  return L.act(btn, async () => put(SHELL_API, await L.api(SHELL_API, { reset: true })), () => L.say("The home is back to its defaults: every cub in install order, Needs you by trust."));
+  return L.act(btn, async () => put(SHELL_API, await L.api(SHELL_API, { reset: true })), () => L.say("The home is back to its defaults: every added feature in install order, Needs you by trust."));
 }
 /** the pins with one moved by step (‹ -1, › +1) */
 export function moved(pins: string[], id: string, step: number): string[] {

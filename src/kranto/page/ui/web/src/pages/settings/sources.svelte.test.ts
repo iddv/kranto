@@ -137,7 +137,7 @@ describe("Settings › Sources", () => {
   it("says when Sources need the server, and when nothing matches", async () => {
     stubL();
     const none = await draw(SourcesList, at("settings/sources"));
-    expect(none.target.querySelector("strong")?.textContent).toBe("Sources need the server. ");
+    expect(none.target.querySelector("strong")?.textContent).toBe("Sources need Kranto's server, which is not answering. ");
     none.done();
     stubL();
     hosted();
@@ -181,7 +181,7 @@ describe("Settings › Sources", () => {
     hosted();
     answering({ [SOURCES_API]: D });
     const home = await draw(SourcesPane, at("settings/sources"));
-    expect(home.target.querySelector(".dt")?.textContent).toBe("Where the kranto read");
+    expect(home.target.querySelector(".dt")?.textContent).toBe("Where Kranto reads");
     expect(home.target.querySelector(".note strong")?.textContent).toBe("Reddit's feeds stop on 13 Nov 2026. ");
     expect(home.target.querySelector("#s-topics a")?.getAttribute("href")).toBe("#/topics/3/sources");
     expect([...home.target.querySelectorAll("#s-counts dt")].map((x) => x.textContent)).toEqual(["Proposed", "Watched", "Retired"]);

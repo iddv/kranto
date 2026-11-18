@@ -21,7 +21,7 @@
 
 <Detail back={view.back}>
   {#if code && !host}
-    {@render gone("This comes from the server, which is not hosting this page.")}
+    {@render gone("This comes from the server, which is not answering.")}
   {:else if topic && host}
     <TopicCard {view} id={topic} />
   {:else if code}

@@ -192,7 +192,7 @@ export async function togglePause(btn: HTMLElement | null, pausing: boolean): Pr
 }
 async function doPause(btn: HTMLElement | null, pausing: boolean, undo = false): Promise<void> {
   await act(btn, async () => {
-    if (!HOST) throw new Error("Pause is the server's, which is not hosting this page.");
+    if (!HOST) throw new Error("Pause is the server's, which is not answering.");
     const note = await hostForm(pausing ? "/pause" : "/resume", pausing ? { reason: "paused from Kranto" } : {});
     await loadHost();
     await load();

@@ -42,7 +42,7 @@
   {:else if k === "r"}
     <QueuePane {view} host={!!H} />
   {:else if !H}
-    {@render gone("This comes from the server, which is not hosting this page.")}
+    {@render gone("This comes from the server, which is not answering.")}
   {:else if !t}
     <Loading error={c?.error} />
   {:else if k === "m"}

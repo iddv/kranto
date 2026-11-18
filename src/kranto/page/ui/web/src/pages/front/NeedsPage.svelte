@@ -49,5 +49,5 @@
 <div class="wl" data-title="Needs you"><PageTitle title="Needs you" facts={waitsWords(all)} lede="Grouped by what you will do. A row opens it; its button acts from the row."
     primary={H ? { label: "Mark all seen", plain: true, id: "mark-seen", title: "Clear the new marks; nothing that asks you goes (⇧a)", run: (b) => void markSeen(b) } : null} />
   <Needs {view} {t} host={H} {n} loading={!!c && !t} byVerb {cubs} />
-  {#if !H}<p class="muted small quiet-topics">Proposed sources, messages and the cubs' asks come from the server, which is not hosting this page.</p>{/if}
+  {#if !H}<p class="muted small quiet-topics">Proposed sources, messages and what features ask you come from the server, which is not answering.</p>{/if}
 </div>

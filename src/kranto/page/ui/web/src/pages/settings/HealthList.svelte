@@ -42,7 +42,7 @@
 
 <List title="Health" crumb="Settings">
   {#if !host}
-    <div class="flash" role="status"><Icon name="note" /><div><strong>{"Watching's health needs the server. "}</strong>Its runs, failures, spend and intake are the server's, which is not hosting this page. Open Kranto through the server to see them here.</div></div>
+    <div class="flash" role="status"><Icon name="note" /><div><strong>{"Watching's health needs the server. "}</strong>Its runs, failures, spend and intake are the server's, which is not answering. Start it with kranto up, then reload this page.</div></div>
   {:else if !d}
     <Loading error={a?.error} />
   {:else}

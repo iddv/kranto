@@ -38,7 +38,7 @@ Welcome has three steps and one screen after them. **Which model reads for you?*
 ways in as boxes: **A model key** (Paste a key opens the form; the key is tested before it is kept,
 and the test is free) and **Your Claude Code login** (one click, with Anthropic's terms sentence
 beside it; it uses your Claude plan). **First topic**: a name and one sentence, then **Find places
-to read**; while it looks (about two minutes) the page says what it is doing, and a topic's first
+to read**; while it looks (a few minutes) the page says what it is doing, and a topic's first
 watch ticks at most the five places that fit best (the rest stay proposed on its page).
 **Ready**: when the first brief comes, what it costs (a key's dollars, or the plan's usage on the
 login), whether Claude Code is ready for the console (it asks once whether to trust its folder; that
@@ -73,8 +73,8 @@ you connected, and its draft waits in Kranto until you connect one. **Check agai
 newsletter guide (docs/newsletter.md) has every platform's steps. **Sanity** (Settings ›
 Posting › Sanity): paste the project id, the dataset and a robot token (an Editor token named
 `kranto-drafts`); Save and test only reads. **Send to Sanity**
-files a post there as a draft and never publishes it: you read it and publish in Studio (the
-examplecom feature's guide, in octo-owner/bearcubs). A form's **Markdown** box keeps your lines as you typed them.
+files a post there as a draft and never publishes it: you read it and publish in Studio.
+A form's **Markdown** box keeps your lines as you typed them.
 
 ## Watch: a topic first {#watch}
 
@@ -101,7 +101,7 @@ topic and Archive; the ⋯ shows when you point at the row), opens one sheet: it
 description, its sources and its own settings. The description is your words for what the topic
 is about: every item is compared with it before any model call, and the topic's idea cards and
 briefs read it. A rename is seen everywhere at once (the topic keeps its number,
-so its cards, briefs and cubs name it anew). Its sources are the topic's own rows, as on
+so its cards, briefs and features name it anew). Its sources are the topic's own rows, as on
 its page: **Remove** takes a source out of this topic only, keeping its evidence (a source left
 with no topic is retired, not read, never read for everything); **Add a source from your
 library** links one you already have; a new feed, site or account is **Add source**, or **Scout
@@ -325,7 +325,7 @@ on); Write a post on the item's page writes a post about the item the article de
 then the briefs. How many
 articles a day, how deep they read and which sources count are on Settings › News.
 
-## The home and cubs {#home}
+## The home and features {#home}
 
 The home is the first screen, in one order that does not change: the date and one sentence
 ("Today's brief is ready, and one draft waits for you."), the one thing (below), today's brief
@@ -338,7 +338,7 @@ ideas) and that you can close the page; the status bar says "Reading for the fir
 and so does ⌘K). `g h` is the home; `kranto` at the top left goes there from any page.
 
 **The doors** are News, Ideas, Watch and Post, in the top bar on every page and, on a phone, in
-the bar at the bottom with ✦ for the console. Post is where the drafts your posting cubs write
+the bar at the bottom with ✦ for the console. Post is where the drafts your posting features write
 wait for you; Settings is ⚙.
 
 **While you were away.** If you have not opened the home for three days or more (`home.away_days`
@@ -349,32 +349,32 @@ what Kranto wrote, and **Everything since …** under the list opens Ideas. It s
 one of the five or choose **Show today** (a reload before that shows it again); only then does
 Kranto count your visit. It is chosen by a rule from what is stored, never by a model.
 
-A cub is anything else Kranto does and anything someone else writes later: Kranto draws its rows
+A feature is anything else Kranto does, and anything someone else writes later: Kranto draws its rows
 and its page from what it declares, and its page says who made it and its mode (practice or
-live). A feature or cub that is off has no row, no account under Settings › Accounts and nothing the console can run; turned on, it
+live). A feature that is off has no row, no account under Settings › Accounts and nothing the console can run; turned on, it
 is back where it was.
-Adding a cub (Available, Made by Kranto, Add a cub) is a developer's: Cubs shows your installed
-cubs and what they ask you unless `cubs.developer: true` is in Kranto's config. A cub never
+Adding a feature (Available, Made by Kranto, Add a feature) is a developer's: Features shows the ones you added
+and what they ask you unless `cubs.developer: true` is in Kranto's config. A feature never
 posts or sends by itself: it asks you. Needs you shows what it asks as one line ("This
 week: Eka Robotics… · ready") with the action's own button (**Send**, **Post toot**, **Send to
 Sanity**), and the button opens one plain dialog: what it is, whom it goes to, the text drawn and
 collapsed with Show all, and **Send now** (or **Schedule**, where the platform can) and Cancel.
 What stops it is fixed there: with no account connected the main button connects one in place
-and comes back; in **practice** (every cub starts there: an approval sends nothing, and the
-dialog says "Nothing was sent (practice)") the dialog has the cub's own **Send for real** switch,
+and comes back; in **practice** (every added feature starts there: an approval sends nothing, and the
+dialog says "Nothing was sent (practice)") the dialog has the feature's own **Send for real** switch,
 which applies to its later ones too. **Details** has the rest: the draft, when it was asked and
 the run that made it, what it rests on (the idea card or the brief is a link), its history, and
 Decline. An ask waits until you answer it (it has no time limit), so "Open until" in Details
 says so. An ask that was practiced, refused or (before Kranto 0.6) ran out of time, when its draft
 is still the newest, stays on its row: its button asks again with the same draft (no new run).
 A draft that ran out of time before Kranto 0.6, never approved or declined, waits again by itself.
-The card's own Details list what cubs asked on it under Asked of you; Post lists every cub's.
-Other people's cubs run from 0.5. When a cub asks which of your topics it should read
+The card's own Details list what features asked on it under Asked of you; Post lists every feature's.
+Features other people write run too. When a feature asks which of your topics it should read
 (the newsletter does), its Settings page shows your topics to switch on, never a box for ids;
 none switched on means every topic.
 
 **The one thing.** Needs you and the home open with one item drawn large, the only bold button on
-the screen: the newest thing waiting to go out (an assistant's prepared item, a draft a cub asks
+the screen: the newest thing waiting to go out (an assistant's prepared item, a draft a feature asks
 to send), else the oldest thing to fix, else the first to decide. It is chosen by a
 rule, never by a model, and Kranto's own trouble (a refused key) is the red band above it instead.
 Every other row is one line: its state in a word, its title, at most one fact, its age and one
@@ -389,7 +389,7 @@ kept, yield) are its sheet's. The idea cards waiting are one row ("6 idea cards 
 
 **Details.** What a row, the one thing or a dialog leaves out (its ids and versions, the rules it
 meets, its evidence, its run and its history) is one click away: **Details** at the foot of a
-decision dialog, beside the one thing's button, and under a cub's ask's Details as **The full
+decision dialog, beside the one thing's button, and under a feature's ask's Details as **The full
 record**. It opens a drawer at the right with the whole record; **Esc** or ✕ closes it. Its last
 line names the console's call for the same record (`kranto_details card:<n>`), so the console
 and the drawer never disagree.
@@ -398,14 +398,14 @@ The home is no longer arranged: its tiles, widgets and Arrange are gone, and a h
 in an earlier release opens in the order above (what you arranged stays in your settings file,
 unread).
 
-Once a day Kranto looks for each cub's new version. One that adds no permission and no send, and
-runs on your Kranto, is applied by itself: the cub's page says "Updated to 1.2.1 by itself" and
+Once a day Kranto looks for each added feature's new version. One that adds no permission and no send, and
+runs on your Kranto, is applied by itself: the feature's page says "Updated to 1.2.1 by itself" and
 Activity has the run. Any other waits for one click: Needs you says "Newsletter 1.2.0 asks for one
-more permission · Review", its page's ⋯ says "Update to 1.2.0" and Home › Cubs lists it under
+more permission · Review", its page's ⋯ says "Update to 1.2.0" and Features lists it under
 Staged with what it may now do; one click opens the change and its new permissions, and Update
 applies it. Look for an update under About on its Settings page (or `kranto cub update ID` in a
 terminal) looks now. `cubs.auto_update: false` in `kranto.yaml` makes every update wait for your approval.
-A cub Kranto ships (the newsletter, short posts) that was added from the folder an earlier install
+A feature Kranto ships (the newsletter, short posts) that was added from the folder an earlier install
 shipped it in keeps updating after an update moved that folder: it reads this Kranto's own copy.
 
 ## Post {#post}
@@ -420,7 +420,7 @@ only when it is sent, declined, or replaced by the next one of its series. **Ope
 draft with Send (the same dialog as anywhere), Copy, Download and Decline; nothing is sent until
 you choose Send. **Write a post** in the head asks about what: this week's news (Write draft then
 writes it, and it waits here), or an idea (Ideas opens; a card's own Write a post writes about
-it). ⚙ is Settings › Posting. Old links to Cubs and its Approvals land here.
+it). ⚙ is Settings › Posting. Old links to the features' list (`#/cubs`) and its Approvals land here.
 
 **Write a post** asks one thing: "Why does this interest you? One sentence." Beside the box are
 three proposals (where it leads, a bet, a scene), each going past the item; pick one, change it,
@@ -459,14 +459,14 @@ under "Not possible today" with why; your blog; the newsletter; how you write; a
 job's own settings, like the weekly issue's day and topics), **Assistant**,
 **Spend**, **Privacy**, **System** (updates, the service, recent runs, your grades) and
 **Appearance**. **Advanced**, folded, has Prompts (every prompt Kranto sends a model, with your
-additions or your own full text) and what your settings file switches on by hand (the cub shop).
+additions or your own full text) and what your settings file switches on by hand (adding features).
 Every old address lands on its new page: a bookmark to Settings › Accounts lands on Posting, Keys
 and Models on Watching, Updates and Health on System, Access on Privacy; the address of a page
 that left lands on the Overview.
 
-## A cub's page {#cub-page}
+## A feature's page {#cub-page}
 
-A cub's page looks like the rest of Kranto: Home › Post › its name, its glyph, who made it and its
+A feature's page looks like the rest of Kranto: Home › Post › its name, its glyph, who made it and its
 mode, one line of facts, what it is for, what of it runs now, one line when it is not live (and
 where to change that), then its lists and Log as the words across the top. Its one blue button is
 its main verb (Compose, Draft a post); Stop sits beside it for one that runs; every
@@ -474,7 +474,7 @@ other verb is under ⋯ (Update to… when one waits), and ⚙ opens its
 Settings page. A row opens in the one sheet, with `j` and
 `k`; something you read before you act on it, a newsletter issue or a post, opens as a page of its
 own with Confirm at its top. A list with
-nothing in it says what will appear and when, in the cub's own words.
+nothing in it says what will appear and when, in the feature's own words.
 
 ## Settings for what Kranto writes and posts {#feature-settings}
 
@@ -492,7 +492,7 @@ when its change takes effect.
 ## What Kranto is doing {#activity}
 
 Everything Kranto does in the background is a run: reading your sources, drawing the map, a
-brief, a cub's weekly post, the update check, and every action that does work (Brief now, the
+brief, a feature's weekly post, the update check, and every action that does work (Brief now, the
 scout, Run ingest now). The top bar says it in one item, in a
 word, in both layouts and on the phone (point at it for the rest): "Quiet" with a green dot when
 nothing runs (its tooltip: "next: reading your sources at 20:23"); a spinning ring and the count
@@ -511,7 +511,7 @@ red. Recent: the last day's runs, done, failed with the reason, skipped with why
 re-checks that found nothing to do and the usage reports are one line a kind (Show every row).
 
 **Stop** ends a run at its next step, never in the middle of one: reading your sources stops after
-the source in hand (what it kept stays; the rest at the next read), a cub's job at its next call
+the source in hand (what it kept stays; the rest at the next read), a feature's job at its next call
 to Kranto. A toast offers Undo for 9
 seconds before it asks. A stopped run is due again at its next hourly check, never lost.
 
@@ -525,7 +525,7 @@ Fix is the first group of Needs you, and its rows lead the home's.
 
 **A refused key stops everything, so it is said first.** When your model provider refuses the key
 (it expired, it is wrong, it ran out of credit), every run that calls a model fails at once:
-reading your sources, idea cards, a cub's model calls. Kranto says it once, from the first failure:
+reading your sources, idea cards, a feature's model calls. Kranto says it once, from the first failure:
 as a red band above everything on the home and on Needs you (in both layouts and on the phone,
 above the console's sheet), and never again as a row of Needs you: "Your OpenRouter key was
 refused (expired) at 08:15 on 25 Oct. Stopped until it is renewed in Settings › Watching: reading
@@ -567,7 +567,7 @@ they do not turn the top bar red. `kranto status` says the same: Kranto's own on
 feature's on a `NEEDS YOU` line. Any of them can be dismissed.
 
 Each page also says its own: a topic's page its sources
-being read, a cub's page its job running or failed, Settings › System › Updates the check.
+being read, a feature's page its job running or failed, Settings › System › Updates the check.
 The home's quiet line says when Kranto last read and what comes next, with Activity at its end. A run's trace (Watch ›, Trace ›) heads with the run in one line ("Reading your sources · source 2
 of 8 · 3 model calls · $0.02") and grows while it runs. The runs' marks are kept 30 days, at most
 20,000 (Settings › System › Activity changes both; the foot of Activity says them); the runs
@@ -646,7 +646,7 @@ does the `kranto` command itself while no version is installed. `sh` runs its li
 the previous version back. An update that ends by itself removes the file.
 
 Before it keeps a new version, Kranto reads every page it serves once, on your own data: every
-topic, every list's first page, the home, each cub's page, the activity (only reads; nothing
+topic, every list's first page, the home, each feature's page, the activity (only reads; nothing
 is changed). If one fails (an error, or no answer), the new version is put back the same way,
 and Needs you says "0.5.x broke on your data and was rolled back", with **Send this error**
 (see [When something can't be read](#errors)). From a terminal, `kranto doctor --routes` runs
@@ -727,7 +727,7 @@ What it does through Kranto's tools shows on the page it changed and in Activity
 name; what your ladder keeps for you (sending, publishing, archiving) is prepared, and waits for
 your approval on its page and in Needs you (on an idea or a source it waits in that one's
 sheet, where you can click it). What Kranto refuses it is said to it in words, and Activity keeps
-it: "An assistant's action, skipped", with why. Keys, logins and approving what a cub asks are never
+it: "An assistant's action, skipped", with why. Keys, logins and approving what a feature asks are never
 its. Kranto's secrets (`data/secrets`, `.env`, the tokens) are refused to it.
 
 **Settings › Assistant** sets what it starts with. Whose configuration and the permission mode
