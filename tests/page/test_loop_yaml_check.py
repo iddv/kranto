@@ -60,6 +60,10 @@ def test_the_console_keeps_one_default_for_each_of_its_settings(tmp_path):
     from kranto.page.term import console
     assert DEFAULTS["ask"] == {}
     assert console.settings(Config(tmp_path).data) == console.DEFAULTS
+    # a home whose loop.yaml has no ask: section (an existing install) keeps what it ran on:
+    # open when Kranto opens, Claude Code's auto mode, the person's own configuration
+    got = console.settings(Config(tmp_path).data)
+    assert (got["open"], got["permission"], got["config"]) == (True, "auto", "own")
     (tmp_path / "loop.yaml").write_text("ask:\n  open: false\n  colour: blue\n")
     cfg = Config(tmp_path)
     assert cfg.problems == [] and console.settings(cfg.data)["open"] is False
