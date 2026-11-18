@@ -140,8 +140,8 @@ def telemetry_rt(tmp_path, store, embedder, make_client, monkeypatch, require=Tr
 
 def test_usage_reports_that_send_are_turned_on_from_the_page_only(tmp_path, store, embedder,
                                                                   make_client, monkeypatch):
-    rt = telemetry_rt(tmp_path, store, embedder, make_client, monkeypatch)
-    app = create_app(rt, port=8765)
+    home_rt = telemetry_rt(tmp_path, store, embedder, make_client, monkeypatch)
+    app = create_app(home_rt, port=8765)
     url = "/api/settings/telemetry"
     with bare(app) as web:
         for mode in telemetry.SENDING:
@@ -153,7 +153,7 @@ def test_usage_reports_that_send_are_turned_on_from_the_page_only(tmp_path, stor
             for name in ("mcp", "console"):      # an assistant's: the guard refuses it first
                 assert web.post(url, json={"mode": mode}, headers=bearer(name)).status_code \
                     == 403, name
-        assert telemetry.effective(rt.cfg.root).mode not in telemetry.SENDING
+        assert telemetry.effective(home_rt.cfg.root).mode not in telemetry.SENDING
         # a mode that keeps everything on this machine is not refused
         assert web.post(url, json={"mode": "local"}, headers=bearer("cli")).status_code == 200
         assert web.post(url, json={"mode": "off"}, headers=bearer("cli")).status_code == 200
