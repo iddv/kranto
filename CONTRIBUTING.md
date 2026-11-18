@@ -37,12 +37,14 @@ Said early, so nobody spends a weekend on it:
 
 - Open an issue first for anything bigger than a typo. The issue holds the reasoning.
 - A pull request says what it changes, what you ran, and plainly what you did not verify.
-- The maintainer applies an accepted change to the development tree with your name and your
-  sign-off kept on the commit. It ships in the next release, and the pull request is closed
-  with a link to that release. This repository receives one commit per release, so a pull
-  request is not merged here directly.
-- CI for pull requests runs on GitHub's own runners, with no secrets. A run started by an
-  outside contributor waits for the maintainer's approval.
+- The maintainer reviews it here. Once every check on its last commit is green, it is
+  squash-merged into `main`: one commit, with your name as its author and your sign-off kept.
+  It ships in the next release (each release's notes list the pull requests it carries).
+- The checks are `.github/workflows/ci.yml`: the tests, the lint, the page's checks, the sandbox
+  checks and a scan for secrets. A pull request from a fork runs them on GitHub's hosted
+  runners with a read-only token and no secrets, and only after the maintainer has approved the
+  run. A red check is yours to fix on the same branch: push more commits rather than
+  force-pushing.
 - Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md).
   [SUPPORT.md](SUPPORT.md) says where questions go.
 
@@ -98,9 +100,9 @@ The root:
 | `prose/` | the prose engine every post is written through: the profile, compose, check, revise, learn, and the shipped guides ([docs/prose.md](docs/prose.md)) |
 | `cubs/` | the reference cubs Kranto ships (`newsletter`, `toot`), installed like any cub |
 | `web/` | the app host: the JSON API routers, the sign-in, the pages the server serves |
-| `sources/`, `connections/` | the source kinds and their adapters; accounts read with the owner's own login |
+| `sources/`, `connections/` | the source kinds and their adapters; accounts read with your own login |
 | `providers/` | how the metered client reaches a model |
-| `prompts/` | the versioned prompt files, and the owner's additions and overrides |
+| `prompts/` | the versioned prompt files, and your own additions and overrides |
 | `ideate/`, `map/` | idea cards from the library; the map of emergent clusters |
 | `activity/` | background work you can see: every run recorded as it goes |
 | `telemetry/` | the usage reports: counters, one daily report, the allow-list |
@@ -119,8 +121,8 @@ files), `rowsafe` and `errtrace` (one bad row never takes a page down; an error 
 
 ## For the maintainer: merging and releasing
 
-CI runs the tests, the lint, the page's checks, the sandbox checks and a gitleaks scan of the new
-commits. In the development tree:
+You do not need this section to contribute. CI runs the tests, the lint, the page's checks, the
+sandbox checks and a gitleaks scan of the new commits. The maintainer merges and releases this way:
 
 - **Merge only when every check on the pull request's exact head commit is green,** with
   `scripts/ci/merge_when_green.sh OWNER/REPO PR --require <jobs>`
@@ -268,8 +270,8 @@ state, a new key):
    `named_odd()`. `scripts/dev/odd_install.py` writes every odd value of every column (its
    `CASES`; `test_every_stored_type_has_an_odd_case`), and `tests/test_odd_install.py` reads
    every page on it (`odd`, `empty`, `projects`, and `upgraded`: rows as every release
-   since v0.2.0 wrote them, committed in `tests/fixtures/odd_install/upgraded/`; the weekly
-   `fixtures` workflow makes it again and reads every page on each variant). Locally, `scripts/dev/odd_walk.sh PORT` serves
+   since v0.2.0 wrote them, committed in `tests/fixtures/odd_install/upgraded/`). Locally,
+   `scripts/dev/odd_walk.sh PORT` serves
    each variant and runs `kranto doctor --routes` on it; `rc_check.sh` and `smoke.sh` do the same.
 5. Fill in the pull request's "Stored data" block.
 

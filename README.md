@@ -9,6 +9,8 @@ drafts the post about it for you to approve.**
 It runs on your own Linux machine as one page in your browser. It needs one model (a key, or
 your Claude Code login) and costs cents a day. Nothing is posted until you say yes.
 
+![A day's brief for one topic: four stories, the first with what happened, why it matters and its source](docs/brand/screenshot.png)
+
 ```
 curl -fsSL https://github.com/iddv/kranto/releases/latest/download/install.sh | sh
 ```
