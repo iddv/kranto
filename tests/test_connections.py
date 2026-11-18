@@ -158,6 +158,107 @@ def test_vault_refuses_another_machine_or_salt(tmp_path, machine_id):
         vault.get("conn:1")
 
 
+def _old_vault(directory, machine_id, entries):
+    """A vault as the server before the rename wrote it (its own ``_write``): a random salt,
+    the key from HKDF-SHA256 with its info, AES-256-GCM with its associated data."""
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
+    from kranto import legacy
+
+    directory.mkdir(parents=True, mode=0o700)
+    salt = secrets.token_bytes(32)
+    (directory / "salt").write_bytes(salt)
+    os.chmod(directory / "salt", 0o600)
+    key = HKDF(algorithm=hashes.SHA256(), length=32, salt=salt, info=legacy.VAULT_INFO) \
+        .derive(machine_id.read_text().strip().encode())
+    nonce = secrets.token_bytes(12)
+    data = AESGCM(key).encrypt(nonce, json.dumps(entries).encode(), legacy.VAULT_AAD)
+    path = directory / "connections.json"
+    path.write_text(json.dumps({"version": 1, "cipher": "AES-256-GCM",
+                                "nonce": base64.b64encode(nonce).decode(),
+                                "data": base64.b64encode(data).decode()}))
+    os.chmod(path, 0o600)
+    return path
+
+
+def _opens_with(path, salt_path, machine_id, info, aad) -> bool:
+    from cryptography.exceptions import InvalidTag
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
+    env = json.loads(path.read_text())
+    key = HKDF(algorithm=hashes.SHA256(), length=32, salt=salt_path.read_bytes(), info=info) \
+        .derive(machine_id.read_text().strip().encode())
+    try:
+        AESGCM(key).decrypt(base64.b64decode(env["nonce"]), base64.b64decode(env["data"]), aad)
+    except InvalidTag:
+        return False
+    return True
+
+
+def test_the_vault_labels_are_the_ones_each_version_wrote():
+    """Kranto's own (the first Kranto releases wrote them: kept, odd wording and all) and the
+    server's from before the rename, byte for byte."""
+    from kranto import legacy
+    from kranto.connections import vault as v
+
+    old = "be" + "ars" + "afk"
+    assert (v._INFO, v._AAD) == (b"the server connections v1", b"kranto-connections")
+    want = (f"{old} connections v1".encode(), f"{old}-connections".encode())
+    assert want == (legacy.VAULT_INFO, legacy.VAULT_AAD)
+    assert v.LABELS == ((v._INFO, v._AAD), (legacy.VAULT_INFO, legacy.VAULT_AAD))
+
+
+def test_a_vault_written_before_the_rename_reads_and_is_rewritten_at_the_next_write(
+        tmp_path, machine_id):
+    from kranto import legacy
+    from kranto.connections import vault as v
+
+    token, other = secrets.token_urlsafe(24), secrets.token_urlsafe(24)
+    path = _old_vault(tmp_path / "secrets", machine_id,
+                      {"conn:1": {"access_token": token, "last_used_at": None},
+                       "conn:2": {"key": other}})
+    before = path.read_bytes()
+    vault = Vault(tmp_path / "secrets", machine_id=machine_id)
+    assert vault.get("conn:1") == {"access_token": token, "last_used_at": None}
+    assert vault.keys() == ["conn:1", "conn:2"] and vault.old_labels
+    assert vault.problems() == []
+    assert path.read_bytes() == before                 # reading never writes
+    vault.update("conn:1", last_used_at="now")
+    assert not vault.old_labels
+    assert _opens_with(path, vault.salt_path, machine_id, v._INFO, v._AAD)
+    assert not _opens_with(path, vault.salt_path, machine_id, legacy.VAULT_INFO,
+                           legacy.VAULT_AAD)
+    fresh = Vault(tmp_path / "secrets", machine_id=machine_id)
+    assert fresh.get("conn:1") == {"access_token": token, "last_used_at": "now"}
+    assert fresh.get("conn:2") == {"key": other} and not fresh.old_labels
+    assert token.encode() not in path.read_bytes()
+    assert stat.S_IMODE(path.stat().st_mode) == 0o600
+
+
+def test_a_vault_from_before_the_rename_on_another_machine_still_fails_in_todays_words(
+        tmp_path, machine_id):
+    path = _old_vault(tmp_path / "secrets", machine_id,
+                      {"conn:1": {"access_token": secrets.token_urlsafe(24)}})
+    before = path.read_bytes()
+    other = tmp_path / "other-id"
+    other.write_text(secrets.token_hex(16))
+    vault = Vault(tmp_path / "secrets", machine_id=other)
+    words = (f"{path} cannot be decrypted here: it was written on another machine or with "
+             "another salt. Connect the accounts again.")
+    with pytest.raises(VaultError) as got:
+        vault.get("conn:1")
+    assert str(got.value) == words
+    assert vault.problems() == [words]
+    # and nothing is written over it: a write reads first, and stops
+    with pytest.raises(VaultError):
+        vault.put("conn:9", {"key": secrets.token_hex(8)})
+    assert path.read_bytes() == before
+
+
 def test_vault_problems_name_loose_modes(tmp_path, machine_id):
     vault = Vault(tmp_path / "secrets", machine_id=machine_id)
     vault.put("k", {"v": 1})
@@ -540,6 +641,32 @@ def test_doctor_reports_secrets_and_needs_login(rig, machine_id, monkeypatch):
     assert checks["secrets"].status == doctor.FAIL and "600" in checks["secrets"].detail
     assert checks["connections"].status == doctor.WARN
     assert "needs login" in checks["connections"].detail
+
+
+def test_doctor_is_ok_with_a_vault_written_before_the_rename(rig, machine_id):
+    """An install that crossed over keeps its connected accounts: the doctor's secrets line is
+    ok, the account is listed, and its token is used."""
+    from kranto import doctor
+
+    rt, fake = rig
+    connect(rt.connections, fake)
+    vault = rt.connections.vault
+    entries = vault._read()
+    import shutil
+    shutil.rmtree(vault.directory)
+    _old_vault(vault.directory, machine_id, entries)
+    checks = {c.name: c for c in doctor._connections(rt.cfg, rt.store, machine_id=machine_id)}
+    assert checks["secrets"].status == doctor.OK, checks["secrets"].detail
+    assert "readable here" in checks["secrets"].detail
+    assert "before the rename" in checks["secrets"].detail
+    assert checks["connections"].status == doctor.OK
+    assert "octo-owner" in checks["connections"].detail
+    [account] = rt.connections.accounts()
+    assert account["state"] == "connected"
+    assert rt.connections.test(account["id"])["ok"] is True
+    checks = {c.name: c for c in doctor._connections(rt.cfg, rt.store, machine_id=machine_id)}
+    assert checks["secrets"].status == doctor.OK
+    assert "before the rename" not in checks["secrets"].detail   # rewritten by the use
 
 
 def test_connection_rows_hold_no_secret_columns(store):

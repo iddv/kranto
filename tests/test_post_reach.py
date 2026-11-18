@@ -167,6 +167,25 @@ def test_a_site_that_does_not_answer_is_read_tomorrow_not_retried(store, tmp_pat
     assert len(reach.due(store, NEXT_DAY + timedelta(minutes=1))) == 1
 
 
+def test_a_run_is_recorded_so_the_job_is_due_once_a_day_not_every_minute(store, tmp_path):
+    """Each run writes its ``runs`` row: without it the scheduler found the job due at every
+    tick (once a minute), whether or not there was anything to read."""
+    from kranto.scheduler import Job, is_due
+    from kranto.store import utcnow
+
+    rt = SimpleNamespace(store=store, cfg=SimpleNamespace(root=tmp_path),
+                         http=_http(lambda req: httpx.Response(502)))
+    job = Job(reach.KIND, 24, lambda: reach.run(rt))
+    now = utcnow()
+    assert is_due(store, job, now)
+    job.run()
+    row = store.query_one("SELECT status FROM runs WHERE kind = ?", (reach.KIND,))
+    assert row["status"] == "ok"
+    assert not is_due(store, job, now + timedelta(minutes=1))
+    assert not is_due(store, job, now + timedelta(hours=23))
+    assert is_due(store, job, now + timedelta(hours=25))
+
+
 def test_learned_says_nothing_under_eight_a_side(store):
     for i in range(5):
         _, tid = _done(store, "bluesky", "post.bluesky", {"uri": f"{URI}{i}"}, parts=1 + i % 2)

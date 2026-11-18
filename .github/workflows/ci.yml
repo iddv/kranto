@@ -97,7 +97,8 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: python3 ../../../../../scripts/dev/build_ui.py --no-install
-      - run: npm audit --audit-level=high
+      # npm audit --audit-level=high, with the named, dated exceptions in npm_audit_allow.json
+      - run: python3 ../../../../../scripts/ci/npm_audit.py --level high
 
   # Lint, the type check's ratchet, the stored-shape lint, the lock, and the public-tree scrub.
   lint:
