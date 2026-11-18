@@ -21,7 +21,7 @@
 # Live is never written: its home and loop home are read with rsync and SQLite's backup opened
 # read-only, and `kranto serve` refuses to start as the preview on live's folders or port.
 set -euo pipefail
-# uv and the owner's own tools live here; an ssh command has no login PATH
+# uv and the maintainer's own tools live here; an ssh command has no login PATH
 PATH="$HOME/.local/bin:$PATH"
 export PATH
 
@@ -196,7 +196,7 @@ start_unit() {  # unit home loop port jobs
   die "$unit did not answer on 127.0.0.1:$port"
 }
 
-unit_path() {  # the preview's kranto first, then where the owner's Claude Code lives (the console)
+unit_path() {  # the preview's kranto first, then where the maintainer's Claude Code lives (the console)
   local p="$VENV/bin:$HOME/.local/bin" c
   c=$(command -v claude 2>/dev/null || true)
   [ -n "$c" ] && p="$p:$(dirname "$c")"
@@ -263,7 +263,7 @@ cmd_refresh_data() {
   cmd_status
 }
 
-one_line() {  # the one command to run on the owner's own PC (this machine's name, or KRANTO_PREVIEW_SSH)
+one_line() {  # the one command to run on the maintainer's own PC (this machine's name, or KRANTO_PREVIEW_SSH)
   local here="$ROOT"
   [[ $ROOT == "$HOME"/* ]] && here="~${ROOT#"$HOME"}"
   printf "ssh -t -L %s:127.0.0.1:%s %s '%s/bin/%s open; exec \$SHELL -l'" \

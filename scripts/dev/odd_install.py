@@ -3,10 +3,10 @@
 generated, never copied from anyone's, holding what the writers can store rather than what one
 install happens to contain.
 
-Everything we tested against used to look like the owner's install, and the owner never added a
-source without a topic, so a null similarity never existed in any database we tested. This
-writes one where every odd value the contract types allow is present: every nullable field
-null, every optional path taken.
+Everything we tested against used to look like the maintainer's install, and the maintainer
+never added a source without a topic, so a null similarity never existed in any database we
+tested. This writes one where every odd value the contract types allow is present: every
+nullable field null, every optional path taken.
 
 Variants:
 
@@ -97,9 +97,9 @@ def topics(ctx: Ctx) -> None:
     lib, s, e = library, ctx.store, ctx.embedder
     ctx.topics["user"] = lib.add_topic(s, e, "Tea", "tea growing and the tea trade")
     ctx.topics["paused"] = lib.add_topic(s, e, "Ceramics", "kilns, glazes, studio pottery")
-    lib.set_topic_status(s, ctx.topics["paused"], "paused", "paused by the owner")
-    ctx.topics["archived"] = lib.add_topic(s, e, "Old", "a topic the owner archived")
-    lib.set_topic_status(s, ctx.topics["archived"], "archived", "archived by the owner")
+    lib.set_topic_status(s, ctx.topics["paused"], "paused", "paused by the maintainer")
+    ctx.topics["archived"] = lib.add_topic(s, e, "Old", "a topic the maintainer archived")
+    lib.set_topic_status(s, ctx.topics["archived"], "archived", "archived by the maintainer")
     ctx.topics["project"] = lib.add_topic(s, e, "A project", "what a project gathers for",
                                           kind="project", ref="project:oddproject")
     ctx.topics["no_sources"] = lib.add_topic(s, e, "Empty", "a topic with no source at all")

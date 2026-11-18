@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# One safe step from a fix's pull request to the owner's install running it,
-# and, with --stable, to every stable install (the owner's Q3: a fix on stable
+# One safe step from a fix's pull request to the maintainer's install running it,
+# and, with --stable, to every stable install (a fix on stable
 # goes out right after its checks, fixes only, never features).
 #
 #   scripts/release/hotfix.sh REPO PR [--stable] [--dry-run] [--no-update]
@@ -22,7 +22,7 @@
 #      under a 3 GB cap); if it fails the nightly is withdrawn (gate.py withdraw: no install is
 #      offered it) and the run stops;
 #   6. read back: the release's commit list holds the merge commit;
-#   7. update: kranto update --to <tag> --yes on this machine's install (the owner's), then
+#   7. update: kranto update --to <tag> --yes on this machine's install (the maintainer's), then
 #      kranto --version and kranto doctor --routes.
 #
 # --stable, after the nightly half:
@@ -167,7 +167,7 @@ step "rc_check.sh $TAG $PREVIOUS (when the release touches what it checks)"
 if [ "$RC_CHECK" != "True" ]; then
   echo "   not required: the cut's smoke (fresh wheels, every page, the odd installs) was the check"
 elif [ -n "$DRY" ]; then
-  dry "would run rc_check.sh $TAG $PREVIOUS on 127.0.0.1:$RC_PORT before the owner's install takes it"
+  dry "would run rc_check.sh $TAG $PREVIOUS on 127.0.0.1:$RC_PORT before the maintainer's install takes it"
 else
   rc_check "$TAG" "$PREVIOUS" rc_check || {
     python3 "$HERE/gate.py" withdraw "$TAG" --reason "rc_check failed (hotfix $FULL#$PR)" || true
@@ -185,7 +185,7 @@ if [ "$MERGED_SHA" != "-" ]; then
     || fail "$TAG does not hold $NAME@$MERGED_SHA"
 fi
 
-step "update the owner's install: $KRANTO update --to $TAG --yes"
+step "update the maintainer's install: $KRANTO update --to $TAG --yes"
 if [ -n "$DRY" ] || [ -n "$NO_UPDATE" ]; then
   dry "would run $KRANTO update --to $TAG --yes, then read back $KRANTO --version (now: $("$KRANTO" --version 2>/dev/null || echo unreadable))"
 else

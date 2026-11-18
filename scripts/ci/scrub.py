@@ -72,7 +72,6 @@ ALLOW: dict[str, dict[str, str]] = {
     "foreign-account": {
         "tests/test_public_tree.py": "tests for this scanner",
         # each until the change that rewords it is on main; then its line goes
-        "docs/design/DESIGN.md": "a design paper from before the rename, rewritten separately",
         "src/kranto/page/ui/help.md": "the page's help, reworded separately",
         "src/kranto/page/ui/web/src/pages/post/post.svelte.test.ts": "a made-up handle in "
         "a page test, renamed separately",
@@ -87,6 +86,7 @@ ALLOW: dict[str, dict[str, str]] = {
         "tests/test_release_scripts.py": "tests that release notes drop them",
     },
     "big-file": {},
+    "nul-byte": {},
     "workflow": {},
 }
 
@@ -332,6 +332,11 @@ def scan_text(
 
 # ---------------------------------------------------------------- tree scan
 
+# files that are text by their name: a NUL byte in one is a finding, never a reason to skip it
+TEXT_SUFFIXES = (".md", ".txt", ".py", ".sh", ".toml", ".yaml", ".yml", ".json", ".ts", ".js",
+                 ".svelte", ".css", ".html", ".svg", ".cfg", ".ini")
+
+
 def scan_tree(root: Path, files: list[str]) -> list[Finding]:
     """Check the given paths (relative to root) for content that must not ship."""
     root = Path(root)
@@ -366,6 +371,16 @@ def scan_tree(root: Path, files: list[str]) -> list[Finding]:
                     text = data.decode("utf-8")
                 except UnicodeDecodeError:
                     text = None  # binary: only path and size checks apply
+            elif rel.lower().endswith(TEXT_SUFFIXES) and not allowed("nul-byte", rel):
+                # a text file with a NUL byte reads as binary to git, so a diff, a review and
+                # the checks above would all skip it: the byte itself is the finding, and the
+                # rest is checked with it taken out
+                nul = data.count(b"\x00")
+                findings.append(Finding("nul-byte", rel, 0, f"{nul} NUL bytes in a text file"))
+                try:
+                    text = data.replace(b"\x00", b"").decode("utf-8")
+                except UnicodeDecodeError:
+                    text = None
         else:
             continue  # directories, submodules
 

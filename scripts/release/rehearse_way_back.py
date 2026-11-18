@@ -1,6 +1,6 @@
 """Rehearse the update's way back on a scratch HOME, from local wheels: an install made before
-the rename crosses to the old-shape release (K0), goes back, crosses again, moves to the
-one-wheel release (K1), goes back and forward again; forced failures roll back; an update
+the rename crosses to the old-shape release, goes back, crosses again, moves to the
+one-wheel release, goes back and forward again; forced failures roll back; an update
 killed while it installs is put back by hand from its RECOVER.txt.
 
     python scripts/release/rehearse_way_back.py --work DIR --old SET --k0 SET --k1 SET
@@ -687,8 +687,9 @@ class Run:
         return seen
 
     def kill_during_install(self) -> dict:
-        """K1 back to K0, killed while it installs (after the swap took K1's tool away):
-        status names RECOVER.txt, and its lines put K1 back."""
+        """The one-wheel release back to the old-shape one, killed while it installs
+        (after the swap took the one-wheel release's tool away): status names
+        RECOVER.txt, and its lines put the one-wheel release back."""
         p = subprocess.Popen([str(self.cmd()), "update", "--rollback", "--yes"], env=self.env,
                              stdout=self.log, stderr=self.log, cwd=self.work)
         end, killed = time.time() + 600, None

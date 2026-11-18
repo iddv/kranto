@@ -3,8 +3,6 @@
 | Method and path          | Does                                                          |
 |--------------------------|---------------------------------------------------------------|
 | GET  /api/setup          | done or not; key set and its last test; the two logins; counts |
-| POST /api/setup/key      | {key, base_url, replace}: an OpenAI-style key (OpenRouter, or |
-|                          | the endpoint at base_url) through providers.choose, as below  |
 | GET  /api/setup/provider | what can serve the watcher's models (providers.detect)         |
 | POST /api/setup/provider | {provider, key?, base_url?, terms?, replace}: test, then make  |
 |                          | it the watcher's (claude_code needs terms: true, its sentence  |
@@ -21,7 +19,7 @@
 person's own key, and the monthly cap or "No cap is set".
 
 These are the only writers of ``.env`` and of the values onboarding sets in the YAML.
-Once setup is done, ``key`` and ``finish`` refuse unless the body says ``replace: true``
+Once setup is done, ``provider`` and ``finish`` refuse unless the body says ``replace: true``
 (Settings › Watching does). No response, log line or stored row holds the key.
 """
 
@@ -101,38 +99,6 @@ class SetupAPI:
 
     async def check(self, request: Request):
         return JSONResponse(await run_in_threadpool(self._state, True))
-
-    async def key(self, request: Request):
-        body, err = await self._body(request)
-        if err:
-            return err
-        store, cfg = self.rt.store, self.rt.cfg
-        if setup.is_done(store) and body.get("replace") is not True:
-            return _error("setup is done: change the key under Settings › Watching", 409)
-        try:
-            key = setup.check_key_shape(str(body.get("key") or ""))
-            base_url = setup.check_base_url(str(body.get("base_url") or cfg.llm.base_url))
-        except setup.SetupError as exc:
-            return _error(str(exc))
-        # an OpenAI-style key, through providers.choose like every other writer: the key's
-        # provider becomes the watcher's, so the last key given is the one watching
-        name = "openrouter" if "openrouter.ai" in base_url else "openai_compat"
-        try:
-            result = await run_in_threadpool(self._choose, name, key,
-                                              None if name == "openrouter" else base_url)
-        except (setup.SetupError, config_mod.ConfigError) as exc:
-            return _error(setup.scrub_key(str(exc), key))
-        except OSError as exc:
-            return _error(setup.scrub_key(f"the key works but could not be saved: {exc}",
-                                          key), 500)
-        test = setup.record_key_test(store, providers.KeyTest(result["test"]["ok"],
-                                                              result["test"]["detail"]),
-                                     base_url)
-        if not result["ok"]:
-            return _error(result["test"]["detail"], test=test)
-        return JSONResponse({"ok": True, "test": test,
-                             "key": {"set": True, "env": result["env"],
-                                     "base_url": result["base_url"] or base_url}})
 
     async def provider_state(self, request: Request):
         return JSONResponse(await run_in_threadpool(providers.detect, self.rt.cfg.root))
@@ -234,7 +200,6 @@ class SetupAPI:
     def routes(self) -> list[Route]:
         return [
             Route("/api/setup", self.state),
-            Route("/api/setup/key", self.key, methods=["POST"]),
             Route("/api/setup/provider", self.provider_state),
             Route("/api/setup/provider", self.provider, methods=["POST"]),
             Route("/api/watch/resume", self.watch_resume, methods=["POST"]),

@@ -24,7 +24,7 @@ be logged in (or ``GH_TOKEN`` set) for the repository.
 ``git log --oneline <previous>..<tag>``). A held release's line (``HELD_LINE``) is replaced by
 ``gate.py`` when the release goes to stable.
 
-**The attribution guard.** The notes must carry no tool attribution (the owner's rule): the
+**The attribution guard.** The notes must carry no tool attribution (the maintainer's rule): the
 script fails when the rendered text holds a co-author or session trailer line, a generated-with
 footer naming the tool, or the tool vendor's noreply address (``ATTRIBUTION``). A title that
 only names a tool ("Claude Code harness: ...") is a title, not attribution, and passes.
@@ -94,14 +94,17 @@ def install_lines(version: str, tag: str, repo: str, shape: str = "final") -> li
                 "one."]
     wheel = wheel_name(version)
     d = product.DIST
+    # install.sh takes the tag, so the line installs exactly this release, stable or not; no
+    # GitHub login is needed for a public repository
     return [
         "```",
-        f"gh release download {tag} -R {repo} -p '*.whl' -p SHA256SUMS -p manifest.json \\",
-        f"  -D {d}-{version}",
-        f"cd {d}-{version} && sha256sum -c SHA256SUMS",
-        f'uv tool install --force --python 3.12 "{d}[connections,notify,mcp] @ ./{wheel}"',
-        f"{product.COMMAND} up",
+        f"curl -fsSL https://github.com/{repo}/releases/download/{tag}/install.sh"
+        f" | sh -s -- --version {tag}",
         "```",
+        f"Or by hand: download `{wheel}` and `SHA256SUMS` from this release, "
+        "`sha256sum -c --ignore-missing SHA256SUMS`, then",
+        f'`uv tool install --python 3.12 "{d}[connections,notify,mcp] @ file://$PWD/{wheel}"` '
+        f"and `{product.COMMAND} up`.",
         f"Or, on an installation that already runs: `{product.COMMAND} update`.",
     ]
 

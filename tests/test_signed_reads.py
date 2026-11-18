@@ -83,7 +83,7 @@ def test_a_search_and_a_fetch_answer_the_page_and_every_token(search_rt):  # noq
         assert web.get(FETCH, headers={**bearer("mcp"), "origin": "https://x.example"}) \
             .status_code == 200
         r = web.get(SEARCH, headers={"authorization": "Bearer " + laptop})
-        assert r.status_code == 403 and "only sends what its browser read" in r.json()["error"]
+        assert r.status_code == 403 and "Kranto no longer has" in r.json()["error"]
 
 
 # -- C8: what the console said, an observation's raw model answer -------------------------------
