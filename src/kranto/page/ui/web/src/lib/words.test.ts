@@ -124,7 +124,7 @@ describe("Settings' words", () => {
     // each was on a page: "The kranto read nothing", "kranto' memory", "brb ui on its own, … afk
     // serve", "opens at 0.7" (this is 0.7), "in 0.6", "which is not hosting this page" (one server
     // serves the page and its data: when a read fails, the server is not answering)
-    const damage = /\bthe kranto\b|\bkranto' |Kranto's needs|\b(brb|afk) (ui|serve)\b|\bbrb\.enabled\b|\b(opens|comes|arrives) (at|in) 0\.\d\b|\bin 0\.[5-7]\b|not hosting this page|not hosted here|octo-owner/i;
+    const damage = /\bthe kranto\b|\bkranto' |Kranto's needs|\b(brb|afk) (ui|serve)\b|\bbrb\.enabled\b|\b(opens|comes|arrives) (at|in) 0\.\d\b|\bin 0\.[5-7]\b|not hosting this page|not hosted here/i;
     const bad = Object.entries(pageFiles()).flatMap(([f, raw]) => shownIn(f, raw).filter((s) => damage.test(s)).map((s) => `${f}: ${s.trim().slice(0, 90)}`));
     expect(bad).toEqual([]);
   });

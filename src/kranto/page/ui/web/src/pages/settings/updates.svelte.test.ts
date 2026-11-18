@@ -69,7 +69,7 @@ describe("Settings › System › Updates", () => {
     done();
   });
 
-  it("says Updates need the server on brb ui alone", async () => {
+  it("says Updates need the server when it does not answer", async () => {
     stub();
     ui.facts = { header: { host: null } } as unknown as Facts;
     const { target, done } = await draw(UpdatesList, where("settings/updates"));

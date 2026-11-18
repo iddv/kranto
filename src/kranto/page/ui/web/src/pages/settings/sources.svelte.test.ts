@@ -68,7 +68,7 @@ describe("Settings › Sources", () => {
     // the catalog's login words: who it reads as, or where to connect one (SRC D5, D7)
     const xp = { ...CAT.providers[1]!.presets[0]!, available: true };
     expect(presetWords(xp, CAT).meta).toBe("with your account · A list. Connect it first under Settings › Watching.");
-    expect(presetWords(xp, { ...CAT, connected: { x: [{ instance: "x.com", account: "@octo-owner", state: "connected" }] } }).meta).toBe("with your account · connected as @octo-owner · A list.");
+    expect(presetWords(xp, { ...CAT, connected: { x: [{ instance: "x.com", account: "@someone", state: "connected" }] } }).meta).toBe("with your account · connected as @someone · A list.");
     expect(proposalTopic(D.sources[1]!, null)).toBe(3);
     expect(proposalTopic({ ...D.sources[1]!, group: "wildcard" }, null)).toBeNull();
     expect(proposalTopic({ ...D.sources[1]!, topics: [], proposed_for: "Gone" }, [])).toBeUndefined();

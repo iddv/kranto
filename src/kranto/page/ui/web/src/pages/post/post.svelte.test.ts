@@ -88,7 +88,7 @@ describe("Post", () => {
   it("says where a sent post went, and what an account is", () => {
     expect(sentLine(draft(1, { note: "Sent to 312 on Resend" }))).toBe("Sent to 312 on Resend");
     expect(sentLine(draft(1))).toBe("Sent");
-    expect(accountWords({ key: "mastodon", word: "Mastodon", state: "connected", account: "@octo-owner@hachyderm.io", platform: null })).toBe("connected as @octo-owner@hachyderm.io");
+    expect(accountWords({ key: "mastodon", word: "Mastodon", state: "connected", account: "@someone@hachyderm.io", platform: null })).toBe("connected as @someone@hachyderm.io");
     expect(accountWords({ key: "newsletter", word: "Newsletter", state: "not set", account: null, platform: null })).toBe("not set");
     expect(accountHref({ key: "newsletter", word: "Newsletter", state: "not set", account: null, platform: null })).toBe("#/settings/posting?sel=enl");
     expect(accountHref({ key: "blog", word: "Blog", state: "not set", account: null, platform: null })).toBe("#/settings/connections/sanity");

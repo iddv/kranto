@@ -223,12 +223,14 @@ describe("an installed cub's Settings page", () => {
     v.done();
   });
 
-  // live's examplecom recorded a folder that no longer exists and said nothing
-  it("says a cub's source is gone, with the command that points it elsewhere", async () => {
+  // an installed feature recorded a folder that no longer exists and said nothing
+  it("says a feature's source is gone, with the command that points it elsewhere", async () => {
     stub();
     hosted();
-    const gone = { path: "/x/the server/cubs/examples/toot", fix: "kranto cub source toot https://github.com/octo-owner/bearcubs#subdirectory=cubs/toot",
-      words: "Its source folder is gone (/x/the server/cubs/examples/toot); it gets no updates. Reinstall from octo-owner/bearcubs: kranto cub source toot https://github.com/octo-owner/bearcubs#subdirectory=cubs/toot" };
+    // the server's words for a feature Kranto ships (core/cubs/updates.py's gone_words)
+    const fix = 'kranto cub source toot "$(kranto paths examples)/toot"';
+    const gone = { path: "/x/old-install/cubs/examples/toot", fix,
+      words: `Its source folder is gone (/x/old-install/cubs/examples/toot); it gets no updates. Point it at this Kranto's own copy: ${fix}` };
     answering({ [FEATURES_API]: FEATURES(toot), [SHELL_API]: shell, [cubPath("toot")]: detail({ source_gone: gone }) });
     let v = await draw(FeaturePage, where("settings/toot"));
     await settle();
