@@ -608,8 +608,8 @@ first, a version may break (one whose pages fail on your data rolls itself back)
 to update, since a nightly never installs by itself. A feature that is not finished can
 reach stable switched off: its setting's stable default keeps the old behaviour until the
 maintainer turns it on in a later stable release, whose notes say so. Moving from nightly to
-stable never downgrades: you stay on your version (`kranto status` says "moving to stable at the
-next promotion") until a newer stable is released. `main` follows every merge from git and
+stable never downgrades: you stay on your version (`kranto status` says it "moves to stable at
+the first stable release newer than it") until a newer stable is released. `main` follows every merge from git and
 suits a development machine. The old `rc` channel reads as nightly.
 
 **Promote to stable** (the maintainer's install only, `update.maintainer: true` in
