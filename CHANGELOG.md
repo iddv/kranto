@@ -20,6 +20,33 @@ will carry; the pre-releases `v0.7.0-devN` carry parts of it.
 - The daily job that reads back the numbers of sent posts now records its run, so it runs once a
   day instead of once a minute.
 
+### Changed since the pre-release v0.7.0-dev2
+
+- **Installing needs no GitHub account:** `install.sh` and the guide's by-hand steps download
+  the release's wheel and `SHA256SUMS` from its public addresses and check every hash.
+- **The watcher's commands are under `kranto watch`** (`kranto watch topics`, `kranto watch
+  websearch "…"`, `kranto watch provider show`, …). Every command Kranto or its docs print now
+  runs on an installed Kranto; `python -m kranto.cli` still works from a checkout.
+- **A live web search and a page fetch need a sign-in** (`/api/websearch` and
+  `/api/websearch/fetch`), as every change does; other reads still need none. A script that
+  called them without a token now gets 401; `kranto mcp` and the page send theirs. Switching
+  usage reports to basic or detailed, the console's last words and a raw model answer are the
+  signed-in page's only.
+- **A new home's console asks first and does not open by itself** (`ask: {open: false,
+  permission: ask}` in its `loop.yaml`); a home made before keeps what it had. `kranto doctor`
+  says how the console behaves.
+- **A feature from an unreviewed source waits for your approval at every update**
+  (`cubs.auto_update_unreviewed`, off); one from your own folder still updates by itself.
+- **The embedding model is kept in `~/.cache/kranto/fastembed`**, not in `/tmp` (gone at a
+  reboot on many machines); a copy an older Kranto left in `/tmp` is copied over once.
+- When GitHub's rate limit stops the update check, it says so, when it lifts, and that a GitHub
+  login avoids it. Without systemd, `kranto uninstall` says when a foreground Kranto still runs,
+  and `kranto setup` no longer takes another program on its port for Kranto.
+- The page says "feature" where it said "cub", and drops the rename's other leftovers; finding
+  places for a new topic says "a few minutes" and ticks first the places that publish.
+- Removed what nothing used: the build loop's settings, the `brb` command line, the evals and
+  setup-key routes, the browser extension's pairing path.
+
 ### What it is
 
 Kranto runs on your own Linux machine as one page in your browser, on 127.0.0.1. You describe
