@@ -515,8 +515,6 @@ CORE: tuple[Verb, ...] = (
          page="#/welcome"),
     Verb("setup.check", "Check", "Check the model provider answers.", "read", "POST",
          "/api/setup/check", page="#/settings/keys"),
-    Verb("setup.key", "Save key", "Keep the model provider's key (pasted by you).", "credential",
-         "POST", "/api/setup/key", doors=PAGE_ONLY, page="#/settings/keys"),
     Verb("setup.provider", "Save provider", "Choose the model provider and keep its key (pasted "
          "by you).", "credential", "POST", "/api/setup/provider", doors=PAGE_ONLY,
          page="#/settings/keys"),

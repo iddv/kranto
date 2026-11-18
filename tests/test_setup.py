@@ -26,6 +26,11 @@ EVIL = {"origin": "https://evil.example"}
 ENV = "KRANTO_TEST_MODEL_KEY"
 
 
+
+def save_key(web, key, provider="openrouter", **extra):
+    """The page's way to keep a model key: ``POST /api/setup/provider``."""
+    return web.post("/api/setup/provider", json={"provider": provider, "key": key, **extra})
+
 def fake_key() -> str:
     # built at run time: no key-shaped literal in the repository
     return "sk-" + "or-v1-" + secrets.token_hex(24)
@@ -147,7 +152,7 @@ def test_the_key_is_tested_kept_in_env_and_never_echoed(workspace, endpoint, cap
     endpoint["fake"] = Accepting(key)
     (rt.cfg.root / ".env").write_text("KRANTO_NOTIFY_URLS=ntfy://example/x\n")
     caplog.set_level(logging.DEBUG)
-    r = web.post("/api/setup/key", json={"key": f"  {key}\n"})
+    r = web.post("/api/setup/provider", json={"provider": "openrouter", "key": f"  {key}\n"})
     assert r.status_code == 200, r.text
     assert key not in r.text and r.json()["test"]["ok"] is True
     assert r.json()["test"]["detail"] == "OpenRouter accepted the key"
@@ -172,8 +177,7 @@ def test_a_preview_tests_no_key_and_says_so(workspace, endpoint, monkeypatch):
     rt, web, _ = workspace
     monkeypatch.setenv(preview.ENV, "1")
     key = fake_key()
-    for path, body in (("/api/setup/key", {"key": key}),
-                       ("/api/setup/provider", {"provider": "openrouter", "key": key})):
+    for path, body in (("/api/setup/provider", {"provider": "openrouter", "key": key}),):
         r = web.post(path, json=body)
         assert r.status_code == 400, r.text
         assert r.json()["error"] == preview.NO_KEY_TEST and key not in r.text
@@ -185,7 +189,7 @@ def test_a_refused_key_is_not_kept(workspace, endpoint, caplog):
     rt, web, _ = workspace
     key = fake_key()
     caplog.set_level(logging.DEBUG)
-    r = web.post("/api/setup/key", json={"key": key})
+    r = save_key(web, key)
     assert r.status_code == 400
     assert r.json()["error"] == "openrouter.ai refused the key (HTTP 401)"
     assert key not in r.text and not (rt.cfg.root / ".env").exists()
@@ -197,10 +201,10 @@ def test_a_refused_key_is_not_kept(workspace, endpoint, caplog):
 def test_a_key_that_could_add_a_line_is_refused(workspace, endpoint):
     rt, web, _ = workspace
     for bad in ("", "   ", "abc\nOTHER=1", "with space" + secrets.token_hex(8), "x" * 600):
-        r = web.post("/api/setup/key", json={"key": bad})
+        r = save_key(web, bad)
         assert r.status_code == 400, bad
     assert endpoint["fake"].seen == [] and not (rt.cfg.root / ".env").exists()
-    r = web.post("/api/setup/key", json={"key": fake_key(), "base_url": "ftp://x"})
+    r = save_key(web, fake_key(), provider="openai_compat", base_url="ftp://x")
     assert r.status_code == 400 and "http" in r.json()["error"]
 
 
@@ -209,7 +213,7 @@ def test_another_endpoint_is_tested_with_models_and_written_to_the_yaml(workspac
     key = fake_key()
     endpoint["fake"] = Accepting(key)
     before = (rt.cfg.root / "kranto.yaml").read_text()
-    r = web.post("/api/setup/key", json={"key": key, "base_url": "http://127.0.0.1:4000/v1/"})
+    r = save_key(web, key, provider="openai_compat", base_url="http://127.0.0.1:4000/v1/")
     assert r.status_code == 200, r.text
     assert endpoint["fake"].seen[0][:2] == ("127.0.0.1", "/v1/models")
     after = (rt.cfg.root / "kranto.yaml").read_text()
@@ -232,7 +236,7 @@ def test_finish_writes_the_config_marks_done_and_starts_the_first_ingest(workspa
     assert r.status_code == 400 and "key first" in r.json()["error"]
     key = fake_key()
     endpoint["fake"] = Accepting(key)
-    assert web.post("/api/setup/key", json={"key": key}).status_code == 200
+    assert save_key(web, key).status_code == 200
     topic = library.add_topic(rt.store, rt.embedder, "solar", "solar microgrids")
     src = library.add_source(rt.store, "rss", {"url": "https://ex.com/feed"}, label="Feed")
     library.link_topic_source(rt.store, topic, src)
@@ -250,9 +254,9 @@ def test_finish_writes_the_config_marks_done_and_starts_the_first_ingest(workspa
     # done: the key and finish refuse unless Settings › Keys says replace
     other = fake_key()
     endpoint["fake"] = Accepting(other)
-    assert web.post("/api/setup/key", json={"key": other}).status_code == 409
+    assert save_key(web, other).status_code == 409
     assert web.post("/api/setup/finish", json={"build_mode": "manual"}).status_code == 409
-    r = web.post("/api/setup/key", json={"key": other, "replace": True})
+    r = save_key(web, other, replace=True)
     assert r.status_code == 200 and other not in r.text
     assert (rt.cfg.root / ".env").read_text() == f"{ENV}={other}\n"
 
@@ -265,7 +269,7 @@ def test_a_kranto_home_has_its_kranto_yaml_written(workspace, endpoint):
     rt, web, _ = workspace
     (rt.cfg.root / "kranto.yaml").rename(rt.cfg.root / legacy.HOME_FILES[0])
     endpoint["fake"] = Accepting(key := fake_key())
-    r = web.post("/api/setup/key", json={"key": key, "base_url": "http://127.0.0.1:4000/v1"})
+    r = save_key(web, key, provider="openai_compat", base_url="http://127.0.0.1:4000/v1")
     assert r.status_code == 200, r.text
     assert web.post("/api/setup/finish", json={"build_mode": "manual"}).status_code == 200
     assert not (rt.cfg.root / "kranto.yaml").exists()
@@ -281,7 +285,7 @@ def test_finish_through_another_port_leaves_the_servers_port_alone(workspace, en
     sched = FakeScheduler()
     with web_client(create_app(rt, sched, port=8765), "http://127.0.0.1:9999") as web:
         endpoint["fake"] = Accepting(key := fake_key())
-        assert web.post("/api/setup/key", json={"key": key}).status_code == 200
+        assert save_key(web, key).status_code == 200
         assert web.post("/api/setup/finish", json={"build_mode": "manual"}).status_code == 200
     assert "9999" not in config_mod.load(rt.cfg.root).notify.base_url
 
@@ -289,7 +293,7 @@ def test_finish_through_another_port_leaves_the_servers_port_alone(workspace, en
 def test_finish_without_sources_or_scheduler_says_so(workspace, endpoint, tmp_path):
     rt, web, sched = workspace
     endpoint["fake"] = Accepting(key := fake_key())
-    web.post("/api/setup/key", json={"key": key})
+    save_key(web, key)
     r = web.post("/api/setup/finish", json={"build_mode": "manual"})
     assert r.json()["ingest"] == "no_sources" and sched.triggered == []
     assert setup.build_choice(rt.store) == {"mode": "manual", "concurrency": 1}
@@ -298,7 +302,8 @@ def test_finish_without_sources_or_scheduler_says_so(workspace, endpoint, tmp_pa
 def test_setup_writes_are_guarded(workspace, endpoint):
     rt, web, _ = workspace
     endpoint["fake"] = Accepting(key := fake_key())
-    for path, body in (("/api/setup/key", {"key": key}), ("/api/setup/finish", {}),
+    for path, body in (("/api/setup/provider", {"provider": "openrouter", "key": key}),
+                       ("/api/setup/finish", {}),
                        ("/api/setup/check", {})):
         assert web.post(path, json=body, headers=EVIL).status_code == 403
     assert endpoint["fake"].seen == [] and not (rt.cfg.root / ".env").exists()
@@ -370,7 +375,7 @@ def test_the_onboarding_answer_never_reaches_a_build_loop(workspace, endpoint, t
                      builds=replace(rt.cfg.builds, enabled=True))
     written = _fake_loop_settings(monkeypatch)
     endpoint["fake"] = Accepting(key := fake_key())
-    assert web.post("/api/setup/key", json={"key": key}).status_code == 200
+    assert save_key(web, key).status_code == 200
     r = web.post("/api/setup/finish", json={"build_mode": "manual", "concurrency": 2})
     assert r.status_code == 200, r.text
     assert written == [] and not (tmp_path / "loop").exists()
@@ -388,7 +393,7 @@ def test_with_builds_off_finish_writes_nothing_to_the_loop(workspace, endpoint, 
                                          loop_home=str(tmp_path / "loop")))
     written = _fake_loop_settings(monkeypatch)
     endpoint["fake"] = Accepting(key := fake_key())
-    assert web.post("/api/setup/key", json={"key": key}).status_code == 200
+    assert save_key(web, key).status_code == 200
     r = web.post("/api/setup/finish", json={})
     assert r.status_code == 200 and r.json()["done"] and r.json()["loop_settings"] is None
     assert written == [] and not (tmp_path / "loop").exists()
@@ -402,7 +407,7 @@ def test_without_page_the_answer_is_kept_and_nothing_else_written(workspace, end
                                          loop_home=str(tmp_path / "loop")))
     brbfake.missing(monkeypatch)
     endpoint["fake"] = Accepting(key := fake_key())
-    assert web.post("/api/setup/key", json={"key": key}).status_code == 200
+    assert save_key(web, key).status_code == 200
     r = web.post("/api/setup/finish", json={"build_mode": "auto"})
     assert r.status_code == 200 and r.json()["loop_settings"] is None
     assert not (tmp_path / "loop").exists()
