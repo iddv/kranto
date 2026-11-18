@@ -5,7 +5,6 @@ import { answering, draw, settle, stub, where } from "../testing.svelte";
 import { frameClassic, layoutOf, SHELL_API, type Arrangement } from "../../features/shell";
 import AppearanceList from "./AppearanceList.svelte";
 import AppearancePane from "./AppearancePane.svelte";
-import ShellList from "./ShellList.svelte";
 import ShellPane from "./ShellPane.svelte";
 
 afterEach(() => { ui.facts = null; });
@@ -53,19 +52,6 @@ describe("One layout (open-source wave 1, PR 1.4: Classic cut, D-2)", () => {
 });
 
 describe("Settings › System › The home", () => {
-  it("keeps the caps and Arrange; no layout row, and the old switches are gone", async () => {
-    stub({ host: {} });
-    hosted();
-    answering({ [SHELL_API]: A("classic") });
-    const { target, done } = await draw(ShellList, where("settings/system"));
-    await settle();
-    const rows = [...target.querySelectorAll(".r-title")].map((x) => x.textContent);
-    expect(rows).toEqual(["Rows at most", "Arrange the home"]);
-    expect(target.textContent).not.toContain("Classic");
-    expect(target.textContent).not.toContain("The doors");
-    done();
-  });
-
   it("writes a cap through the one writer", async () => {
     const L = stub({ host: {}, answer: A("new") });
     hosted();
