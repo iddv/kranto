@@ -20,6 +20,11 @@ another site open in the operator's browser from reading or driving it is
 - Every response forbids framing (clickjacking) and sets a content policy.
 - A state-changing request must carry a kranto token (``web/auth.py``, OI): the page's
   session cookie, or ``Authorization: Bearer``. The token says who acts.
+- A few reads are checked the same way (``Auth.guarded_read``): the owner's (a trace, the
+  runs, what the console's assistant said) and those that do something (a live web search, a
+  page fetch). A browser makes them only from Kranto's own page.
+- An observation's raw model answer is shown to the owner signed in only; to anyone else its
+  ``call.response`` is null.
 """
 
 from __future__ import annotations
@@ -120,8 +125,8 @@ class GuardMiddleware(BaseHTTPMiddleware):
                 refused = self.auth.check(request)
                 if refused is not None:
                     return self._secure(refused)
-        elif self.auth is not None and self.auth.owner_read(request.url.path):
-            refused = self.auth.check_read(request)           # a trace: the owner's only
+        elif self.auth is not None and self.auth.guarded_read(request.url.path):
+            refused = self.auth.check_read(request)   # a trace, a live search: signed in only
             if refused is not None:
                 return self._secure(refused)
         return self._secure(await call_next(request))
@@ -865,6 +870,23 @@ class App:
                              "message": "Removed from the library at your request; the purge "
                                         "record says so."})
 
+    def _call_for(self, request: Request, call) -> dict | None:
+        """The model call that judged an observation; its raw answer (``response``: the
+        model's own words about a stranger's text) only for the owner signed in, else null.
+        With ``api.require_token: false`` everyone is the owner, as for every write."""
+        from .auth import is_owner
+
+        if not call:
+            return None
+        out = dict(call)
+        auth = getattr(self, "auth", None)
+        if auth is not None and auth.require:
+            ident, _ = auth.identify(request)
+            if not is_owner(ident) or ((ident or {}).get("via") == "cookie"
+                                       and auth.from_elsewhere(request)):
+                out["response"] = None
+        return out
+
     def api_observation(self, request: Request):
         obs_id = _int(request.path_params["obs_id"])
         row = library.get_observation(self.rt.store, obs_id) if obs_id else None
@@ -895,7 +917,7 @@ class App:
             "neighbours": [{**self._public(_row(near[h.observation_id])),
                             "score": round(h.score, 4), "weak": h.weak}
                            for h in hits if h.observation_id in near],
-            "call": dict(call) if call else None,
+            "call": self._call_for(request, call),
             "synthesis": {"text": synthesis["text"],
                           "input_ids": SynthesisInputIds.load(synthesis["input_ids"]).items}
             if synthesis else None,

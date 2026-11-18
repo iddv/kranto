@@ -133,7 +133,9 @@ def _assistant(schema: dict) -> list[str]:
         "the page (Settings › Privacy & access) or in your own terminal: an assistant "
         "working in Kranto can prepare the choice for your approval (verb "
         "`settings.telemetry`), never make it, under every assistant setting; `kranto "
-        "telemetry basic|detailed` is refused inside an assistant's session. An assistant "
+        "telemetry basic|detailed` is refused inside an assistant's session. Over HTTP only "
+        "the page, signed in, can choose them: a token (the command line's, an assistant's) "
+        "is refused, and so is everyone when the server's tokens are switched off. An assistant "
         "may turn reports off at once (verb `telemetry.off`). The first time Kranto's "
         "plugin starts in an install that never answered, it shows one line pointing to "
         "`/kranto:telemetry` and this setting, and never again.",
