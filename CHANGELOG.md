@@ -5,11 +5,10 @@ What changed in each release of Kranto, for the person who runs it. Versions fol
 (`vX.Y.0-devN`, GitHub prereleases) are not listed one by one: their notes name the pull
 requests they carry.
 
-## Unreleased
+## 0.7.0 — unreleased
 
-Nothing yet.
-
-## 0.7.0 — 2026-11-16
+Not released yet: the date is written here when 0.7.0 is cut. Until then this is what it
+will carry; the pre-releases `v0.7.0-devN` carry parts of it.
 
 ### What it is
 
@@ -26,7 +25,8 @@ library with the same tools.
 It needs Linux, Python 3.12 and [uv](https://docs.astral.sh/uv/), and one model for reading: an
 Anthropic or OpenRouter key, another OpenAI-compatible endpoint, or your Claude Code login. The
 console needs the Claude Code CLI, signed in. It is installed from this repository's release
-wheel (it is not on PyPI); `docs/setup.md` has every step.
+wheel, with `install.sh` or by hand, no GitHub account needed (it is not on PyPI);
+`docs/setup.md` has every step.
 
 ### What is in it
 
@@ -71,8 +71,9 @@ wheel (it is not on PyPI); `docs/setup.md` has every step.
   for anyone else is not measured.
 - **Posting for real** has been rehearsed with stand-ins and the preview's switch; each site's
   direct posting needs your own app or token, and the sites' terms change (`docs/accounts.md`).
-- The console starts Claude Code with your own login and plan; what it may do by itself is a
-  setting (Settings › Assistant), and its default is the safe side.
+- The console starts Claude Code with your own login and plan, as you and not in a sandbox;
+  whether it opens by itself and what it may do without asking are settings (Settings ›
+  Assistant), and `docs/threat-model.md` says what the defaults allow.
 
 ### Before you upgrade from an install made before the rename
 

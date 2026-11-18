@@ -7,7 +7,7 @@ guaranteed response time.
   an issue from you, with the details it shows you first (Help › Feedback).
 - **Questions and ideas:** GitHub Discussions on this repository, when they are enabled;
   until then, an issue.
-- **An error Kranto showed you:** press **Send this error** on the row or page that says it
+- **An error Kranto showed you:** click **Send this error** on the row or page that says it
   (it shows the report before sending), or run `kranto report` and attach the file it names.
 - **A bug:** open an issue with the **Bug** form. It asks for `kranto --version`, your
   distribution, the model provider and the output of `kranto doctor`. Remove keys, tokens and

@@ -11,6 +11,18 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
 authors = [{ name = "The Kranto authors" }]
+keywords = ["news", "feeds", "briefs", "writing", "self-hosted", "local-first"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Web Environment",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: News/Diary",
+  "Topic :: Text Processing",
+]
 dependencies = [
   "numpy>=1.26",
   "fastembed>=0.4",
@@ -34,6 +46,13 @@ dependencies = [
   # kranto cub eval runs a cub's own tests (its tests/, against bears_cub.testing.FakeHost)
   "pytest>=8",
 ]
+
+[project.urls]
+Homepage = "https://github.com/iddv/kranto"
+Documentation = "https://github.com/iddv/kranto/blob/main/docs/README.md"
+Changelog = "https://github.com/iddv/kranto/blob/main/CHANGELOG.md"
+Issues = "https://github.com/iddv/kranto/issues"
+Source = "https://github.com/iddv/kranto"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff==0.16.10", "time-machine>=2.14", "cryptography>=42",
