@@ -49,14 +49,14 @@ def test_the_search_and_the_fetch_carry_kranto_mcps_token(server):
     store.ensure_doors()
     want["value"] = store.value("mcp")
     c = T.http_client(url)
-    status, body = c.afk_get("/api/websearch", {"q": "sync"})
+    status, body = c.server_get("/api/websearch", {"q": "sync"})
     assert status == 200 and body["live"]
-    status, body = c.afk_get("/api/websearch/fetch", {"url": "https://page.example/a"})
+    status, body = c.server_get("/api/websearch/fetch", {"url": "https://page.example/a"})
     assert status == 200 and body["text"] == "A page."
     assert [s["auth"] for s in seen] == [f"Bearer {want['value']}"] * 2
     console = T.http_client(url, door="console")          # the console's own door
     want["value"] = store.value("console")
-    assert console.afk_get("/api/websearch", {"q": "x"})[0] == 200
+    assert console.server_get("/api/websearch", {"q": "x"})[0] == 200
 
 
 def test_a_refused_read_says_how_to_fix_the_token(server):
@@ -65,4 +65,4 @@ def test_a_refused_read_says_how_to_fix_the_token(server):
     want["value"] = None                                   # the server knows no such token
     c = T.http_client(url)
     with pytest.raises(T.ToolError, match="Kranto refused kranto mcp's token"):
-        c.afk_get("/api/websearch", {"q": "sync"})
+        c.server_get("/api/websearch", {"q": "sync"})
