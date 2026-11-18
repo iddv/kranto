@@ -18,15 +18,29 @@ off (memory goes back after each run), one run happens at a time per embedder (t
 shares one between its jobs and requests), and a text is read up to ``MAX_TOKENS`` (the
 prefilter's text is at most 2000 characters, about 600 tokens; longer text has never been
 embedded by any caller, so no stored vector changes).
+
+Where the model is kept (about 500 MB): ``~/.cache/kranto/fastembed`` (``$XDG_CACHE_HOME`` when
+set; ``$FASTEMBED_CACHE_PATH`` when set wins), not fastembed's default ``/tmp/fastembed_cache``,
+which a reboot empties on many machines (the model was then downloaded again, and reading failed
+offline) and which any local user can make first. A model an earlier Kranto left in the old place
+is copied over once (``cache_dir``), only when that folder and everything in it is this user's;
+if the copy fails, the old place is used for that run. fastembed looks in the folder before it
+asks the network, so with the model there Kranto reads offline.
 """
 
 from __future__ import annotations
 
 import contextlib
 import hashlib
+import logging
+import os
 import re
+import shutil
+import stat
+import tempfile
 import threading
 import time
+from pathlib import Path
 from typing import Protocol
 
 import numpy as np
@@ -34,6 +48,11 @@ import numpy as np
 EMBED_DIM = 384
 NOMIC_MODEL = "nomic-ai/nomic-embed-text-v1.5"
 NOMIC_MODEL_NAME = "nomic-embed-text-v1.5@384"
+# fastembed's own default, where Kranto before 0.7.0 kept the model
+OLD_CACHE = Path(tempfile.gettempdir()) / "fastembed_cache"
+CACHE_ENV = "FASTEMBED_CACHE_PATH"
+
+log = logging.getLogger(__name__)
 # At most this many texts a model run, and at most this many characters squared times the
 # texts in it (four texts of 2,100 characters, measured at about +470 MB over the loaded
 # model; a batch of 40 such texts went past 3 GB).
@@ -98,6 +117,84 @@ def batches(texts: list[str]) -> list[list[int]]:
     return out
 
 
+def default_cache_dir(environ=None) -> Path:
+    """Where the model is kept: ``$FASTEMBED_CACHE_PATH`` when set, else
+    ``$XDG_CACHE_HOME/kranto/fastembed`` (an absolute path only, as the XDG rule says), else
+    ``~/.cache/kranto/fastembed``."""
+    env = os.environ if environ is None else environ
+    if env.get(CACHE_ENV):
+        return Path(env[CACHE_ENV]).expanduser()
+    base = env.get("XDG_CACHE_HOME") or ""
+    if os.path.isabs(base):
+        root = Path(base)
+    else:
+        root = Path(env.get("HOME") or Path.home()).expanduser() / ".cache"
+    return root / "kranto" / "fastembed"
+
+
+def _all_mine(top: Path) -> bool:
+    """Whether ``top`` is a real folder (not a link) that this user owns, and so is everything
+    in it (a link inside is taken as it is: the hub's cache links its snapshots to its blobs)."""
+    uid = os.getuid()
+    try:
+        st = os.lstat(top)
+        if not stat.S_ISDIR(st.st_mode) or st.st_uid != uid:
+            return False
+        for here, dirs, files in os.walk(top):
+            for name in dirs + files:
+                if os.lstat(os.path.join(here, name)).st_uid != uid:
+                    return False
+    except OSError:
+        return False
+    return True
+
+
+def _holds_something(folder: Path) -> bool:
+    try:
+        return folder.is_dir() and any(folder.iterdir())
+    except OSError:
+        return False
+
+
+def cache_dir(environ=None, old: Path | None = None) -> Path:
+    """The folder to hand fastembed, made if missing (mode 700). When it holds nothing yet and
+    the old place (``OLD_CACHE``) holds a model of this user's, that is copied over once (into a
+    folder of its own, then renamed into place, so a half copy is never read); the old place is
+    left as it is (another process may be reading it). If the copy fails, the old place is
+    returned for this run, so nothing is downloaded again. ``$FASTEMBED_CACHE_PATH`` is the
+    user's own choice: used as it is, nothing copied."""
+    env = os.environ if environ is None else environ
+    new = default_cache_dir(env)
+    if env.get(CACHE_ENV):
+        return new
+    old = OLD_CACHE if old is None else old
+    if _holds_something(new):
+        return new
+    usable_old = _holds_something(old) and _all_mine(old)
+    try:
+        new.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    except OSError as exc:
+        log.warning("the embedding model's folder %s could not be made: %s", new.parent, exc)
+        return old if usable_old else new
+    if usable_old:
+        staging = Path(tempfile.mkdtemp(dir=new.parent, prefix=".fastembed-copy-"))
+        try:
+            shutil.copytree(old, staging / "c", symlinks=True)
+            with contextlib.suppress(OSError):
+                new.rmdir()                    # an empty folder from an earlier start
+            os.rename(staging / "c", new)
+            log.info("the embedding model was copied from %s to %s", old, new)
+        except OSError as exc:
+            if not _holds_something(new):      # another process's copy may have won
+                log.warning("the embedding model could not be copied from %s to %s (%s): "
+                            "using %s for now", old, new, exc, old)
+                return old
+        finally:
+            shutil.rmtree(staging, ignore_errors=True)
+    new.mkdir(parents=True, exist_ok=True, mode=0o700)
+    return new
+
+
 class NomicEmbedder:
     model_name = NOMIC_MODEL_NAME
 
@@ -113,9 +210,11 @@ class NomicEmbedder:
     def _load(self):
         if self._model is None:
             factory = self._factory
+            folder = self._cache_dir
             if factory is None:
                 from fastembed import TextEmbedding as factory
-            kwargs = {"cache_dir": self._cache_dir} if self._cache_dir else {}
+                folder = folder or str(cache_dir())       # never fastembed's /tmp default
+            kwargs = {"cache_dir": str(folder)} if folder else {}
             with _no_prepacking():
                 self._model = factory(NOMIC_MODEL, enable_cpu_mem_arena=False, **kwargs)
             tokenizer = getattr(getattr(self._model, "model", None), "tokenizer", None)
