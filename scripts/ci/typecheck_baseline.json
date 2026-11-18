@@ -1,6 +1,6 @@
 {
  "about": "mypy errors per file; a count may only fall (scripts/ci/typecheck.py)",
- "total": 511,
+ "total": 510,
  "files": {
   "src/kranto/cli.py": 14,
   "src/kranto/config.py": 1,
@@ -103,7 +103,7 @@
   "src/kranto/web/features_api.py": 4,
   "src/kranto/web/prompts_api.py": 2,
   "src/kranto/web/settings_api.py": 5,
-  "src/kranto/web/setup_api.py": 2,
+  "src/kranto/web/setup_api.py": 1,
   "src/kranto/web/sources_api.py": 11,
   "src/kranto/web/today_api.py": 2,
   "src/kranto/web/update_api.py": 5,
