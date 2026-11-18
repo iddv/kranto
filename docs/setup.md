@@ -198,7 +198,7 @@ open http://127.0.0.1:8765/auth/open?code=…
 ```
 
 Open that link in a browser on the same machine. **You should see** the kranto start page with a
-**Set up Kranto** button. Reading needs no sign-in; anything that changes something does, so a
+**Set up Kranto** button. Reading needs no sign-in (but for a web search and a page fetch); anything that changes something does, so a
 browser that was never signed in sees the page but cannot act.
 
 On another machine, tunnel the port first, then open the link there:
@@ -362,7 +362,8 @@ the first time.` and **The first hour**.
 
 ## 9. Let an assistant or a script use Kranto
 
-Reads need nothing. Every change needs a token, and each caller gets its own, so the record says
+Most reads need nothing (a live web search and a page fetch need a token too). Every change
+needs a token, and each caller gets its own, so the record says
 who did what:
 
 ```sh
