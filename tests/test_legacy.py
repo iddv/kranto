@@ -150,3 +150,17 @@ def test_a_unit_written_before_the_rename_is_known_by_its_text():
     new = ("[Unit]\nDescription=x\n[Service]\nEnvironment=KRANTO_HOME=%h/kb\n"
            "ExecStart=%h/.local/bin/kranto serve --port 10025\n")
     assert not legacy.is_old_unit(new)
+
+
+def test_every_kept_old_name_is_still_in_the_code_and_says_why():
+    """``legacy.KEPT`` records the old names still used outside legacy.py; one that the code no
+    longer holds must leave the list (and one renamed must not stay in it)."""
+    src = Path(legacy.__file__).resolve().parent
+    text = "\n".join(p.read_text() for p in sorted(src.rglob("*.py")) if p.name != "legacy.py")
+    seek = {"/brb/": "/brb/", "afk_oauth": '"afk_oauth"', "afk_device": '"afk_device"',
+            "#/afk/<run>/trace": "#/afk/", "brb:": '"brb"', "afk:<run>": 'f"afk:',
+            "afk_error": '"afk_error"', "kranto.web.brb": 'getLogger("kranto.web.page")'}
+    assert set(seek) == set(legacy.KEPT)
+    assert [k for k, s in seek.items() if s not in text] == []
+    assert (src / "web" / "brb.py").is_file()
+    assert all(len(why) > 30 for why in legacy.KEPT.values())

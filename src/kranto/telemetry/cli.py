@@ -197,7 +197,7 @@ def main(home: Path, argv: list[str]) -> int:
     if args.cmd == "docs":
         print(docs_mod.page(), end="")
         return 0
-    if args.cmd == "schema":  # the whole list, for the relay (ops/telemetry)
+    if args.cmd == "schema":  # the whole list, for the usage-report relay (a separate service)
         from . import schema as schema_mod
 
         print(json.dumps(schema_mod.union(), indent=1, sort_keys=True))

@@ -3,7 +3,7 @@ order; the first match answers, else 404 (tests/page/test_api_routes.py pins eve
 is a path, a tuple of paths, a ``Prefix``, or a predicate on the path; the method ``"*"``
 matches any. A handler takes the app and the request (``Req``: method, path, data, who) and
 returns ``(status, content type, body)``; data is the query for a GET and the JSON body for a
-POST, who the caller's identity (OI)."""
+POST, who the caller's identity."""
 from __future__ import annotations
 
 import json

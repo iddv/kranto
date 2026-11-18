@@ -122,6 +122,14 @@ click Restart to update, or by itself in the quiet window if you set
 rollback that has to reinstall online can resolve versions the release was
 not tested with. Signed attestations and a constraints file are planned.
 
+**The install runs code from the release too.** `curl … | sh` runs the
+release's `install.sh` as you, at once; to read it first, download it and run
+`sh install.sh` (the README shows both). It installs uv with uv's own installer
+when you have none, downloads the release's wheel over HTTPS and checks it
+against the release's `SHA256SUMS`, with the same limit as an update: the
+check proves the download is the release's, not who published it. It never
+runs sudo, asks for no login and keeps no token.
+
 ## Data
 
 The library holds model-written summaries of third-party content, verbatim

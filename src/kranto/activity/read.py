@@ -12,7 +12,7 @@
   is failing;
 - **recent**: the last day's runs, newest first; the hourly skipped re-checks and the usage
   reports **folded** into one line a kind (``all=1`` unfolds);
-- **failing**: the Fix rows (the owner's D-6): a kind that failed twice in a row or has
+- **failing**: the Fix rows: a kind that failed twice in a row or has
   been failing for two days, until its next good run or the owner's Dismiss.
 
 Bounded (``LIMIT``, ``LIMIT_MAX``), every word scrubbed at write and passed through
@@ -665,7 +665,7 @@ def _tries(kind: str, rs: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _row(out: list[Any], ident: str, kind: str, state: str) -> AbstractContextManager[None]:
     """One activity row built in this block: one that raises is listed as "Couldn't read this
-    run" with its kind and state, never the whole read (RCA A3)."""
+    run" with its kind and state, never the whole read."""
     from .. import rowsafe
     return rowsafe.row(out, "run", f"afk:{ident}" if ":" not in ident else ident,
                        uuid=ident, kind=kind, state=state, title=W.plain(kind))

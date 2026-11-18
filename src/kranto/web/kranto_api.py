@@ -145,7 +145,7 @@ class KrantoAPI:
         cluster_grades = grades.latest(store, "cluster", [c["lineage_id"] for c in clusters])
         out: list[dict] = []
         for c in clusters:
-            # one theme that cannot be read is listed as such (RCA A3)
+            # one theme that cannot be read is listed as such, never the whole list
             with rowsafe.row(out, "theme", c.get("cluster"), label=c.get("label"),
                              lineage_id=c.get("lineage_id")):
                 c["synthesis"] = _synthesis(cached_synthesis(store,

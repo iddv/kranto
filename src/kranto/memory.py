@@ -180,7 +180,7 @@ _LIBC = None
 
 def release() -> None:
     """After a job: collect, and hand glibc's free memory back to the system. Without it a map
-    snapshot's working memory stayed with the server (measured on live's library: 746 MB after
+    snapshot's working memory stayed with the server (measured on a real library: 746 MB after
     a snapshot, 535 MB after this; the next snapshot no higher). A no-op off glibc."""
     global _LIBC
     gc.collect()

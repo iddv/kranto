@@ -501,7 +501,7 @@ def listing(store: Store, *, cub: str | None = None, open_only: bool = False,
             now: datetime | None = None, unreadable: bool = False) -> list[dict[str, Any]]:
     """The tickets, newest first. One that cannot be read is kept once by its error's id and
     left out (a cub, a feature and the counts read tickets' fields); ``unreadable`` lists it as
-    "Couldn't read this ticket" instead (the page's list: ``GET /api/tickets``, RCA A3)."""
+    "Couldn't read this ticket" instead (the page's list: ``GET /api/tickets``)."""
     sql = "SELECT id FROM cub_tickets WHERE 1 = 1"
     params: list[Any] = []
     if cub:

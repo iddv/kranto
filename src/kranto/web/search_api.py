@@ -1,4 +1,4 @@
-"""One search for Kranto UI's command palette (UI-v4.md 2.4).
+"""One search for Kranto UI's command palette.
 
 | Method and path   | Does                                                             |
 |-------------------|------------------------------------------------------------------|
