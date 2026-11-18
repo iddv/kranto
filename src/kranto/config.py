@@ -239,32 +239,6 @@ look:
   # call per item, as for every other kind.
   screen_batch: 20
 
-deep_dive:
-  # Deep dives left Kranto in wave 3 (their job and their command); the observations
-  # they found stay, linked to theirs. Reading one step from an item is look:'s.
-  # These keys are accepted so existing files load; only Settings › Watching and
-  # the usage report still show enabled and daily_usd.
-  enabled: false
-  # Unused since #84 (nothing is queued by signal any more); accepted so
-  # existing configurations still load.
-  min_signal: 0.5
-  daily_usd: 0.05
-  every_hours: 3
-  max_per_run: 10
-  # Per deep dive: pages linked from the item and its comments, and repositories.
-  max_links: 3
-  max_repos: 2
-  # Comments read from a Hacker News thread for its discussion.
-  max_comments: 20
-  # Reddit comments come from the post's public feed, paced like every Reddit
-  # request (one a minute). Off: see RESPONSIBLE_USE.md before turning it on.
-  reddit_comments: false
-  # A deep dive that keeps failing is given up after this many attempts.
-  max_attempts: 3
-  # Queued deep dives older than this are dropped (a thread goes quiet); ones
-  # queued by hand are not.
-  max_queue_days: 7
-
 notify:
   # Apprise URLs (https://github.com/caronc/apprise/wiki), e.g. "mailto://...",
   # "ntfy://...", "tgram://...". Needs: pip install 'kranto[notify]'.
@@ -282,17 +256,11 @@ notify:
   heartbeat_ping_url: null
 
 brb:
-  # The page's builds UI at /brb/ (needs the page installed in this environment). It can
-  # start paid builds and make repos public, so it is only mounted when the server is
-  # bound to loopback. root: the task folder it lists (default: the loop's tasks_dir);
-  # loop_home: the build loop's home (default: $KRANTO_LOOP_HOME, else ~/kranto-loop; a kranto home
-  # sets its own loop/); harness: what runs a build (claude-code).
-  enabled: false
-
-builds:
-  # Builds, projects and repo maintenance (the loop, Build, Projects, Repos). Off unless set:
-  # no loop lane, no maintenance poll, no build pages or build actions, and project topics
-  # are not read (listed as paused; nothing is removed). true turns them on (needs brb).
+  # The page: Kranto's web UI with its console (kranto up turns it on). Served only when
+  # the server is bound to loopback. loop_home: the page's own folder, its settings file
+  # loop.yaml and its console sessions (default: $KRANTO_LOOP_HOME, else ~/kranto-loop; a
+  # Kranto home sets its own loop/). root and harness were for an earlier release's builds:
+  # still accepted in a file that has them, and left out of a new one.
   enabled: false
 
 connections:
@@ -1162,6 +1130,9 @@ DOTENV_VARS = "KRANTO_DOTENV_VARS"
 # removes its feature.
 RETIRED: dict[str, str] = {"invest": "Invest", "radar": "The trend radar",
                            "browser": "The browser extension"}
+# Sections of features that left, still read from a file that has them (their defaults when it
+# does not) but no longer written into a new file (DEFAULT_CONFIG_YAML leaves them out).
+FOR_OLD_FILES = ("deep_dive", "builds")
 
 
 def config_path(root: Path) -> Path | None:

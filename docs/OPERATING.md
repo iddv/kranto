@@ -650,13 +650,9 @@ required check yet) builds the final wheel, installs it into a scratch HOME and 
 **Where it runs.** An install is one home (`~/.kranto`, or `$KRANTO_HOME`) served by
 the systemd user unit `kranto.service` on 127.0.0.1, made by `kranto up`
 ([setup.md](setup.md)); `kranto status`, `kranto logs`, `kranto doctor` and
-`kranto paths` say how it stands and where things are. The maintainer's own
-instances run on an always-on server, not a PC: one checkout of the repository (after a merge: `git pull`,
-reinstall if `pyproject.toml` changed, run the tests), one workspace per purpose
-(the local-first library, and a second one for the #63 benchmark), each served
-by a systemd user unit bound to 127.0.0.1 and reached through an SSH tunnel.
-Work that needs another branch uses a separate worktree, never the served
-checkout. `kranto adopt` moves an install from before Kranto (by default that
+`kranto paths` say how it stands and where things are. An always-on machine suits it better
+than a laptop (the scheduler reads while it runs); from another machine, reach it through an
+SSH tunnel, never by binding it to another address. `kranto adopt` moves an install from before Kranto (by default that
 install's own workspace, loop home and task folders where the older release put them;
 `-w` and `--loop-home` for others) to `kranto.service` in place (backups next to
 the workspace in `<workspace>-backups`, the page's `brb` section written, migrations,
@@ -685,50 +681,21 @@ Breaking any of these reintroduces a failure that already happened once.
 
 ## 8. How work on this project is run
 
-- **GitHub issues are the only record of state.** Every piece of work is an
-  issue. Decisions and progress are comments. PRs say `Closes #N`.
-- **Tracking issues** hold a checklist of a phase: #22 (phase 2, built) and
-  #28 (pre-public readiness). A new session starts from the newest open
-  tracking issue.
-- **Orchestrator and subagents.** Phase 2 was built by one orchestrating agent
-  and four implementing agents. What worked:
-  1. The orchestrator builds the shared foundation first (contracts,
-     migration scheme, the notify API), so parallel work cannot diverge.
-  2. Each issue is self-contained: why, scope, done-when tests, a
-     pre-assigned migration number, rules.
-  3. Each implementing agent works in its own git worktree
-     (`../kranto-wt/<name>`, beside the checkout) and virtualenv, comments on its
-     issue when it starts, records each non-obvious decision, rebases before
-     pushing, and opens a PR without merging.
-  4. The orchestrator reads the core diff against DECISIONS.md, re-runs the
-     tests on the branch, waits for CI, merges one PR at a time, ticks the
-     tracking issue, and runs an end-to-end check on anything its agent could
-     not verify.
-- **Doors.** Reversible changes are decided and recorded. One-way doors are
-  asked: making the repository public, publishing to PyPI, committing
-  third-party data, freezing a data contract other instances would depend
-  on, sending anything to a target the operator did not configure.
-- **Output discipline.** No emojis, no co-author trailers, no hyperbole, and
-  never report something as working that was not run.
+[CONTRIBUTING.md](../CONTRIBUTING.md) says how a change is proposed, tested and merged. The
+rules the code depends on are the invariants above and the ones in CONTRIBUTING.md; a change that
+breaks one says so in its pull request.
 
-## 9. Open threads
+## 9. Considered and not built
 
-- **#21 calibration.** One week on a real key: cost per judged item, keep
-  rate, time to first map, bursts, candidates, strikes, grades. Then tune the
-  prefilter, strike thresholds, burst parameters and card thresholds, and add
-  a measured cost table to the README. Blocked on the operator's key.
-- **#10 Reddit OAuth.** Optional credentials for reliable Reddit access.
-- **#28 pre-public readiness.**
-- **Considered and deliberately not built (2026-09-24):**
-  - Topic "lenses" (per-topic map views, per-topic strike routing and
-    budgets). One library with several topics is the intended way to get
-    cross-pollination; separate workspaces are the way to run for someone
-    else. Revisit if one library with many topics becomes hard to read.
-  - A shared library written by many instances. If it is ever needed, the
-    notes were: give each workspace an `instance_id` on every observation;
-    start with a hub instance that pulls peers' append-only exports, rather
-    than a shared server store; treat OpenSearch as a read-side index for
-    search and dashboards, not as the system of record (no append-only
-    enforcement, no transactions, heavy to run); decide duplicate handling,
-    since two instances observing one post inflates clusters. The import
-    format would become a contract between instances: a one-way door.
+- Topic "lenses" (per-topic map views, per-topic strike routing and
+  budgets). One library with several topics is the intended way to get
+  cross-pollination; separate workspaces are the way to run for someone
+  else. Revisit if one library with many topics becomes hard to read.
+- A shared library written by many instances. If it is ever needed, the
+  notes were: give each workspace an `instance_id` on every observation;
+  start with a hub instance that pulls peers' append-only exports, rather
+  than a shared server store; treat OpenSearch as a read-side index for
+  search and dashboards, not as the system of record (no append-only
+  enforcement, no transactions, heavy to run); decide duplicate handling,
+  since two instances observing one post inflates clusters. The import
+  format would become a contract between instances: a one-way door.

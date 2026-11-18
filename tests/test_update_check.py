@@ -457,7 +457,8 @@ def test_a_nightly_install_that_chose_stable_says_it_moves_at_the_next_promotion
     check.run_check(home, ucfg(), source=gh_source(FakeGh(releases=rels)))
     (home / "kranto.yaml").write_text("update:\n  channel: stable\n")
     line = check.status_line(home)
-    assert line.startswith("0.7.0.dev14 (nightly, moving to stable at the next promotion) · "
+    assert line.startswith("0.7.0.dev14 (nightly, moves to stable at the first stable release "
+                           "newer than it) · "
                            "up to date")                  # 0.6.2 is older: never a downgrade
     (home / "kranto.yaml").write_text("update:\n  channel: nightly\n")
     assert check.status_line(home).startswith("0.7.0.dev14 (nightly) · up to date")
