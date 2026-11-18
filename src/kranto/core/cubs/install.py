@@ -682,13 +682,22 @@ def apply_update(rt: Any, job_id: str, cid: str, *, door: str) -> dict[str, Any]
     return row
 
 
-def waits_why(rec: dict[str, Any]) -> str | None:
+# below this trust a cub's source is nobody's review: listed, unreviewed (a git address), generated
+REVIEWED = "reviewed"
+UNREVIEWED_WAITS = ("waits for your approval: it comes from a source nobody reviewed "
+                    "(cubs.auto_update_unreviewed is off)")
+
+
+def waits_why(rec: dict[str, Any], cfg: Any = None) -> str | None:
     """Why a staged update waits for the owner's press, or None when it may apply by itself
     (the owner's rule of 2026-10-23, under ``cubs.auto_update``): it adds no permission and no
-    send (the delta did not grow) and this Kranto is inside its ``kranto`` range. Trust, the
-    sandbox and every ticket's own confirm are the same either way."""
+    send (the delta did not grow), this Kranto is inside its ``kranto`` range, and its source
+    was reviewed or ``cubs.auto_update_unreviewed`` is on (read from ``cfg``; without one, the
+    default: off). Trust, the sandbox and every ticket's own confirm are the same either way.
+    A record without a ``trust`` (or with one this Kranto does not know) is taken as
+    unreviewed."""
     from ... import __version__
-    from ..manifest import in_range
+    from ..manifest import TRUST, in_range, trust_rank
     added = (rec.get("delta") or {}).get("added") or {}
     n = sum(len(items) for items in added.values())
     if "requests" in added:
@@ -700,6 +709,11 @@ def waits_why(rec: dict[str, Any]) -> str | None:
     rng = (rec.get("manifest") or {}).get(HOST_RANGE)
     if rng and not in_range(__version__, rng):
         return f"needs a newer Kranto ({rng})"
+    trust = rec.get("trust")
+    reviewed = isinstance(trust, str) and trust in TRUST and \
+        trust_rank(trust) >= trust_rank(REVIEWED)
+    if not reviewed and not cub_settings.values(cfg)["cubs.auto_update_unreviewed"]:
+        return UNREVIEWED_WAITS
     return None
 
 

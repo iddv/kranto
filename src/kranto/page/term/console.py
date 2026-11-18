@@ -12,8 +12,11 @@ What it starts with (``ask:`` in ``loop.yaml``; Settings › Assistant):
 
 - ``harness``: ``claude`` (first when installed) or ``codex``; each keeps its own conversation.
 - ``model.<harness>``: ``--model`` / ``-m``; unset: the harness's own default.
+- ``open``: the panel opens with the page by itself. Default true for a home whose loop.yaml
+  does not say; a home made by ``kranto up`` from 0.7.0 on says false (``NEW_HOME``).
 - ``permission``: ``auto`` (the owner's Q3: Claude Code's auto mode) · ``ask`` (asks before
-  edits and commands) · ``accept-edits``. Bypass is refused.
+  edits and commands) · ``accept-edits``. Bypass is refused. Default ``auto`` when loop.yaml
+  does not say; a new home says ``ask`` (``NEW_HOME``).
 - ``config``: ``own`` (your login, settings, plugins, MCP servers and CLAUDE.md: it is your
   Claude Code) or ``kranto`` (Kranto's plugin and settings only, a config dir of its own, Kranto's
   Claude token by pipe as Open in Claude Code has it). Switching offers a restart (the page).
@@ -54,6 +57,21 @@ PERMISSIONS = ("auto", "ask", "accept-edits")
 CONFIGS = ("own", "kranto")
 DEFAULTS: dict[str, Any] = {"open": True, "harness": None, "model": {}, "permission": "auto", "config": "own",
             "daily_usd": None}
+# A home made from now on starts safer than DEFAULTS (the operator's S1 of 2026-11-17): the
+# console does not open by itself and asks before every edit and command, until the person
+# turns it up in Settings › Assistant. ``kranto up`` writes these into a new home's loop.yaml
+# (``NEW_HOME_YAML``); a home whose loop.yaml does not say keeps DEFAULTS, as before.
+NEW_HOME: dict[str, Any] = {"open": False, "permission": "ask"}
+NEW_HOME_YAML = (
+    "# The console (your own Claude Code or Codex beside every page; Settings › Assistant).\n"
+    "# A new home's does not open by itself and asks before every edit and command; turn it\n"
+    "# up in Settings › Assistant. Without these lines it opens by itself in auto mode.\n"
+    "ask:\n"
+    "  open: false\n"
+    "  permission: ask\n")
+PERMISSION_WORDS = {"auto": "decides edits and commands by itself (Claude Code's auto mode)",
+                    "ask": "asks before every edit and command",
+                    "accept-edits": "makes edits by itself and asks before commands"}
 CLAUDE_MODE = {"auto": "auto", "ask": "default", "accept-edits": "acceptEdits"}
 CODEX_APPROVAL = {"auto": "on-request", "ask": "untrusted", "accept-edits": "on-request"}
 CONSOLE_ENV = "KRANTO_MCP_CONSOLE"
@@ -81,6 +99,35 @@ def settings(cfg: dict | None) -> dict:
     if isinstance(d, int | float) and not isinstance(d, bool) and d > 0:
         out["daily_usd"] = float(d)
     return out
+
+
+def describe(cfg: dict | None) -> dict[str, Any]:
+    """What the console does in this home, for ``kranto doctor`` and the docs: ``{open,
+    permission, said, words}``. ``said`` is whether loop.yaml (or Settings › Assistant) chose
+    each, else Kranto's default (DEFAULTS) is in force; ``words`` is one plain line."""
+    raw = (cfg or {}).get("ask") if isinstance(cfg, dict) else None
+    raw = raw if isinstance(raw, dict) else {}
+    s = settings(cfg)
+    said = isinstance(raw.get("open"), bool) and raw.get("permission") in PERMISSIONS
+    opens = "opens by itself" if s["open"] else "opens when you press ✦ (or ⌘J)"
+    words = f"{opens}; {PERMISSION_WORDS[s['permission']]}"
+    if not said:
+        words += " (Kranto's default when loop.yaml does not say; Settings › Assistant changes it)"
+    else:
+        words += " (Settings › Assistant changes it)"
+    return {"open": s["open"], "permission": s["permission"], "said": said, "words": words}
+
+
+def doctor_line(loop_home: str | Path) -> str:
+    """``describe``'s words for the home whose page settings live in ``loop_home`` (its
+    loop.yaml as written, never merged with DEFAULTS); an unreadable file reads as empty."""
+    import yaml
+
+    try:
+        raw = yaml.safe_load(paths.LoopLayout(Path(loop_home)).settings.read_text("utf-8"))
+    except (OSError, ValueError, yaml.YAMLError):
+        raw = None
+    return describe(raw if isinstance(raw, dict) else None)["words"]
 
 
 def installed(environ=None) -> dict[str, str]:
