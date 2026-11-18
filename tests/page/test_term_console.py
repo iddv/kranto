@@ -66,6 +66,15 @@ def test_settings_read_with_their_defaults():
     assert bad == C.DEFAULTS
 
 
+def test_the_own_config_saved_before_the_rename_still_means_kranto_s():
+    """The old page saved "the product's own config" under the old name; read as ``kranto``,
+    not dropped to the person's own ``~/.claude``."""
+    from kranto import legacy
+
+    assert C.settings({"ask": {"config": legacy.CONSOLE_CONFIG}})["config"] == "kranto"
+    assert C.settings({"ask": {"config": "own"}})["config"] == "own"
+
+
 def test_claude_codes_command_line(tmp_path, home):
     spec = C.Spec(tid="c1", harness="claude", tdir=tmp_path / "t", cwd=home, session="s1",
                   add_dirs=("/loop", "/tasks"), plugin=tmp_path / "plugin")
