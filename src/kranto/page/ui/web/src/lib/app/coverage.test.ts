@@ -102,7 +102,7 @@ for (const layout of LAYOUTS) {
       it("lists every cub that is on under Cubs, with the tickets waiting, so a cub installed later needs no work", async () => {
         await open("#/needs");
         const t = navTree(parse());
-        expect(t.rows.find((x) => x.head === "Cubs")).toMatchObject({ to: "cubs", n: 1 });
+        expect(t.rows.find((x) => x.head === "Features")).toMatchObject({ to: "cubs", n: 1 });
         expect(t.rows.filter((x) => x.to.startsWith("cub/")).map((x) => x.w)).toEqual(["Digest", "Toot the pick"]);
       });
     }

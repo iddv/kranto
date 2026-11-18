@@ -82,7 +82,7 @@ describe("Add topic", () => {
     stub();
     ui.facts = null;
     const none = await draw(AddTopic, page());
-    expect(none.target.querySelector("strong")?.textContent).toBe("Topics need the server. ");
+    expect(none.target.querySelector("strong")?.textContent).toBe("Topics need Kranto's server, which is not answering. ");
     none.done();
   });
 

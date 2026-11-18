@@ -100,7 +100,7 @@ describe("Settings › Prompts (the server's alone)", () => {
     stub();
     ui.facts = null;
     const off = await draw(PromptsPane, where("settings/prompts"));
-    expect(off.target.querySelector(".pane-empty p")?.textContent).toBe("Prompts are the server's, which is not hosting this page.");
+    expect(off.target.querySelector(".pane-empty p")?.textContent).toBe("Prompts are the server's, which is not answering.");
     off.done();
   });
 

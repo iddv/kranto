@@ -101,7 +101,7 @@ describe("Settings › Sources › Accounts", () => {
     stub();
     ui.facts = null;
     const none = await draw(ConnectionsList, at());
-    expect(none.target.querySelector("strong")?.textContent).toBe("Connections need the server. ");
+    expect(none.target.querySelector("strong")?.textContent).toBe("Connections need Kranto's server, which is not answering. ");
     none.done();
   });
 

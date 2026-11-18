@@ -49,8 +49,8 @@ function at(path: string, sel: string | null = null) {
   return { node: "cubs", list: path.split("/"), id: sel, stage: true, missing: false, object: null, obj: null, sel: false, r: { path: path.split("/"), q: {}, sel } };
 }
 
-describe("Cubs", () => {
-  it("says it is reading, never \"0 cubs installed · None yet\", until the features arrive (QA B14)", async () => {
+describe("Features (#/cubs/<tab>)", () => {
+  it("says it is reading, never \"0 features installed · None yet\", until the features arrive (QA B14)", async () => {
     stub();
     hosted();
     drop(FEATURES_API);
@@ -58,12 +58,12 @@ describe("Cubs", () => {
     setFetcher((path) => (path === FEATURES_API ? new Promise((r) => { arrive = r; }) : Promise.reject(new Error("not found: " + path))));
     ui.headOn = true;
     const { target, done } = await draw(CubsPage, at("cubs"));
-    expect(target.textContent).not.toMatch(/0 cubs installed|None yet/);
-    expect(headOf().facts).toBe("reading your cubs…");
+    expect(target.textContent).not.toMatch(/0 features installed|None yet/);
+    expect(headOf().facts).toBe("reading your features…");
     arrive(structuredClone(F));
     await settle();
     await settle();
-    expect(headOf().facts).toContain("2 cubs installed");
+    expect(headOf().facts).toContain("2 features installed");
     done();
   });
 
@@ -126,7 +126,7 @@ describe("Cubs", () => {
     v.done();
   });
 
-  it("has one path to add a cub: Add a cub is the head's one primary, Check a manifest a fold in its sheet", async () => {
+  it("has one path to add a feature: Add a feature is the head's one primary, Check a manifest a fold in its sheet", async () => {
     stub();
     hosted();
     answering(READS());
@@ -134,7 +134,7 @@ describe("Cubs", () => {
     let v = await draw(CubsPage, at("cubs"));
     await settle();
     // one primary; Arrange the home under ⋯
-    expect(headOf().primary?.label).toBe("Add a cub");
+    expect(headOf().primary?.label).toBe("Add a feature");
     expect(headOf().more!.map((x) => x.label)).toEqual(["Arrange the home"]);
     v.done();
     v = await draw(CubsPane, at("cubs", "add"));                                    // the shell's one sheet
@@ -159,17 +159,17 @@ describe("Cubs", () => {
     done();
   });
 
-  it("says the index opens at 0.7, and building a cub at 0.6, never pretending", async () => {
+  it("says there is no index yet, and no building from a sentence yet, never a version it already passed", async () => {
     stub();
     hosted();
     answering(READS());
     let v = await draw(CubsPage, at("cubs/available"));
     await settle();
-    expect(v.target.querySelector("#cubs-index")?.textContent).toContain("opens at 0.7");
+    expect(v.target.querySelector("#cubs-index")?.textContent).toContain("There is no index of other people's features yet.");
     v.done();
     v = await draw(CubsPage, at("cubs/made"));
     await settle();
-    expect(v.target.querySelector("#made-later")?.textContent).toContain("in 0.6");
+    expect(v.target.querySelector("#made-later")?.textContent).toContain("Kranto cannot build a feature from a sentence yet");
     expect(v.target.querySelector(".made .btn.primary")).toBeNull();               // nothing to press that cannot work
     v.done();
   });
@@ -207,7 +207,7 @@ describe("Cubs", () => {
     const sheet = target.ownerDocument.querySelector("#cubs-sheet")!;
     expect(sheet.textContent).toContain("Nobody at Kranto has read this code.");
     expect(sheet.querySelector("#cub-will")?.textContent).toContain("Asks youpost mastodon");
-    expect(sheet.getAttribute("data-title")).toBe("Add a cub");                   // one sheet, one path
+    expect(sheet.getAttribute("data-title")).toBe("Add a feature");                   // one sheet, one path
     expect((sheet.querySelector("#cub-check-fold") as HTMLDetailsElement).open).toBe(true);
     expect(sheet.querySelector("#cub-check-fold .foot .btn.primary")).toBeNull();
     expect(sheet.querySelector("#cub-install-later")?.textContent).toContain("folder or its git URL");
@@ -215,7 +215,7 @@ describe("Cubs", () => {
   });
 });
 
-describe("Add a cub", () => {
+describe("Add a feature", () => {
   const READY: CubJob = { id: "j1", kind: "add", state: "awaiting_confirm", needs: "house", cub: {
     id: "toot", title: "Toot the pick", version: "1.0.0", trust: "unreviewed", sha: "0123456789abcdef", source: { kind: "git", url: "https://github.com/you/toot" },
     inventory: { files: 4, bytes: 9000, licence: "MIT", findings: [{ level: "warn", text: "imports socket: it has no network, so this does nothing, or hides a try" }] },

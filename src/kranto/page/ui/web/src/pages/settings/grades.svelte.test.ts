@@ -30,7 +30,7 @@ describe("Settings › System › Your grades", () => {
     stub();
     answering({});
     const { target, done } = await draw(GradesList, where("settings/grades"));
-    expect(target.querySelector(".box strong")?.textContent).toBe("Your grades need the server. ");
+    expect(target.querySelector(".box strong")?.textContent).toBe("Your grades need Kranto's server, which is not answering. ");
     expect(titles(target)).toEqual([]);
     done();
   });
@@ -87,7 +87,7 @@ describe("Settings › System › Your grades", () => {
     ui.facts = null;
     stub();
     const b = await draw(GradesPane, where("settings/grades"));
-    expect(b.target.querySelector(".pane-empty")?.textContent).toBe("Your grades need the server, which is not hosting this page.");
+    expect(b.target.querySelector(".pane-empty")?.textContent).toBe("Your grades need the server, which is not answering.");
     b.done();
   });
 });

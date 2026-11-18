@@ -116,6 +116,26 @@ def test_a_topic_that_watches_nothing_yet_has_at_most_five_ticked():
     assert sum(r["pretick"] for r in rows) == 8
 
 
+def test_the_first_five_are_places_that_publish_before_the_quiet_ones():
+    """A stranger's five ticks were "0.2 new items a day" between them: the best fits were quiet
+    places. A place that publishes goes before a quiet one; quiet ones only fill what is left."""
+    from kranto.web.topics_api import first_ticks
+    # ids 0-5 fit best but are quiet (none, one or two items in 30 days; a stored null counts as
+    # none); ids 6-8 fit less and publish (a figure of their own, or 30 items in 30 days)
+    quiet = [{"id": i, "review": "proposed", "topics": [], "pretick": True, "_sim": 0.9 - i / 100,
+              "items_per_day": None, "_recent": i % 3} for i in range(6)]
+    busy = [{"id": 6, "review": "proposed", "topics": [], "pretick": True, "_sim": 0.6,
+             "items_per_day": 2.5, "_recent": 0},
+            {"id": 7, "review": "proposed", "topics": [], "pretick": True, "_sim": 0.55,
+             "_recent": 30},
+            {"id": 8, "review": "proposed", "topics": [], "pretick": True, "_sim": 0.52,
+             "items_per_day": None, "_recent": None}]
+    rows = quiet + busy
+    first_ticks(rows, 3)
+    # the two that publish, then the three quiet ones that fit best; id 8 (a null) is quiet
+    assert sorted(r["id"] for r in rows if r["pretick"]) == [0, 1, 2, 6, 7]
+
+
 # -- the first hour, the bar, the heartbeat --------------------------------------------------------
 
 

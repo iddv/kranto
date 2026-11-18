@@ -14,7 +14,7 @@
 
 <Detail back={view.back}>
   {#if !host}
-    <div class="pane-empty"><p class="empty">Your grades need the server, which is not hosting this page.</p></div>
+    <div class="pane-empty"><p class="empty">Your grades need the server, which is not answering.</p></div>
   {:else}
     <Pane title="How your grades are used" sections={[{ id: "cards", w: "Cards" }, { id: "sources", w: "Sources" }, { id: "settings", w: "Settings" }]}>
       {#snippet kind()}<Glyph name="dot" colour="blue" word="Your grades" />{kindLine("system", "your grades")}{/snippet}

@@ -69,11 +69,11 @@ describe("Settings › System › Updates", () => {
     done();
   });
 
-  it("says Updates need the server on brb ui alone", async () => {
+  it("says Updates need the server when it does not answer", async () => {
     stub();
     ui.facts = { header: { host: null } } as unknown as Facts;
     const { target, done } = await draw(UpdatesList, where("settings/updates"));
-    expect(target.querySelector("strong")?.textContent).toBe("Updates need the server. ");
+    expect(target.querySelector("strong")?.textContent).toBe("Updates need Kranto's server, which is not answering. ");
     ui.facts = null;
     done();
   });

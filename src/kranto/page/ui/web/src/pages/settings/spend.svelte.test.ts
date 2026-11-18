@@ -74,7 +74,7 @@ describe("Settings › Spend (the server's alone)", () => {
     stub();
     answering({});
     const { target, done } = await draw(SpendList, where("settings/spend"));
-    expect(target.querySelector("#sp-topic")?.closest("section")?.querySelector("p.more")?.textContent).toBe("Spend is the server's, which is not hosting this page.");
+    expect(target.querySelector("#sp-topic")?.closest("section")?.querySelector("p.more")?.textContent).toBe("Spend is the server's, which is not answering.");
     expect(target.querySelectorAll('[data-sel^="ecap:"]').length).toBe(0);
     done();
   });

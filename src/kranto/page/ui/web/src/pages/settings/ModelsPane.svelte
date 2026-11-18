@@ -55,7 +55,7 @@
 
 <Detail back={view.back}>
   {#if !host}
-    <div class="pane-empty"><p class="empty">Watching's models are the server's, which is not hosting this page.</p></div>
+    <div class="pane-empty"><p class="empty">Watching's models are the server's, which is not answering.</p></div>
   {:else if !xs}
     <div class="pane-in"><p class="empty">Loading…</p></div>
   {:else if !id}

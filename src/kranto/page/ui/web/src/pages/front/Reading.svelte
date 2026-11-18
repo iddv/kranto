@@ -24,7 +24,7 @@
 </script>
 
 {#if host && !t && !side}
-  <section class="box" role="status"><MarkEmpty text="No topics yet. The kranto read nothing until you say what you are interested in; after the first ingest, what they keep shows up here, the newest first."><a class="btn primary" href="#/topics/new">Add a topic</a></MarkEmpty></section>
+  <section class="box" role="status"><MarkEmpty text="No topics yet. Kranto reads nothing until you say what you are interested in; after its first read, what it keeps shows up here, the newest first."><a class="btn primary" href="#/topics/new">Add a topic</a></MarkEmpty></section>
 {:else if host && small}
   <section class="box" role="status"><div class="hero"><img src={pageUrl("static/brand/icon-192.png")} alt="" width="72" height="72" /><p class="small muted">{`Kranto is reading ${plural(n, "source")} for ${plural(t, "topic")}. ${busy} Themes appear after about 30 observations (${host.observations} so far); ideas after the first map.`}</p></div></section>
 {/if}

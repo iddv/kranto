@@ -125,7 +125,7 @@ describe("the panel", () => {
     d.done();
   });
 
-  it("says brb ui alone has no terminal", async () => {
+  it("draws no terminal where the server serves none", async () => {
     const d = draw({ "api/term": listing({ socket: false }) });
     await settle();
     expect(d.target.textContent).toContain("needs Kranto itself");
