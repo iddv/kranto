@@ -76,7 +76,7 @@ def test_the_table_is_read(app):
     got = {v["kind"]: v for v in r.json()["verbs"]}
     assert got["topic.add"]["choice"] == "do" and got["topic.add"]["ladder"] == "reversible"
     assert got["settings.telemetry"]["choice"] == "ask"
-    assert got["setup.key"]["choice"] == "never" and got["setup.key"]["locked"]
+    assert got["setup.provider"]["choice"] == "never" and got["setup.provider"]["locked"]
     # Invest is off by default, and its broker's verbs with it (.2: test_hide_off.py)
     assert "broker.approve" not in got
     assert got["topic.add"]["route"] == {"method": "POST", "path": "/api/topics"}
@@ -287,7 +287,7 @@ def test_per_verb_exceptions_win_over_the_kind(rt, app):
 
 def test_the_locks(rt, app):
     with bare(app) as web:
-        for kind in ("setup.key", "ticket.confirm", "token.add",
+        for kind in ("setup.provider", "ticket.confirm", "token.add",
                      "assistant.ladder"):
             r = web.post(f"/api/verbs/{kind}", headers=bearer("console"),
                          json={"subject": {"id": "1"}})

@@ -131,8 +131,8 @@ def test_every_call_is_counted_with_its_outcome_and_rung(rt, app):
                        "client": "claude"})
         web.post("/api/verbs/topic.add", headers=bearer("mcp"),
                  json={"fields": {"nope": 1}, "client": "codex"})
-        web.post("/api/verbs/setup.key", headers=bearer("console"), json={"client": "claude"})
-        web.post("/api/verbs/setup.key", headers=bearer("console"), json={})   # no name
+        web.post("/api/verbs/setup.provider", headers=bearer("console"), json={"client": "claude"})
+        web.post("/api/verbs/setup.provider", headers=bearer("console"), json={})   # no name
         # (pressing a mode other than detailed would delete what waits: leaving detailed)
         pid = web.post("/api/verbs/settings.telemetry", headers=bearer("console"),
                        json={"fields": {"mode": "detailed"},
@@ -146,8 +146,8 @@ def test_every_call_is_counted_with_its_outcome_and_rung(rt, app):
            for r in rows()}
     assert ("topic.add", "console", "claude-code", "ok", None, "do") in got
     assert ("topic.add", "mcp", "codex", "refused", "fields", "do") in got
-    assert ("setup.key", "console", "claude-code", "refused", "door", "lock") in got
-    assert ("setup.key", "console", "other", "refused", "door", "lock") in got
+    assert ("setup.provider", "console", "claude-code", "refused", "door", "lock") in got
+    assert ("setup.provider", "console", "other", "refused", "door", "lock") in got
     assert ("settings.telemetry", "console", "claude-code", "prepared", None, "lock") in got
     assert ("settings.telemetry", "mcp", "codex", "dismissed", None, "lock") in got
     assert ("settings.telemetry", "console", "claude-code", "confirmed", None, "lock") in got

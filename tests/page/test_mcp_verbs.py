@@ -28,7 +28,7 @@ def afk_table() -> list[dict]:
         {"kind": "settings.telemetry", "title": "Save", "says": "Usage reports.",
          "ladder": "outward", "subject": "new", "choice": "ask", "page": "#/settings/privacy",
          "fields": [], "doors": ["ui", "cli", "mcp", "console", "agent"]},
-        {"kind": "setup.key", "title": "Save key", "says": "The provider's key.",
+        {"kind": "setup.provider", "title": "Save key", "says": "The provider's key.",
          "ladder": "credential", "subject": "new", "choice": "never", "page": "#/settings/keys",
          "fields": [], "doors": ["ui"]},
     ]
@@ -82,7 +82,7 @@ def test_rule_4_the_tool_list_is_the_registry():
              and not v["kind"].startswith("cub.")}
     assert set(names) == verbs | set(T.READS) | set(T.GENERIC)
     assert len(names) == 10 + 4 + 4                       # the reads, the generic, the verbs
-    assert T.verb_tool_name("setup.key") not in names     # the owner's own: no tool
+    assert T.verb_tool_name("setup.provider") not in names     # the owner's own: no tool
     assert {"kranto_topic_add", "kranto_feedback_add", "kranto_idea_later"} <= set(names)
     for t in tools:
         s = t["schema"]

@@ -19,9 +19,8 @@ returns is a secret. Two kinds of read are checked as a write is (``check_read``
 reads (a trace, the runs, what the browser read, what the console's assistant said), and the
 reads that do something (``SIGNED_READS``: a live web search and a page fetch, which any
 current token may make); a browser makes them only from Kranto's own page, never from another
-site or another port of this machine. A ``browser:<name>`` token (the browser extension's) may
-write ``POST /api/browser/captures`` and nothing
-else, and no other token may write there.
+site or another port of this machine. A ``browser:<name>`` token (made for a browser extension
+Kranto had before 0.7) may do nothing.
 
 **Signing a browser in.** The page is served to anyone on loopback and never sets the cookie,
 so fetching the HTML hands out nothing. ``kranto open`` (and ``kranto up``) prints a link with a
@@ -51,12 +50,11 @@ OWNER = ("ui", "cli")            # may write anywhere
 ACT_PATHS = ("/brb/api/act",)    # all an mcp, console or agent token may write, with
 VERB_PREFIX = "/api/verbs/"      # the server's verbs (core.verbs: the ladder applies there)
 ASSISTANT_DOORS = ("mcp", "console")   # their build-loop actions go through the verbs too
-# writes that need no token: they are how a browser gets one (the page's sign-in box, and the
-# browser extension's pairing; each still needs its one-time code)
-PAIR_PATH = "/api/browser/pair"
-SIGNIN_PATHS = ("/auth/code", PAIR_PATH)
-# all a browser:<name> token may write: the pages its extension read
-BROWSER_PATHS = ("/api/browser/captures",)
+# writes that need no token: they are how a browser gets one (the page's sign-in box; it still
+# needs its one-time code)
+SIGNIN_PATHS = ("/auth/code",)
+# a browser:<name> token was a browser extension's; the extension left Kranto, and a token an
+# older install made for it may do nothing (refused here, before the rule for agent tokens)
 BROWSER_PREFIX = "browser:"
 # reads that carry file contents and prompts: a build's agent trace (the page decision
 # D-4; the page's api.read_needs_identity says the same of its own paths), and the runs whose
@@ -149,15 +147,10 @@ class Auth:
             return _json(401, _signed_out_words(request, why))
         self.last_used[ident["origin"]] = time.time()
         if str(ident.get("origin") or "").startswith(BROWSER_PREFIX):
-            if path in BROWSER_PATHS and request.method == "POST":
-                return None
-            log.warning("refused %s %s: a browser token only sends captures", request.method,
-                        path)
-            return _json(403, f"the {ident['origin']} token only sends what its browser read "
-                              f"(POST {BROWSER_PATHS[0]}); this is the owner's")
-        if path in BROWSER_PATHS:
-            return _json(403, "captures come from a paired browser's extension, with its own "
-                              "token (Settings › Browser)")
+            log.warning("refused %s %s: a browser extension's token", request.method, path)
+            return _json(403, f"the {ident['origin']} token was made for a browser extension "
+                              "Kranto no longer has, so it may do nothing: revoke it with "
+                              f"kranto token revoke {ident['origin']}")
         if not is_owner(ident) and path not in ACT_PATHS and not (
                 path.startswith(VERB_PREFIX) and request.method == "POST"):
             log.warning("refused %s %s: an %s token only runs actions", request.method, path,
@@ -243,8 +236,8 @@ class Auth:
             log.warning("refused %s %s: an %s token may not read it", request.method, path,
                         origin)
             if self.signed_read(path):
-                return _json(403, f"the {origin} token only sends what its browser read; "
-                                  f"{inside} is not its to make")
+                return _json(403, f"the {origin} token was made for a browser extension "
+                                  f"Kranto no longer has; {inside} is not its to make")
             return _json(403, f"{inside} is the owner's to read; the {origin} token does not "
                               "read it")
         return None
