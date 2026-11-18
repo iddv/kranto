@@ -37,7 +37,7 @@ dependencies = [
   "websockets>=13",
   "python-multipart>=0.0.9",
   "scikit-learn>=1.4",
-  "umap-learn>=0.5.6",
+  "umap-learn>=0.6",
   "scipy>=1.10",
   "trafilatura>=2.0",
   # Registrable domains from the public suffix list (bundled, read offline). Already installed
@@ -55,7 +55,7 @@ Issues = "https://github.com/iddv/kranto/issues"
 Source = "https://github.com/iddv/kranto"
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff==0.16.10", "time-machine>=2.14", "cryptography>=42",
+dev = ["pytest>=8.0", "ruff==0.17.5", "time-machine>=2.14", "cryptography>=42",
        "jsonschema>=4.20", "hypothesis>=6.100", "mypy>=1.13", "pytest-randomly>=5.0.0",
        "pytest-split>=0.11.0", "pytest-xdist>=3.8.0"]
 # Delivery of strikes, heartbeats and alarms to Apprise targets (BSD-2).
@@ -67,7 +67,7 @@ mcp = ["mcp>=1.8"]
 
 [dependency-groups]
 # The page in a real browser (tests/page/test_browser_*.py): only its CI job installs it
-browser = ["playwright==1.63.0"]
+browser = ["playwright==1.65.1"]
 
 [project.scripts]
 kranto = "kranto.launcher:main"
