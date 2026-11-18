@@ -72,7 +72,6 @@ ALLOW: dict[str, dict[str, str]] = {
     "foreign-account": {
         "tests/test_public_tree.py": "tests for this scanner",
         # each until the change that rewords it is on main; then its line goes
-        "docs/design/DESIGN.md": "a design paper from before the rename, rewritten separately",
         "src/kranto/page/ui/help.md": "the page's help, reworded separately",
         "src/kranto/page/ui/web/src/pages/post/post.svelte.test.ts": "a made-up handle in "
         "a page test, renamed separately",
