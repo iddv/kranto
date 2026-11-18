@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""The preview's acceptance check (the first process change;).
+"""The preview's acceptance check.
 
-Plays the owner's Gate A lines against a running preview, read-only: it signs in with a one-time
-link from ``kranto-preview open`` (or ``--link``), every request but a GET is aborted in the page,
-and nothing is pressed. Then the word test (with "cub") and the counts for the pages
- fixed. Exits 1 when a line fails; a line that needs a press, a model key or a person (Later
-on a card, Write draft writing, a real send, the console's answer) is "skip", with why, and does
-not fail.
+Plays the maintainer's acceptance lines against a running preview, read-only: it signs in
+with a one-time link from ``kranto-preview open`` (or ``--link``), every request but a GET is
+aborted in the page, and nothing is pressed. Then the word test (with "cub") and the counts
+for the pages fixed. Exits 1 when a line fails; a line that needs a press, a model key or a
+person (Later on a card, Write draft writing, a real send, the console's answer) is "skip",
+with why, and does not fail.
 
     acceptance.py [--port 8766] [--link URL] [--fresh-port 8767 --fresh-link URL] [--topic Padel]
                   [--out FILE] [--arch-before FILE] [--only arch,fixes,...]
@@ -202,7 +202,7 @@ def _counted(c: dict[str, Any]) -> str:
     return f"{c['words']} words, {c['controls']} controls, {c['primaries']} primaries"
 
 
-# -- the owner's Gate A lines, as far as a copy without a model key plays them ---------
+# -- the maintainer's acceptance lines, as far as a copy without a model key plays them ---------
 
 def prev_lines(p: Preview) -> list[Result]:
     out = []
@@ -323,7 +323,7 @@ def post_lines(p: Preview) -> list[Result]:
     out.append(skip("POST-3", "Write draft writes a blog draft within a minute",
                     "needs a model key"))
     out.append(skip("POST-4", "the console writes a post about the open card", "a model answer"))
-    out.append(skip("POST-5", "a send says \"Sent to 3 on …\"", "a real send: Gate B"))
+    out.append(skip("POST-5", "a send says \"Sent to 3 on …\"", "a real send"))
     return out
 
 
@@ -371,7 +371,7 @@ def prose_lines(p: Preview) -> list[Result]:
     out.append(skip("PROSE-6", "Settings › Posting › Voice is within the budget",
                     "played as (the F2 draws the page)"))
     # the checker knows what a post is for, and each writer's
-    # model is its own setting (unset until the owner's read chooses one)
+    # model is its own setting (unset until the maintainer's read chooses one)
     rules = {r.get("id") for r in prof.get("rules") or []}
     claims = {"claim.announced", "claim.caveats", "claim.no_hook", "claim.sections",
               "claim.skeleton", "claim.restates"}
@@ -450,7 +450,7 @@ def shell_lines(p: Preview) -> list[Result]:
                   " · ".join(starters) + (f" (and: {first})" if first else "")))
     ctx.close()
     out.append(skip(" answer", "the first answers from my library",
-                    "the owner answers Claude Code's trust prompt once, then a model answers"))
+                    "the maintainer answers Claude Code's trust prompt once, then a model answers"))
     ctx, pg = p.page(PHONE)
     p.go(pg, "#/home")
     tab = pg.query_selector("#tab-console")
@@ -470,7 +470,7 @@ def shell_lines(p: Preview) -> list[Result]:
 
 # -- what the two outside testers found (A: false words and dead ends; B: what left) ---------
 
-# the owner's own site's name, which a stranger's page must never show (set it for your copy)
+# the maintainer's own site's name, which a stranger's page must never show (set it for your copy)
 SITE = re.compile(os.environ.get("KRANTO_ACCEPT_SITE", r"example\.?com"), re.I)
 HREFS = "() => [...document.querySelectorAll('a')].map((a) => a.getAttribute('href') || '')"
 
@@ -489,8 +489,8 @@ SETTINGS_CHROME = r"""(root) => {
 
 
 def social_lines(p: Preview) -> list[Result]:
-    """SOCIAL's lines (short posts for the sites people use), as the owner's note of 13 November
-    changes them: two ways only (Open, or post directly after a yes), Open first, Substack and
+    """The lines for short posts on the sites people use, as changed on 13 November
+    2026: two ways only (Open, or post directly after a yes), Open first, Substack and
     LinkedIn not offered, no "copy and open" anywhere, the preview refuses every send. GETs
     only: a line that needs a write (a model answer, a ticked site) says so and is skipped."""
     out = []
@@ -663,7 +663,7 @@ def fixes_lines(p: Preview) -> list[Result]:
                   ", ".join(h for h in hrefs if "mastodon" in h) or "no Mastodon link"))
     feats = p.api(pg, "/api/features").get("features") or []
     site += [str(f.get("title")) for f in feats if SITE.search(str(f.get("title")))]
-    out.append(ok(" G4", "a stranger reads \"Blog\", never the owner's site name, on Post, "
+    out.append(ok(" G4", "a stranger reads \"Blog\", never the maintainer's site name, on Post, "
                   "Settings › Posting and the features", not site, ", ".join(site) or "none"))
     p.go(pg, "#/news")
     news = _text(pg, "#app")
@@ -742,7 +742,7 @@ ARCH_EXPECT = {
     "radar_trends": 15,
     "radar_proposals": 42,
 }
-ARCH_DOCTOR_FAILS_OK = {"api key"}  # the copy never holds the owner's keys
+ARCH_DOCTOR_FAILS_OK = {"api key"}  # the copy never holds the maintainer's keys
 
 
 def _kranto(*args: str, timeout: int = 300) -> subprocess.CompletedProcess:
@@ -1161,7 +1161,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
                 f"no prepared item of a verb that left on this copy ({len(rows)} open)",
             )
         )
-    # doctor says Open in Claude Code is ready; the answer itself is the owner's
+    # doctor says Open in Claude Code is ready; the answer itself is the maintainer's
     code, said = _doctor()
     line = next((ln.strip() for ln in said.splitlines() if DOCTOR_CONSOLE.search(ln)), "")
     out.append(
@@ -1176,7 +1176,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
         skip(
             " answer",
             'the console answers "what is new in Robotics?"',
-            "Claude Code's trust prompt on the preview is the owner's (CUT's report has "
+            "Claude Code's trust prompt on the preview is the maintainer's (CUT's report has "
             "the answer from a scratch install)",
         )
     )
@@ -1285,7 +1285,7 @@ def front_first_box(p: Preview) -> Result:
     return ok(
         "FRONT-1",
         "Welcome's step 1 offers the ways in as boxes, one primary; the Claude "
-        "Code login is one press (first once the owner says F-3)",
+        "Code login is one press (first once the maintainer says F-3)",
         good,
         f"boxes {boxes}; first {first!r}; primary {prim}; login offered "
         f"{bool(found.get('offered'))}",
@@ -2034,7 +2034,7 @@ def main(argv: list[str] | None = None) -> int:
             if want("shell"):
                 results += shell_lines(p)
             if want("words"):
-                # the copy holds the owner's own words (topics, cards, news: "build", "repo"),
+                # the copy holds the maintainer's own words (topics, cards, news: "build", "repo"),
                 # so its scan is told, not failed; the failing word test is the fresh home's,
                 # as ran it
                 copy = word_test(p, WORD_PAGES, "copy")

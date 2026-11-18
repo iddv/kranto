@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The stored-shape lint.
 
-A value read from stored JSON and used as if it could not be None: the RCA's own line was
+A value read from stored JSON and used as if it could not be None: the bug that taught it was
 ``f"sim {v.get('median_similarity', 0):.2f}"`` with the similarity stored as null. Neither mypy
 nor pyright inspects an f-string's format spec, typed or not, so this lint runs beside the type
 check. Standard library only; it reads the code (AST), it never runs it.

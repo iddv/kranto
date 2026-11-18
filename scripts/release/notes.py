@@ -24,7 +24,7 @@ be logged in (or ``GH_TOKEN`` set) for the repository.
 ``git log --oneline <previous>..<tag>``). A held release's line (``HELD_LINE``) is replaced by
 ``gate.py`` when the release goes to stable.
 
-**The attribution guard.** The notes must carry no tool attribution (the owner's rule): the
+**The attribution guard.** The notes must carry no tool attribution (the maintainer's rule): the
 script fails when the rendered text holds a co-author or session trailer line, a generated-with
 footer naming the tool, or the tool vendor's noreply address (``ATTRIBUTION``). A title that
 only names a tool ("Claude Code harness: ...") is a title, not attribution, and passes.
