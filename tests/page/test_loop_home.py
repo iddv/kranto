@@ -1,9 +1,8 @@
-"""One loop home: a ``brb`` command on a kranto install uses that install's loop (the home
+"""One loop home: the page on a Kranto install uses that install's loop (the home
 ``kranto up`` or ``kranto adopt`` recorded), never a second, empty ``~/kranto-loop``; and nothing
 starts a home that is not there."""
 import pytest
 
-from kranto.page.cli import main
 from kranto.page.settings import store as config
 
 
@@ -58,11 +57,7 @@ def test_another_unit_and_kranto_home_are_followed(user, tmp_path, monkeypatch):
     assert config.home() == (test_home / "loop").resolve()
 
 
-def test_no_command_starts_a_home(user, tmp_path):
-    """The loop's commands left with it (CUT): ``brb loop`` is no command, and reading the
-    settings of a home that is not there makes nothing."""
+def test_reading_a_home_that_is_not_there_makes_nothing(user, tmp_path):
     missing = tmp_path / "no-such-loop"
-    with pytest.raises(SystemExit):
-        main(["loop", "--home", str(missing), "status"])
     config.Config(missing)
     assert not missing.exists()

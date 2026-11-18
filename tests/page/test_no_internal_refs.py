@@ -1,12 +1,10 @@
 """What a user reads carries no internal references: no private plan citations (``X-PLAN``,
 ``§``), no track codes (``track OI``, ``(OI)``), no "example-host" and no personal paths. Checked:
-every ``brb`` help text, the page's strings (``app.js``), the help page (``help.md``) and the
+every ``kranto trace`` help text, the page's strings (``app.js``), the help page (``help.md``) and the
 files Kranto writes into a product's repo (``maintain/templates``)."""
 import argparse
 import re
 from pathlib import Path
-
-import pytest
 
 PKG = Path(__file__).resolve().parents[2] / "src" / "kranto" / "page"
 # ~/kranto-loop is the loop's documented default home, not a personal path
@@ -50,23 +48,14 @@ def js_strings(src: str) -> list[str]:
     return out
 
 
-class _Captured(Exception):
-    def __init__(self, parser):
-        self.parser = parser
+def trace_parser() -> argparse.ArgumentParser:
+    from kranto.page.host_api import add_trace_group
+    p = argparse.ArgumentParser(prog="kranto")
+    add_trace_group(p.add_subparsers(dest="cmd", required=True))
+    return p
 
 
-def brb_parser(monkeypatch) -> argparse.ArgumentParser:
-    from kranto.page import cli
-
-    def capture(self, *a, **k):
-        raise _Captured(self)
-    monkeypatch.setattr(argparse.ArgumentParser, "parse_args", capture)
-    with pytest.raises(_Captured) as e:
-        cli.main(["--help"])
-    return e.value.parser
-
-
-def help_texts(p: argparse.ArgumentParser, where: str = "brb"):
+def help_texts(p: argparse.ArgumentParser, where: str = "kranto"):
     for t in (p.description, p.epilog):
         if t:
             yield where, t
@@ -81,8 +70,8 @@ def help_texts(p: argparse.ArgumentParser, where: str = "brb"):
                 yield from help_texts(sp, f"{where} {name}")
 
 
-def test_brb_help_has_no_internal_references(monkeypatch):
-    bad = [(w, t[:120]) for w, t in help_texts(brb_parser(monkeypatch)) if offending(t)]
+def test_trace_help_has_no_internal_references():
+    bad = [(w, t[:120]) for w, t in help_texts(trace_parser()) if offending(t)]
     assert bad == []
 
 
