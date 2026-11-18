@@ -1,0 +1,11 @@
+{
+  "about": "Advisories CI's npm audit (scripts/ci/npm_audit.py) lets pass until a day, each with why it cannot reach a person who installs Kranto. Remove an entry once a fixed version is in the lockfile.",
+  "exceptions": [
+    {
+      "id": "GHSA-fc5q-39xc-vjpf",
+      "package": "picomatch",
+      "why": "a slow match on crafted glob patterns, in the build and test tools only (vite, vitest, svelte-check, through fdir and tinyglobby) with the repository's own patterns; the wheel carries the built page, never these packages; no fixed version exists yet (<= 4.0.7, the newest)",
+      "until": "2026-12-31"
+    }
+  ]
+}
