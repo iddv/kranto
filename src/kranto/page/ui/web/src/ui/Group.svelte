@@ -3,7 +3,7 @@
   // id, or words), a right-hand slot, the rows, and a foot (an empty state, a See all). hidden: a
   // list that filters as you type hides a group with no row left. fold: a key that lets the group
   // fold to its heading (UP #7), remembered per viewer (fold.svelte.ts). says: what the group
-  // means, in words beside its heading rather than behind a ? (SRC D2). start: the group starts
+  // means, in words beside its heading rather than behind a ?. start: the group starts
   // folded until the viewer opens it (R4: at most seven decisions before scrolling).
   import type { Snippet } from "svelte";
   import Tip from "./Tip.svelte";

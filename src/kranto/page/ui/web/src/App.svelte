@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The frame (WORKSPACE.md 1;): five regions, #app's children in a CSS grid (kranto.css):
+  // The frame: five regions, #app's children in a CSS grid (kranto.css):
   // the top bar, the navigator, the list pane, the detail pane and the status bar, with the two
   // splitters between the panes. The shell draws the chrome; every page draws itself into #rows
   // and #dscroll (lib/pages.svelte.ts); #dlg is the one dialog (DialogHost); #term holds Open in
@@ -52,7 +52,7 @@
       if (hereT) clearTimeout(hereT);
       if (consoleUi.served) hereT = setTimeout(() => void consoleHere(location.hash, document.title).catch(() => undefined), 800);
     };
-    // Feedback (FB): the page's own errors are among the last few its details name, and
+    // Feedback: the page's own errors are among the last few its details name, and
     // ?feedback=1 on any address (the help page's Send feedback) opens the sheet there
     const oops = (e: ErrorEvent) => noteError(e.message || "a script error");
     const rejected = (e: PromiseRejectionEvent) => noteError((e.reason && (e.reason as Error).message) || String(e.reason || "a promise was rejected"));
@@ -131,7 +131,7 @@
     }
   }
   /** ?feedback=1: the sheet, and the address without it (a reload does not open it again);
-   * ?send_error=<id> (Kranto's error page's Send this error, RCA B3): the sheet with that error's report */
+   * ?send_error=<id> (Kranto's error page's Send this error): the sheet with that error's report */
   function feedbackAsked(): void {
     const r = parse();
     const err = /^[0-9a-f]{8}$/.test(r.q.send_error || "") ? r.q.send_error! : null;

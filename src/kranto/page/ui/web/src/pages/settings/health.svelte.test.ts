@@ -82,7 +82,7 @@ describe("Settings › System › Health", () => {
     done();
   });
 
-  it("words each run: its job in words, a skip with its reason, never the job's id or the state twice (QA B8)", async () => {
+  it("words each run: its job in words, a skip with its reason, never the job's id or the state twice", async () => {
     stub();
     hosted();
     const run = (kind: string, status: string, summary: Record<string, unknown>) => ({ run_uuid: kind, kind, status, started_at: NOW, finished_at: NOW, error: null, tokens: null, summary });
@@ -141,7 +141,7 @@ describe("Settings › System › Health", () => {
   });
 });
 
-describe("memory and the read in progress (MEM)", () => {
+describe("memory and the read in progress", () => {
   const P = { run_uuid: "r9", started_at: NOW, sources: 8, source_index: 3, source: "www.inkandswitch.com", items: 40, item: 12, done_items: 52, kept: 5 };
   const HIGH = { ...D.memory, level: "high" as const, used_mb: 2765, words: "Kranto uses 2.7 GB of its 3.0 GB MemoryHigh (kranto.service); above it the system slows kranto down" };
 

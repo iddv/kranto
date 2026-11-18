@@ -1,8 +1,8 @@
-"""The term door (the owner's D5): a session reaches Kranto only through its own
+"""The term door: a session reaches Kranto only through its own
 socket with its own token, and every write becomes a proposal of one of the server's verbs the
 owner confirms in the page, which runs it through the server's verbs' door as the owner.
 ``confirm: true`` from the session changes nothing; the build loop's actions and patches are
-gone (CUT): a proposal of one is refused, and an old one is dismiss-only. No model, no
+gone: a proposal of one is refused, and an old one is dismiss-only. No model, no
 network."""
 from __future__ import annotations
 

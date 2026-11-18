@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Library › Map, the pane (WORKSPACE.md 4, 5): the map as an SVG scatter (built once per
+  // Library › Map, the pane: the map as an SVG scatter (built once per
   // snapshot, map.svelte.ts), the selected point (?p=) with its nearest neighbours in meaning
   // (each a walk to it on the map, or its page when it is not on the map), and how to read the
   // map (a fold that stays open). ?c= dims every cluster but one, and a topic's Map (WT,

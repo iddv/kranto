@@ -1,5 +1,5 @@
-"""The click levers CLICKS-v4.md measured (fleet2 track U7): Spend with its breakdowns first (S11), the model key
-tested on paste (S01) (Today's top 20 and New idea left with the cut);
+"""The click levers a review measured: Spend with its breakdowns first, the model key
+tested on paste (Today's top 20 and New idea left with the cut);
 and two fixes: mute is its own control, apart from the source link, and Today's Spend box and
 the header's chip show the same week from the same source."""
 from pathlib import Path
@@ -53,14 +53,14 @@ def test_no_spend_chip_and_today_keeps_only_a_quiet_tokens_line():
 
 
 def test_spend_opens_with_the_breakdowns_first():
-    # W5: the breakdown is the list, By topic first, the caps last: pressed in
+    # the breakdown is the list, By topic first, the caps last: pressed in
     # pages/settings/spend.svelte.test.ts ("lists where it went first, then the caps; …"); the caps
     # are the pane with nothing selected: lib/app/topics.test.ts ("opens with nothing selected on
     # Totals and caps: …")
-    assert '{"route": "settings/spend", "node": "settings/spend"}' in JS, "no row selected on open: S11 is one click"
+    assert '{"route": "settings/spend", "node": "settings/spend"}' in JS, "no row selected on open: Spend is one click"
 
 
-# -- S16 and S01 -------------------------------------------------------------------------------
+# -- the model key, tested on paste --------------------------------------------------------------
 def test_the_key_is_tested_on_paste_and_never_kept():
     # moved: the key's form is KeyField.svelte, Settings › Keys' and the welcome step's;
     # tested on a paste and after a pause in typing, the same press as the button: pressed in

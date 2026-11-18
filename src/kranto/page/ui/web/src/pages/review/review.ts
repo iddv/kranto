@@ -1,4 +1,4 @@
-// Review, the weekly queue (LEARNING.md 3.4, #/review): the types and the pure helpers of the list
+// Review, the weekly queue (#/review): the types and the pure helpers of the list
 // and the pane. The server's GET /api/review/queue builds the queue: only what a grade is read for
 //, this week's cards in the order of what they stand on, themes and observations. The
 // doors' count and Needs you's row read the same path (reviewCount, QueuePane). The queue's shapes

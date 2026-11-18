@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Needs you's rows (WORKSPACE.md 8;): a row for each thing that waits on
+  // Needs you's rows: a row for each thing that waits on
   // you, one line each: the state in a word, the title, at most one fact, the age, one verb. It
   // opens with the one thing (Next, by rule: needs.ts nextOf), the page's only primary; every
   // other row's verb is a plain button (R3). At most seven rows with a verb before scrolling (five
@@ -95,7 +95,7 @@
   });
   const upd = $derived(host?.update || null);
   const offer = $derived(updateOffer(upd));
-  // Promote to stable (REL): the gate's candidate, on the maintainer's install only
+  // Promote to stable: the gate's candidate, on the maintainer's install only
   const cand = $derived.by(() => {
     void view.tick;
     return candidateRead(host);
@@ -228,7 +228,7 @@
 <!-- the Updates row says the version: it is about versions (the lint's allowlist says so) -->
 {#snippet updateRowS()}
   {#if upd && offer === "bad" && upd.broke && upd.state === "rolled_back"}
-    <!-- the post-update self-check (RCA D1): a page of the new version failed on this data -->
+    <!-- the post-update self-check: a page of the new version failed on this data -->
     {#snippet send()}{#if upd.broke!.error_id}<button class="btn sm" id="upd-send-error" title={`Feedback with the error's report (error ${upd.broke!.error_id}), shown before anything is sent`} onclick={() => sendError(upd.broke!.error_id!, `${upd.to} broke on my data and was rolled back`)}>Send this error</button>{/if}{/snippet}
     <Row title={`${upd.to} broke on your data and was rolled back`} href="#/settings/updates" meta="nothing in your data was undone" end={send}>
       {#snippet st()}<Glyph say name="warn" colour="red" word="Rolled back" />{/snippet}

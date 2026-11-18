@@ -1,4 +1,4 @@
-"""The ``kranto`` command (PLAN.md sections 1.1 to 1.7), offline: the home and its config,
+"""The ``kranto`` command, offline: the home and its config,
 the unit file, up/serve/status, doctor's prerequisite checks, and adopt's plan (dry run and
 real, against a scratch copy of the pre-kranto layout). systemctl, claude, gh, bwrap and tmux
 are fakes; nothing here starts a service, calls a model or touches the network."""
@@ -266,7 +266,7 @@ def test_up_installs_and_starts_the_unit(user_home, capsys, monkeypatch):
     calls = [c[2:] for c in host.machine.calls if c[0] == "systemctl"]
     assert ["daemon-reload"] in calls and ["enable", "--now", "kranto.service"] in calls
     assert any(c[:2] == ["loginctl", "enable-linger"] for c in host.machine.calls)
-    # the browser opens a one-time sign-in link (OI), which then lands on #/welcome
+    # the browser opens a one-time sign-in link, which then lands on #/welcome
     assert re.search(r"open http://127\.0\.0\.1:8765/auth/open\?code=[\w-]+&next=/#/welcome\n",
                      out), out
     assert (user_home / ".kranto" / "kranto.yaml").exists()
@@ -380,7 +380,7 @@ def test_down_and_logs_without_systemd(user_home, tmp_path, capsys):
 
 
 def test_status_one_screen(user_home, monkeypatch, capsys):
-    """Builds left Kranto (CUT): no lane, loop, build spend or build login line, and still well;
+    """Builds left Kranto: no lane, loop, build spend or build login line, and still well;
     even a server that still reports a loop lane (an older one) is not said."""
     launcher.make_home(user_home / ".kranto", 8765, user_home)
     lane = {"state": "waiting", "ticks": 12, "errors": 0, "detail": "a brb loop run holds it",
@@ -727,7 +727,7 @@ def test_adopt_dry_run_plans_and_changes_nothing(user_home, legacy, capsys):
     assert f"systemctl --user disable --now {launcher.OLD_UNIT} (now active)" in out
     assert f"move {legacy['dropin']}" in out
     assert "systemctl --user enable --now kranto.service" in out
-    # builds left Kranto (CUT): no word of the old loop daemon or its tmux session
+    # builds left Kranto: no word of the old loop daemon or its tmux session
     assert "tmux" not in out and "loop daemon" not in out and "Afterwards" not in out
     changes = [
         c

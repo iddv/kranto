@@ -2,7 +2,7 @@
 // news, look at the ideas, tune what is watched, post). The top bar draws them on a wide screen,
 // the phone's bar at the bottom with ✦ (the console) as its fifth item. [door id, word, address];
 // the id is lib/app/chrome.ts's doorId, which lights the current one. Watch opens #/topics, which
-// lands on the last topic you looked at (WT).
+// lands on the last topic you looked at.
 export const DOORS: readonly (readonly [string, string, string])[] = [
   ["news", "News", "#/news"],
   ["ideas", "Ideas", "#/ideas"],

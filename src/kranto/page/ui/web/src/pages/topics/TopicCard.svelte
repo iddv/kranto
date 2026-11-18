@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A topic in the pane (WORKSPACE.md 2.7; the old page's paneTopic): its facts (the sources'
+  // A topic in the pane (the old page's paneTopic): its facts (the sources'
   // number links to its Sources), what is rising now; Open the topic (away from its pages), Add source, Scout more (the
   // scout's job, polled; its close matches ticked on the topic's Sources, which it opens), Edit
   // (the sheet: its words, sources and settings;), Pause topic or Resume topic and Archive (with

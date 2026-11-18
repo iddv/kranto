@@ -46,7 +46,7 @@ export interface HomeRow {
   dismiss?: string;
   /** a prepared item: its button opens its dialog, never a link */
   prepared?: Prepared;
-  /** what a cub asks (SEND): its button opens the ask's dialog, never a link */
+  /** what a cub asks: its button opens the ask's dialog, never a link */
   ask?: AskRef;
 }
 /** a cub's row as its read answers it (the server's TodayRow contract) */
@@ -160,7 +160,7 @@ export function cubRows(f: FeatureRow, rows: CubRow[], group: "needs_you" | "new
       return { key: `${f.id}:${r.id}`, title: r.title, meta: r.meta || "", href: href(`post/d/${nope.id}`), from: f.id, verb: "Open",
         age: r.at ? ago(dt(r.at)) : null, at: dt(r.at), word: "waits", want: "approve" as const, tags: [{ word: f.title, tone: f.trust }], glyph: "", tone: "violet" };
     }
-    // what the cub asks, as the server's core built it (SEND): one line, its title and where it
+    // what the cub asks, as the server's core built it: one line, its title and where it
     // stands, and the action's own button, which opens its dialog
     const ask = group === "needs_you" && r.ask ? { cub: f.id, ticket: r.ticket ?? null, again: r.again ?? null } : undefined;
     return {

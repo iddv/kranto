@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The usage-reports question (the owner's D1: asked once, nothing sent until
+  // The usage-reports question (asked once, nothing sent until
   // answered): the two sentences, three choices with none chosen for the person, and where to
   // read every field. Welcome's first step and Settings › Privacy & access draw it; a choice is saved at
   // once through the one setter (POST /api/settings/telemetry).

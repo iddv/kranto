@@ -131,7 +131,7 @@ def test_running_is_the_same_process_not_just_the_same_pid(tmp_path):
     assert not proc.running(p.pid, s)
 
 
-# -- S-9 step 3: every background job of the product on proc ----------------------------------
+# -- every background job of the product on proc ---------------------------------------------
 def test_a_finished_job_is_reaped_without_anyone_asking(tmp_path):
     p = proc.spawn_detached([sys.executable, "-c", "pass"], log=tmp_path / "l")
     end = time.time() + 10

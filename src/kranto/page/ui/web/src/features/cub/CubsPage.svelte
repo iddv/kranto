@@ -41,7 +41,7 @@
     return features(H);
   });
   const cubs = $derived(cubsOf(fs));
-  // the features not read yet: no "0 cubs installed" and no "None yet" before they arrive (QA B14)
+  // the features not read yet: no "0 cubs installed" and no "None yet" before they arrive
   const pending = $derived.by(() => {
     void view.tick;
     if (!H || fs) return false;

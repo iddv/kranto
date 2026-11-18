@@ -38,7 +38,7 @@ afterEach(() => {
   ui.facts = null;
 });
 
-describe("Settings › Assistant (the owner's Q2 and Q6)", () => {
+describe("Settings › Assistant", () => {
   it("offers Restart the console now after a change it takes at its start", async () => {
     stub({});
     answering({ [CONSOLE_API]: STATE });

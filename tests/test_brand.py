@@ -1,4 +1,4 @@
-"""Kranto brand on the server's side (UI-v4.md section 1.4): every server-rendered page links
+"""Kranto brand on the server's side: every server-rendered page links
 the favicon, the files are in the static directory, and the README opens with the name."""
 from pathlib import Path
 

@@ -1,9 +1,8 @@
-"""The security test plan of the rows the runtime and the brokers own (S1 to
-S15, S23 to S26, S28 to S30): each adversarial cub under ``tests/fixtures/cubs/`` runs in its
-real sandbox (bubblewrap, and a systemd user scope where the machine has one) and the test
-asserts the design's expected result. Where this machine has no user manager the scope-only
-rows (S11's fork bomb) are skipped with the reason; CI's runner and the owner's machine say
-which ran in the job's log (``limits_mode``).
+"""The security test plan of the rows the runtime and the brokers own: each adversarial cub
+under ``tests/fixtures/cubs/`` runs in its real sandbox (bubblewrap, and a systemd user scope
+where the machine has one) and the test asserts the design's expected result. Where this
+machine has no user manager the scope-only rows (the fork bomb) are skipped with the reason;
+CI's runner and the owner's machine say which ran in the job's log (``limits_mode``).
 
 The protocol rows (S6 to S9) use a cub that writes the protocol by hand (``raw``) so the host's
 answers to broken lines can be seen; its fixture's docstring says how.
@@ -279,7 +278,7 @@ def test_s24_a_ticket_flood_is_capped_then_paused(rt, home):  # noqa: F811
 
 
 def test_a_refused_key_in_a_cubs_run_joins_the_keys_incident(rt, home, make_client):  # noqa: F811
-    """live's newsletter run failed "the handler raised HostError" (a cub says its
+    """A real install's newsletter run failed "the handler raised HostError" (a cub says its
     exception's class only), so it stayed a Fix row of its own beside the key's. The host now
     says what it last refused the cub, in its own words, and the run joins the incident."""
     from kranto.activity import read as activity_read

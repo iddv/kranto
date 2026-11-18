@@ -29,7 +29,7 @@
   });
   let said = $state("");
   let busy = $state(false);
-  // the owner's Q2: a change the running console takes only at its start offers the restart
+  // a change the running console takes only at its start offers the restart
   let offer = $state<{ harness: string | null; word: string } | null>(null);
 
   async function saveConsole(body: Partial<C.ConsoleSettings>): Promise<void> {

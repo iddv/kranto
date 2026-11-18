@@ -55,7 +55,7 @@ POST = [
     ("/api/github/app", {}), ("/api/chat/send", {}), ("/api/nothing", {}), ("/nothing", {}),
 ]
 
-# a token's caller (OI): the owner's doors write anywhere; mcp and agents only run actions
+# a token's caller: the owner's doors write anywhere; mcp and agents only run actions
 AS = [("/api/term/settings", {}, {"origin": "mcp"}),
       ("/api/act", {"kind": "nope"}, {"origin": "agent:helper"}),
       ("/api/nothing", {}, {"origin": "ui"})]
@@ -120,9 +120,9 @@ def test_every_route_answers_as_it_did(app, tmp_path):
 
 
 def test_a_500_says_little_and_logs_the_rest(app, monkeypatch, caplog):
-    """An unexpected error answers Kranto's error JSON (RCA B3): its id, its type, the version
+    """An unexpected error answers Kranto's error JSON: its id, its type, the version
     and the report's address; the message (a path, a command line) goes to the server's log,
-    once for the id however often it happens (CR-REVIEW C-1)."""
+    once for the id however often it happens."""
     import logging
 
     from kranto.page import __version__, rowsafe

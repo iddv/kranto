@@ -1,4 +1,4 @@
-// The hash routes (WORKSPACE.md 5), as data: nodes.json is every route the app has, read by the
+// The hash routes, as data: nodes.json is every route the app has, read by the
 // page and by the Python tests. A route is #/<node path>[/<object>][?filters][&sel=<key>]. The
 // node path picks the navigator's entry and the list; an object segment (ideas/<id>,
 // library/o/<id>, ...) picks the object's home node and draws the object in the detail pane. sel=

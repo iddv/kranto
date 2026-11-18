@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The navigator (WORKSPACE.md 1.3): one tree, never tabs, drawn from the app's
+  // The navigator: one tree, never tabs, drawn from the app's
   // navTree() (lib/app/chrome.ts). A "g x" key is in the entry's tooltip,
   // the ? sheet and the palette, never beside it. An open topic or the library is not itself the
   // current entry: its first page is. Under 1180 px the tree is a drawer under the top bar (☰),

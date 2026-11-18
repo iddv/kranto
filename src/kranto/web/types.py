@@ -17,7 +17,7 @@ annotations``: TypedDict reads ``NotRequired`` only from evaluated annotations.)
 """
 from typing import Any, Literal, NotRequired, TypedDict
 
-# 2 (CUT): /api/ideas lost ``intake`` and ``default_output_kind`` and ``output_kind`` may be
+# 2 (builds left): /api/ideas lost ``intake`` and ``default_output_kind`` and ``output_kind`` may be
 # null; a prepared item says ``available`` (a verb that left Kranto: Dismiss only); the build
 # loop's b.* verbs and token actions are gone
 HOST_API_VERSION = 2
@@ -178,7 +178,7 @@ class UpdateSummary(TypedDict):
     available: str | None
     installed: str | None
     channel: str | None         # the installed build's line: stable or nightly (main, dev)
-    chosen: NotRequired[str]    # the channel in Settings (REL); absent from a server before it
+    chosen: NotRequired[str]    # the channel in Settings; absent from a server before it
     state: str
     detail: str | None
     reason: str | None
@@ -189,7 +189,7 @@ class UpdateSummary(TypedDict):
     checked_at: str | None
     check_failing: str | None    # the check's error once it has failed for more than two days
     failing_since: str | None
-    # the post-update self-check that rolled it back (RCA D1); absent from a server before it
+    # the post-update self-check that rolled it back; absent from a server before it
     broke: NotRequired[UpdateBroke | None]
 
 
@@ -386,7 +386,7 @@ class Source(TypedDict):
     fields: dict[str, Any] | None
     topics: list[SourceLink]
     proposed_for: str | None
-    # the topic the scout proposed it for, else the first it was added to (SRC)
+    # the topic the scout proposed it for, else the first it was added to
     found_for: SourceLink | None
     why: str | None
     replaces: Any
@@ -1821,7 +1821,7 @@ class IdeaOutcome(TypedDict):
 class IdeaBuilt(TypedDict):
     """What the loop made of a card (``outcomes.built``): the newest build, gate or publish
     step's word (``state``), the loop's idea id, and the repo once published. Read from the
-    rows the loop wrote before builds left Kranto (CUT); none come after."""
+    rows the loop wrote before builds left Kranto; none come after."""
     state: str
     kind: Literal["build", "gate", "publish"]
     idea: str | None
@@ -1925,7 +1925,7 @@ class Idea(TypedDict):
     theme: IdeaTheme | None
     topics: list[IdeaTopic]
     topic: IdeaTopic | None
-    output_kind: str | None        # the card writer's own word; None without one (CUT)
+    output_kind: str | None        # the card writer's own word; None without one
     one_liner: str
     who: str | None
     smallest_v1: str
@@ -2109,7 +2109,7 @@ class WebFetch(TypedDict):
 
 
 class UnreadableMark(TypedDict):
-    """``unreadable`` on a row that could not be built (``rowsafe``, RCA A3): what it is, the
+    """``unreadable`` on a row that could not be built (``rowsafe``): what it is, the
     words the list shows, the error's id and class."""
     what: str
     words: str

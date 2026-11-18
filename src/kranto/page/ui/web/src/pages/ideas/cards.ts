@@ -36,7 +36,7 @@ function parsed(data: Answer): CardX[] {
       grade: x.grade || x.verdict || null, topics: (x.topics || []).map((t) => ({ id: Number(t.id), name: t.name, share: t.share })),
       cited: (x.citations || x.evidence || []).length, signals: (x.signals as CardX["signals"]) || null, waiting: x.status === "waiting" || !!x.waiting,
       // a theme compacted or renamed since the card was written comes back without a name: no
-      // theme then, never "theme null" (QA B7)
+      // theme then, never "theme null"
       theme: (x.theme as CardX["theme"])?.name ? (x.theme as CardX["theme"]) : null, lineage: (x.lineage_id as string) || null, origin: x.origin || null, evidence: x.evidence || [], citations: x.citations || [],
       rank: (x.rank as CardX["rank"]) || null, prior_art: (x.prior_art as CardX["prior_art"]) || null,
       novelty_dropped: (x.novelty_dropped as CardX["novelty_dropped"]) || [],

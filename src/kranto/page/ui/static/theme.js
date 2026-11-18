@@ -1,4 +1,4 @@
-/* The theme before the first paint (UI-v4.md 1.2, AP): Settings › Appearance keeps two choices
+/* The theme before the first paint: Settings › Appearance keeps two choices
    in localStorage. The base, auto, light or dark: light and dark set html[data-theme], auto leaves
    it to the OS (prefers-color-scheme in kranto.css). The sidebar theme sets html[data-look]
    (static/looks.css); a custom one also sets its worked-out colours as --c-* on html. Loaded in

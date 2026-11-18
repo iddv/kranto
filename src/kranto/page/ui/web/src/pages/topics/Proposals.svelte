@@ -22,7 +22,7 @@
   $effect(() => { void rows; on.clear(); for (const x of ticked) on.add(x); n = ticked.size; });
   const order = $derived(rows.slice().sort((a, b) => Number(a.role === "wildcard") - Number(b.role === "wildcard") || Number(!!b.pretick) - Number(!!a.pretick)
     || ((b.validation || {}).median_similarity || 0) - ((a.validation || {}).median_similarity || 0)));
-  // one primary in the group (SRC D2): the first proposal's Approve
+  // one primary in the group: the first proposal's Approve
   const lead = $derived(order.find((p) => p.review !== "approved")?.id);
   const count = $derived(`${n} ticked · about ${about(perDay(rows.filter((p) => on.has(p.id) || p.review === "approved")))} new items a day`);
   function tick(p: Proposal, yes: boolean): void {

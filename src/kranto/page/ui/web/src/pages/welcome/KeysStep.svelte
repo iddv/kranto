@@ -3,7 +3,7 @@
   // you?", the ways in as boxes, each with one button, in WAYS' order. A model key opens Settings ›
   // Watching's own form (KeyField, the three keys), so a key is tested and kept the same way in both
   // places; Your Claude Code login is one deliberate press with Anthropic's terms sentence in view
-  // (the owner's D2), never preselected; found or not, it says how. The first way's button is the
+  // (as the owner decided), never preselected; found or not, it says how. The first way's button is the
   // page's one primary until a model is chosen; then Continue is. The usage question is Ready's.
   import Loading from "../../ui/Loading.svelte";
   import Mark from "../../shell/Mark.svelte";

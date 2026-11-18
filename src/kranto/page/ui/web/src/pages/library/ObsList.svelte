@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Library › Observations, the list (WORKSPACE.md 1.4, 1.5): one 31 px row each with its tick and
+  // Library › Observations, the list: one 31 px row each with its tick and
   // grade, the filters in the toolbar (the search, Filter ▾, the sort: the old module's filterBar,
   // shared with every list until they move), the rows grouped by their new flag ("New since your
   // last visit", "Seen before"), the top-20 cut in the group's foot and the pager under it. A search
@@ -34,8 +34,8 @@
   const host = $derived(!!ui.facts?.header.host);
   const doors = $derived(shellDoors(host));
   const base = $derived(doors ? (topic ? `watch/topic/${topic.id}/evidence` : "watch/evidence") : topic ? `topics/${topic.id}/evidence` : "library");
-  // named as the subnav names it: Evidence under the doors, Observations in the Library (QA B21);
-  // under the doors the title says whose (WT): a topic's, or All topics
+  // named as the subnav names it: Evidence under the doors, Observations in the Library;
+  // under the doors the title says whose: a topic's, or All topics
   const allWord = $derived(doors ? "Evidence" : "Observations");
   const title = $derived(doors ? `${topic ? topic.name : "All topics"} › Evidence` : topic ? "Evidence" : allWord);
   const r = $derived(listRoute(view.w));

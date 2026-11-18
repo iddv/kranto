@@ -34,7 +34,7 @@ def test_dollars_only_on_spend():
 def test_tokens_where_a_thing_used_some():
     # (a build's line, its page and its On GitHub box left with the factory, CUT)
     assert not (SRC / "pages" / "builds").exists()
-    # W5: Health's runs are rows with their tokens in the meta; the month's tokens are a group row
+    # Health's runs are rows with their tokens in the meta; the month's tokens are a group row
     health = src("pages/settings/HealthList.svelte")      # moved
     assert "d.tokens_month" in health and "tokText(x.tokens || sm.tokens)" in health and "spend_usd" not in health
     # a topic's pane (moved,): its month in tokens

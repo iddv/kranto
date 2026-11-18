@@ -1,4 +1,4 @@
-/* Appearance (UI-v4.md 1.2, AP): two choices, apart, kept in this browser's localStorage (the
+/* Appearance: two choices, apart, kept in this browser's localStorage (the
    only things the page ever stores) and applied to <html>, as static/theme.js also does before
    the first paint:
    - the base, THEME_KEY: auto follows the OS; light and dark set html[data-theme];
@@ -43,8 +43,8 @@ export const isDark = (): boolean => {
   return t ? t === "dark" : deviceDark();
 };
 /** what ◐ and the palette's Switch to light/dark set: the other scheme, and Auto again whenever
- * that is the device's own, so a press never drops Auto for good (QA B18, the owner's B2: Auto,
- * then ◐, stayed dark after the device's evening switch) */
+ * that is the device's own, so a press never drops Auto for good (Auto,
+ * then ◐, once stayed dark after the device's evening switch) */
 export function flipTo(): Base {
   const want = isDark() ? "light" : "dark";
   return (want === "dark") === deviceDark() ? "auto" : want;
@@ -98,7 +98,7 @@ function fitInk(c: string, bgs: string[], need: number, toward: string): string 
 /* a custom theme: five colours picked, the rest worked out from them, and the pairs checked as the
    test checks the built-in themes. The accent is darkened for the light base and lightened for the
    dark one as far as AA needs; the sidebar's text and the badge are yours, so they block Save. */
-/* its page (TH): tinted neutrals in the sidebar's hue (the accent's, when the sidebar is a grey), at
+/* its page: tinted neutrals in the sidebar's hue (the accent's, when the sidebar is a grey), at
    the lightness of the built-in themes: [HSL lightness, saturation] a token, on the light base (l)
    and the dark one (d). The accent is fitted to read on these surfaces and on its selected row, which
    is the accent faded into a card until every ink reads on it (#8f5a00: kranto.css's amber, the
@@ -181,7 +181,7 @@ export function adoptOld(): string[] {
   (window as { krantoLayout?: { apply: () => unknown } }).krantoLayout?.apply();
   return copied;
 }
-/** a custom theme saved before it had a page of its own (TH): its colours are worked out again
+/** a custom theme saved before it had a page of its own: its colours are worked out again
     from the five it keeps, once, as the app loads */
 export function upgradeCustom(): void {
   const saved = customNow();

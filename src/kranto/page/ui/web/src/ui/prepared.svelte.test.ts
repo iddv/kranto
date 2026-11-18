@@ -42,7 +42,7 @@ describe("a prepared item", () => {
     expect(preparedHere(rows, "#/home")).toEqual([]);
   });
 
-  it("is matched where its page lands, and not on another selection (PAR)", () => {
+  it("is matched where its page lands, and not on another selection", () => {
     const land = (h: string) => h.replace(/^#\/ideas\/([^/?]+)$/, "#/ideas?sel=i$1");
     const rows = [P({ uuid: "b1", page: "#/ideas/12" }), P({ uuid: "b2", page: "#/ideas/13" })];
     expect(preparedHere(rows, "#/ideas?sel=i12", land).map((p) => p.uuid)).toEqual(["b1"]);

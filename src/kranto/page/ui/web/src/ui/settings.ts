@@ -1,4 +1,4 @@
-// What every Settings page shares (WORKSPACE.md 2.12): a page is a list of its setting groups
+// What every Settings page shares: a page is a list of its setting groups
 // and real rows (a group's state, its name and its value in one line, never a field), and a
 // group's form is in the detail pane when it is selected (sel=e<key>).
 import { href } from "../lib/router";

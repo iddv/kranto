@@ -65,7 +65,7 @@ describe("Settings › Sources", () => {
     expect(topicWords({ ...D.sources[1]!, found_for: pk })).toBe("for Plotkeeper (project)");
     expect(topicWords({ ...wild, found_for: pk })).toBe("wildcard for Plotkeeper (project): unrelated, may carry its patterns");
     expect(topicWords({ ...D.sources[1]!, found_for: pk }, 40)).toBeNull();
-    // the catalog's login words: who it reads as, or where to connect one (SRC D5, D7)
+    // the catalog's login words: who it reads as, or where to connect one
     const xp = { ...CAT.providers[1]!.presets[0]!, available: true };
     expect(presetWords(xp, CAT).meta).toBe("with your account · A list. Connect it first under Settings › Watching.");
     expect(presetWords(xp, { ...CAT, connected: { x: [{ instance: "x.com", account: "@someone", state: "connected" }] } }).meta).toBe("with your account · connected as @someone · A list.");

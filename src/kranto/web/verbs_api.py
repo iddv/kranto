@@ -163,7 +163,7 @@ def check_fields(verb: verbs.Verb, fields: Any) -> dict[str, Any]:
                             if f.lo is not None and f.hi is not None else
                             f"{verb.kind}.{name} is out of its range", refusal="fields")
         out[name] = value
-    # blank words and an empty list are missing, as every press reads them (PAR)
+    # blank words and an empty list are missing, as every click reads them
     missing = [f.name for f in verb.fields if f.required and _blank(out.get(f.name))]
     if missing:
         raise VerbError(f"{verb.kind} needs {', '.join(missing)}")
@@ -982,7 +982,7 @@ class VerbsAPI:
                 return r
         return None
 
-    # -- your own client, outside Kranto's folder (the owner's Q6 of 2026-10-25) --------------
+    # -- your own client, outside Kranto's folder (decided on 2026-10-25) ---------------------
     def _global(self, harness: str, which: Any = None) -> dict:
         """What adding Kranto to your own Claude Code or Codex changes, exactly as ``kranto
         assistant global`` shows it: its own commands, and Codex's skill files."""

@@ -1,4 +1,4 @@
-"""Continue outside (the owner's D3): ``kranto term open`` runs exactly the page's command, and
+"""Continue outside: ``kranto term open`` runs exactly the page's command, and
 the page's Continue outside ends the page's process, puts the conversation where your own
 Claude Code finds it, and gives the plain command with Kranto's tools and the same-limits one."""
 from __future__ import annotations

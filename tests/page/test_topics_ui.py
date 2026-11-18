@@ -1,4 +1,4 @@
-"""Settings › Watching and the Topics tab (PLAN.md 1.5, 2, 3): the pages are in-app routes with
+"""Settings › Watching and the Topics tab: the pages are in-app routes with
 a vertical menu; the key is never kept by the page. (Build this from a topic, the builds' and
 projects' pages and the Building step left with the factory, CUT.)"""
 import re
@@ -20,7 +20,7 @@ def test_topic_pages_are_in_app_routes_with_a_vertical_menu():
     pages = re.search(r"export const TPAGES: \[string, string\]\[\] = (\[.*?\]);", ts).group(1)
     assert [w for _, w in re.findall(r'\["([a-z]*)", "([^"]+)"\]', pages)
             if w != "Builds"] == ["Overview", "Evidence", "Themes", "Ideas", "Sources", "Map"]
-    # its pages are its children in the side nav (UI-v4.md 2.1), with their counts (W3: read from
+    # its pages are its children in the side nav, with their counts (read from
     # /api/today and /api/topics/<id>, so they show before the topic is visited): pressed in
     # lib/app/chrome.test.ts ("is one tree: Desk, Topics with their pages, …")
     assert 'import { TODAY_API, type Today } from "../../pages/topics/topics";' in src("lib/app/chrome.ts")
@@ -30,7 +30,7 @@ def test_topic_pages_are_in_app_routes_with_a_vertical_menu():
     # every topic is Watch › Topics in either layout: the old Topics list went (track)
     assert 'import("./topics/TopicsList.svelte")' not in reg
     assert 'for (const [sub] of TPAGES) register("topics/:id" + (sub ? "/" + sub : ""), { list: topicList, pane: sub === "map" ? lazy(() => import("./library/MapPane.svelte")) : topicPane });' in reg
-    # under the doors a topic's pages are Watch's (WT): #/watch/topic/<id>[/sources|/evidence|/map]
+    # under the doors a topic's pages are Watch's: #/watch/topic/<id>[/sources|/evidence|/map]
     assert {n["route"] for n in nodes()} >= {"watch/topic/:id", "watch/topic/:id/sources", "watch/topic/:id/evidence", "watch/topic/:id/map"}
     # each of them a route of its own (lib/nodes.json)
     assert {n["route"] for n in nodes()} >= {"topics/:id" + ("/" + k if k else "") for k in re.findall(r'\["([a-z]*)", "', pages)}
@@ -84,7 +84,7 @@ def test_the_key_is_never_kept_by_the_page():
     # lib/app/topics.test.ts ("leaves the page be while the key field holds something, …")
     assert not re.search(r"sessionStorage|document\.cookie", JS)
     # the only things the page stores are its appearance: light or dark, the sidebar theme and a
-    # custom theme's colours (Settings › Appearance, UI-v4.md 1.2, AP), and the width of
+    # custom theme's colours (Settings › Appearance), and the width of
     # Claude Code's split, and which list groups the viewer folded or opened (UP #7, R4:
     # the names of groups, never their rows), and Feedback's draft (FB: the person's own words, kept in this
     # browser while the sheet is closed, cleared once filed), and when the viewer last opened
@@ -113,7 +113,7 @@ def test_the_key_is_never_kept_by_the_page():
 # notice a form redirects with")
 
 
-# -- topics and the library in the workspace (WORKSPACE.md 8, W3) ----------------------------
+# -- topics and the library in the workspace -----------------------------------------------
 CSS = css()
 
 
@@ -174,7 +174,7 @@ def test_the_outline_is_a_table_of_contents_not_tabs():
     assert '.toc a[aria-current]::before { content: "▸ "; }' in CSS and ".toc a[aria-current] { color: var(--text); font-weight: 600; }" in CSS
     # the scroll-spy marks the outline: pressed in lib/app/rows.test.ts ("marks the outline's
     # section the pane is scrolled to")
-    assert 'document.querySelector("#dscroll .dh")' in JS and not re.search(r"[.\"]decide\b", JS)     # W5: the old sticky bar is gone
+    assert 'document.querySelector("#dscroll .dh")' in JS and not re.search(r"[.\"]decide\b", JS)     # the old sticky bar is gone
 
 
 def test_approve_on_a_proposal_posts_the_topic():
@@ -218,7 +218,7 @@ def test_the_topics_node_and_a_topics_pages_show_the_topic_in_the_pane():
         assert group in ov, group
     assert ov.index("<TopicSourceRows") < ov.index('id="ov-themes"'), "Sources is the first section"
     # one component draws a topic's rows: the page's section, its Sources page and the Edit sheet
-    # (SRC D4), which keeps no list, Add form or Save of its own for sources
+    # too, which keeps no list, Add form or Save of its own for sources
     assert "<TopicSourceRows {t} at={view.tick} />" in src("pages/topics/TopicSources.svelte")
     edit = src("pages/topics/TopicEdit.svelte")
     assert '<TopicSourceRows {t} mode="edit" {close} />' in edit and "te-find" not in edit and "toggle(remove" not in edit

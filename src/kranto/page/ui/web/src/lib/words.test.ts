@@ -90,7 +90,7 @@ describe("Settings' words", () => {
     expect(bad).toEqual([]);
   });
 
-  it("an ask's dialog and its rows say no cub: the cub's name, its verb, where it stands (SEND)", () => {
+  it("an ask's dialog and its rows say no cub: the cub's name, its verb, where it stands", () => {
     const files = import.meta.glob(["../features/cub/AskDialog.svelte", "../features/cub/AskLine.svelte", "../features/ask.ts", "../ui/ReadBack.svelte"], { query: "?raw", import: "default", eager: true }) as Record<string, string>;
     expect(Object.keys(files).length).toBe(4);
     const bad = Object.entries(files).flatMap(([f, raw]) => shownIn(f, raw).filter((s) => /\bcubs?\b/i.test(s)).map((s) => `${f}: ${s.trim().slice(0, 90)}`));

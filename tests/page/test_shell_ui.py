@@ -1,4 +1,4 @@
-"""The shell of Kranto UI (UI-v4.md 2.1 and 2.4, track U2; Svelte since): the sticky
+"""The shell of Kranto UI (Svelte since): the sticky
 header with its links, the side nav (no tabs anywhere), #/overview landing on the home, the one key
 map (lib/keys.json) and the command palette. Read here: the key map as the JSON it is, and what
 the files say whole. What they do is pressed in Vitest: action() in lib/keys.test.ts, the keys
@@ -37,7 +37,7 @@ def test_no_top_level_name_is_declared_twice():
 
 # -- the key map -----------------------------------------------------------------------------
 def test_the_key_map_covers_the_sheet():
-    """UI-v4.md 2.4's sheet, every key once, each with what it does and how it is carried out:
+    """The keys sheet, every key once, each with what it does and how it is carried out:
     a route (go), a shell verb (run), or a verb the page declares (page). Every run has its case
     and every g key its page: lib/keyboard.test.ts, lib/app/route.test.ts."""
     keys = [m["keys"] for m in KEYMAP]
@@ -90,7 +90,7 @@ def test_overview_and_today_land_on_the_home_and_needs_you():
 def test_the_header_tells_and_links():
     assert '<a class="brand" href="#/home" aria-label="Kranto, Home">' in HEADER
     # the lanes are one item, what Kranto is doing, opening Activity, where a build's row opens its
-    # trace; no build to say Revising of, no loop to be down (CUT)
+    # trace; no build to say Revising of, no loop to be down
     assert "<ActivityIndicator {lanes}" in HEADER and 'href="#/activity"' in src("shell/ActivityIndicator.svelte")
     assert 'fix: x.kind === "fix"' not in HEADER
     assert "{f.que} queued" not in HEADER and "hd-loop-down" not in HEADER + src("shell/StatusBar.svelte")

@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A route the app does not have: the list pane says so, with the way home (QA B11: "Go to Today",
+  // A route the app does not have: the list pane says so, with the way home ("Go to Today",
   // a place retired with the doors).
   import MarkEmpty from "../ui/MarkEmpty.svelte";
   import type { View } from "../lib/pages.svelte";

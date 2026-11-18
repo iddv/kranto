@@ -1,4 +1,4 @@
-// Topics (PLAN.md sections 2.2 and 2.3; WORKSPACE.md 2.7, 2.13): the server's /api/topics (every
+// Topics: the server's /api/topics (every
 // topic with its facts, the broad lane, the library as a whole) and one topic's page,
 // /api/topics/<id>: its facts, its themes (the latest map's clusters whose stories come mostly
 // from it), the ones rising now, its sources with the scout's proposals. Both are generated from

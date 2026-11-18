@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Settings › Accounts › Newsletter, the sheet (MAIL): the platform a newsletter cub's issues go out
+  // Settings › Accounts › Newsletter, the sheet: the platform a newsletter cub's issues go out
   // through. The cub never names one; the server's /api/newsletter says which is in use (none until
   // one is connected), whether an issue can go out and what is missing. Connect a provider offers
   // every platform the server lists, each to its own connection page (the key, Save and test); Check

@@ -97,7 +97,7 @@ def test_thresholds_are_per_origin(store):
     add_snapshots(store, 2)
     cfg = StrikeConfig(max_per_week=10)
     # 0.2 is a strong card; 0.96 is a weak burst. A watch candidate left from before watches
-    # were retired (WT) has no threshold now: decided once, never sent.
+    # were retired has no threshold now: decided once, never sent.
     card = candidate(store, "card", "lineage:c", 0.2)
     burst_weak = candidate(store, "burst", "lineage:d", 0.96)
     old_watch = candidate(store, "watch", "watch:2", 0.99)
@@ -451,7 +451,7 @@ def test_an_older_cluster_grade_is_kept_and_counted_nowhere(store, embedder):
     old_grade(store, "cluster", row["lineage_id"], "missed",
               context={"snapshot_id": row["snapshot_id"]})
     # a theme's grade was the build loop's (`feedback.target` = cluster): the row
-    # stays as stored and no reader counts it (CUT)
+    # stays as stored and no reader counts it
     assert grades.history(store, "cluster", row["lineage_id"]) == []
     assert grades.latest(store, "cluster", [row["lineage_id"]]) == {}
 
@@ -497,7 +497,7 @@ def test_default_config_documents_and_parses_strike_and_notify(tmp_path):
     assert "different scales" in text or "own scale" in text
 
     path = tmp_path / config_mod.CONFIG_FILENAME
-    # an older kranto.yaml still loads with the key watches left (WT), which nothing reads
+    # an older kranto.yaml still loads with the key watches left, which nothing reads
     path.write_text(text.replace("  min_burst_score: 0.99",
                                  "  min_burst_score: 0.99\n  min_watch_score: 0.7"))
     assert config_mod.load(tmp_path).strike.threshold("watch") is None

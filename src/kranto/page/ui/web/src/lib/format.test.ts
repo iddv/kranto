@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { capUsd, dur, memoryWords, nextRead, readingWords, usd, when } from "./format";
 
-describe("a read in progress and memory, in words (MEM)", () => {
+describe("a read in progress and memory, in words", () => {
   const p = { sources: 8, source_index: 1, source: "HN search: local-first", items: null, item: 0, kept: 0 };
   it("says the source, its items and what was kept", () => {
     expect(readingWords(p)).toBe("source 1 of 8, HN search: local-first · fetching · 0 kept so far");

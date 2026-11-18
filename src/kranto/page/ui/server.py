@@ -40,7 +40,7 @@ MAX_DRAIN = 1 << 20
 # Every answer: the server's policy for the page: scripts only from this
 # origin and never inline; github.com is the one form the page posts elsewhere;
 # img-src https: for a News article's picture from its source, loaded by the reader's browser
-# (the owner's D3, 2026-10-23).
+# (as the owner decided on 2026-10-23).
 PAGE_CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
             "img-src 'self' data: https:; object-src 'none'; base-uri 'none'; "
             "form-action 'self' https://github.com; frame-ancestors 'none'")

@@ -1,4 +1,4 @@
-// The one key map (UI-v4.md 2.4). Every shortcut is declared once, in keys.json (the Python
+// The one key map. Every shortcut is declared once, in keys.json (the Python
 // tests read it too); the ? sheet, the nav's tooltips and the palette's hints are drawn from it.
 // action() is a pure function from (key, state) to what to do; the shell carries it out.
 // A row's "go" is a route; "run" is a shell verb; "page" is a verb the page declares through
@@ -105,7 +105,7 @@ export interface QueueAction {
   value?: string;
   at?: number;
 }
-/** The review queue's keys (LEARNING.md 3.4): one item at a time, no pointer needed. */
+/** The review queue's keys: one item at a time, no pointer needed. */
 export function queueAction(key: string, state: QueueState): QueueAction | null {
   const m = QUEUE_BY[key];
   if (!m) return null;

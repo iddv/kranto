@@ -50,7 +50,7 @@
   let pending: string | null = null;
   let quietT: ReturnType<typeof setTimeout> | null = null;
   // the assistant's own first-run prompt (trust Kranto's folder, sign in): one line above the
-  // starters, and a starter's sentence waits until the prompt is gone (decision D1)
+  // starters, and a starter's sentence waits until the prompt is gone
   let firstRun = $state<string | null>(null);
   const held = new Held((s) => sock?.input(s));
   const list = $derived.by((): Starter[] => {
@@ -606,7 +606,7 @@
   :global(body.con-rail.doors:not(.classic).show-detail #detail) { right: 36px; }
   :global(body.con-full) .console { width: 100vw; }
   /* Classic with the console docked (at 1400 px the list keeps 224 + 6 + 784 and
-     the console 380; live's list fell to 320 px, Needs you's titles to "Add …"): while
+     the console 380; a real install's list fell to 320 px, Needs you's titles to "Add …"): while
      no object is open, the empty detail column gives its width to the list */
   @media (min-width: 1180px) {
     :global(body.classic.con-open:not(.show-detail):not(.focus):not(.stage) #app) {

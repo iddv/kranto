@@ -14,7 +14,7 @@ What it starts with (``ask:`` in ``loop.yaml``; Settings › Assistant):
 - ``model.<harness>``: ``--model`` / ``-m``; unset: the harness's own default.
 - ``open``: the panel opens with the page by itself. Default true for a home whose loop.yaml
   does not say; a home made by ``kranto up`` from 0.7.0 on says false (``NEW_HOME``).
-- ``permission``: ``auto`` (the owner's Q3: Claude Code's auto mode) · ``ask`` (asks before
+- ``permission``: ``auto`` (Claude Code's auto mode) · ``ask`` (asks before
   edits and commands) · ``accept-edits``. Bypass is refused. Default ``auto`` when loop.yaml
   does not say; a new home says ``ask`` (``NEW_HOME``).
 - ``config``: ``own`` (your login, settings, plugins, MCP servers and CLAUDE.md: it is your

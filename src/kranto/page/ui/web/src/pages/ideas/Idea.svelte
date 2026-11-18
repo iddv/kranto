@@ -1,5 +1,5 @@
 <script lang="ts">
-  // An idea card's sheet (WORKSPACE.md 2.2;): its state, its number, its title, the topics
+  // An idea card's sheet: its state, its number, its title, the topics
   // with their shares, its theme and when it was written; Write a post (the primary), Pass and
   // Later (p l) in the head and Details; a note while it is put off; then the card: the grade, the
   // thesis and the sites of its sources (decision D4). Its evidence, signals, score

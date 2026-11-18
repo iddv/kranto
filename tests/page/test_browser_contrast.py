@@ -1,4 +1,4 @@
-"""Every text on the page is readable in both themes (BG): the WCAG contrast of each visible text
+"""Every text on the page is readable in both themes: the WCAG contrast of each visible text
 against what is drawn under it, 4.5:1 (3:1 for large text), on every route of the fake app
 (tests/page/test_browser_smoke.py's), in light and in dark, with the theme from the OS and from
 Settings › Appearance against the OS (static/theme.js's html[data-theme]). The palette's pairs are

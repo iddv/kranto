@@ -293,7 +293,7 @@ describe("the one thing's candidates", () => {
     expect(uniqueRows([r("a"), r("a"), r("b")]).map((x) => x.key)).toEqual(["a", "a~1", "b"]);
   });
 
-  it("opens a cub's row on the cub's page with its object's sheet (QA B3: #/newsletter was no page)", () => {
+  it("opens a cub's row on the cub's page with its object's sheet (#/newsletter was no page)", () => {
     const mail = newsletter();
     const [r] = cubRows(mail, [{ id: "2026-10-20", title: "This week: Kodama raises $7M", ticket: 9 }], "needs_you");
     expect(r!.href).toBe("#/cub/newsletter?sel=o2026-10-20");

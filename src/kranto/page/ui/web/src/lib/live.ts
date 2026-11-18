@@ -81,7 +81,7 @@ export function live(L: Pick<App, "refresh" | "loadHost" | "loadWho">, url = "ap
         soon();
       }
     });
-    // every place taken: the feed says busy and ends (no 503 in the console, QA B20); poll, and
+    // every place taken: the feed says busy and ends (no 503 in the console); poll, and
     // try again in 30 s
     s.addEventListener("busy", () => {
       s.close();

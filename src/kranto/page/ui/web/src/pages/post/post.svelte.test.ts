@@ -147,7 +147,7 @@ describe("Post with short posts", () => {
     expect(whereLine({ ...POST, sites: { line: "X opens in the site.", ticked: 1 } })).toBe("X opens in the site. Blog: not set. Newsletter: not set.");
   });
 
-  // SOC-10: "I choose Send Tuesday 09:00. The row moves to Scheduled with Cancel."
+  // POSTING-10: "I choose Send Tuesday 09:00. The row moves to Scheduled with Cancel."
   it("lists a post said yes to at an hour under Scheduled, with Cancel and its hour", async () => {
     const held = draft(30, { cub: "social", kind: "short", word: "short posts", site: "bluesky", site_word: "Bluesky", title: "Kiosks", fact: "from #143",
       due: "2026-11-17T09:00:00Z", due_words: "Tuesday 17 Nov, 09:00" });
@@ -181,7 +181,7 @@ describe("Post with short posts", () => {
     done();
   });
 
-  // SOC-9: "A post sent yesterday shows its replies, reposts and likes. LinkedIn's shows its
+  // POSTING-9: "A post sent yesterday shows its replies, reposts and likes. LinkedIn's shows its
   // address and says LinkedIn gives no numbers."
   it("shows a sent post's numbers, and once which sites give none", async () => {
     const sky = draft(40, { cub: "social", kind: "short", site: "bluesky", site_word: "Bluesky", note: "posted: https://bsky.app/profile/a/post/x", link: "https://bsky.app/profile/a/post/x", ticket: null,

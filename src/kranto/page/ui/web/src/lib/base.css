@@ -2,7 +2,7 @@
    panes and every part the pages share, imported once by main.ts after static/kranto.css (the
    tokens, the resets, the help page) and static/looks.css (the themes), so it reads their
    tokens and never defines one. A component's own rules are its <style>. */
-/* the workspace (WORKSPACE.md 1): a 40 px top bar, the navigator, the list pane, the detail
+/* the workspace: a 40 px top bar, the navigator, the list pane, the detail
    pane and a 24 px status bar; the page itself never scrolls, each pane does. Never tabs.
    kranto's own pages still use .hd-top and .tabs (their header) and header.hd. */
 body:has(> #app) { overflow: hidden; }
@@ -118,7 +118,7 @@ nav#nav { overflow: auto; padding: 6px 8px 24px; background: var(--side-bg); scr
 #nav .ni .tw { flex: none; width: 18px; font: inherit; font-size: 10px; color: var(--side-muted); background: none; border: 0; padding: 0; cursor: pointer; text-align: center; }
 #nav .ni.sub { margin-left: 18px; }
 #nav .ni.sub a { padding-left: 8px; font-size: 12.5px; }
-#nav .ni.sub.deep { margin-left: 34px; }   /* a topic's Sources, Evidence and Map (WT) */
+#nav .ni.sub.deep { margin-left: 34px; }   /* a topic's Sources, Evidence and Map */
 #nav .ni.on { background: var(--side-active); box-shadow: inset 2px 0 0 var(--side-bar); }
 #nav .ni.on a { color: var(--side-active-text); }
 #nav .ni.on a, #nav .ni.parent-on a { font-weight: 600; }
@@ -170,7 +170,7 @@ input[type=checkbox], input[type=radio] { margin: 0 6px 0 0; }
 .label.add { border-color: var(--blue); color: var(--blue); }
 .label.plan { border-color: var(--amber); color: var(--amber); }
 .label.no { border-color: var(--red); color: var(--red); }
-.label.agent { border-color: var(--amber); color: var(--amber); }   /* a round an agent or MCP started (OI) */
+.label.agent { border-color: var(--amber); color: var(--amber); }   /* a round an agent or MCP started */
 #signin input { margin: 0 6px; }
 .flash button.linkish { font-weight: 600; text-decoration: underline; }
 
@@ -325,12 +325,12 @@ tr.grp td { background: var(--subtle); padding-top: 6px; padding-bottom: 6px; }
 .device-code { font-size: 24px; font-weight: 600; letter-spacing: 0.12em; margin: 8px 0; }
 .facts dd .st { font-size: 16px; }
 
-/* onboarding and the Topics tab (PLAN.md 1.5, 2.2, 2.3) */
+/* onboarding and the Topics tab */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font: inherit; font-size: 12px; padding: 2px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--violet-wash); color: var(--text); cursor: pointer; }
 .chip:hover { background: var(--inset); }
 .chip[aria-pressed=true] { background: var(--violet-pastel); color: var(--chip-text); border-color: var(--violet); font-weight: 600; }
-/* pastel chips (UI-v4.md 1.1): a word on a tint, navy ink in both themes */
+/* pastel chips: a word on a tint, navy ink in both themes */
 .chip.blue, .chip.violet, .chip.green, .chip.amber, .chip.red { color: var(--chip-text); border-color: transparent; }
 .chip.blue { background: var(--blue-pastel); } .chip.violet { background: var(--violet-pastel); } .chip.green { background: var(--green-pastel); }
 .chip.amber { background: var(--amber-pastel); } .chip.red { background: var(--red-pastel); }
@@ -380,7 +380,7 @@ aside .row.nocost .r-act, aside .row.nocost .r-time { display: none; }
 .spark polyline { fill: none; stroke: currentColor; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 [aria-pressed=true]:not(.btn) { font-weight: 600; }
 .btn[aria-pressed=true] { background: var(--blue-pastel); color: var(--chip-text); font-weight: 600; border-color: var(--blue); }
-/* the grade glyphs (UI-v4.md section 3): pressed is the pastel chip with navy ink, plus
+/* the grade glyphs: pressed is the pastel chip with navy ink, plus
    aria-pressed, so never colour alone; ✕ wrong shows on hover, focus, and after a ▼ */
 .grade { display: inline-flex; gap: 2px; }
 .grade button { width: 28px; height: 28px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -404,7 +404,7 @@ aside .row.nocost .r-act, aside .row.nocost .r-time { display: none; }
 .toast button.x { text-decoration: none; opacity: .8; }
 .toast.red { background: var(--red-wash); color: var(--text); border: 1px solid var(--red); }
 /* the bulk bar takes the box head's place while rows are ticked */
-/* the review queue (LEARNING.md 3.4): a list group (.grp.queue) as wide as the list, like any other */
+/* the review queue: a list group (.grp.queue) as wide as the list, like any other */
 .progress { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; color: var(--muted); font-size: 13px; }
 .progress .meter { flex: 1; margin: 0; }
 .qcard { border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; background: var(--box); }
@@ -424,7 +424,7 @@ aside .row.nocost .r-act, aside .row.nocost .r-time { display: none; }
 @media (max-width: 700px) { .qpair { grid-template-columns: minmax(0, 1fr); } .toast { left: 12px; right: 12px; bottom: 32px; max-width: none; } }
 kbd { font: 11px/16px var(--mono); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--subtle); color: var(--muted); }
 
-/* the mark (UI-v4.md 1.4; the owner's illustration, its pastel variant): empty states, the
+/* the mark (the owner's illustration, its pastel variant): empty states, the
    onboarding head, the splash before setup and the missing page. The splash is navy in
    both themes, the composition of the social card. */
 .mark-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 16px; text-align: center; color: var(--muted); }
@@ -475,7 +475,7 @@ kbd { font: 11px/16px var(--mono); border: 1px solid var(--border); border-botto
 .cust input[type=color] { width: 40px; height: 28px; padding: 2px; cursor: pointer; flex: none; }
 .cust-pv { max-width: 260px; } .cust-pv .pv { height: 96px; }
 
-/* decisions (UI-v4.md 2.3, 2.5): the sticky decision bar on the idea and build pages, quiet
+/* decisions: the sticky decision bar on the idea and build pages, quiet
    secondary buttons on rows, the reason popover (Pass, Reject, a theme's Watch), the README
    preview, and the failing build.log line */
 .btn.primary kbd { background: var(--primary-text); color: var(--primary); border-color: transparent; }
@@ -517,7 +517,7 @@ kbd { font: 11px/16px var(--mono); border: 1px solid var(--border); border-botto
 details.fold { border-top: 1px solid var(--border-2); }
 details.fold > summary { padding: 8px 16px; cursor: pointer; color: var(--muted); }
 
-/* the workspace list (WORKSPACE.md 1.4, 1.5): a head, a toolbar that stays at the top of the
+/* the workspace list: a head, a toolbar that stays at the top of the
    pane (the bulk bar takes its place while rows are ticked), groups with sticky heads, and rows
    of one 31 px line: tick · glyph · number or kind tag · title and meta · aside · age · end. The
    end cell's width is fixed per list, so a grade never moves a row. */
@@ -604,7 +604,7 @@ details.fold > summary { padding: 8px 16px; cursor: pointer; color: var(--muted)
 .grp.start .row.lr { grid-template-columns: var(--tickw, 0px) var(--stw, 14px) 0px minmax(0, 1fr) 0px max-content 0px; }
 .grp.start .lr .c-age { overflow: visible; min-width: max-content; }
 @media (max-width: 500px) { .radios { display: flex; flex-direction: column; gap: 4px; margin-left: 0 !important; } }
-/* a pane's parts (WORKSPACE.md 1.6): kind line, title, lede, actions, then sections */
+/* a pane's parts: kind line, title, lede, actions, then sections */
 .pane-in { padding: 16px 0 8px; }
 .pane-in > .dt { margin: 4px 0 6px; }
 .pane-in .acts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 10px 0 14px; }
@@ -616,7 +616,7 @@ details.fold > summary { padding: 8px 16px; cursor: pointer; color: var(--muted)
 .pane-in .qlast { padding: 8px 10px; border-radius: 6px; background: var(--subtle); }
 ul.dots { list-style: disc; padding-left: 18px; }
 .pane-empty > .box { margin-top: 16px; }
-/* W3: a pane's head sticks (kind line, title, lede, actions, the outline); the outline reads as a
+/* a pane's head sticks (kind line, title, lede, actions, the outline); the outline reads as a
    table of contents, one muted line: no border, no underline, no background, the current
    section ▸ and bold; notes about the object; rows inside a pane */
 .dh { position: sticky; top: 0; z-index: 6; background: var(--box); margin: 0 -20px; padding: 14px 20px 8px; border-bottom: 1px solid var(--border-2); }
@@ -645,12 +645,12 @@ ul.dots { list-style: disc; padding-left: 18px; }
 .map-pane .viz-box { padding: 8px 0; }
 .map-pane .viz { max-height: none; }
 .map-pane .sec h3, .map-pane h3 { font-size: 13px; }
-/* W3: the toolbar's filters (it may wrap: the group heads stick under it, --tbh), and the lists' cells */
+/* the toolbar's filters (it may wrap: the group heads stick under it, --tbh), and the lists' cells */
 .wl .tb .tbn.filters { flex-wrap: wrap; row-gap: 4px; padding: 2px 0; }
 .tb .tb-q { width: 150px; padding: 2px 8px; font-size: 12px; height: 24px; }
 .tb .tb-f { padding: 1px 2px; font-size: 12px; height: 24px; max-width: 104px; }
 .grp.ideas { --numw: 40px; --asidew: 52px; --endw: 140px; }
-/* W4: Ideas, Builds and Chats as lists; the pipeline miniature and the ledger; the thread pane */
+/* Ideas, Builds and Chats as lists; the pipeline miniature and the ledger; the thread pane */
 .grp.ideas.pin .row.lr { border-bottom: 1px solid var(--border); }
 .grp.ideas.pin .r-title { color: var(--link); }
 .lr .c-end .tok { font: 11px var(--mono); color: var(--ink3); white-space: nowrap; }
@@ -694,7 +694,7 @@ ul.dots { list-style: disc; padding-left: 18px; }
 .wl > .box { max-width: 760px; }
 /* a narrow list pane: a theme row gives its sparkline's room to the label (the pane draws the movement) */
 @container (max-width: 640px) { #rows .grp.themes { --asidew: 0px; --numw: 36px; } #rows .grp.themes .c-aside { visibility: hidden; } }
-/* Settings as lists and panes (WORKSPACE.md 2.12, W5): a group row is its state, its name and its
+/* Settings as lists and panes: a group row is its state, its name and its
    value in one line, no number, no age, no end cell; a pane's forms keep their fields' widths */
 .grp.sets { --tickw: 0px; --numw: 0px; --asidew: 0px; --endw: 0px; }
 .grp.spend { --tickw: 0px; --numw: 64px; --asidew: 0px; --endw: 0px; }
@@ -731,7 +731,7 @@ input.vnote { flex: 1 1 220px; min-width: 0; max-width: 420px; }
 @media (max-width: 1100px) {
   .hd .host, .hd-st .word { display: none; }
 }
-/* the workspace by width (WORKSPACE.md 4): under 1180 px the navigator is a drawer (☰) over a
+/* the workspace by width: under 1180 px the navigator is a drawer (☰) over a
    scrim; under 760 px the list takes the width and the pane opens over it, with Back */
 @media (max-width: 1179px) {
   #app { grid-template-columns: minmax(320px, 1fr) 6px var(--detail-w, minmax(380px, 50%)); grid-template-areas: "top top top" "list sd detail" "bar bar bar"; }
@@ -782,7 +782,7 @@ input.vnote { flex: 1 1 220px; min-width: 0; max-width: 420px; }
   .hd-status .lanes .word { display: none; }
   #bar .hint { display: none; }
 }
-/* the stage (WORKSPACE.md 1.8): the splash, the welcome steps and Not found, one centred
+/* the stage: the splash, the welcome steps and Not found, one centred
    column between the top bar and the status bar */
 body.stage #app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "list" "bar"; }
 body.stage .split { display: none; }
@@ -947,7 +947,7 @@ body.stage #list-h:not(:empty) { max-width: 860px; margin: 0 auto; width: 100%; 
 .tl time { font-size: 11px; }
 textarea.pj-text { width: 100%; min-height: 320px; font: 12.5px/1.45 var(--mono); }
 
-/* the views placed in a pane (W1): one column at a pane's width, and the rows stacked as a
+/* the views placed in a pane: one column at a pane's width, and the rows stacked as a
    phone stacks them while the pane is narrow; last, so they win over the page-wide rules */
 @container (max-width: 860px) {
   .cols, .cols.halves { grid-template-columns: minmax(0, 1fr); }
@@ -1111,7 +1111,7 @@ body.doors:not(.classic).show-detail #detail { display: block; position: fixed; 
 #sheet-scrim { display: none; }
 body.doors:not(.classic) #sheet-scrim:not([hidden]) { display: block; position: fixed; z-index: 29; inset: 40px 0 24px 0; background: rgba(11, 11, 42, .28); }
 #sheet-x { position: absolute; z-index: 12; top: 8px; right: 10px; padding: 2px 9px; }
-/* a press prepared for the sheet's object, above its pane (PAR); empty when there is none */
+/* an action prepared for the sheet's object, above its pane; empty when there is none */
 .sheet-prepared { padding: 0 44px 0 18px; }
 .sheet-prepared:empty { display: none; }
 body.doors:not(.classic).show-detail:not(.focus) .dh { padding-right: 44px; }
@@ -1159,7 +1159,7 @@ body.doors:not(.classic).focus #dscroll { max-width: 1040px; margin: 0 auto; }
 .phead .doornav .n { font: 600 11px/16px var(--sans); font-variant-numeric: tabular-nums; padding: 0 6px; border-radius: 8px; background: var(--counter); color: var(--text); }
 .phead .doornav .n.wait { background: var(--amber-wash); }
 .phead .doornav .n.new { background: var(--blue-wash); }
-/* Watch's scope in the subnav and the crumb (WT): the topic's name before its pages, a switcher */
+/* Watch's scope in the subnav and the crumb: the topic's name before its pages, a switcher */
 .phead .doornav .scope { flex: none; display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding-left: 10px; border-left: 1px solid var(--border-2); }
 .phead .doornav .scope .scope-name { padding: 6px 2px 8px; font-weight: 600; color: var(--text); }
 .phead .doornav .scope a.scope-name { padding: 6px 4px 8px; }
@@ -1179,7 +1179,7 @@ body.doors:not(.classic).focus #dscroll { max-width: 1040px; margin: 0 auto; }
 .c-meta .flash.failed { display: inline-flex; margin: 0; padding: 2px 6px; }
 .flash.failed .acts { display: flex; gap: 6px; flex: none; }
 .flash.failed .ver { white-space: nowrap; }
-/* the rows a page's lists could not read (RCA A3, ui/Unreadables.svelte): one line each, under the head */
+/* the rows a page's lists could not read (ui/Unreadables.svelte): one line each, under the head */
 #rows > #unreadable-box:empty { display: none; }
 .unreadable { margin: 6px 0 2px; }
 .unreadable .flash.unread { margin: 4px 0; padding: 6px 12px; }
@@ -1317,7 +1317,7 @@ body.doors .loading .skel i:nth-child(2) { width: 70%; } body.doors .loading .sk
 @media (prefers-reduced-motion: no-preference) { body.doors .loading .skel i { animation: pulse 1.6s ease-in-out infinite; } }
 
 /* the phone (44 px targets): a row's verb and a sheet's actions are pressed with a
-   thumb, grown by padding, never by font size; a page's lede wraps rather than being cut (QA B24) */
+   thumb, grown by padding, never by font size; a page's lede wraps rather than being cut */
 @media (max-width: 759px) {
   .row .btn, .acts .btn, .r-act .btn, .dlg-f .btn { min-height: 44px; display: inline-flex; align-items: center; }
   /* a row's end cell sets its small buttons inline-block: a verb that is a link (Decide) kept

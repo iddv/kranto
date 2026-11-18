@@ -1,4 +1,4 @@
-"""Grading in Kranto UI (once LEARNING.md section 3): one control,
+"""Grading in Kranto UI: one control,
 ▲ ▼ and a why chip, on idea cards and evidence only; no grade on builds, themes, messages, sources
 or News; no bulk grading; the review queue of this week's cards and its keys; Settings › System ›
 Your grades. The key maps (lib/keys.json) are read as the JSON they are and the components whole;

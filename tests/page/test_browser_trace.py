@@ -3,7 +3,7 @@ kept stream (the hand-written build session from tests/page/fixtures/trace, kept
 researcher keeps it), it draws the tree with no error, a span opens in the inspector, the phone gets the Log and
 the inspector as a sheet, every text is readable in light and dark (tests/page/contrast.js), a
 running stream grows live, and a 50,000-span trace paints its first rows and selects a span
-within the design's budget. Builds left with the factory (CUT): the trace page reads sessions,
+within the design's budget. Builds left with the factory: the trace page reads sessions,
 research runs and the server's runs.
 
 Needs the built UI and Playwright, as tests/page/test_browser_smoke.py does; CI's browser job runs it."""

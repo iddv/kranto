@@ -1929,7 +1929,7 @@ export interface IdeaOutcome {
   created_at: string;
 }
 
-/** What the loop made of a card (``outcomes.built``): the newest build, gate or publish step's word (``state``), the loop's idea id, and the repo once published. Read from the rows the loop wrote before builds left Kranto (CUT); none come after. */
+/** What the loop made of a card (``outcomes.built``): the newest build, gate or publish step's word (``state``), the loop's idea id, and the repo once published. Read from the rows the loop wrote before builds left Kranto; none come after. */
 export interface IdeaBuilt {
   state: string;
   kind: "build" | "gate" | "publish";
@@ -2197,7 +2197,7 @@ export interface WebFetch {
   text: string;
 }
 
-/** ``unreadable`` on a row that could not be built (``rowsafe``, RCA A3): what it is, the words the list shows, the error's id and class. */
+/** ``unreadable`` on a row that could not be built (``rowsafe``): what it is, the words the list shows, the error's id and class. */
 export interface UnreadableMark {
   what: string;
   words: string;

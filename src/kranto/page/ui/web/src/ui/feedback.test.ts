@@ -1,4 +1,4 @@
-// Feedback (FB): the details the sheet adds and their scrub, the issue, GitHub's prefilled link and
+// Feedback: the details the sheet adds and their scrub, the issue, GitHub's prefilled link and
 // its length, the draft, and an error's Tell us.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {

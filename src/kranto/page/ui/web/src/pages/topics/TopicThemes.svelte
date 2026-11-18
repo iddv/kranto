@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A topic's Themes (WORKSPACE.md 2.6): the latest map's clusters whose stories come mostly from
+  // A topic's Themes: the latest map's clusters whose stories come mostly from
   // the topic's sources, rising first, each opening in the pane (sel=c<n>, Library › Clusters'
   // pane); when the map was made and a link to it. As Watch's Map of one topic (WT, title
   // "Robotics › Map") the map itself is over the column, with the other topics' clusters dimmed.

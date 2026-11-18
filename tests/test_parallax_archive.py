@@ -341,7 +341,7 @@ head of growth whose launch posts underconvert.
 **A founder pitch.** A platform that generates a vendor's refusals page: every dependency \
 they will not take on.
 
-This article was generated from the [Parallax observation library](/parallax) by a fleet.
+This article was generated from the [Parallax observation library](/parallax) by its writers.
 """
 
 PROSE = """---
@@ -477,7 +477,7 @@ def test_ideas_api_filters_dispatch_cards_and_keeps_them_manual(web, rt, tmp_pat
     oss = web.get("/api/ideas?origin=dispatch&kind=oss").json()["ideas"]
     assert [i["pitch_kind"] for i in oss] == ["oss"]
     one = web.get(f"/api/ideas/{oss[0]['id']}?embedding=ref").json()
-    # ``intake`` (the build loop's automatic intake) left with builds (CUT)
+    # ``intake`` (the build loop's automatic intake) left with builds
     assert one["score"] is None and "intake" not in one
     assert one["pitch_label"] == "An OSS idea" and one["dispatch"]["slug"]
     assert {c["verified"] for c in one["citations"]} == {"url_match"}

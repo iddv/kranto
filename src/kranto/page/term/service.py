@@ -1,4 +1,4 @@
-"""Open in Claude Code's sessions, held by ``App.term`` (the owner's D6, D8).
+"""Open in Claude Code's sessions, held by ``App.term``.
 
 - **One session per subject** (a described batch of sources; ``subject``): Open attaches to it
   when it runs, resumes its conversation in a fresh process when it ended (``--resume``), or
@@ -653,7 +653,7 @@ class Term:
             self.store.update(tid, proposals=props)
         return {"proposal": p}
 
-    # -- continue outside (the owner's D3) -------------------------------------------------------
+    # -- continue outside ----------------------------------------------------------------------
     def outside(self, tid: str, config_dir: Path | None = None) -> dict:
         """Continue in your own terminal: the page's process ends (two processes on one
         conversation would fork it), the transcript is copied where your own Claude Code
@@ -964,7 +964,7 @@ class Term:
         running = set(self.running())
         recs = [self._console_rec(h) for h in console.ORDER]
         # whose configuration and the permission mode are read at the start: a running console
-        # takes them when restarted (the owner's Q2: the page offers it)
+        # takes them when restarted (the page offers it)
         moved = any(changes.get(("ask", k), cur[k]) != cur[k] for k in ("config", "permission"))
         restart = bool(moved and any(r and r["tid"] in running for r in recs))
         return {**self.console_state(), "restart": restart}

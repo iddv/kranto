@@ -48,7 +48,7 @@ def test_the_matrix_names_every_part_of_the_inventory_once():
 def test_what_uxa_proposed_to_drop_stays_for_the_owner():
     # the tree and its layout commands were D-4's: the owner kept them as the classic layout
     # (2026-10-21), so they are kept, not waiting; the bulk bar and its keys the owner removed
-    #, as News' ▲ ▼ (D-1)
+    #, as News' ▲ ▼
     kept = sorted(r["id"] for r in ROWS if r["fate"] == "kept-not-dropped")
     assert kept == []
     assert {r["id"]: r["fate"] for r in ROWS if r["id"] in ("B3-bulk", "D-ticks", "B5-news-grade")} == \

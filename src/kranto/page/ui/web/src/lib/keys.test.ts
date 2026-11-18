@@ -72,7 +72,7 @@ describe("the key map", () => {
 });
 
 describe("the keys sheet's words", () => {
-  it("name today's places, never one retired with the doors (QA B11: Needs you (Today), Evidence (the Library))", () => {
+  it("name today's places, never one retired with the doors (Needs you (Today), Evidence (the Library))", () => {
     const retired = /\bToday\b|\bLibrary\b|\bDesk\b|Home and feed|Settings › Publishing › Maintenance|\b[Bb]uilds?\b|Projects|Publish/;
     for (const k of KEYMAP) expect([k.keys, k.does]).not.toEqual([k.keys, expect.stringMatching(retired)]);
   });

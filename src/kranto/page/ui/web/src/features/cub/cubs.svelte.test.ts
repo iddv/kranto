@@ -50,7 +50,7 @@ function at(path: string, sel: string | null = null) {
 }
 
 describe("Features (#/cubs/<tab>)", () => {
-  it("says it is reading, never \"0 features installed · None yet\", until the features arrive (QA B14)", async () => {
+  it("says it is reading, never \"0 features installed · None yet\", until the features arrive", async () => {
     stub();
     hosted();
     drop(FEATURES_API);

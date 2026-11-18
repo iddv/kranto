@@ -198,7 +198,7 @@ def test_a_scheduled_send_reads_as_scheduled(host):
 
 def test_an_earlier_versions_dry_run_reads_as_practiced_never_sent(host):
     """1.3.1 kept a practiced issue as "dry run" and listed it with the sent ones (the owner on
-    2026-10-29 took live's issue of 27 Oct for sent); 1.4.0 reads it as practiced."""
+    2026-10-29 took a real install's issue of 27 Oct for sent); 1.4.0 reads it as practiced."""
     two_briefs(host)
     host.run_job("compose", strict=True)
     ref = host.tickets[0]["fields"]["draft_ref"]

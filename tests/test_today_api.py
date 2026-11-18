@@ -1,4 +1,4 @@
-"""Today (UI-v4.md 2.2): what was kept since the last visit, per topic, in one call; the
+"""Today: what was kept since the last visit, per topic, in one call; the
 last-visit marker; "new" on the observation list; mute; spend by topic. No model call."""
 
 from datetime import timedelta

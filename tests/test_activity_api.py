@@ -160,7 +160,7 @@ def test_the_update_check_failing_two_days_reaches_fix_after_one_try(store):
 
 
 def test_try_again_on_the_update_check_is_a_run_and_clears_its_fix_row(rt, monkeypatch):  # noqa: F811
-    """W3: the check failing for days is one Fix row; the owner's Try again (Settings' Check for
+    """The check failing for days is one Fix row; the owner's Try again (Settings' Check for
     updates, the same route) is a run of the update check; when it works the row is gone."""
     from kranto.update import check
     store = rt.store
@@ -309,7 +309,7 @@ def test_kranto_status_says_what_runs_waits_and_fails_from_the_same_read():
              "quiet": "Nothing is running. Next: reading your sources at 20:23."}
     host.http_get = lambda url, t: (200, json.dumps(quiet).encode())
     assert activity_line(host, 8765) == "Nothing is running. Next: reading your sources at 20:23"
-    # live's 0.5.14 said "…at 07:27.; failing: Toot the pick's weekly run (1 tries)"
+    # a real install on 0.5.14 said "…at 07:27.; failing: Toot the pick's weekly run (1 tries)"
     quiet["failing"] = [{"title": "Toot the pick's weekly run", "tries": 1}]
     assert activity_line(host, 8765) == ("Nothing is running. Next: reading your sources at 20:23; "
                                          "failing: Toot the pick's weekly run (1 try)")

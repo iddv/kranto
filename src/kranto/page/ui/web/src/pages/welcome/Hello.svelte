@@ -1,6 +1,6 @@
 <script lang="ts">
   import { pageUrl } from "../../lib/base";
-  // Before setup, the front door (#/hello; UI-v4.md 1.4, 2.5): the mark, the wordmark, one line,
+  // Before setup, the front door (#/hello): the mark, the wordmark, one line,
   // one button. A fresh install opens here (boot sends it); a stage route, drawn without the
   // panes.
   import type { View } from "../../lib/pages.svelte";

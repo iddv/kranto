@@ -76,7 +76,7 @@ def test_the_drawer_and_the_console_read_the_same_record(sel, kind):
 
 
 def test_a_build_or_a_loop_idea_is_gone_in_words():
-    """The factory left (CUT): a build's or the loop's own idea's sel answers 404, in words."""
+    """The factory left: a build's or the loop's own idea's sel answers 404, in words."""
     for sel in ("bsidedoor", "i01"):
         with pytest.raises(HttpError) as e:
             D.record(FakeApp(), {"sel": sel})

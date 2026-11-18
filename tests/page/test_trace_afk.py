@@ -79,7 +79,7 @@ def test_a_run_reads_as_a_trace_through_the_hosts_api(tmp_path):
 
 
 def test_a_runs_title_is_its_kind_and_time_and_its_summary_is_in_the_overview(tmp_path):
-    """ 3: live's telemetry run was titled with its summary JSON; a run with no model calls
+    """ 3: a real install's telemetry run was titled with its summary JSON; a run with no model calls
     said nothing of why it has one row."""
     summary = json.dumps({"mode": "detailed", "built": [], "sent": 3})
     data = {"run": {"run_uuid": UUID, "kind": "telemetry", "status": "ok",

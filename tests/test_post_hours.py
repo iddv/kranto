@@ -1,4 +1,4 @@
-"""Send at an hour (SOC-10): a post the person said yes to goes at the hour they chose, can be
+"""Send at an hour (POSTING-10): a post the person said yes to goes at the hour they chose, can be
 moved or cancelled until then, never goes without that yes, survives a restart, and a missed
 hour (Kranto stopped) asks again instead of sending late. Nothing is posted: the site's send is
 replaced by a counter."""

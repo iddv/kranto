@@ -76,7 +76,7 @@ socket.socket.connect_ex = _connect_ex
 socket.getaddrinfo = _getaddrinfo
 
 ROOT = Path(__file__).resolve().parents[2]
-# The token store (OI) is never the developer's ~/.config/kranto: one per test session.
+# The token store is never the developer's ~/.config/kranto: one per test session.
 os.environ["KRANTO_TOKENS_DIR"] = tempfile.mkdtemp(prefix="kranto-tokens-")
 # Without bubblewrap (CI's runner has none) the suite's own fixtures still run, as before;
 # tests of the refusal unset it.
@@ -90,7 +90,7 @@ for _k in ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN"):
 
 @pytest.fixture(autouse=True)
 def _own_claude_store(tmp_path_factory, monkeypatch):
-    """Each test has its own store for the Claude login token Kranto keeps (BL): none unless a
+    """Each test has its own store for the Claude login token Kranto keeps: none unless a
     test keeps one; the names a test's .env added are that test's."""
     monkeypatch.setenv("KRANTO_CLAUDE_DIR", str(tmp_path_factory.mktemp("claude")))
     monkeypatch.delenv("KRANTO_DOTENV_VARS", raising=False)

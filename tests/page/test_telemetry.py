@@ -1,6 +1,6 @@
 """The page's usage counters: its part of the allow-list is
 nodes.json's pages and the origins; with no sink nothing is recorded. The registry's action and
-build lines left with the factory (CUT)."""
+build lines left with the factory."""
 import json
 from pathlib import Path
 

@@ -1,6 +1,6 @@
-"""What Kranto (the host, the server) may use of the page: exactly these names, nothing else
-(S-12; CR-REVIEW A-8). The server imports from here only, so the page's modules can move
-without breaking the host; a test in each repo pins the set.
+"""What Kranto (the host, the server) may use of the page: exactly these names, nothing else.
+The server imports from here only, so the page's modules can move without breaking the host;
+a test on each side, the server's and the page's, pins the set.
 
 Each name is imported when it is first read (PEP 562), so ``import kranto.page.host_api`` costs
 nothing and a missing optional part (the MCP SDK) raises ``ImportError`` only where it is

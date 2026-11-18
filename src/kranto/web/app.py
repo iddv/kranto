@@ -86,7 +86,7 @@ SECURITY_HEADERS = {
         # form-action: github.com too, for the one form the page posts there: the manifest
         # that creates Kranto's own GitHub App (the page's Settings › Publishing › GitHub,
         #); img-src https: for a News article's picture from its source, loaded
-        # from the outlet by the reader's browser (the owner's D3 of 2026-10-23; no referrer
+        # from the outlet by the reader's browser (as the owner decided on 2026-10-23; no referrer
         # leaves: Referrer-Policy is same-origin)
         "img-src 'self' data: https:; object-src 'none'; base-uri 'none'; "
         "form-action 'self' https://github.com; frame-ancestors 'none'"
@@ -389,7 +389,7 @@ class App:
             if h.rollup_id in rows:
                 try:
                     out.append((_rollup(rows[h.rollup_id]), h))
-                except Exception as exc:  # noqa: BLE001 - listed as unreadable (RCA A3)
+                except Exception as exc:  # noqa: BLE001 - listed as unreadable
                     out.append((rowsafe.unreadable("trend summary", h.rollup_id, exc), h))
         return out
 
@@ -1147,10 +1147,10 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
     post_api = PostAPI(app)
     prose_api = ProseAPI(app)         # the prose profile and its checker
     runs_api = RunsAPI(app)           # an analyst's or a cub's run, for the page's trace
-    activity_api = ActivityAPI(app)   # what Kranto is doing, as it goes (ACT)
+    activity_api = ActivityAPI(app)   # what Kranto is doing, as it goes
     service_api = ServiceAPI(app)     # the service's memory, as a setting
     verbs_api = VerbsAPI(app)         # every write, once, for every caller (ASK, core.verbs)
-    # what the post-update self-check reads (RCA D1): the routes, once they are made
+    # what the post-update self-check reads: the routes, once they are made
     selfcheck_api = SelfCheckAPI(app, lambda: routes)
 
     @contextlib.asynccontextmanager
@@ -1178,7 +1178,7 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
                                  rt.cubs, scheduler)
 
     def kranto_page(route):
-        """An old server page address Kranto UI has as a hash route (UI-v4.md 2.3):
+        """An old server page address Kranto UI has as a hash route:
         while the page is mounted it answers 302 to it, with its query kept; without it,
         the install notice (D5). ``route`` is the hash route, or a function of the request
         that returns it."""
@@ -1280,7 +1280,7 @@ def create_app(rt: Runtime, scheduler: Scheduler | None = None, *,
     ]
     starlette = Starlette(
         routes=routes, lifespan=lifespan,
-        # a request that still fails answers Kranto's error JSON or page (RCA A3, B3)
+        # a request that still fails answers Kranto's error JSON or page
         exception_handlers={rowsafe.Unreadable: app.error_answer},
         # timing outside the guard, so a refused request is counted too; the
         # error answer outside timing, so timing still records what escaped a route

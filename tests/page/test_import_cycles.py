@@ -8,8 +8,8 @@ from pathlib import Path
 
 import kranto.page
 
-LARGEST = 4           # 2026-11-12, the factory gone (CUT): the page server and the terminal's socket;
-                      # 18 before the cut, 73 before S-10
+LARGEST = 4           # 2026-11-12, the factory gone: the page server and the terminal's socket;
+                      # 18 before the cut, 73 before that
 PKG = Path(kranto.page.__file__).parent
 
 

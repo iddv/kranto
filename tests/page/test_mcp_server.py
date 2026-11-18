@@ -18,7 +18,7 @@ def test_the_sdk_server_lists_every_tool_with_its_schema_and_hints():
     def attr(o, camel, snake):                       # mcp 1.x camelCase, 2.x snake_case
         return getattr(o, snake) if hasattr(o, snake) else getattr(o, camel)
     assert attr(by["kranto_status"].annotations, "readOnlyHint", "read_only_hint") is True
-    # without a host the tools are Kranto's reads only: the factory's action tools left (CUT)
+    # without a host the tools are Kranto's reads only: the factory's action tools left
     for name, t in by.items():
         assert attr(t.annotations, "readOnlyHint", "read_only_hint") is True, name
         assert attr(t, "inputSchema", "input_schema")["type"] == "object", name

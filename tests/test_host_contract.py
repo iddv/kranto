@@ -1,4 +1,4 @@
-"""Kranto's contract with the page (the page's S-12).
+"""Kranto's contract with the page.
 
 - Always: the server imports the page through ``kranto.page.host_api`` only.
 - With the page installed (CI's test job installs the page's main for these): every name Kranto

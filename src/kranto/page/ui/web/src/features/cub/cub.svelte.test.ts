@@ -125,8 +125,8 @@ describe("a cub's page, drawn from its manifest", () => {
   // its Settings and About are its Settings page now: pages/settings/featurepage.svelte.test.ts
 });
 
-describe("the one dialog of what a cub asks (SEND)", () => {
-  // The server's GET /api/tickets/88/ask for live's issue of 27 Oct: no account, in practice
+describe("the one dialog of what a cub asks", () => {
+  // The server's GET /api/tickets/88/ask for a real install's issue of 27 Oct: no account, in practice
   const view = (o: Record<string, unknown> = {}, ask: Record<string, unknown> = {}) => ({
     id: 88, cub: "newsletter", kind: "send.newsletter", state: "needs_confirm", said: null,
     readback: [["Draft", "draft:3, in Kranto"], ["Subject", "This week: Eka Robotics raises $150M"]], because: { briefs: [41] },
@@ -372,7 +372,7 @@ describe("the helpers", () => {
 });
 
 describe("an object whose id holds a colon (the newsletter's issue draft:1)", () => {
-  it("opens its sheet with its ask's button from sel=o<id>, the link the home and Needs you give (QA B3, seen on live)", async () => {
+  it("opens its sheet with its ask's button from sel=o<id>, the link the home and Needs you give, as seen on a real install", async () => {
     stub();
     hosted();
     const base = digest();

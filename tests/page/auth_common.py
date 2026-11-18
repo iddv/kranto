@@ -1,4 +1,4 @@
-"""The tests' stand-in for a signed-in browser (OI): the UI's token from the session's token
+"""The tests' stand-in for a signed-in browser: the UI's token from the session's token
 store (``KRANTO_TOKENS_DIR``, a temporary folder made by conftest), sent as a bearer header."""
 from kranto.page.tokens import Store
 

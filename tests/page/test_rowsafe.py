@@ -31,7 +31,7 @@ def _fresh(monkeypatch):
 
 
 def test_the_self_checks_reads_are_every_page_and_nothing_that_leaves(tmp_path):
-    """RCA D1: Kranto's post-update self-check reads these under /brb (host_api.selfcheck_paths):
+    """Kranto's post-update self-check reads these under /brb (host_api.selfcheck_paths):
     each GET that takes nothing, never what asks GitHub or runs a program."""
     from kranto.page import host_api
     app = api.App(None, "fake", make_home(tmp_path).home)

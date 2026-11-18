@@ -3,7 +3,7 @@
 // not signed in asks for a sign-in. While such a prompt stands, a starter's sentence typed into it
 // would answer the prompt, not ask Kranto. So the page says one line above the starters and holds
 // the sentence until the prompt is gone. Kranto never answers it and never writes Claude Code's
-// configuration to skip it (decision D1): it is the person's consent, in the person's own words.
+// configuration to skip it: it is the person's consent, in the person's own words.
 
 export const TRUST_LINE = "Claude Code asks once whether to trust Kranto's own folder. Answer it here, then ask.";
 export const SIGN_IN_LINE = "Claude Code asks you to sign in once. Sign in here, then ask.";

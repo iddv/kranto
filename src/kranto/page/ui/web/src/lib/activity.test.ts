@@ -33,7 +33,7 @@ describe("the indicator", () => {
     expect(indicator(a, LANES, "2026-10-23T01:30:00Z", NOW).state).toBe("quiet");
   });
 
-  // live's top bar read "Quiet" once Activity was opened and "1 running" while the
+  // a real install's top bar read "Quiet" once Activity was opened and "1 running" while the
   // key had been refused for two days (failedSince counted only runs since the last look)
   it("stays red while a kind is failing: while something runs and after Activity is opened", () => {
     const a = activityOf({ failing: [fail({ kind: "ingest", title: "Reading your sources" })], running: [run()] });

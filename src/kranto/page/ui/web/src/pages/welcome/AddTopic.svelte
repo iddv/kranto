@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Add topic (WORKSPACE.md 2.13): the name, the sentence, suggestions and Scout sources, then the
+  // Add topic: the name, the sentence, suggestions and Scout sources, then the
   // scout's proposals as ticked rows and one Watch button, the foot's, which watches what is
   // ticked and goes on. On #/topics/new it is the list pane (its side, TopicAside, is the pane);
   // on #/welcome/topics, onboarding's step 2, the stage's column draws both. Once scouted the
@@ -31,7 +31,7 @@
   });
   const T = $derived(TOPIC.t || newStep());
   const locked = $derived(!!T.id);
-  // the scout is one model call: with no key it could only fail (QA B13); an older server
+  // the scout is one model call: with no key it could only fail; an older server
   // without /api/setup's key part does not hold it
   const keyed = $derived.by(() => {
     const k = host ? read<{ key?: { set?: boolean } }>(SETUP_API, 30000).data?.key : null;
@@ -48,7 +48,7 @@
   let descEl = $state<HTMLTextAreaElement>();
   let scouting = $state<string | null>(null);
 
-  // the name takes the cursor when the form opens (S02: no click to reach it), once the side's
+  // the name takes the cursor when the form opens (no click to reach it), once the side's
   // reads are in
   let focusing = !TOPIC.t?.id && !TOPIC.t?.name;
   $effect(() => {

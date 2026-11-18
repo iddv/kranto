@@ -1,6 +1,6 @@
 """The unified UI (DESIGN-v3.md, phase 1): ``api.handle`` as one plain function,
 its pages and static files, and the rules the page's sources keep. The snapshot, the loop's words
-and the builds' pages left with the factory (CUT)."""
+and the builds' pages left with the factory."""
 import json
 import re
 import threading
@@ -170,7 +170,7 @@ def test_every_section_and_settings_page_is_in_the_app():
         assert f'import("./library/{name}.svelte")' in src("pages/index.ts"), name
     for endpoint in ("/api/health", "/api/map", "/api/clusters", "/api/feedback", "/api/rollups"):
         assert endpoint in js, endpoint
-    assert "/api/watches" not in js  # watches are retired (WT)
+    assert "/api/watches" not in js  # watches are retired
     assert "the server's health page" not in js and "Open in the server" not in js
     assert "tablist" not in js and 'role: "tab"' not in js
 

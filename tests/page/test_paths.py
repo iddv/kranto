@@ -130,7 +130,7 @@ def test_paths_py_is_the_same_in_both_repos():
 
 
 def test_no_module_joins_the_homes_names_by_hand():
-    """The homes' entries are named in paths.py only (S-8 step 2 and its remainder): its files
+    """The homes' entries are named in paths.py only: its files
     and its directories (``publish/``, ``inbox/``, ``chat/``, ``maintain/``, ``projects/``),
     ``cfg.layout.settings``,
     ``paths.LoopLayout(home).db``, ``paths.Layout(home).mcp_servers``, never ``home / "loop.yaml"``.

@@ -1,4 +1,4 @@
-"""Grades, the review queue and the learning summary as JSON (LEARNING.md 2.4, track L1).
+"""Grades, the review queue and the learning summary as JSON.
 
 Kranto UI grades through these; the page never writes this database (it posts here).
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { pageUrl } from "../../lib/base";
-  // Review (WORKSPACE.md 2.10): the list is the queue, the progress bar its toolbar, one row an
+  // Review: the list is the queue, the progress bar its toolbar, one row an
   // item with the grade given in its end cell; the current item is the selected row (data-cur:
   // the old module's markSel) and the pane. Keys only (QUEUE_KEYS, set as the page's keys on every
   // draw), the pointer works too: a grade posts and selects the next ungraded row. A row grades

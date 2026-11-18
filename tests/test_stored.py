@@ -28,7 +28,7 @@ class Cost(Stored):
 
 @dataclass(frozen=True)
 class Measured(Stored):
-    """The RCA's column, in small: a similarity a writer may leave null."""
+    """The unmeasured column, in small: a similarity a writer may leave null."""
 
     JSON_NAMES = {"from_text": "from"}
     status: Literal["valid", "invalid", "unverified"] | None = None
@@ -59,7 +59,7 @@ def _fresh_problems():
     base.forget_problems()
 
 
-# -- the RCA, as a type --
+# -- the unmeasured similarity, as a type --
 
 def test_a_null_and_an_absent_key_both_read_as_none_and_never_as_the_default():
     """`.get(k, 0)` returned the stored None; the type says None for both, and nothing else."""

@@ -1,4 +1,4 @@
-"""First-run setup (PLAN.md 1.5): the key is tested, kept in .env (0600) and set for the
+"""First-run setup: the key is tested, kept in .env (0600) and set for the
 running server, and never echoed, logged, stored in the YAML or the library; the logins
 are read for a yes or no; finish writes the config and starts the first ingest. No test
 reaches the network: the key test runs against a mock transport."""

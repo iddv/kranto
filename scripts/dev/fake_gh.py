@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A fake ``gh`` for Feedback's File it (FB): the tests and a scratch server put it first on
+"""A fake ``gh`` for Feedback's File it: the tests and a scratch server put it first on
 ``PATH`` (as ``gh``) so the whole path runs, from the press to the issue's link, with nothing
 sent to GitHub. It answers the four calls ``kranto.page.feedback`` makes and writes each issue it
 "files" to ``$FAKE_GH_DIR/issues.jsonl``:

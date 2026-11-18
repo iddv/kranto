@@ -63,7 +63,7 @@ describe("the coverage matrix", () => {
 for (const layout of LAYOUTS) {
   describe(`the coverage matrix in the ${layout} layout`, () => {
     beforeAll(async () => {
-      localStorage.removeItem("kranto.watch.topic"); // #/topics lands on Watch's Topics until a topic is opened (WT)
+      localStorage.removeItem("kranto.watch.topic"); // #/topics lands on Watch's Topics until a topic is opened
       await frame({ hash: "#/needs", reads: { ...READS, "/api/shell": { ...SHELL, layout } } });
       onPageLoaded(() => { if (typeof document !== "undefined" && document.getElementById("rows")) render(); }); // a part that arrives after the frame is gone draws nothing
       await open("#/needs"); // the shell's read has arrived: the layout is drawn

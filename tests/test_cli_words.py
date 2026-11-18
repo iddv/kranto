@@ -1,7 +1,7 @@
 """ B (Codex 10, Gemini 6): ``kranto --help`` read "Watch topics, build what converges. One app:
 the watcher, the build loop and the UI." and listed the build tools, plugins, MCP servers, repo
 maintenance, the corpus, traces and evals to a stranger whose Kranto has builds off. Help now opens
-with the one line from the strategy; the factory's commands left with it (CUT), traces and evals
+with the one line from the strategy; the factory's commands left with it, traces and evals
 are not listed, kranto cub only for a developer (cubs.developer), and help says nothing of what
 left (acceptance.py's WORDS, as the page's word test)."""
 

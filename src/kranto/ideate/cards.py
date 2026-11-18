@@ -778,8 +778,8 @@ def card_theme(store: Store, llm: LLMClient, lineage_id: str, *,
                clock: Callable[[], datetime] = utcnow, archive_evidence: bool = False,
                searcher: Any = None, hint: str | None = None,
                story: str | None = None) -> IdeasReport:
-    """One card on one theme of the latest map, on the owner's request (L11, the
-    owner's D-1 of 2026-10-22): the theme's current evidence, outside the daily selection, one
+    """One card on one theme of the latest map, on the owner's request (asked
+    for on 2026-10-22): the theme's current evidence, outside the daily selection, one
     card call and its check (about $0.06). Under the same lock and budget as the daily run; the
     same evidence already carded is not carded again. Its run is recorded with kind ``ideas``
     and the fingerprint of the last daily run, so the daily run decides as it would have.

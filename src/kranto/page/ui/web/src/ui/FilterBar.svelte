@@ -4,7 +4,7 @@
 </script>
 
 <script lang="ts">
-  // A list's filters in its toolbar (WORKSPACE.md 1.4): the search (/), then compact dropdowns;
+  // A list's filters in its toolbar: the search (/), then compact dropdowns;
   // the state lives in the URL. two filters or more fold into Filter ▾, the active ones
   // chips beside it, each with ×; the sort stays inline.
   import { go, type Route } from "../lib/router";
@@ -17,7 +17,7 @@
   const active = $derived(filters.filter(([k, , opts]) => r.q[k] && opts.some(([v]) => v === r.q[k])));
   const to = (key: string, v: string) => go(base, { ...r.q, [key]: v, page: "" });
   /** Enter applies the search and hands the keys back to the list (j moves the cursor, not the
-   * text); esc leaves the box, and an emptied box clears the search (QA B5) */
+   * text); esc leaves the box, and an emptied box clears the search */
   function search(e: KeyboardEvent): void {
     const el = e.currentTarget as HTMLInputElement;
     if (e.key === "Escape") {

@@ -1,4 +1,4 @@
-"""The preview's copy of live's data, read-only on live.
+"""The preview's copy of the live install's data, read-only on live.
 
     python3 -I copy_live.py --src-home ~/kranto-kb --src-loop ~/kranto-loop --root ~/kranto-preview
     \
@@ -6,7 +6,7 @@
 
 What it does, in order:
 
-1. ``rsync`` live's home into ``<root>/home`` and live's loop home into ``<root>/loop``, without
+1. ``rsync`` the live home into ``<root>/home`` and the live loop home into ``<root>/loop``, without
    ``.env``, ``data/secrets``, ``backups``, ``update``, ``telemetry``, the databases (step 2), the
    lock files and the console's sessions (``term``, ``chat``, ``inbox``) and ``trace.db``.
    ``~/tasks`` is not copied: ``<root>/tasks`` starts empty.
@@ -73,7 +73,7 @@ def backup_db(src: Path, dst: Path) -> str:
 
 
 def rewrite(value, swaps: list[tuple[str, str]]):
-    """Every string in a YAML tree with live's folders swapped for the copy's."""
+    """Every string in a YAML tree with the live install's folders swapped for the copy's."""
     if isinstance(value, dict):
         return {k: rewrite(v, swaps) for k, v in value.items()}
     if isinstance(value, list):

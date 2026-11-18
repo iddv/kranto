@@ -1,7 +1,7 @@
 """What a cub asks, in plain words (SEND; the owner, 2026-10-29: "Not sure what 'ticket #1 is
 expired' means, I just wanted to post the newsletter. Seems like nothing is connected.").
 
-Live's library as it stood: #1 the newsletter's issue of 21 Oct under an earlier release's kind,
+An install's library as it stood: #1 the newsletter's issue of 21 Oct under an older release's kind,
 expired on 23 Oct while the cub's own row still said "waiting"; #2 example.com's post, expired on 25
 Oct; #3 the newsletter's issue of 27 Oct, approved on 28 Oct in practice, so nothing was sent.
 The core, never the cub's row, says what waits: #1 never opens a dialog again (a newer draft came);
@@ -49,7 +49,7 @@ def old_limits():
 
 
 def live(rt) -> dict:  # noqa: F811
-    """Live's three tickets, as they stood on 2026-10-29."""
+    """A real install's three tickets, as they stood on 2026-10-29."""
     with old_limits():
         return _live(rt)
 

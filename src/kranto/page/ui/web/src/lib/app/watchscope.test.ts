@@ -1,4 +1,4 @@
-// Watch's scope (WT): where an address is in topic-first Watch, the pages' addresses, the old
+// Watch's scope: where an address is in topic-first Watch, the pages' addresses, the old
 // ?topic= forms and the Watch door landing on the last topic looked at (per browser).
 import { afterEach, describe, expect, it } from "vitest";
 import { parse } from "../router";

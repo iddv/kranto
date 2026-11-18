@@ -77,7 +77,7 @@ export interface DoorFacts {
   word: string;
   /** sub: the page is the scope's (Watch's Sources, Evidence and Map: a topic's, or All topics') */
   items: { to: string; w: string; n: number | null; tone: string; title?: string | null; on: boolean; sub?: boolean }[];
-  /** Watch's scope (WT): the topic its pages are for, or All topics; page is the scoped page
+  /** Watch's scope: the topic its pages are for, or All topics; page is the scoped page
    * open (null: none, "" the topic itself); the crumb's switcher lists topics */
   /** the classic frame: the crumb only (its tree is the subnav) */
   crumbOnly?: boolean;

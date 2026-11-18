@@ -1,4 +1,4 @@
-"""The session's working directory (the owner's D8): like cd'ing into the folder, never the
+"""The session's working directory: like cd'ing into the folder, never the
 live one.
 
 - **a project** (a repo Kranto keeps a clone of) and **a build whose out/ is a git repo**: a

@@ -1,4 +1,4 @@
-// Settings › Sources and Add source (section 4; WORKSPACE.md 2.5, 2.12): the server's
+// Settings › Sources and Add source (section 4): the server's
 // /api/sources (every source, grouped as the scout and you left them), one source's page
 // (/api/sources/<id>: its fetches, how it is read), the catalog of kinds (/api/catalog) and its
 // preview (POST /api/sources/preview: one fetch, nothing saved). Their shapes are generated from
@@ -86,13 +86,13 @@ export function findPreset(cat: Catalog, key: string | null | undefined): [Catal
 export function presetWords(s: Preset, cat: Catalog): { st: St; meta: string } {
   const can = s.available, acct = (cat.connected[s.needs || ""] || []).find((a) => a.state === "connected");
   const login = s.access === "login" && can && !acct;
-  // the account it is read with is Settings › Accounts' (SRC D5, D7): who it reads as, or where to connect one
+  // the account it is read with is Settings › Accounts': who it reads as, or where to connect one
   const how = !can && s.access === "login" ? "next update" : s.access === "login" && can ? (acct ? `with your account · connected as ${acct.account}` : "with your account") : accessWord(s.access);
   const st: St = !can ? ["closed", "grey", "Not offered"] : s.access === "login" ? ["open", "blue", "With your account"] : ["check", "green", "Public"];
   return { st, meta: [how, can ? s.blurb + (login ? " Connect it first under Settings › Watching." : "") : s.reason].filter(Boolean).join(" · ") };
 }
 /** the group a row is listed under on Watch › Sources: a proposal is Proposed, a wildcard too
- * while it waits (SRC D6: the Wildcards group is the watched ones) */
+ * while it waits (the Wildcards group is the watched ones) */
 export const listGroup = (s: Pick<Source, "group" | "review">): string => (s.review === "proposed" ? "proposed" : s.group);
 /** what the catalog's filter reads of a kind */
 export const presetText = (p: CatalogProvider, s: Preset): string => [p.name, s.name, s.blurb, s.reason || "", s.access].join(" ");

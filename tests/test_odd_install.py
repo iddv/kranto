@@ -84,10 +84,10 @@ def test_every_route_answers_on_the_odd_install(home, client):
     assert not failed, f"{manifest['variant']}:\n" + "\n".join(failed)
 
 
-def test_the_odd_install_holds_the_rcas_row(home):
+def test_the_odd_install_holds_the_unmeasured_row(home):
     path, manifest = home
     if manifest["variant"] != "odd":
-        pytest.skip("only the odd variant has the RCA's row")
+        pytest.skip("only the odd variant has the unmeasured row")
     store = Store.open(path / "data" / "kranto.db")
     try:
         rows = {s.id: s for s in library.list_sources(store)}

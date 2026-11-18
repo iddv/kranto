@@ -146,7 +146,7 @@ describe("the header", () => {
     expect(L.toast).toHaveBeenCalledWith("Dark, until you switch back");
     expect(L.render).toHaveBeenCalled();
     // ◐ again, back to the device's scheme: Auto, never a fixed Light that outlives the device's
-    // own switch at night (QA B18, the owner's B2)
+    // own switch at night
     document.documentElement.setAttribute("data-theme", "dark");
     (target.querySelector("#theme") as HTMLButtonElement).click();
     expect(L.setTheme).toHaveBeenLastCalledWith("auto");

@@ -1,7 +1,7 @@
 """Grades: a person's verdict on what the instance surfaced, or failed to.
 
-VISION: the fleet improves "through occasional human verdict on its rare loud
-moments". A grade names a target and a verdict; grades are append-only and
+Kranto improves through a person's occasional verdict on its rare loud
+moments. A grade names a target and a verdict; grades are append-only and
 the latest one on a target counts, so a changed mind is a new row and the old
 verdict stays legible.
 

@@ -15,8 +15,7 @@ the lines run ``kranto archive --out <a temporary folder>`` and ``kranto doctor`
 preview's own install, and read its databases read-only.
 
 Needs Playwright with Chromium (the server's dev extra; set PLAYWRIGHT_BROWSERS_PATH where they
-are). Wave 3's tracks add their lines beside these (one function each, returning Results) and
-call it from ``main``.
+are). New lines go beside these (one function each, returning Results), called from ``main``.
 """
 
 from __future__ import annotations
@@ -211,8 +210,8 @@ def prev_lines(p: Preview) -> list[Result]:
     pv = st.get("preview") or {}
     p.go(pg, "#/home")
     bar = _text(pg, "#bar") if pg.query_selector("#bar") else _text(pg)
-    out.append(ok("PREV-1", "I open the link and see my Kranto; the bar says it is a preview and "
-                  "nothing is posted",
+    out.append(ok("PREVIEW-1", "I open the link and see my Kranto; the bar says it is a preview "
+                  "and nothing is posted",
                   "Preview" in bar and "Nothing is posted" in bar and bool(st.get("topics")),
                   pv.get("line") or "no preview line", topics=len(st.get("topics") or [])))
     ctx.close()
@@ -222,12 +221,12 @@ def prev_lines(p: Preview) -> list[Result]:
     out.append(ok(" phone", "on my phone the strip says it whole",
                   bool(strip) and not strip["cut"], strip["text"] if strip else "no strip"))
     ctx.close()
-    out.append(skip("PREV-2", "On Post I choose Send: \"This is the preview: nothing is sent.\"",
+    out.append(skip("PREVIEW-2", "On Post I choose Send: \"This is the preview: nothing is sent.\"",
                     "a press (Send); its answer is a test (tests/test_preview.py)"))
-    out.append(skip("PREV-3", "live says what it said; no file of live's is newer",
+    out.append(skip("PREVIEW-3", "live says what it said; no file of the live install is newer",
                     "a listing on the machine, not a page"))
     commits = pv.get("commits") or {}
-    out.append(ok("PREV-4", "kranto-preview status names the commit it runs",
+    out.append(ok("PREVIEW-4", "kranto-preview status names the commit it runs",
                   bool(commits.get("kranto")), f"kranto {str(commits.get('kranto'))[:12]}"))
     return out
 
@@ -262,7 +261,7 @@ def hour_lines(p: Preview, topic: str) -> list[Result]:
     t = next((x for x in topics if str(x.get("name", "")).lower() == topic.lower()), None)
     if t is None:
         ctx.close()
-        return [ok("HOUR-1", f"{topic}'s page shows four rows", False, f"no topic {topic}")]
+        return [ok("START-1", f"{topic}'s page shows four rows", False, f"no topic {topic}")]
     start = p.api(pg, f"/api/topics/{t['id']}/start")
     rows = start.get("rows") or []
     ctx.close()
@@ -289,13 +288,13 @@ def hour_lines(p: Preview, topic: str) -> list[Result]:
     news = next((r for r in rows if r.get("key") == "brief"), {})
     out.append(ok(" (D8)", f"News is on for {topic}, so its first brief can come",
                   news.get("state") != "off", news.get("words") or "no brief row"))
-    out.append(skip("HOUR-2", "within the hour News has its first brief",
+    out.append(skip("START-2", "within the hour News has its first brief",
                     "needs a model key and jobs on"))
-    out.append(skip("HOUR-4", "Later on a card moves it to Later; loop.db unchanged",
+    out.append(skip("START-4", "Later on a card moves it to Later; loop.db unchanged",
                     "a press (Later)"))
-    out.append(skip("HOUR-5", "Welcome in three steps, under ten minutes",
+    out.append(skip("START-5", "Welcome in three steps, under ten minutes",
                     "timed by a person on the fresh home"))
-    out.append(skip("HOUR-6", "the console names a card that is on Ideas", "a model answer"))
+    out.append(skip("START-6", "the console names a card that is on Ideas", "a model answer"))
     return out
 
 
@@ -305,25 +304,25 @@ def post_lines(p: Preview) -> list[Result]:
     post = p.api(pg, "/api/post")
     drafts = post.get("drafts") or []
     issue = next((d for d in drafts if d.get("kind") == "newsletter"), None)
-    out.append(ok("POST-1", "on Post the newsletter draft waits, though its two days passed",
+    out.append(ok("DRAFTS-1", "on Post the newsletter draft waits, though its two days passed",
                   issue is not None, issue.get("title", "") if issue else "none waiting"))
     if issue:
         r = pg.request.get(f"{p.base}/api/post/d/{issue['id']}.md")
         md = r.text() if r.ok else ""
-        out.append(ok("POST-2", "Copy and Download give the markdown with every item and its "
+        out.append(ok("DRAFTS-2", "Copy and Download give the markdown with every item and its "
                       "link, with no account", r.ok and md.count("](http") >= 1,
                       f"{len(md)} characters, {md.count('](http')} links"))
     p.go(pg, "#/post")
     head = pg.query_selector("#post-write")
     out.append(ok("POST head (fix 6a)", "Post's head has a plain Write a post", bool(head),
                   head.inner_text().strip() if head else "missing"))
-    out.append(ok("POST-6", "Earlier drafts are there and still open", bool(post.get("earlier")),
+    out.append(ok("DRAFTS-6", "Earlier drafts are there and still open", bool(post.get("earlier")),
                   f"{len(post.get('earlier') or [])} earlier drafts"))
     ctx.close()
-    out.append(skip("POST-3", "Write draft writes a blog draft within a minute",
+    out.append(skip("DRAFTS-3", "Write draft writes a blog draft within a minute",
                     "needs a model key"))
-    out.append(skip("POST-4", "the console writes a post about the open card", "a model answer"))
-    out.append(skip("POST-5", "a send says \"Sent to 3 on …\"", "a real send"))
+    out.append(skip("DRAFTS-4", "the console writes a post about the open card", "a model answer"))
+    out.append(skip("DRAFTS-5", "a send says \"Sent to 3 on …\"", "a real send"))
     return out
 
 
@@ -334,41 +333,41 @@ def prose_lines(p: Preview) -> list[Result]:
     ctx, pg = p.page(NEW)
     prof = p.api(pg, "/api/prose")
     floor = next((g for g in prof.get("guides") or [] if g.get("name") == "floor"), {})
-    out.append(ok("PROSE-1", "Kranto has my prose profile: the floor always on, the checker's "
+    out.append(ok("VOICE-1", "Kranto has my prose profile: the floor always on, the checker's "
                   "rules, a template per site", bool(floor.get("always"))
                   and len(prof.get("rules") or []) >= 20 and len(prof.get("sites") or []) >= 8,
                   f"{len(prof.get('rules') or [])} rules, {len(prof.get('sites') or [])} sites, "
                   f"strictness {prof.get('strictness')}"))
     migrated = prof.get("migrated") or {}
     first = (prof.get("voice") or "").splitlines()[:1]
-    out.append(ok("PROSE-2", "my old tone setting is my voice card's first line",
+    out.append(ok("VOICE-2", "my old tone setting is my voice card's first line",
                   not migrated or (bool(first) and first[0].startswith("Tone:")),
                   f"migrated {sorted(migrated) or 'nothing (no tone written)'}; card starts "
                   f"{first[0][:60] if first else '(empty)'!r}"))
     kinds = {v.get("kind") for v in (p.api(pg, "/api/verbs").get("verbs") or [])}
     want = {"prose.check", "prose.voice", "prose.learn"}
-    out.append(ok("PROSE-3", "my assistant can check a draft, change my voice and learn from my "
+    out.append(ok("VOICE-3", "my assistant can check a draft, change my voice and learn from my "
                   "edits (three verbs)", want <= kinds, f"{sorted(want & kinds)}"))
     drafts = p.api(pg, "/api/post").get("drafts") or []
     ctx.close()
     if not drafts:
-        out.append(skip("PROSE-4", "a waiting draft's text shows its flags", "no draft waits"))
+        out.append(skip("VOICE-4", "a waiting draft's text shows its flags", "no draft waits"))
     else:
         ctx, pg = p.page(NEW)
         r = pg.request.get(f"{p.base}/api/post/d/{drafts[0]['id']}.md")
         got = _prose_check(r.text() if r.ok else "", "blog")
         ctx.close()
         if got is None:
-            out.append(skip("PROSE-4", "a waiting draft's text shows its flags",
+            out.append(skip("VOICE-4", "a waiting draft's text shows its flags",
                             "Kranto is not importable here, nor the preview's install"))
         else:
-            out.append(ok("PROSE-4", "a waiting draft's text shows its flags (the page draws "
+            out.append(ok("VOICE-4", "a waiting draft's text shows its flags (the page draws "
                           "them in PR 2)", r.ok and "verdict" in got,
                           f"{drafts[0].get('title', '')[:50]}: {got['verdict']} "
                           f"(score {got['score']})"))
-    out.append(skip("PROSE-5", "Welcome's \"How you write\" step is there and skippable",
-                    "PROSE's PR 2 (places it)"))
-    out.append(skip("PROSE-6", "Settings › Posting › Voice is within the budget",
+    out.append(skip("VOICE-5", "Welcome's \"How you write\" step is there and skippable",
+                    "the page does not place it yet"))
+    out.append(skip("VOICE-6", "Settings › Posting › Voice is within the budget",
                     "played as (the F2 draws the page)"))
     # the checker knows what a post is for, and each writer's
     # model is its own setting (unset until the maintainer's read chooses one)
@@ -376,13 +375,13 @@ def prose_lines(p: Preview) -> list[Result]:
     claims = {"claim.announced", "claim.caveats", "claim.no_hook", "claim.sections",
               "claim.skeleton", "claim.restates"}
     models = prof.get("writer_models")
-    out.append(ok("PROSE-7", "Kranto flags a post that announces its points, catalogues what is "
+    out.append(ok("VOICE-7", "Kranto flags a post that announces its points, catalogues what is "
                   "unknown, opens on nothing or only restates the facts", claims <= rules,
                   f"{len(claims & rules)} of {len(claims)} round-2 rules"))
-    out.append(ok("PROSE-8", "each writer's model is its own setting, apart from the watcher's",
+    out.append(ok("VOICE-8", "each writer's model is its own setting, apart from the watcher's",
                   isinstance(models, dict) and {"blog", "toot"} <= set(models),
                   f"writer_models {models}"))
-    out.append(skip("PROSE-9", "Write a post asks for my angle and proposes three",
+    out.append(skip("VOICE-9", "Write a post asks for my angle and proposes three",
                     "a model call (POST /api/post/angles); draws the step"))
     return out
 
@@ -475,7 +474,7 @@ SITE = re.compile(os.environ.get("KRANTO_ACCEPT_SITE", r"example\.?com"), re.I)
 HREFS = "() => [...document.querySelectorAll('a')].map((a) => a.getAttribute('href') || '')"
 
 
-# Settings' page links and the crumbs, as SOC-7 leaves them out: (words, controls)
+# Settings' page links and the crumbs, as POSTING-7 leaves them out: (words, controls)
 SETTINGS_CHROME = r"""(root) => {
   const el = document.querySelector(root) || document.body;
   const names = new Set(['Home', 'Settings', '?', 'Overview', 'Watching', 'Posting', 'Assistant',
@@ -498,7 +497,7 @@ def social_lines(p: Preview) -> list[Result]:
     got = p.api(pg, "/api/post/sites")
     offered = got.get("sites") or []
     gone = {g.get("id"): g for g in got.get("not_offered") or []}
-    out.append(ok("SOC-0", "every site Kranto offers opens first (LinkedIn, with no Open, is "
+    out.append(ok("POSTING-0", "every site Kranto offers opens first (LinkedIn, with no Open, is "
                   "posted directly only); none is copy and open",
                   bool(offered) and all((s.get("ways") or [""])[0] == "open"
                                         or s.get("ways") == ["direct"] for s in offered)
@@ -506,7 +505,7 @@ def social_lines(p: Preview) -> list[Result]:
                   ", ".join(f"{s.get('name')}: {' or '.join(s.get('ways') or [])}"
                             for s in offered)))
     li = next((s for s in offered if s.get("id") == "linkedin"), {})
-    out.append(ok("SOC-6", "Substack is not offered, with its reason; LinkedIn only as Post "
+    out.append(ok("POSTING-6", "Substack is not offered, with its reason; LinkedIn only as Post "
                   "directly", bool(gone.get("substack", {}).get("why"))
                   and li.get("ways") == ["direct"],
                   f"substack: {gone.get('substack', {}).get('why')}; linkedin: "
@@ -519,12 +518,12 @@ def social_lines(p: Preview) -> list[Result]:
     words += _text(pg, "#app")
     c = pg.evaluate(COUNT, _root(pg))
     # The page's own content: the crumbs and Settings' eight page links (the same on every
-    # Settings page, counted by COUNT settings) are left out of SOC-7's budget
+    # Settings page, counted by COUNT settings) are left out of POSTING-7's budget
     chrome = pg.evaluate(SETTINGS_CHROME, _root(pg))
     own = {**c, "words": c["words"] - chrome["words"],
            "controls": c["controls"] - chrome["controls"]}
     ticked = sum(1 for s in offered if s.get("ticked"))
-    out.append(ok("SOC-7", f"Settings › Posting fits: 80 words or fewer, 7 controls or fewer "
+    out.append(ok("POSTING-7", f"Settings › Posting fits: 80 words or fewer, 7 controls or fewer "
                   f"({ticked} sites ticked on this copy; Settings' own links left out)",
                   own["words"] <= 80 and own["controls"] <= 7, _counted(own), count=c,
                   chrome=chrome))
@@ -534,19 +533,19 @@ def social_lines(p: Preview) -> list[Result]:
         add.click()
         pg.wait_for_timeout(600)
         sheet = _text(pg, "#dlg") if pg.query_selector("#dlg") else ""
-    out.append(ok("SOC-6 page", "Add a site lists the rest and, under Not possible today, "
+    out.append(ok("POSTING-6 page", "Add a site lists the rest and, under Not possible today, "
                   "Substack with its reason", "Not possible today" in sheet and "Substack" in sheet,
                   sheet[:160] or "no Add a site"))
     words += sheet
-    out.append(ok("SOC no copy", "no page offers copy and open", "copy and open" not in
+    out.append(ok("POSTING no copy", "no page offers copy and open", "copy and open" not in
                   words.lower(), "none" if "copy and open" not in words.lower() else "found"))
     p.go(pg, "#/settings/toot")
     landed = landed_at(pg, "/settings/posting")
-    out.append(ok("SOC redirect", "my old address for the toot's settings lands on Posting",
+    out.append(ok("POSTING redirect", "my old address for the toot's settings lands on Posting",
                   landed.startswith("/settings/posting"), landed))
     if short:
         d = p.api(pg, f"/api/post/d/{short[0]['id']}")
-        out.append(ok("SOC-2", "a short post's parts are each within the site's limit, its "
+        out.append(ok("POSTING-2", "a short post's parts are each within the site's limit, its "
                       "siblings named", all(x.get("used", 0) <= (d.get("limit") or {}).get(
                           "max", 0) for x in d.get("parts") or []) and bool(d.get("siblings")),
                       f"{d.get('site')}: " + ", ".join(str(x.get("used"))
@@ -555,32 +554,33 @@ def social_lines(p: Preview) -> list[Result]:
         btn = pg.query_selector("#draft-open")
         off = btn is not None and (btn.get_attribute("aria-disabled") == "true"
                                    or btn.get_attribute("disabled") is not None)
-        out.append(ok("SOC-4", "Open is the first button; on the preview it is off and says "
+        out.append(ok("POSTING-4", "Open is the first button; on the preview it is off and says "
                       "nothing is posted", off and "nothing is posted" in _text(pg, "#draft-sheet"),
                       _text(pg, "#draft-verbs")[:120]))
     else:
-        out.append(skip("SOC-2", "a short post's parts within the site's limit",
+        out.append(skip("POSTING-2", "a short post's parts within the site's limit",
                         "no short post on this copy (it needs a model answer)"))
-        out.append(skip("SOC-4", "Open first, off on the preview", "no short post on this copy"))
+        out.append(skip("POSTING-4", "Open first, off on the preview",
+                        "no short post on this copy"))
     out += reach_and_hours_lines(p, pg)
     ctx.close()
-    out.append(skip("SOC-1", "Write a post › Short posts: one row naming the sites",
+    out.append(skip("POSTING-1", "Write a post › Short posts: one row naming the sites",
                     "needs a model key (the angles and the write); the scratch install's real "
                     "write is in the report"))
-    out.append(skip("SOC-3", "an edit of a short post waits", "a write on the copy"))
-    out.append(skip("SOC-5", "Post to Bluesky on the preview says nothing is posted",
+    out.append(skip("POSTING-3", "an edit of a short post waits", "a write on the copy"))
+    out.append(skip("POSTING-5", "Post to Bluesky on the preview says nothing is posted",
                     "a connected posting account on the copy (tests: test_social.py)"))
-    out.append(skip("SOC-11", "the console writes short posts; nothing is sent", "a model answer "
-                    "(tests: test_social_routes.py)"))
-    out.append(skip("SOC-12", "I posted it records posted by you, nothing sent",
+    out.append(skip("POSTING-11", "the console writes short posts; nothing is sent",
+                    "a model answer (tests: test_social_routes.py)"))
+    out.append(skip("POSTING-12", "I posted it records posted by you, nothing sent",
                     "a write on the copy (tests: test_social.py)"))
     return out
 
 
 def reach_and_hours_lines(p: Preview, pg) -> list[Result]:
-    """SOC-9 and SOC-10, read-only: a sent post's numbers on Sent and the sites that give none
-    said once; the Scheduled group and its Cancel. A press (Schedule, Cancel) is never made on
-    the copy: the tests hold them (test_post_hours.py, test_post_reach.py)."""
+    """POSTING-9 and POSTING-10, read-only: a sent post's numbers on Sent and the sites that
+    give none said once; the Scheduled group and its Cancel. A press (Schedule, Cancel) is never
+    made on the copy: the tests hold them (test_post_hours.py, test_post_reach.py)."""
     out: list[Result] = []
     post = p.api(pg, "/api/post")
     sent = post.get("sent") or []
@@ -589,31 +589,32 @@ def reach_and_hours_lines(p: Preview, pg) -> list[Result]:
     page = _text(pg, "[aria-labelledby=post-sent]")
     if counted:
         w = counted[0]["reach"]["words"]
-        out.append(ok("SOC-9", "a sent post shows its replies, reposts and likes", w in page, w))
+        out.append(ok("POSTING-9", "a sent post shows its replies, reposts and likes", w in page,
+                      w))
     else:
-        out.append(skip("SOC-9", "a sent post's numbers on Sent",
+        out.append(skip("POSTING-9", "a sent post's numbers on Sent",
                         "no sent post with numbers on this copy (tests: test_post_reach.py)"))
     gone = {r.get("site") for r in sent} & {"linkedin", "x"}
     if gone:
         foot = post.get("reach_foot") or ""
-        out.append(ok("SOC-9 foot", "Sent says once which sites give no numbers",
+        out.append(ok("POSTING-9 foot", "Sent says once which sites give no numbers",
                       bool(foot) and page.count(foot) == 1, foot[:120] or "no foot"))
     learned = p.api(pg, "/api/post/learned")
-    out.append(ok("SOC-9 learned", "what was learned answers per site, nothing under 8 a side",
+    out.append(ok("POSTING-9 learned", "what was learned answers per site, nothing under 8 a side",
                   isinstance(learned.get("sites"), list) and all(
                       x.get("lines") == [] or x.get("posts", 0) >= 16
                       for x in learned.get("sites") or []),
                   ", ".join(f"{x.get('word')}: {x.get('posts')}" for x in learned.get("sites")
                             or [])))
     held = post.get("scheduled")
-    out.append(ok("SOC-10 read", "Post's read has the Scheduled group", isinstance(held, list),
+    out.append(ok("POSTING-10 read", "Post's read has the Scheduled group", isinstance(held, list),
                   f"{len(held or [])} scheduled"))
     if held:
         g = _text(pg, "[aria-labelledby=post-scheduled]")
-        out.append(ok("SOC-10", "a scheduled post shows its hour and Cancel",
+        out.append(ok("POSTING-10", "a scheduled post shows its hour and Cancel",
                       "Cancel" in g and "Goes " in g, g[:120]))
     else:
-        out.append(skip("SOC-10", "Schedule moves the row to Scheduled with Cancel; on the "
+        out.append(skip("POSTING-10", "Schedule moves the row to Scheduled with Cancel; on the "
                         "preview it says nothing is posted",
                         "a press on the copy (tests: test_post_hours.py)"))
     return out
@@ -648,7 +649,7 @@ def fixes_lines(p: Preview) -> list[Result]:
                   str(gear)))
     hrefs = pg.evaluate(HREFS)
     masto = [h for h in hrefs if "connections/mastodon" in h]
-    # Post's accounts are one line to Settings › Posting since short posts (SOCIAL): no
+    # Post's accounts are one line to Settings › Posting since short posts came: no
     # Mastodon link on Post is fine, and any there must be the posting one
     out.append(ok(" mastodon", "Post's Mastodon Connect leads to the posting connection",
                   all(h.endswith("mastodon_post") for h in masto),
@@ -734,7 +735,7 @@ def fresh_lines(p: Preview) -> list[Result]:
 ROOT_PREVIEW = ROOT
 ARCH_WORDS = re.compile(r"\b(broker(?:s|age)?|invest|radar|(?:browser )?extension|IBKR)\b", re.I)
 GONE_KINDS = ("broker.", "browser.", "f.invest.", "f.radar.")
-# the counts on live's copy of 11 November (the design's acceptance line 1)
+# the counts on the copy of the live install of 11 November (the design's acceptance line 1)
 ARCH_EXPECT = {
     "builds": 12,
     "projects": 10,
@@ -818,7 +819,7 @@ def arch_lines(p: Preview, before: str | None) -> list[Result]:
     if wrote is None:
         out.append(
             ok(
-                "ARCH-1",
+                "ARCHIVE-1",
                 "kranto archive writes a page with my builds and their "
                 "repositories, projects, Invest's cards, trends and proposals",
                 False,
@@ -842,7 +843,7 @@ def arch_lines(p: Preview, before: str | None) -> list[Result]:
         heads = re.findall(r"<h2>([^<]+)</h2>", page)
         out.append(
             ok(
-                "ARCH-1",
+                "ARCHIVE-1",
                 "kranto archive writes a page that lists my 12 builds with their "
                 "repositories, 10 projects, 12 Invest cards, 15 trends and 42 proposals: "
                 "the databases' counts",
@@ -862,7 +863,7 @@ def arch_lines(p: Preview, before: str | None) -> list[Result]:
     still = bool(re.search(r"(?m)^invest:\s*\n(?:\s+.*\n)*?\s+enabled:\s*true", settings))
     out.append(
         ok(
-            "ARCH-2",
+            "ARCHIVE-2",
             "the preview, whose settings still say invest.enabled: true, starts; "
             "kranto doctor says one line about Invest and exits 0",
             len(inv) == 1 and "not part of Kranto" in inv[0] and not other,
@@ -887,7 +888,7 @@ def arch_lines(p: Preview, before: str | None) -> list[Result]:
         }
         out.append(
             ok(
-                "ARCH-4",
+                "ARCHIVE-4",
                 "every invest_*, radar_* and browser_* table has the rows it had",
                 not changed,
                 f"{len(now)} tables, {sum(now.values())} rows"
@@ -898,7 +899,7 @@ def arch_lines(p: Preview, before: str | None) -> list[Result]:
     else:
         out.append(
             skip(
-                "ARCH-4",
+                "ARCHIVE-4",
                 "every invest_*, radar_* and browser_* table has the rows it had",
                 f"no --arch-before file to compare with (now: {len(now)} tables,"
                 f" {sum(now.values())} rows)",
@@ -994,7 +995,7 @@ def arch_words(p: Preview) -> list[Result]:
         hits["MCP tools"] = [said_mcp]
     return [
         ok(
-            "ARCH-3",
+            "ARCHIVE-3",
             "no page, tool or status line mentions a broker, Invest, the radar or a "
             "browser extension (Settings' pages and Prompts, ? keys, ⌘K, the status bar, "
             "kranto status, kranto --help, the verbs, the features, the MCP tools)",
@@ -1005,7 +1006,7 @@ def arch_words(p: Preview) -> list[Result]:
     ]
 
 
-# -- CUT: the lab and the factory leave (CUT; the rewording of line 2) ----------
+# -- builds: the lab and the factory leave Kranto -------------------------------
 
 KRANTO = os.path.join(ROOT, "venv", "bin", "kranto")
 CUT_PAGES = ["#/home", "#/news", "#/ideas", "#/watch", "#/post", "#/settings"]
@@ -1109,7 +1110,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
     ctx.close()
     out.append(
         ok(
-            "CUT-1",
+            "BUILDS-1",
             "the preview updates across the cut: the home, News, Ideas, Watch, "
             "Post and Settings work as before it, in New and on the phone",
             not bad and not new_errors and all(v == 200 for v in kept.values()),
@@ -1144,7 +1145,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
     if gone:
         out.append(
             ok(
-                "CUT-4",
+                "BUILDS-4",
                 'my old prepared items (each "File a Kranto issue") show as no '
                 "longer available, with Dismiss",
                 len(good) == len(gone) and "no longer available" in needs,
@@ -1156,7 +1157,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
     else:
         out.append(
             skip(
-                "CUT-4",
+                "BUILDS-4",
                 "my old prepared items show as no longer available, with Dismiss",
                 f"no prepared item of a verb that left on this copy ({len(rows)} open)",
             )
@@ -1166,7 +1167,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
     line = next((ln.strip() for ln in said.splitlines() if DOCTOR_CONSOLE.search(ln)), "")
     out.append(
         ok(
-            "CUT-2",
+            "BUILDS-2",
             "`kranto doctor` says Open in Claude Code is ready",
             bool(line),
             line or said.strip().splitlines()[-1:][0] if said.strip() else "no output",
@@ -1176,8 +1177,8 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
         skip(
             " answer",
             'the console answers "what is new in Robotics?"',
-            "Claude Code's trust prompt on the preview is the maintainer's (CUT's report has "
-            "the answer from a scratch install)",
+            "Claude Code's trust prompt on the preview is the maintainer's (a scratch install "
+            "gave the answer)",
         )
     )
     # a settings file with builds.enabled: true starts, and doctor says one line
@@ -1193,7 +1194,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
     if has_builds:
         out.append(
             ok(
-                "CUT-5",
+                "BUILDS-5",
                 "a settings file with builds.enabled: true starts, and doctor says one line",
                 len(builds_lines) == 1,
                 "; ".join(builds_lines) or "no line",
@@ -1202,7 +1203,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
     else:
         out.append(
             skip(
-                "CUT-5",
+                "BUILDS-5",
                 "a settings file with builds.enabled: true starts, and doctor says one line",
                 "the copy's settings have no builds.enabled: true "
                 "(tests/test_config_retired.py plays it)",
@@ -1218,7 +1219,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
         hours = (time.time() - float(before.get("at", time.time()))) / 3600
         out.append(
             ok(
-                "CUT-3",
+                "BUILDS-3",
                 "loop.db, trace.db and the loop's folders are byte-identical "
                 "before and after a day of the preview's jobs",
                 not changed,
@@ -1233,7 +1234,7 @@ def cut_lines(p: Preview, baseline: str | None) -> list[Result]:
                 json.dump({"at": time.time(), "hashes": now}, fh, indent=1)
         out.append(
             skip(
-                "CUT-3",
+                "BUILDS-3",
                 "loop.db, trace.db and the loop's folders byte-identical after a day",
                 f"baseline of {len(now)} paths written to {baseline}; run again after a day"
                 if baseline
@@ -1512,9 +1513,9 @@ def counts(p: Preview) -> list[Result]:
             pg.wait_for_timeout(800)
             q = pg.evaluate(COUNT, "#dlg")
         both = {k: sheet[k] + q[k] for k in ("words", "controls", "primaries")}
-        # the D4 was 180 words and 12 controls; the question then gained PROSE's "What do you
-        # think?" (P-1: a field) and, while no voice is set, the "Set up how you write ›"
-        # (a link): 190 and 14; then the angle step (SOCIAL, PROSE's rule 4): three proposed
+        # the D4 was 180 words and 12 controls; the question then gained "What do you
+        # think?" (a field) and, while no voice is set, the "Set up how you write ›"
+        # (a link): 190 and 14; then the angle step (short posts): three proposed
         # sentences, each a button you can read before choosing, and Skip: 220 and 18
         out.append(
             ok(
@@ -2000,7 +2001,7 @@ def main(argv: list[str] | None = None) -> int:
         help="the fresh home's port (kranto-preview fresh): Welcome's words too",
     )
     ap.add_argument("--fresh-link")
-    ap.add_argument("--topic", default="Padel", help="the new topic of HOUR's line 1 (D8)")
+    ap.add_argument("--topic", default="Padel", help="the new topic the first-hour lines read")
     ap.add_argument("--out", help="write the results as JSON here")
     ap.add_argument(
         "--arch-before", help="the retired tables' row counts before the cut, as JSON {table: rows}"

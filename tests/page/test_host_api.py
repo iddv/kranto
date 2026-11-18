@@ -11,7 +11,7 @@ from kranto.page import host_api
 # change of meaning bumps HOST_API_VERSION (2: the factory left, cut 3).
 CONTRACT = {
     "API_VERSION", "configure", "handle", "handle_with_headers", "stream",
-    "selfcheck_paths",    # the post-update self-check's reads of the mount (RCA D1)
+    "selfcheck_paths",    # the post-update self-check's reads of the mount
     "Config", "write_setting", "mcp_available", "mcp_main",
     "term_ws", "term_ws_served", "term_cli", "term_mcp_main", "term_doctor",
     "console_new_home_yaml", "console_doctor_line",   # kranto up's seed, doctor's console line

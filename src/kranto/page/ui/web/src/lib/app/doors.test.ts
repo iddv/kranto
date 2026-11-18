@@ -49,12 +49,12 @@ describe("where an old route goes in the doors", () => {
     expect(await at("#/builds/plots")).toBe("#/home"); // builds left: the home
     expect(await at("#/review")).toBe("#/ideas/review");
     expect(await at("#/settings/sources/4")).toBe("#/watch/sources?sel=s4");
-    // watches are retired (WT): their old pages open Watch, a topic's its page
+    // watches are retired: their old pages open Watch, a topic's its page
     expect(await at("#/settings/watches")).toBe("#/watch");
     expect(await at("#/library/watches/new")).toBe("#/watch");
     expect(await at("#/topics/1/watches")).toBe("#/watch/topic/1");
     expect(await at("#/watch/watches?topic=1")).toBe("#/watch/topic/1");
-    // Watch is topic-first (WT): a topic's Sources, Evidence and Map are its pages, and the old
+    // Watch is topic-first: a topic's Sources, Evidence and Map are its pages, and the old
     // ?topic= forms land there; Clusters is the Map, Rollups a group of Evidence
     expect(await at("#/topics/1/evidence")).toBe("#/watch/topic/1/evidence");
     expect(await at("#/topics/1/themes")).toBe("#/watch/topic/1/map");
@@ -93,7 +93,7 @@ describe("the door's head", () => {
     const d = chromeFacts(parse())!.door!;
     expect(d.word).toBe("Ideas");
     expect(d.items.map((x) => [x.w, x.on])).toEqual([["Cards", false], ["Review", true]]);
-    // Watch is topic-first (WT): Topics, then the topic's own Sources, Evidence and Map
+    // Watch is topic-first: Topics, then the topic's own Sources, Evidence and Map
     await at("#/watch/topic/1");
     let w = chromeFacts(parse())!.door!;
     expect(w.items.map((x) => [x.w, x.to, x.on])).toEqual([["Topics", "watch", false], ["Sources", "watch/topic/1/sources", false], ["Evidence", "watch/topic/1/evidence", false], ["Map", "watch/topic/1/map", false]]);
@@ -111,7 +111,7 @@ describe("the door's head", () => {
     expect(w.items.find((x) => x.on)!.w).toBe("Topics");
     expect(w.scope).toMatchObject({ topic: "1", page: null });
     expect(w.items[1]!.to).toBe("watch/topic/1/sources");
-    // Add source and Add topic stay pages (the owner's O3), drawn under Watch, not Settings (QA B16)
+    // Add source and Add topic stay pages, drawn under Watch, not Settings
     await at("#/settings/sources/new");
     expect(chromeFacts(parse())!.door!.word).toBe("Watch");
     expect(chromeFacts(parse())!.door!.items.find((x) => x.on)!.w).toBe("Sources");

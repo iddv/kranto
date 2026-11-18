@@ -357,7 +357,7 @@ parallax:
 update:
   # Updates ('kranto update', Settings › System). channel: stable (what the maintainer made
   # stable, and fixes), nightly (every build from main; the old rc reads as nightly) or main
-  # (each repo's main, from git). maintainer: true on the maintainer's install only, by hand
+  # (the head of main, from git). maintainer: true on the maintainer's install only, by hand
   # (Needs you offers Promote to stable there). check_every_hours: 0 never checks. download:
   # stage a new release's wheels as soon as it is seen. auto: off (you click Restart to update)
   # or idle (inside quiet_window, local time, when nothing runs). keep_backups: the update
@@ -438,7 +438,7 @@ class AnthropicConfig:
 @dataclass(frozen=True)
 class ClaudeCodeConfig:
     """``llm.claude_code``: the user's Claude Code login as the watcher's model,
-    offered only as an explicit choice (the owner's D2). ``structured``: per call, a JSON schema
+    offered only as an explicit choice. ``structured``: per call, a JSON schema
     for the reply (``--json-schema``). ``sandbox``: bubblewrap around ``claude -p`` (D11; no tools
     either way). ``timeout_seconds``: one call's limit. ``cwd``: the empty directory calls run
     in, ``<home>/data/claude-cwd`` when left out."""
@@ -804,7 +804,7 @@ class BuildsConfig:
 
 @dataclass(frozen=True)
 class ApiConfig:
-    """Who may write (OI). ``require_token``: every state-changing request needs a token from
+    """Who may write. ``require_token``: every state-changing request needs a token from
     ``~/.config/kranto/tokens`` (the page's session cookie, or ``Authorization: Bearer``), and
     the token, not the request, says who acts. Off: the old behaviour (the request's own
     ``origin``), which ``kranto doctor`` warns about."""

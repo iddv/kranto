@@ -27,7 +27,7 @@
 #   3. kranto update --rollback: the previous release answers again;
 #   4. kranto update to the rc again: done, the rc answers;
 #   5. kranto doctor --routes: every page the rc serves, read once on the scratch data, answers
-#      below 500 (the post-update self-check, D1);
+#      below 500 (the post-update self-check);
 #   6. the same on the odd installs (scripts/dev/odd_walk.sh,): homes holding
 #      every odd value the rc's writers store (odd, empty, projects), each served by the rc on
 #      127.0.0.1:$ODD_PORT (default PORT+1);

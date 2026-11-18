@@ -1,4 +1,4 @@
-// Where a route draws, and the draw (WORKSPACE.md 1, 5): the routes are ../router.ts and
+// Where a route draws, and the draw: the routes are ../router.ts and
 // ../nodes.json, every page a component (../../pages, lib/pages.svelte.ts). render() puts the
 // route's list page in the list pane and the selected object's page (or what the list is about)
 // in the detail pane; a page already there only gets its new props, so the five-second refresh
@@ -75,7 +75,7 @@ export function where(r: Route): W {
   else if (!w.object && !w.stage && r.sel && shellDoors(!!host())) Object.assign(w, { object: "sel", obj: ["sel", r.sel], id: r.sel, sel: true });
   return w;
 }
-/* the row a route selects when it names none (WORKSPACE.md 9, risk 4): a settings page's main
+/* the row a route selects when it names none: a settings page's main
    group (NODES' sel: the key, the first role, the house rules, the theme), so its form is one look
    away; Health's ?message= and Add source's ?preset= and ?review= (the links that already exist)
    select their row. Not on a phone, where a selection would cover the list. */
@@ -94,7 +94,7 @@ export const routeNow = (): W | null => ROUTE;
 const LISTQ: Record<string, Record<string, string>> = {}; // a list's filters, by node: kept while one of its rows is open in the pane
 const SCROLLS: Record<string, number> = {}; // a list's scroll, by its route, for coming back
 /* the list scrolls in #rows, not the document, so the browser's own restore does nothing on a
-   reload (QA B19): its scroll is kept in this history entry's state (stored nowhere by the page)
+   reload: its scroll is kept in this history entry's state (stored nowhere by the page)
    once it settles, and put back once the rows are there */
 let RESTORE: { k: string; top: number; tries: number } | null = null;
 export function keepScroll(): void {
@@ -132,7 +132,7 @@ export const linkKey = (link: string | null): string | null => {
 };
 export const backHref = (w: W): string =>
   w.sel ? href(w.r.path.map(encodeURIComponent).join("/"), w.r.q) : href(w.list.map(encodeURIComponent).join("/"), (w.node && LISTQ[w.node]) || {});
-/** a row's pane when it is not an object's own route: the list's route with sel= (WORKSPACE.md 5) */
+/** a row's pane when it is not an object's own route: the list's route with sel= */
 export const selHref = (code: string): string => {
   const r = ROUTE ? ROUTE.r : parse();
   return href(r.path.map(encodeURIComponent).join("/"), { ...r.q, sel: code });
@@ -187,7 +187,7 @@ export const flashNow = () => FLASHED;
 
 /** Where an address lands: a redirect, then (the doors' pages, in either layout) the route's
  * place in the doors; a redirect's target may have moved too (library/clusters/3 →
- * watch/map?sel=c3), and Watch is topic-first (WT): an old ?topic= form is the topic's page, and
+ * watch/map?sel=c3), and Watch is topic-first: an old ?topic= form is the topic's page, and
  * the Watch door lands on the last topic looked at. The page goes there (render); a prepared
  * press's page is matched by where it lands (PAR: #/ideas/12 lands on #/ideas?sel=i12, and its
  * card never showed). */
@@ -351,7 +351,7 @@ function renderHead(): void {
   }
   if (rows.firstElementChild !== HEADBOX) rows.prepend(HEADBOX);
 }
-/* the rows this page's lists could not read (RCA A3, ui/Unreadables.svelte): mounted once, kept
+/* the rows this page's lists could not read (ui/Unreadables.svelte): mounted once, kept
    right under the page's head (or first, where there is none), in every layout and on a phone; it
    draws nothing while every row was read */
 let UNREADBOX: HTMLElement | null = null;

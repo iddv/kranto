@@ -47,7 +47,7 @@ LADDER_KINDS = ("read", "reversible", "spend", "outward", "destructive", "creden
 # stored for it is accepted and never read, so a settings file that names it still loads
 RETIRED_KINDS = ("broker",)
 CHOICES = ("do", "ask", "never")
-# the owner's defaults (the owner's Q3): what can be undone or only costs money
+# the owner's defaults: what can be undone or only costs money
 # you have not capped is done; what leaves Kranto or cannot be undone waits for your press
 DEFAULTS = {"read": "do", "reversible": "do", "spend": "do", "outward": "ask",
             "destructive": "ask", "credential": "never"}
@@ -482,7 +482,7 @@ CORE: tuple[Verb, ...] = (
                  F("x_monthly_usd", "usd", "the X cap"),
                  F("search_monthly_usd", "usd", "the live search cap")),
          page="#/settings/spend", undo="settings.spend"),
-    # how often Kranto reads and whether deep dives run is what it spends (the safe side of D1)
+    # how often Kranto reads and whether deep dives run is what it spends (so it waits for a yes)
     Verb("settings.reading", "Save", "How often Kranto reads, and whether deep dives run (this "
          "changes what Kranto spends: an assistant's change waits for the owner's approval).",
          "spend", "POST", "/api/settings/reading",
@@ -654,13 +654,13 @@ CORE: tuple[Verb, ...] = (
          "POST", "/api/newsletter/check", page="#/settings/posting?sel=enl"),
     Verb("newsletter.audience", "Choose audience", "Which audience on the platform the "
          "newsletter sends to.", "outward", "POST", "/api/newsletter/audience", click="confirm",
-         doors=PAGE_ONLY,                 # the route's: "made on the Accounts page only" (PAR)
+         doors=PAGE_ONLY,                 # the route's: "made on the Accounts page only"
          fields=(F("name", "line", "the audience", True),), page="#/settings/posting?sel=enl"),
     # -- the assistant's own ladder: the owner's only ----------------------------------------------
     Verb("assistant.ladder", "Save", "What an assistant may do by itself: per kind of action "
          "and per verb (the locks cannot be turned).", "credential", "POST",
          "/api/settings/assistant", doors=OWNERS_ONLY, page="#/settings/assistant"),
-    # the owner's Q6 (2026-10-25): outside Kranto's folder only when asked, the change shown
+    # as the owner decided (2026-10-25): outside Kranto's folder only when asked, the change shown
     # first; an assistant asked for it prepares the press, the owner makes it
     Verb("assistant.global", "Add Kranto to my own client", "Add Kranto to your own Claude Code "
          "or Codex: their own commands, shown first, outside Kranto's folder.", "outward",

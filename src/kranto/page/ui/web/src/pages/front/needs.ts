@@ -1,4 +1,4 @@
-// Needs you, the inbox as one list (WORKSPACE.md 8, W2;): the types and the helpers
+// Needs you, the inbox as one list: the types and the helpers
 // of the list and its pane. A row and its one press for each of: a release on offer, what an
 // assistant's session proposes, idea cards waiting, dispatches, sources failing run after run, the
 // scout's proposed sources, messages since the last visit, the review queue. Backed by the server's
@@ -21,7 +21,7 @@ import type { Listing, Session } from "../../term/api";
 export { TODAY_API };
 export type { Message, Today, TodayTopic };
 
-/** the top N of a busy topic's new rows (CLICKS-v4.md, S03): read less on a heavy day */
+/** the top N of a busy topic's new rows: read less on a heavy day */
 export const TOP_NEW = 20;
 /** a topic's new rows on its Evidence, by signal since the last visit */
 export const newHref = (x: Pick<TodayTopic, "id">, q: Record<string, string | number> = {}): string =>
@@ -127,7 +127,7 @@ export type Want = "approve" | "fix" | "decision";
 /** a row that may be the one thing: what it asks and when it came (seconds; null: unknown) */
 export interface NextCand { want: Want; at: number | null; key: string }
 
-/** The one thing on Needs you and the home (the owner's D-1), by rule, never by
+/** The one thing on Needs you and the home, by rule, never by
  * a model: the newest of Approve (an assistant's prepared item, a cub's ask: one click finishes
  * it), else the oldest of Fix, else the first of Decide, else nothing. Kranto's own trouble is the
  * band, never a candidate: the caller leaves it out. On a tie the first listed wins; a row of

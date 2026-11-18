@@ -1,4 +1,4 @@
-// Review's state and its flow (LEARNING.md 3.4; WORKSPACE.md 2.10): one item at a time; keys only
+// Review's state and its flow: one item at a time; keys only
 // (QUEUE_KEYS in lib/keys.json, queueAction in lib/keys.ts), the pointer works too. A grade moves
 // on by itself to the next ungraded item; a chip letter after it attaches to the item just
 // graded. The queue is read once per visit and kept (Q, for the list and the pane alike), so

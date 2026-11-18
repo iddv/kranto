@@ -1,4 +1,4 @@
-"""Feedback (LEARNING.md 2.4, track L1): one append-only table for Kranto UI's grades, its
+"""Feedback: one append-only table for Kranto UI's grades, its
 vocabulary, the union with the older grades table and the review queue. Grades are kept on
 ideas and evidence only: older rows on other targets are history, still read.
 No model call anywhere."""
@@ -62,7 +62,7 @@ def test_the_vocabulary_refuses_what_it_does_not_know(rt):  # noqa: F811
     for target, tid in (("source", "1"), ("message", "1")):
         with pytest.raises(ValueError, match=feedback.NOT_KEPT):
             grade(store, target, tid, "not_useful")
-    # a build, a project or a theme has no object any more (CUT): no new row names one
+    # a build, a project or a theme has no object any more: no new row names one
     for target in feedback.RETIRED_TARGETS:
         with pytest.raises(ValueError, match="target must be"):
             grade(store, target, "plotkeeper-1", "not_useful")

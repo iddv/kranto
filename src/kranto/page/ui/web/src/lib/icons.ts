@@ -1,4 +1,4 @@
-// The page's icons (UI-v4.md 1.4, DESIGN-v3.md section 4): 16 px SVGs drawn from these tables,
+// The page's icons: 16 px SVGs drawn from these tables,
 // by the shell's Icon component and the old page's icon(). A shape is [tag, attributes].
 export type Shape = [string, Record<string, string | number>];
 

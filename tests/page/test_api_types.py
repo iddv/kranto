@@ -69,7 +69,7 @@ def test_every_typed_route_answers_its_type(app):
     assert [r["id"] for r in seen["api/traces"]["traces"]] == [tr]
     gone = {"api/info", "api/kranto", "api/loop/editor", "api/actions", "api/outcomes",
             "api/build/runs", "api/run", "api/trace/compare"}
-    assert not gone & set(T.RETURNS)                  # the factory's reads left (CUT)
+    assert not gone & set(T.RETURNS)                  # the factory's reads left
 
 
 def test_whoami_answers_its_type(app):

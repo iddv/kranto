@@ -29,7 +29,7 @@
 - A source feeds every topic it is linked to (``topic_links``; CON's D-3: many to many).
   Its row names them with their kind (user, project) and the topic it was found for
   (``found_for``: the one the scout proposed it for, or the first you added it to); its
-  page counts, for each, the topic's watched sources and its kept items this month (SRC).
+  page counts, for each, the topic's watched sources and its kept items this month.
 - Spend: the model calls that judged or screened a source's items this month, the
   same query a topic's facts sum over its sources (``model_spend``). A screening call that
   read items of several sources counts once for each of them, and once for a topic.
@@ -417,7 +417,7 @@ def list_sources(store: Store, cfg: Any = None, *,
                 "topics": [topic_ref(refs, t) for t in links.get(s.id, [])],
                 "proposed_for": topics.get(v.topic_id) if v.role == "wildcard"
                 and v.topic_id is not None else None,
-                # the topic the scout proposed it for, else the first you added it to (SRC)
+                # the topic the scout proposed it for, else the first you added it to
                 "found_for": topic_ref(refs, v.topic_id) if v.topic_id in refs
                 else topic_ref(refs, links[s.id][0]) if links.get(s.id) else None,
                 "why": v.why, "replaces": v.replaces,

@@ -1,6 +1,6 @@
 /* The shared "kranto" look on the server's own pages, loaded after style.css only when
    kranto.page is mounted at /brb/ (brb.enabled). It maps kranto's tokens onto the palette
-   of kranto.page's kranto.css (the v4 palette from the logo, UI-v4.md section 1) and draws the shared header: five tabs, the service state and
+   of kranto.page's kranto.css (the palette from the logo) and draws the shared header: five tabs, the service state and
    one Pause button. A full restyle of these pages (rows, boxes, labels) is later work. */
 :root {
   --bg: #f6f5ff; --panel: #fdfdff; --ink: #1c1c4b; --muted: #55578a; --faint: #e3e3f6;

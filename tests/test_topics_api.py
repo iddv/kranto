@@ -1,4 +1,4 @@
-"""The Topics tab's JSON (PLAN.md 2.2, 2.3): topics with their facts, one topic's themes
+"""The Topics tab's JSON: topics with their facts, one topic's themes
 and sources, pausing a topic, and the scout's proposals as rows to tick."""
 
 import json

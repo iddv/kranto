@@ -1,4 +1,4 @@
-// A source's quiet verbs (UI-v4.md 2.3;): Mute (7 days, 30 days, read less, or retire, a
+// A source's quiet verbs: Mute (7 days, 30 days, read less, or retire, a
 // small menu in the one popover) and Retire / Watch again; every one says what it did, with Undo.
 // By reach (the owner's O-1): Remove from <topic> is this topic only (the // unlink; Undo links it again); Mute, Read less and Retire act on every topic the source feeds,
 // and say so when it feeds more than one ("everywhere: all 4 topics"). No confirm: each is

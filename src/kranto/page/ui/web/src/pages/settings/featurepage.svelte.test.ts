@@ -1,4 +1,4 @@
-// Settings › <Feature> (D-1 to D-3): every feature's and cub's own page, generated
+// Settings › <Feature>: every feature's and cub's own page, generated
 // from its manifest. Moved here from the cub page's Settings and About sheets (cub.svelte.test.ts),
 // every claim kept: by hand shown not edited, sensitive behind the house confirm, the topic picker
 // for a key of type topics, the manifest in words, a kind live only after the house confirm, an
@@ -123,7 +123,7 @@ describe("Settings › <Feature>, generated from its manifest", () => {
     done();
   });
 
-  it("says the other line's default when a setting's stable default keeps the old behaviour (REL)", async () => {
+  it("says the other line's default when a setting's stable default keeps the old behaviour", async () => {
     stub();
     hosted();
     const row = key("digest.layout", { type: "enum", value: null, default: "classic", choices: ["new", "classic"], words: "the layout", line: "stable", default_other: "new" });
@@ -147,7 +147,7 @@ describe("Settings › <Feature>, generated from its manifest", () => {
     answering({ [FEATURES_API]: FEATURES(digest()), [SHELL_API]: shell });
     const { target, done } = await draw(FeaturePane, where("settings/digest", "eabout"));
     await settle();
-    expect(target.querySelector("#fs-perms")?.textContent).toContain("Asks youbook place"); // the kind in words, not its id (QA B10)
+    expect(target.querySelector("#fs-perms")?.textContent).toContain("Asks youbook place"); // the kind in words, not its id
     expect(target.textContent).toContain("It cannot pay, post, trade or send by itself");
     done();
   });

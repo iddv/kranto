@@ -364,7 +364,7 @@ def test_a_chrome_body_is_blanked_and_the_judge_is_told(tmp_path, store, embedde
 
 def test_ingest_records_no_strike_candidate_and_reads_no_watch(tmp_path, store, embedder,
                                                                make_client):
-    """Watches are retired (WT): an ingest that keeps an item and its children writes no
+    """Watches are retired: an ingest that keeps an item and its children writes no
     candidate, and a watch row left from before is neither read nor matched."""
     hn(store, [hn_item()])
     query = "community battery round-trip efficiency log analyser"

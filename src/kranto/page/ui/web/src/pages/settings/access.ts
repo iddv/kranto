@@ -1,4 +1,4 @@
-// Settings › Privacy & access (OI): who may act on Kranto. Every write needs a token: this page's (its
+// Settings › Privacy & access: who may act on Kranto. Every write needs a token: this page's (its
 // session), kranto mcp's, the command line's, and named agents, each with its own. Values never
 // reach the page: each lives in its own file at mode 600, which the agent reads. From the server's
 // /api/tokens; `kranto token` does the same.

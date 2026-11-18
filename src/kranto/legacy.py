@@ -22,7 +22,7 @@ _OLD = "be" + "ars"   # written in two parts so a search for the old name finds 
 COMMAND = _OLD                                         # the alias command, kept until 1.0
 COMMANDS = (_OLD, "afk", "brb")                        # executables an old tool put on PATH
 TOOL = _OLD                                            # the uv tool an old install lives in
-# A release in the old shape (K0: the one release that crosses an old install over): three
+# A release in the old shape (the one release that crosses an old install over): three
 # wheels, the real code under its old distribution name, an empty one the old helper still
 # asks for, and the meta-package that carries the commands.
 COMPAT_META = _OLD

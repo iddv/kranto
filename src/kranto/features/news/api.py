@@ -101,7 +101,7 @@ def briefs_list(ctx: Any, params: dict[str, Any]) -> dict[str, Any]:
     if where:
         sql += " WHERE " + " AND ".join(where)
     rows = ctx.db.query(sql + " ORDER BY id DESC LIMIT ?", (*args, limit))
-    # one brief that cannot be read is listed as such, never the whole list (RCA A3)
+    # one brief that cannot be read is listed as such, never the whole list
     return {"briefs": rowsafe.each(rows, _brief, "brief", ident=lambda r: r["id"],
                                    keep=lambda r: {"topic_id": r["topic_id"],
                                                    "created_at": r["created_at"]})}

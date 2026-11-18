@@ -31,10 +31,10 @@
   const FIRST = 8;
   const opened = new SvelteSet<string>();
   const host = $derived(!!ui.facts?.header.host);
-  // Sources and Add source are Watch's pages with the doors on (QA B16; SRC D7: the title's
+  // Sources and Add source are Watch's pages with the doors on (the title's
   // crumb says Watch), Settings' without them
   const addCrumb = $derived(shellDoors(host) ? "Watch" : "Settings");
-  // every source is All topics' Sources under the doors (WT: a topic's own are its page)
+  // every source is All topics' Sources under the doors (a topic's own are its page)
   const allTitle = $derived(shellDoors(host) ? "All topics › Sources" : "Sources");
   const allCrumb = $derived(shellDoors(host) ? null : addCrumb);
   const r = $derived(listRoute(view.w));
@@ -122,7 +122,7 @@
       {/if}
     {/each}
     {#if !xs.length}<p class="empty">{d.sources.length ? "No sources match." : "No sources yet."}</p>{/if}
-    <!-- the accounts sources are read with are Settings › Accounts' (the owner's O1, 2026-10-22);
+    <!-- the accounts sources are read with are Settings › Accounts' (since 2026-10-22);
          Add source says "Connect it first" for a kind that needs one -->
     <p class="topic-only foot">The logins some sources are read with are under <a href="#/settings/watching">Settings › Watching</a>.</p>
   </List>

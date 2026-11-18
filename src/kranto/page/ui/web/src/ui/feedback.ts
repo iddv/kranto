@@ -1,4 +1,4 @@
-// Feedback (FB): the issue the sheet writes on Kranto's release repository, as the person who
+// Feedback: the issue the sheet writes on Kranto's release repository, as the person who
 // sends it. This file is the sheet's logic, with no page in it: the details it adds (each shown
 // before anything is sent), the scrub over them, the issue's title and body, GitHub's prefilled
 // new-issue link kept under the length GitHub takes, the draft this browser keeps, and the last
@@ -15,7 +15,7 @@
 import { NODES } from "../lib/router";
 
 export const ISSUE_API = "api/feedback/issue";
-/** an error's report (the server's GET /api/errors/<id>, RCA B3) */
+/** an error's report (the server's GET /api/errors/<id>) */
 export const REPORT_API = (id: string): string => `/api/errors/${encodeURIComponent(id)}`;
 export interface ErrorReport { id: string; title: string; body: string; url: string }
 export const MAX_URL = 6000;
@@ -227,7 +227,7 @@ export function titleOf(kind: Kind, text: string, m: Machine): string {
   const cut = first.length > 80 ? first.slice(0, 79).replace(/\s+\S*$/, "") + "…" : first;
   return `${kindWord(kind)}: ${cut || "(no words)"}`;
 }
-/** the issue; report: an error's report Kranto kept (Send this error, RCA B3: the server wrote it
+/** the issue; report: an error's report Kranto kept (Send this error: the server wrote it
  * from Kranto's own words and code lines; scrubbed here once more), sent whether or not the details
  * are */
 export function issue(d: Draft, f: Facts, m: Machine, n: Names, drop = 0, report: string | null = null): Issue {

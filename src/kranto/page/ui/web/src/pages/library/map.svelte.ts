@@ -1,4 +1,4 @@
-// The Library's Map and Clusters (WORKSPACE.md 2.6, 4, 5; W3): the server's /api/map (the latest
+// The Library's Map and Clusters: the server's /api/map (the latest
 // snapshot's 2-d projection, its clusters and its points as columns), /api/clusters (the clusters
 // as themes, with their movement) and /api/archive/themes (the Parallax archive's own themes).
 // The shapes are the server's, generated from its web/types.py (api/afk.gen.ts).
@@ -17,7 +17,7 @@ export const ARCHIVE_THEMES = "/api/archive/themes";
 export const CLUSTERS_API = "/api/clusters";
 /** the map, asked for only once there is one: /api/clusters answers 200 before the first map
  * (no snapshot, with the progress), so a fresh install's page never asks /api/map for the 404
- * that means "not yet", an error in the console (QA B20). Before the first map: an error read
+ * that means "not yet", an error in the console. Before the first map: an error read
  * ("no map yet"), as the 404 was; a server whose clusters cannot be read: /api/map as before */
 export function mapRead(): Read<Map> {
   const cl = read<{ snapshot: unknown }>(CLUSTERS_API, 60000);
@@ -114,7 +114,7 @@ export function mapHighlight(v: MapView, sel: number | null, near: { id: number 
   add("circle", { cx: me[0], cy: me[1], r: 17, class: "sel" });
 }
 
-/** an observation's theme, from the map when it has been read (WORKSPACE.md 6.4); else null */
+/** an observation's theme, from the map when it has been read; else null */
 export function mapTheme(oid: number | string): { cluster: number; label: string } | null {
   const m = peek<Map>(MAP_API)?.data;
   if (!m || !m.points) return null;

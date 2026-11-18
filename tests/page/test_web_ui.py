@@ -66,7 +66,7 @@ def test_a_build_is_linked_at_this_versions_address(app, tmp_path, monkeypatch):
 
 
 def test_every_page_a_person_reads_draws_in_the_chosen_appearance(app, tmp_path, monkeypatch):
-    """QA B18 (the owner's B2, appearance resets): a page served without theme.js drew in the
+    """Appearance reset: a page served without theme.js drew in the
     OS's scheme whatever Settings › Appearance said. Every HTML page Kranto serves to read loads
     theme.js in its head."""
     monkeypatch.setattr(static_routes, "APP_DIR", fake_build(tmp_path / "app"))

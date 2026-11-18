@@ -1,6 +1,6 @@
 <script lang="ts">
   // Settings › Overview, the pane: find a setting by its name (or its key), where things are
-  // kept (the address; kranto paths has the rest), and Feedback (FB).
+  // kept (the address; kranto paths has the rest), and Feedback.
   import Detail from "../../ui/Detail.svelte";
   import Glyph from "../../ui/Glyph.svelte";
   import Kv from "../../ui/Kv.svelte";

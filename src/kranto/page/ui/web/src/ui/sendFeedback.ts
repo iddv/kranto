@@ -1,4 +1,4 @@
-// Feedback's doors (FB): the header's Feedback, ⌘K's Send feedback, Settings › Overview, the help
+// Feedback's doors: the header's Feedback, ⌘K's Send feedback, Settings › Overview, the help
 // page (#/?feedback=1) and every red line's Tell us open the one sheet (Feedback.svelte) in the
 // dialog. What the page knows goes in here: the names the details must not carry, the layout,
 // the address the sheet was opened on (before the dialog), and the update state the server keeps.
@@ -32,7 +32,7 @@ export function factsNow(hash: string = location.hash): Facts {
 }
 
 /** the sheet; error: a red line's words, said in the draft (Tell us); report: the id of an error
- * Kranto kept (RCA B3), whose report goes with it, shown in the sheet first */
+ * Kranto kept, whose report goes with it, shown in the sheet first */
 let REPORT: string | null = null; // the error the open sheet sends: kept through its confirm's Back
 export function openFeedback(o: { error?: string; report?: string | null } = {}): void {
   REPORT = o.report || null;

@@ -1,4 +1,4 @@
-"""Who is calling (OI): the token on a request decides who acts, never its body.
+"""Who is calling: the token on a request decides who acts, never its body.
 
 ``GuardMiddleware`` asks ``Auth.check`` about every state-changing request after the Host and
 Origin checks. The caller is the token it carries (``tokens.Store``):

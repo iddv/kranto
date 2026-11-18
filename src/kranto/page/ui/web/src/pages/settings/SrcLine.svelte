@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A source as one row (WORKSPACE.md 1.5;): its state, the label and one fact
+  // A source as one row: its state, the label and one fact
   // ("Kranto recommends removing it" when your downvotes say so, the source rule; else why the
   // scout proposed it; else the topics it feeds, on a topic's rows the others), the last
   // fetch; Approve on a proposal whose topic is known and a quiet ✕ to dismiss any proposal (D-4;

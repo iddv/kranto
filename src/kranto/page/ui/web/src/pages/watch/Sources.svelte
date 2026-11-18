@@ -1,7 +1,7 @@
 <script lang="ts">
   // Watch › Sources of All topics (#/watch/sources, what Settings › Sources was:
   // data, not a setting): every source by its state, Add source, the accounts they are read with;
-  // a source opens in the sheet. All topics is a choice (WT): a topic's own sources are its page,
+  // a source opens in the sheet. All topics is a choice: a topic's own sources are its page,
   // #/watch/topic/<id>/sources, where the topic switcher and these chips lead.
   import type { View } from "../../lib/pages.svelte";
   import { href } from "../../lib/router";

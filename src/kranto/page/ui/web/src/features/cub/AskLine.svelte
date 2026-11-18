@@ -1,5 +1,5 @@
 <script lang="ts">
-  // What a cub asks you, one line each (SEND): the draft's title, where it stands ("ready", "needs a
+  // What a cub asks you, one line each: the draft's title, where it stands ("ready", "needs a
   // newsletter account", "practice: nothing is sent") and the action's own button, which opens its
   // dialog (AskDialog; a draft offered again is asked for again by that click). The top of the
   // cub's page, and Cubs › Approvals with every cub's (cub: null). The server's GET /api/asks says

@@ -66,7 +66,7 @@ def test_pressing_update_once_leaves_nothing_to_press_however_many_jobs_staged_i
 
 def test_an_update_an_older_kranto_applied_still_says_its_version(
         home, tmp_path, monkeypatch):  # noqa: F811
-    """Live's newsletter was updated by 0.5.15, whose installed step kept no version: its page
+    """An install's newsletter was updated by 0.5.15, whose installed step kept no version: its page
     said nothing. The registry row its pin wrote says it."""
     src = make_cub(tmp_path / "hello")
     added(home, src)
@@ -228,7 +228,7 @@ def cli_args(*argv: str):
 
 
 def test_a_gone_source_is_said_once_with_the_command_that_points_it_elsewhere(home, tmp_path):  # noqa: F811
-    """live's examplecom recorded a folder that no longer exists; its daily look said
+    """A real install's examplecom recorded a folder that no longer exists; its daily look said
     ok and it would never update, and nothing said so. Now its page, ``kranto cub inspect`` and
     Needs you (once) say it, with ``kranto cub source`` to point it elsewhere."""
     from io import StringIO

@@ -34,8 +34,8 @@ def test_it_plays_every_wave_2_package_and_a_failure_fails():
     src = SCRIPT.read_text()
     for fn in ("prev_lines", "hour_lines", "post_lines", "shell_lines", "word_test", "counts"):
         assert callable(getattr(m, fn)), fn
-    for line in ("PREV-1", "PREV-4", "HOUR-1", "POST-1", "POST-2", "SHELL-1", "SHELL-3", "SHELL-5",
-                 "SHELL-6", "SHELL-7", "COUNT card"):
+    for line in ("PREVIEW-1", "PREVIEW-4", "START-1", "DRAFTS-1", "DRAFTS-2", "SHELL-1", "SHELL-3",
+                 "SHELL-5", "SHELL-6", "SHELL-7", "COUNT card"):
         assert f'"{line}' in src, line
     assert m.ok("X", "w", False, "s").state == "fail" and m.skip("X", "w", "why").state == "skip"
     assert "return 1 if n[\"fail\"] else 0" in src

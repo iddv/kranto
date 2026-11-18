@@ -40,7 +40,7 @@ describe("Watch › Sources by topic", () => {
     ui.facts = { header: { host: { paused: false } } } as unknown as Facts;
     answering({ [TOPICS_API]: MINE, [TOPICS_API + "?kind=project"]: PROJ, [topicApi(13)]: { id: 13, name: "Robotics", sources: 19, source_rows: [], items_per_day: 0, kept_per_day: 0, tokens_month: null, prefilter: 0.3, status: "active" },
       "/api/sources": { sources: [], topics: [], reddit: { watched: 0, note: "" }, connections_need_you: 0, every_hours: 6, default_retention_days: 90 } });
-    // on All topics' Sources (WT: a choice); a topic's chip opens that topic's Sources page
+    // on All topics' Sources (a choice); a topic's chip opens that topic's Sources page
     const { target, done } = await draw(Sources, at("watch/sources"));
     const chips = [...target.querySelectorAll("#src-chips .chip")] as HTMLElement[];
     expect(chips.map((c) => c.textContent)).toEqual(["All 130", "Robotics 19", "Local-first 6", "No topic 2"]);

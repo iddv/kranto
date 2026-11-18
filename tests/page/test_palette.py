@@ -1,4 +1,4 @@
-"""Kranto palette (UI-v4.md section 1), read from kranto.css itself: every foreground and
+"""Kranto palette, read from kranto.css itself: every foreground and
 background pair the UI uses meets its WCAG 2.1 minimum in both themes (4.5:1 for text, 3:1
 for icons, focus rings and meter fills), the two dark blocks agree, and the brand assets the
 shell links to are served. U/palette.py, as a test."""
@@ -43,7 +43,7 @@ def ratio(a: str, b: str) -> float:
 TEXT, NONTEXT = 4.5, 3.0
 SURFACES = ("bg", "box", "subtle", "head")     # the page, a box, hover, a box head and the header
 PAIRS = [(fg, bg, TEXT) for fg in ("text", "muted", "ink3", "link", "blue", "violet", "green", "amber", "red")
-         for bg in SURFACES]                     # ink3: the workspace's mono meta (W1)
+         for bg in SURFACES]                     # ink3: the workspace's mono meta
 PAIRS += [
     ("text", "inset", TEXT), ("muted", "inset", TEXT), ("text", "counter", TEXT), ("text", "btn", TEXT),
     ("text", "blue-wash", TEXT), ("text", "violet-wash", TEXT),       # the current nav entry, a chip

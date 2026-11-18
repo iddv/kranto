@@ -1,4 +1,4 @@
-"""Settings › Watching and Welcome open without waiting on ``claude`` or ``gh`` (SL).
+"""Settings › Watching and Welcome open without waiting on ``claude`` or ``gh``.
 
 ``/api/setup`` shows the two logins (``claude auth status``, ``gh auth status``) and
 ``/api/setup/provider`` Claude Code's version and login: about half a second of processes. The

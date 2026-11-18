@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The status bar (WORKSPACE.md 1.7;): the service in one word (Paused,
+  // The status bar: the service in one word (Paused,
   // Degraded or Healthy), the version (pressable: Check for updates) and ? keys, with the keys of
   // a chord or a split while one is held. The tokens used today are Settings › Spend's (D-6); the
   // last ingest and the library's size are Activity's and Settings › System's. No links to the old

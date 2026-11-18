@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The queue's current item, in the pane (WORKSPACE.md 2.10): the kind line, the title (enter
+  // The queue's current item, in the pane: the kind line, the title (enter
   // opens the item's own page), its line and facts, the grade bar (a grade moves on by itself),
   // Skip. The slot goes into the grade's context only.
   import Glyph from "../../ui/Glyph.svelte";

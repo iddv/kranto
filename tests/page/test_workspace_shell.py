@@ -1,4 +1,4 @@
-"""The workspace shell (WORKSPACE.md 1, 3, 4 and 5; fleet2 track W1): the frame's five regions,
+"""The workspace shell: the frame's five regions,
 the route table (NODES) covering every route the app had, the keys it adds, the status bar
 that carries Today's service line, Open in Claude Code's place, and the breakpoints. Read here: the
 routes (lib/nodes.json) and the key map (lib/keys.json) as the JSON they are, the frame
@@ -38,13 +38,13 @@ def match(route: str):
     return None
 
 
-# every route of WORKSPACE.md 5's table that the cut kept: (the route, its node, the object in the pane)
+# every route of the workspace's table that the cut kept: (the route, its node, the object in the pane)
 ROUTES = [
     ("review", "review", None), ("needs", "needs", None), ("post", "post", None),
     ("topics", "topics", None), ("topics/new", "topics/new", None), ("topics/2", "topics/2", None),
     *[(f"topics/2/{p}", f"topics/2/{p}", None) for p in ("evidence", "themes", "ideas", "sources", "map")],
-    ("topics/2/watches", "topics/2", None),   # watches retired (WT): the topic itself
-    # Watch is topic-first (WT): a topic's page and its Sources, Evidence and Map
+    ("topics/2/watches", "topics/2", None),   # watches retired: the topic itself
+    # Watch is topic-first: a topic's page and its Sources, Evidence and Map
     ("watch/topic/2", "topics/2", None), *[(f"watch/topic/2/{p}", f"topics/2/{p}", None) for p in ("sources", "evidence", "map")],
     ("ideas", "ideas", None), ("ideas/i0a1b2c3d", "ideas", "idea"), ("ideas/card:6", "ideas", "idea"),
     ("library", "library", None), ("library/o/665", "library", "observation"), ("library/map", "library/map", None),
@@ -73,7 +73,7 @@ def test_the_welcome_steps_and_the_splash_are_the_stage(route):
 
 
 @pytest.mark.parametrize("old,new", [("", "home"), ("today", "needs"), ("overview", "home"),
-                                     # watches retired (WT): their old pages land on Watch
+                                     # watches retired: their old pages land on Watch
                                      ("settings/watches", "watch"), ("settings/watches/new", "watch"),
                                      ("library/watches", "watch"), ("library/watches/new", "watch"), ("watch/watches", "watch"),
                                      # the chat went

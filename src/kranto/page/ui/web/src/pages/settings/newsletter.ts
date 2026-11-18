@@ -1,4 +1,4 @@
-// Settings › Accounts › Newsletter (MAIL): the server's /api/newsletter, generated from its
+// Settings › Accounts › Newsletter: the server's /api/newsletter, generated from its
 // web/types.py (api/afk.gen.ts). The platform's name comes from the server; nothing here names one.
 import type { Newsletter } from "../../api/afk.gen";
 import type { St } from "../../ui/settings";

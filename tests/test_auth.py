@@ -1,4 +1,4 @@
-"""Who is calling (OI): every write needs a kranto token, and the token says who acts.
+"""Who is calling: every write needs a kranto token, and the token says who acts.
 
 The guard refuses a write without a current token (401), lets an mcp or agent token run only
 actions (``POST /brb/api/act``), and hands the caller to the mounted the page, which acts as
@@ -147,7 +147,7 @@ def test_a_spoofed_ui_origin_acts_as_its_token(rt, fake_api, caplog):
                 "subject": {"kind": "build", "id": "beliefline"}}
         r = web.post("/brb/api/act", json=body, headers=bearer("agent:RC"))
         assert r.status_code == 200 and r.json() == {"by": "agent:RC"}
-        # an assistant never reaches api/act around the ladder, verbs or not (CUT)
+        # an assistant never reaches api/act around the ladder, verbs or not
         r = web.post("/brb/api/act", json=body, headers=bearer("mcp"))
         assert r.status_code == 403 and "/api/verbs/<kind>" in r.json()["error"]
     who = [c[4] for c in fake_api.calls if c[0] == "POST"]
@@ -276,7 +276,7 @@ def test_require_token_off_keeps_the_old_way_and_doctor_warns(tmp_path, store, e
 def test_the_tokens_api(rt, fake_api):
     app = create_app(rt, port=8765)
     with web_client(app, BASE) as web:
-        r = web.post("/api/tokens", json={"name": "RC", "note": "fleet track RC"})
+        r = web.post("/api/tokens", json={"name": "RC", "note": "a release check"})
         assert r.status_code == 200 and r.json()["name"] == "agent:RC"
         rows = web.get("/api/tokens").json()["tokens"]
         assert [t["name"] for t in rows] == ["cli", "console", "mcp", "ui", "agent:RC"]
@@ -287,7 +287,7 @@ def test_the_tokens_api(rt, fake_api):
             .status_code == 200
         assert tokens.Store().identify(tokens.Store().value("agent:RC"))["actions"] == \
             ["topic.add"]
-        # a build loop's action is no verb any more (CUT): refused when asked for anew
+        # a build loop's action is no verb any more: refused when asked for anew
         r = web.post("/api/tokens/agent%3ARC/actions", json={"actions": ["retry"]})
         assert r.status_code == 400 and "no such verb: retry" in r.json()["error"]
         assert "topic.add" in web.get("/api/tokens").json()["default_actions"]
@@ -328,7 +328,7 @@ def test_a_token_file_naming_old_build_actions_still_signs_in(rt, fake_api):
 
 def test_the_cli(tmp_path, capsys):
     host = launcher.Host(home=tmp_path, run=lambda *a, **k: None)
-    assert launcher.main(["token", "add", "RC", "--note", "fleet"], host) == 0
+    assert launcher.main(["token", "add", "RC", "--note", "a release check"], host) == 0
     out = capsys.readouterr().out
     value = tokens.Store().value("agent:RC")
     assert "added agent:RC" in out and "Authorization: Bearer $(cat" in out and value not in out

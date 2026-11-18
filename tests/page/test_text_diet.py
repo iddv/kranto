@@ -86,7 +86,7 @@ def test_the_deleted_sentences_are_gone():
 
 def test_no_hint_paragraph_outside_the_welcome_steps():
     # a field's hint is a ? beside its label (flabel); the Building step that kept its words left
-    # with the factory (CUT)
+    # with the factory
     assert 'h("p", { class: "hint"' not in JS
     assert 'class: "hint", text' not in JS
 

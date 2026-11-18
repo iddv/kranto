@@ -49,7 +49,7 @@ def empty() -> httpx.Response:
 
 
 def refused() -> httpx.Response:
-    """Live's reply at 12:42, as OpenRouter sent it (the words shortened)."""
+    """A real install's reply at 12:42, as OpenRouter sent it (the words shortened)."""
     return httpx.Response(200, json={
         "id": "gen-1", "object": "chat.completion", "model": "anthropic/claude-haiku-5.5",
         "provider": "Claude Platform on AWS", "choices": [{
@@ -153,7 +153,7 @@ def judge_says(make_client):
 
 def test_one_empty_judge_reply_degrades_the_run_never_fails_it(tick_cfg, store, judge_says,
                                                                embedder):
-    """Live's 12:36 run, replayed: one judge call empty among good ones."""
+    """A real install's 12:36 run, replayed: one judge call empty among good ones."""
     add(store, "a", items(3))
     client = judge_says(lambda text: empty() if "battery 1" in text else chat_response(CONTRIB),
                         max_retries=2)

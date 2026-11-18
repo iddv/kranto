@@ -1,7 +1,7 @@
 """The reference cubs: both install from Kranto's own folder on a scratch
 home, run their jobs in the sandbox against a seeded library, and file tickets whose press is
-dry; ``kranto cub eval`` runs their own tests and the standard fixtures; S16 (the planted
-instruction) on the real host, with a model that echoes what it reads.
+dry; ``kranto cub eval`` runs their own tests and the standard fixtures; the planted
+instruction on the real host, with a model that echoes what it reads.
 
 No connection exists here: the newsletter's draft is in Kranto, the toot's limit is 500, and
 nothing leaves the machine (the model is a fake transport)."""
@@ -68,7 +68,7 @@ def nominee(rt, title: str = "Battery swap ledger",  # noqa: F811
     card = {**old_card(rt.store, oids[:1]), "title": title, "one_liner": one_liner,
             "insight": note or one_liner}
     cid = add_card(rt.store, title, card, score=0.9)
-    # the weekly editor's pick is a row the build loop wrote before it left (CUT): written as an
+    # the weekly editor's pick is a row the build loop wrote before it left: written as an
     # old row is stored, since outcomes.add takes no loop kind any more; readers still read it
     rt.store.insert("outcomes", {"idea_id": cid, "kind": "editor", "value": "nominee",
                                  "detail": json.dumps({"week": "2026-W43"}), "source": "api",

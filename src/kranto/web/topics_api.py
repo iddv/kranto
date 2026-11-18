@@ -1,4 +1,4 @@
-"""Topics as JSON, for Kranto UI's Topics tab (PLAN.md sections 2.2 and 2.3).
+"""Topics as JSON, for Kranto UI's Topics tab.
 
 | Method and path                | Does                                                      |
 |--------------------------------|-----------------------------------------------------------|
@@ -132,7 +132,7 @@ class TopicsAPI:
                 continue
             v = meta.get(row["id"]) or Validation.empty()
             if rowsafe.is_unreadable(row):
-                # listed where it belongs, as "Couldn't read this source" (RCA A3)
+                # listed where it belongs, as "Couldn't read this source"
                 if topic_id is None or topic_id in links.get(row["id"], []) or \
                         v.topic_id == topic_id:
                     out.append(row)
@@ -233,7 +233,7 @@ class TopicsAPI:
         def keep(r: tuple[library.Topic, str, str]) -> dict[str, Any]:
             return {"name": r[0].name, "kind": r[0].kind, "status": r[1]}
 
-        # one topic or source that cannot be read is listed as such (RCA A3)
+        # one topic or source that cannot be read is listed as such
         topics = rowsafe.each([r for r in rows if r[1] != library.ARCHIVED], facts, "topic",
                               ident=lambda r: r[0].id, keep=keep)
         archived = rowsafe.each([r for r in rows if r[1] == library.ARCHIVED], facts, "topic",

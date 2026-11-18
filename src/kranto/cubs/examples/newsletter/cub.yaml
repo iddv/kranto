@@ -1,11 +1,11 @@
 # The owner's first cub: news → a newsletter issue, sent through the
 # newsletter platform the owner connected, only after the owner's approval, in practice first.
-# Installed from a local folder, so trust: owner (set by Kranto). 1.1.0 (MAIL): the neutral kind
+# Installed from a local folder, so trust: owner (set by Kranto). 1.1.0: the neutral kind
 # send.newsletter and broker service newsletter; it names no platform. 1.2.0: its topics
-# are picked on its Settings page (the core's topic picker), never typed as ids. 1.3.0 (STD): its
+# are picked on its Settings page (the core's topic picker), never typed as ids. 1.3.0: its
 # page draws like Kranto's own: Compose its one primary, what its list says when empty, its groups'
 # tones, an issue opening as a page of its text, its settings in two groups. 1.3.1: its words name
-# a verb with no "…" (the owner's word). 1.4.0 (SEND): an issue whose approval an earlier
+# a verb with no "…" (the owner's word). 1.4.0: an issue whose approval an earlier
 # release's kind answered (expired, practiced) leaves Waits for you; a practiced one is in its
 # own group, never with the sent ones. 1.4.1 (Kranto 0.6): an issue waits until you answer it; a newer
 # issue replaces it (it moves to Earlier drafts, where it can still be read).

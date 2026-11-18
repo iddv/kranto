@@ -114,7 +114,7 @@ register("needs", {
 // Watch (with the doors on): Topics as the digest (a topic's sheet, sel=t<id>;
 // its page is watch/topic/<id>, the topic's node, with its pane drawn in the column), Sources (what
 // Settings › Sources was), Evidence (Observations, Rollups and every topic's Evidence), Map (the
-// map over the themes: Map and Clusters), all topics at once: a topic's own are its pages (WT)
+// map over the themes: Map and Clusters), all topics at once: a topic's own are its pages
 register("watch", { list: lazy(() => import("./watch/Topics.svelte")), pane: lazy(() => import("./topics/TopicPane.svelte")) });
 register("watch/sources", { list: lazy(() => import("./watch/Sources.svelte")), pane: lazy(() => import("./settings/SourcesPagePane.svelte")) });
 register("watch/evidence", { list: lazy(() => import("./watch/Evidence.svelte")), pane: lazy(() => import("./watch/EvidencePane.svelte")) });

@@ -15,7 +15,7 @@ wakes every stream through one ``Condition``.
     : ping                                                     every PING_S, to keep it open
 
 At most ``MAX_STREAMS`` at once per process; one more is answered ``event: busy`` and closed,
-and the page polls (it was a 503, an error in the console: QA B20). A
+and the page polls (it was a 503, an error in the console). A
 stream nobody has read for ``STALE_S`` (its client went away while the server was blocked)
 gives its place up. The watcher stops when the last stream ends.
 """
@@ -46,7 +46,7 @@ RETRY_BUSY_MS = 30000
 def busy_events(why: str) -> Iterator[bytes]:
     """What a stream refused for want of a place answers (200, then closed): try again in 30 s,
     and that it is busy. A 503 here was an error in the page's console on every page past the
-    hub's places (QA B20); the page polls meanwhile and its status bar says live updates are
+    hub's places; the page polls meanwhile and its status bar says live updates are
     paused."""
     yield f"retry: {RETRY_BUSY_MS}\n\n".encode()
     yield _event("busy", {"why": why, "retry_ms": RETRY_BUSY_MS})

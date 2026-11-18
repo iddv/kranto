@@ -25,7 +25,7 @@ def test_every_entry_has_an_icon_and_its_words_as_a_label():
     icon = re.search(r"const ICONS: Record<string, string> = \{(.*?)\};", n, re.S).group(1)
     for to, name in (("needs", "today"), ("review", "check"), ("library", "book"), ("ideas", "open"), ("settings", "gear")):
         assert f'{to}: "{name}"' in icon, to
-    assert "builds:" not in icon and "today:" not in icon      # Builds left; Today is Needs you (CUT)
+    assert "builds:" not in icon and "today:" not in icon      # Builds left; Today is Needs you
     for name in ("today", "book", "gear"):
         assert re.search(rf"\n  {name}: \[\[", JS), name
 

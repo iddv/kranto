@@ -1,4 +1,4 @@
-"""The newsletter platform over HTTP (MAIL): which platform the newsletter goes out through,
+"""The newsletter platform over HTTP: which platform the newsletter goes out through,
 and whether it is ready. Connecting one is the Connections flow (``POST
 /api/connections/<platform>/credentials``, Save and test); this is what Settings › Accounts ›
 Newsletter reads and presses around it.
