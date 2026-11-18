@@ -7,7 +7,15 @@ requests they carry.
 
 ## Unreleased
 
-Nothing yet.
+### Fixed
+
+- An install that crossed over from before the rename keeps its connected accounts: Kranto
+  reads the secrets file the old version wrote (0.7.0.dev1 and dev2 said "cannot be decrypted
+  here") and rewrites it in its own form at the next change; `kranto doctor` says so.
+- The console's "Kranto's own Claude config" choice, saved before the rename, is read as that
+  again (it fell back to your own config).
+- The daily job that reads back the numbers of sent posts now records its run, so it runs once a
+  day instead of once a minute.
 
 ## 0.7.0 — 2026-11-16
 

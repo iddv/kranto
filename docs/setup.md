@@ -457,8 +457,15 @@ crosses in two steps, each with the way back:
 2. the next release, one wheel: `kranto update --yes`; back: `kranto update --rollback --yes`.
 
 Its settings must name this repository first (`update.repo: iddv/kranto` in its settings file),
-or it never sees a Kranto release. Both commands, and both the old and the new names of the
+or it never sees a Kranto release; in the same edit set `update.auto: off`, or its own nightly
+check would try the one-wheel release, which its update helper cannot install, by itself in its
+quiet window (it can go back on once step 2 is done). Both commands, and both the old and the new names of the
 environment variables, keep working after the crossing.
+
+Connected accounts cross too: from 0.7.0.dev3 Kranto reads the secrets file the old version
+wrote, and rewrites it in its own form at the next change (0.7.0.dev1 and dev2 cannot read it and
+leave it untouched: update on, and don't disconnect or reconnect the accounts meanwhile; once
+rewritten, the version from before the rename cannot read it after a rollback to it).
 
 ## 12. Remove Kranto
 

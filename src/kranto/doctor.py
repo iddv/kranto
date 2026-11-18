@@ -235,9 +235,11 @@ def _connections(cfg: Config, store: Store,
                                               "used" if accounts else ""))]
         out = []
         problems = conns.vault.problems()
+        old = (" (written before the rename; Kranto rewrites it at the next change)"
+               if conns.vault.old_labels else "")
         out.append(Check(FAIL if problems else OK, "secrets",
                          "; ".join(problems) if problems else
-                         f"{conns.vault.directory}: 0700, files 0600, readable here"
+                         f"{conns.vault.directory}: 0700, files 0600, readable here{old}"
                          if conns.vault.directory.exists() else "no connected accounts yet"))
         needing = [a for a in accounts if a["state"] == "needs_login"]
         if needing:
