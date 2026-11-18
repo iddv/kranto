@@ -660,7 +660,7 @@ def test_doctor_is_ok_with_a_vault_written_before_the_rename(rig, machine_id):
     assert "readable here" in checks["secrets"].detail
     assert "before the rename" in checks["secrets"].detail
     assert checks["connections"].status == doctor.OK
-    assert "octo-owner" in checks["connections"].detail
+    assert "jo-example" in checks["connections"].detail
     [account] = rt.connections.accounts()
     assert account["state"] == "connected"
     assert rt.connections.test(account["id"])["ok"] is True
