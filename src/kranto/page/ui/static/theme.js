@@ -16,6 +16,10 @@
   try { vars = c ? JSON.parse(c).vars : null; } catch (e) { vars = null; }
   for (const k in vars || {}) if (/^--c-[a-z0-9-]+$/.test(k) && /^(#[0-9a-f]{6}|light|dark)$/.test(vars[k])) html.style.setProperty(k, vars[k]);
   if (LOOKS.includes(l) && (l !== "custom" || vars)) html.setAttribute("data-look", l);
+  /* a Mac (or an iPad/iPhone with a keyboard) says ⌘K where Linux and Windows say Ctrl+K: the help
+     page draws both and kranto.css shows the one that fits (html[data-mac]); the app has keyLabel */
+  const nav = navigator, plat = (nav.userAgentData && nav.userAgentData.platform) || nav.platform || nav.userAgent || "";
+  if (/mac|iphone|ipad|ipod/i.test(plat)) html.setAttribute("data-mac", "");
 
   /* kranto.layout: {nav, detail, icons}, per browser, nothing on the server. The navigator is
      168 to 400 px (56 as icons), the list at least 320, the detail at least 360 and at most 70% of

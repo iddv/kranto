@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { action, hint, keyName, KEYMAP, queueAction, type KeyState } from "./keys";
+import { action, hint, isMac, keyLabel, keyName, KEYMAP, queueAction, type KeyState } from "./keys";
 
 const press = (key: string, o: Partial<KeyboardEvent> = {}) =>
   keyName({ key, altKey: false, metaKey: false, ctrlKey: false, shiftKey: false, ...o });
@@ -75,5 +75,28 @@ describe("the keys sheet's words", () => {
   it("name today's places, never one retired with the doors (Needs you (Today), Evidence (the Library))", () => {
     const retired = /\bToday\b|\bLibrary\b|\bDesk\b|Home and feed|Settings › Publishing › Maintenance|\b[Bb]uilds?\b|Projects|Publish/;
     for (const k of KEYMAP) expect([k.keys, k.does]).not.toEqual([k.keys, expect.stringMatching(retired)]);
+  });
+});
+
+// A Linux-only audience saw ⌘K and ⌘J; the label fits the platform, the map's names stay.
+describe("a key as this platform names it", () => {
+  it("is Ctrl on Linux and Windows, ⌘ on a Mac, an iPad or an iPhone", () => {
+    expect(isMac({ platform: "Linux x86_64" })).toBe(false);
+    expect(isMac({ platform: "Win32" })).toBe(false);
+    expect(isMac({ userAgent: "Mozilla/5.0 (Linux; Android 14)" })).toBe(false);
+    expect(isMac({ platform: "MacIntel" })).toBe(true);
+    expect(isMac({ userAgentData: { platform: "macOS" } })).toBe(true);
+    expect(isMac({ platform: "iPad" })).toBe(true);
+    expect(isMac(undefined)).toBe(false);
+  });
+  it("shows ⌘ as Ctrl+ off a Mac and leaves every other key as it is", () => {
+    expect(keyLabel("⌘K", false)).toBe("Ctrl+K");
+    expect(keyLabel("⌘J", false)).toBe("Ctrl+J");
+    expect(keyLabel("⌘enter", false)).toBe("Ctrl+enter");
+    expect(keyLabel("⌘K", true)).toBe("⌘K");
+    expect(keyLabel("g h", false)).toBe("g h");
+  });
+  it("leaves no 'ctrl K too' in the sheet's words: the label says it", () => {
+    for (const m of KEYMAP) expect(m.does).not.toMatch(/ctrl [kj] too/i);
   });
 });

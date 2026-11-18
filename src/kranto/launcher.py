@@ -778,8 +778,10 @@ def cmd_up(args, host: Host) -> int:
 def cmd_down(args, host: Host) -> int:
     why_not = host.systemd()
     if why_not:
-        print(f"Kranto is not managed by systemd here ({why_not}); stop 'kranto serve' with "
-              "Ctrl-C")
+        # the person typed the installer's line or 'kranto up', never 'kranto serve'
+        print(f"Kranto is not managed by systemd here ({why_not}), so it runs in the "
+              "foreground: stop it with Ctrl-C in the terminal that started it (the installer "
+              "or 'kranto up')")
         return 1
     unit = host_unit(host)
     r = host.sh("systemctl", "--user", "stop", unit, timeout=120)
@@ -903,6 +905,25 @@ GITHUB_PAGES = ("Kranto's GitHub connection: revoke it at https://github.com/set
                 "https://github.com/settings/apps (the app's Advanced tab)")
 
 
+def github_was_connected(db: Path) -> bool:
+    """Whether the library at ``db`` ever connected GitHub (a ``connections`` row: rows are
+    never deleted, a disconnect is an event), read-only; True when it cannot be read, so
+    uninstall's GitHub lines are left out only when it is certain they do not apply."""
+    import sqlite3
+
+    if not db.is_file():
+        return False
+    try:
+        con = sqlite3.connect(f"{db.resolve().as_uri()}?mode=ro", uri=True, timeout=5)
+        try:
+            return con.execute("SELECT 1 FROM connections WHERE provider = 'github' "
+                               "LIMIT 1").fetchone() is not None
+        finally:
+            con.close()
+    except sqlite3.Error:
+        return True
+
+
 def remove_data(home: Path, host: Host) -> list[str]:
     """Delete the home, a loop home or task folder outside it, ``~/.config/kranto`` and the
     cache. Refuses anything that is not a Kranto home, or is the user's home itself."""
@@ -932,8 +953,8 @@ def cmd_uninstall(args, host: Host) -> int:
     """Undo what ``kranto up`` did to the machine: stop and disable the service, remove its
     unit and drop-ins, optionally turn lingering off. ``--program`` also removes the program
     (``uv tool uninstall kranto``); ``--data`` also deletes the data, after the home's path is
-    typed (or given as ``--confirm PATH``). Nothing on GitHub is deleted: the last lines say
-    which two pages to visit."""
+    typed (or given as ``--confirm PATH``). Nothing on GitHub is deleted: for a home that ever
+    connected GitHub the last lines say which two pages to visit."""
     home = kranto_home(args.home, host)
     if getattr(args, "data", False):
         typed = getattr(args, "confirm", None)
@@ -969,6 +990,8 @@ def cmd_uninstall(args, host: Host) -> int:
     except config_mod.ConfigError:
         cfg = None
     port = port_of(cfg) if cfg is not None else DEFAULT_PORT
+    # read before --data deletes the library: GitHub's pages only for a home that connected it
+    github = github_was_connected(cfg.db_path) if cfg is not None else True
     if why_not is None:
         print("Kranto is stopped and will not start again.")
     elif port_in_use(port) and serves_this_home(host, port, home):
@@ -995,7 +1018,7 @@ def cmd_uninstall(args, host: Host) -> int:
         print("Your data is kept: " + ", ".join(where) + ".")
     if not getattr(args, "program", False):
         print(f"Remove the program with: {uninstall} (or kranto uninstall --program)")
-    for line in GITHUB_PAGES:
+    for line in GITHUB_PAGES if github else ():
         print(f"On GitHub, if you want: {line}")
     return 0
 
@@ -1517,10 +1540,12 @@ def console_checks(cfg: config_mod.Config, svc: tuple[dict, str] | None = None) 
     try:
         from kranto.page.host_api import API_VERSION as version
     except ImportError as exc:
-        return [Check(FAIL, "kranto.page", f"not installed, and the console needs it: {exc} "
-                                        "(reinstall Kranto)")]
-    return [Check(OK if version >= REQUIRED_API else FAIL, "kranto.page",
-                  f"API version {version} (needs {REQUIRED_API})"),
+        return [Check(FAIL, "page", f"not installed, and the console needs it: {exc} "
+                                    "(reinstall Kranto)")]
+    # in words a person reads: whether the page and this server work together, not the numbers
+    return [Check(OK, "page", "installed, and it works with this server") if version >= REQUIRED_API
+            else Check(FAIL, "page", f"too old for this server (its version {version}, this server "
+                                     f"needs {REQUIRED_API} or later): reinstall Kranto"),
             term_check(paths.loop_home(cfg.brb.loop_home), svc, dotenv_tokens(cfg.root)),
             *console_line(paths.loop_home(cfg.brb.loop_home))]
 
@@ -2581,7 +2606,7 @@ def cmd_update(args, host: Host) -> int:
         else:
             w = wheels_in(releases_dir(home) / to, tag_version(to))
             print(
-                f"  stop 'kranto serve' (Ctrl-C)\n  uv tool install --force --python 3.12 "
+                f"  stop Kranto (Ctrl-C where it runs)\n  uv tool install --force --python 3.12 "
                 f"--with-executables-from the server,the page --with {w['kranto']} "
                 f"--with {w['kranto.page']} {w['kranto']}\n  kranto up --foreground"
             )

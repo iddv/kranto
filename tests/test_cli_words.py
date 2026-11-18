@@ -90,6 +90,17 @@ def test_no_command_help_describes_what_left():
     assert by["python -m kranto sources"].startswith("the sources Kranto reads")
 
 
+def test_watch_import_says_what_parallax_is():
+    """``kranto watch --help`` named "your Parallax dispatches" to a stranger who never heard of
+    it: the help says what it is, and that without such an archive the command is not needed."""
+    from kranto import cli
+
+    sub = next(a for a in cli.build_parser()._actions if isinstance(a, argparse._SubParsersAction))
+    said = next(a.help for a in sub._choices_actions if a.dest == "import")
+    assert "your Parallax" not in said
+    assert "Parallax, an earlier watcher" in said and "you never need this" in said
+
+
 def test_help_reads_the_homes_config_only_for_help():
     assert launcher._help_developer(["status"], None) is False        # a command parses everything
     assert launcher._help_developer(["cub", "--help"], None) is False  # a command's own help

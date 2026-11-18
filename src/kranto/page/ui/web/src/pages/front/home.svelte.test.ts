@@ -14,7 +14,7 @@ import { PREPARED_API } from "../../lib/prepared";
 import { IDEAS_API } from "../ideas/cards";
 import { UPD_API } from "../settings/updates";
 import { DISPATCH_API } from "./needs";
-import { agoWords, awaySpan, coreNeeds, cubRows, everythingLine, nextLine, nextWords, quietLine, sinceWords, uniqueRows, type HomeRow } from "./home";
+import { agoWords, awaySpan, coreNeeds, cubRows, everythingLine, nextLine, nextWords, quietLine, setupRow, sinceWords, uniqueRows, type HomeRow } from "./home";
 import { matchRoute, parse } from "../../lib/router";
 import { ACT_PATH } from "../../lib/activity";
 import { activityOf, incident } from "../../lib/activity.fixtures";
@@ -321,5 +321,46 @@ describe("the one thing's candidates", () => {
     expect(rows.length).toBeGreaterThan(4);
     for (const r of rows) expect([r.href, matchRoute(parse(r.href).path)]).not.toEqual([r.href, null]);
     for (const r of rows) expect([r.href, ["today", "library", "desk"].includes(parse(r.href).path[0] || "")]).toEqual([r.href, false]);
+  });
+});
+
+// An unfinished install: the home said "No brief yet today, and nothing waits for you." with no
+// way to Welcome; on a phone the status bar that says "Choose a topic to watch on Welcome" is not
+// drawn. The home's one thing leads there now, at the step still missing.
+describe("an unfinished install's home", () => {
+  it("names what is missing and where Set up goes", () => {
+    const none = setupRow({ key: { set: false }, topics: 0 }, "Not set up yet")!;
+    expect([none.title, none.meta, none.href, none.verb, none.want]).toEqual(
+      ["Kranto is not set up yet", "Still missing: a model (step 1), and a topic to watch (step 2).", "#/welcome", "Set up", "decision"]);
+    expect(nextLine(none)).toBe("to start");
+    expect(setupRow({ key: { set: true }, topics: 0 }, "Not set up yet")!.href).toBe("#/welcome/topics");
+    const unwatched = setupRow({ key: { set: true }, topics: 1 }, "Not set up yet")!;
+    expect([unwatched.meta, unwatched.href]).toEqual(["Still missing: a place to read for your topic (step 2).", "#/welcome/topics"]);
+    expect(setupRow({ key: { set: false }, topics: 2 }, "Reading for the first time")!.meta).toBe("Still missing: a model (step 1).");
+    // a finished one, or a server too old to say: nothing
+    expect(setupRow({ key: { set: true }, topics: 1 }, "Healthy")).toBeNull();
+    expect(setupRow({ key: { set: true }, topics: 1 }, "Reading for the first time")).toBeNull();
+    expect(setupRow(null, "Not set up yet")).toBeNull();
+  });
+
+  it("draws Set up as the one thing and says no brief comes until setup is finished", async () => {
+    const bare = HOME({ sentence: "No brief yet today, and nothing waits for you.", waiting: { drafts: 0, prepared: 0 }, briefs: { topics: [], more: 0 },
+      ideas: { rows: [], new: 0, since: null, total: 0 }, rows: { needs_you: {} } });
+    const { target, done } = await home(bare, { "/api/setup": { needs_setup: false, done: true, key: { set: false }, topics: 0 },
+      [PREPARED_API]: { prepared: [] }, [featurePath("newsletter", "rows")]: { rows: [] } });
+    expect(target.querySelector("#home-sentence")?.textContent).toBe("No brief yet, and none comes until setup is finished.");
+    expect(target.querySelector("#next h2")?.textContent).toBe("Kranto is not set up yet");
+    expect(target.querySelector("#next .nk")?.textContent).toBe("Next · to start");
+    const primary = target.querySelectorAll<HTMLAnchorElement>(".btn.primary");
+    expect(primary.length).toBe(1);
+    expect([primary[0]!.textContent, primary[0]!.getAttribute("href")]).toEqual(["Set up", "#/welcome"]);
+    done();
+  });
+
+  it("is not drawn on a home that is set up", async () => {
+    const { target, done } = await home(HOME(), { "/api/setup": { needs_setup: false, done: true, key: { set: true }, topics: 1 },
+      [PREPARED_API]: { prepared: [] }, [featurePath("newsletter", "rows")]: { rows: HOME().rows.needs_you.newsletter.data } });
+    expect(target.querySelector("#next h2")?.textContent).toBe("This week: Amazon grasps 66 objects");
+    done();
   });
 });

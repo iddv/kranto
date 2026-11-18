@@ -13,6 +13,9 @@ def _inline(text: str) -> str:
     out = html.escape(text, quote=True)
     out = re.sub(r"`([^`]+)`", r"<code>\1</code>", out)
     out = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", out)
+    # ⌘K is written once; the page shows Ctrl+K off a Mac (kranto.css, theme.js's data-mac)
+    out = re.sub(r"⌘(\w+)", r'<span class="modkey"><span class="k-pc">Ctrl+\1</span>'
+                            r'<span class="k-mac">⌘\1</span></span>', out)
     # a link: the web, a heading here, or a place in the app (./#/…: Send feedback's sheet)
     return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+|#[\w-]+|\./#/[\w/?=&;:.-]*)\)",
                   r'<a href="\2">\1</a>', out)

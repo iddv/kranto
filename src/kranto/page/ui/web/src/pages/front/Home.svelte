@@ -18,7 +18,7 @@
   import { features } from "../../features/index";
   import { arrangement } from "../../features/shell";
   import { needsCount, nextOf, reviewCount, todayRead, type Want, type Host } from "./needs";
-  import { activityRows, awaySpan, briefFact, cardHref, coreNeeds, dayTitle, everythingLine, everythingParts, homeRows, itemHref, nextLine, orderNeeds, preparedRows, quietLine, rowCubs, sentence, sinceWords, uniqueRows, type HomeRow } from "./home";
+  import { activityRows, awaySpan, briefFact, cardHref, coreNeeds, dayTitle, everythingLine, everythingParts, homeRows, itemHref, nextLine, orderNeeds, preparedRows, quietLine, rowCubs, sentence, setupRow, sinceWords, uniqueRows, type HomeRow, type SetupFacts } from "./home";
   import { openPrepared, refusedPrepared } from "../../ui/prepared.svelte";
   import { openAsk } from "../../features/cubverbs";
   import { PREPARED_API, waitingItems, whyOf, type Prepared } from "../../lib/prepared";
@@ -84,18 +84,25 @@
     void view.tick;
     return rowCubs(f, a, "needs_you").flatMap((x) => homeRows(hr, x, "needs_you"));
   });
+  // an unfinished install (no model, no topic, nothing watched): a way to Welcome, the phone's
+  // too, where no status bar says it
+  const setup = $derived.by((): HomeRow | null => {
+    void view.tick;
+    return H ? setupRow(read<SetupFacts>("/api/setup", 30000).data, t?.ingest?.health?.word) : null;
+  });
   // the candidates for the one thing: the core's rows, the prepared items, the cubs' asks (a draft
   // that waits), the failing kinds; Needs you (#/needs) holds them all, the home only the one
   const needs = $derived.by((): HomeRow[] => {
     void view.tick; // the cards' read, read again on its schedule
     const core = coreNeeds(t, host, review);
+    if (setup) core.unshift(setup);
     const items = H ? waitingItems(read<{ prepared: Prepared[] }>(PREPARED_API, 10000).data?.prepared) : [];
     return orderNeeds(core, [...preparedRows(items), ...activityRows(act, cubNeeds, { band: true, prepared: true })], cubNeeds);
   });
   const incs = $derived(bandOf(act)); // Kranto's own trouble: the band, never the one thing
   const nx = $derived(nextOf(needs.filter((r): r is HomeRow & { want: Want } => !!r.want).map((r) => ({ ...r, at: r.at ?? null }))));
   // an older server (no sentence in its home read) keeps the counts' sentence
-  const said = $derived(first ? `${Product} is reading ${first.topic!.name} for the first time.` : d?.sentence || (d && !d.date ? sentence(needsCount(host, uniqueRows(cubNeeds).length, cubNeeds.map((r) => r.href), act), cubNeeds.length, t ? t.new_kept : 0, 0) : ""));
+  const said = $derived(setup && !first ? "No brief yet, and none comes until setup is finished." : first ? `${Product} is reading ${first.topic!.name} for the first time.` : d?.sentence || (d && !d.date ? sentence(needsCount(host, uniqueRows(cubNeeds).length, cubNeeds.map((r) => r.href), act), cubNeeds.length, t ? t.new_kept : 0, 0) : ""));
 
   // While you were away, until one of its five is opened or Show today is chosen
   let today = $state(false);

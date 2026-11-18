@@ -21,6 +21,7 @@ import { placeOf, type Arrangement } from "../../features/shell";
 import { dispatchWaiting, messageListed, projectProposed, updateOffer, waitingCards, type Host } from "./needs";
 import { reviewMinutes } from "../review/review";
 import { POST_API, unsendable, type Post } from "../post/post";
+import { Product } from "../../lib/product";
 
 /** one row of Needs you or New today */
 export interface HomeRow {
@@ -94,6 +95,34 @@ export function coreNeeds(t: Today | null, host: Host | null, review: number): H
   const msgs = t ? t.messages.filter(messageListed(null)).length : 0;
   if (msgs) row({ key: "msgs", title: `${plural(msgs, "message")} from Kranto`, meta: "", href: "#/needs", verb: "Read", glyph: "✉", tone: "blue", word: "messages" });
   return out;
+}
+
+/** what the home reads of /api/setup (the server's setup_api) to see an unfinished install */
+export interface SetupFacts {
+  key?: { set?: boolean } | null;
+  topics?: number;
+}
+/** an unfinished install's way to Welcome: no model chosen, no topic, or a topic with nothing
+ * watched yet (the server's health word "Not set up yet"). The status bar says it on a wide
+ * screen, but a phone has no status bar, and the home said only "nothing waits for you". */
+export function setupRow(s: SetupFacts | null, health: string | null | undefined): HomeRow | null {
+  if (!s) return null;
+  const missing: string[] = [];
+  let to: string | null = null;
+  if (!s.key?.set) {
+    missing.push("a model (step 1)");
+    to = "#/welcome";
+  }
+  if (!(s.topics || 0)) {
+    missing.push("a topic to watch (step 2)");
+    to = to || "#/welcome/topics";
+  } else if (health === "Not set up yet") {
+    missing.push("a place to read for your topic (step 2)");
+    to = to || "#/welcome/topics";
+  }
+  if (!to) return null;
+  return { key: "setup", title: `${Product} is not set up yet`, meta: `Still missing: ${missing.join(", and ")}.`, href: to, verb: "Set up",
+    age: null, from: "core", tags: [], glyph: "○", tone: "blue", word: "setup", want: "decision" };
 }
 
 /** what the activity read adds to Needs you: one Fix row a kind
@@ -219,6 +248,7 @@ export function nextLine(r: HomeRow): string {
   const when = r.age ? (r.age === "now" ? ", just now" : `, ${r.age} ago`) : "";
   if (r.prepared) return `prepared ${r.prepared.by_words || "by an assistant"}${when}`;
   if (r.from !== "core") return askedBy(r, when);
+  if (r.key === "setup") return "to start";
   if (r.want === "decision") return `it asks you${when}`;
   return (r.word || "it waits") + when;
 }

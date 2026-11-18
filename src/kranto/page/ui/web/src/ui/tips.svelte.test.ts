@@ -2,6 +2,7 @@ import { flushSync, mount, unmount } from "svelte";
 import { afterEach, describe, expect, it } from "vitest";
 import Tip from "./Tip.svelte";
 import { closePop, menu, popNow } from "./popover";
+import { pageUrl } from "../lib/base";
 
 function draw(props: { id: string | { text: string; docs?: string }; about?: string }) {
   const target = document.createElement("div");
@@ -35,7 +36,7 @@ describe("the ? tip", () => {
     expect(el.getAttribute("aria-label")).toBe("About models.gate");
     expect(el.querySelector("p")?.textContent).toMatch(/^Items at or above this signal are kept/);
     const a = el.querySelector("a")!;
-    expect([a.getAttribute("href"), a.target, a.rel, a.textContent]).toEqual(["help#models-gate", "_blank", "noopener", "More in the docs ↗"]);
+    expect([a.getAttribute("href"), a.target, a.rel, a.textContent]).toEqual([pageUrl("help#models-gate"), "_blank", "noopener", "More in the docs ↗"]);
     expect(b.getAttribute("aria-expanded")).toBe("true");
     expect(b.getAttribute("aria-describedby")).toBe("tip-models-gate");
     b.click();
@@ -50,7 +51,7 @@ describe("the ? tip", () => {
     b.focus();
     flushSync();
     expect(box()?.getAttribute("role")).toBe("tooltip");
-    expect(box()?.querySelector("a")?.getAttribute("href")).toBe("help#access"); // docs: a paragraph by name
+    expect(box()?.querySelector("a")?.getAttribute("href")).toBe(pageUrl("help#access")); // docs: a paragraph by name
     b.dispatchEvent(new KeyboardEvent("keydown", { key: "?", bubbles: true }));
     expect(box()?.getAttribute("role")).toBe("dialog");
     b.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));

@@ -30,7 +30,7 @@ disk, unread ([archive.md](archive.md)).
 - **Open in Claude Code** and the console: **Trace** in the panel's head, for the session
   running or the one before it.
 - **Activity**: a run's row opens its trace.
-- The command palette (⌘K): "Trace of …".
+- The command palette (Ctrl+K; ⌘K on a Mac): "Trace of …".
 
 ## The page
 

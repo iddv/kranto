@@ -336,6 +336,10 @@ nothing to say is left out. Until a new topic's first brief, the home shows **Th
 instead: the read as it goes, the topic's four rows (Sources, First read, First brief, First
 ideas) and that you can close the page; the status bar says "Reading for the first time". Needs you holds everything else that waits (the one thing opens it,
 and so does ⌘K). `g h` is the home; `kranto` at the top left goes there from any page.
+While setup is unfinished (no model chosen, no topic, or a topic with nothing watched yet) the
+home's one thing is **Kranto is not set up yet**, saying what is still missing, and its **Set
+up** opens Welcome at that step, on a phone too. Keys are shown as this computer names them: Ctrl on
+Linux and Windows, the Command key on a Mac (either works on both).
 
 **The doors** are News, Ideas, Watch and Post, in the top bar on every page and, on a phone, in
 the bar at the bottom with ✦ for the console. Post is where the drafts your posting features write
@@ -685,8 +689,8 @@ a rail, **–** to one item in the top bar (✦ and its name, beside ⚙), and t
 which.
 Drag its left edge to make it wider or narrower (320 px to 60% of the window); this browser
 keeps the width, a double-click on the edge resets it, and with the edge focused the arrow keys
-step it (shift for bigger steps, Enter resets). `⌘J` (ctrl J) opens it or puts the keys in it from anywhere;
-`ctrl+]` gives them back to the page. Moving between pages never touches it: the same screen,
+step it (shift for bigger steps, Enter resets). ⌘J opens it or puts the keys in it from anywhere;
+`Ctrl+]` gives them back to the page. Moving between pages never touches it: the same screen,
 the same conversation. Reloading the page brings the same screen back; when Kranto restarts, the
 conversation resumes. **⋯ › New conversation** starts over (the old one stays in its
 `/resume`). **⋯ › End this session** asks once, ends it and starts a fresh session in the same
@@ -747,7 +751,7 @@ global claude|codex` does it from a terminal.
 `c` on an idea opens the real Claude Code about it, in a panel at the bottom of the pane, as
 wide as you drag its left edge. It works in its own empty folder, starts with what Kranto knows
 about it, and asks before every edit and command, as it does in a terminal. While the terminal
-has the keys, every key is its own; `ctrl+]` gives them back to the page.
+has the keys, every key is its own; `Ctrl+]` gives them back to the page.
 
 It changes nothing of Kranto by itself. Kranto's actions come to you as cards above the terminal,
 with the session's reason: **Confirm** runs one as your own approval, **Dismiss** drops it. A
