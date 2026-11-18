@@ -1,4 +1,4 @@
-"""Today, Kranto UI's inbox (UI-v4.md 2.2), the "last visit" marker, and spend by topic.
+"""Today, Kranto UI's inbox, the "last visit" marker, and spend by topic.
 
 | Method and path         | Does                                                          |
 |-------------------------|---------------------------------------------------------------|
@@ -162,7 +162,7 @@ class TodayAPI:
             since, seen = resolve_since(store, request.query_params.get("since"), now)
         except ValueError:
             return _error('since must be "last" or an ISO time')
-        # a source that cannot be read is counted nowhere here; its list says so (RCA A3)
+        # a source that cannot be read is counted nowhere here; its list says so
         rows = [r for r in self.app.topics_api.source_rows() if not rowsafe.is_unreadable(r)]
         topics_out: list[dict] = []
         project_out: list[dict] = []

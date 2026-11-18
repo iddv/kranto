@@ -11,7 +11,8 @@ stores:
    ``preset: "web.search"``;
 3. **Add sources by describing them** (``resolve.take``): the measurement, ``why``, ``from``,
    ``batch``, ``role: "core"``, and **``topic_id`` and ``median_similarity`` None when no topic
-   was chosen** (the RCA's row: without a topic the similarity is not measured);
+   was chosen** (a real row once broke on this: without a topic the similarity is not
+   measured);
 4. a preset's form (``source_health.add_from_preset``): ``items``, ``preset``, ``fields``,
    ``checked: "preview"``, no ``status``;
 5. ``python -m kranto pack``: ``items``, ``checked: "pack"``;
@@ -87,7 +88,7 @@ class Validation(Stored):
     @classmethod
     def named_odd(cls) -> list[Validation]:
         return [
-            # Add sources by describing them, no topic chosen: the RCA's row
+            # Add sources by describing them, no topic chosen (a real row that once broke)
             cls(status="valid", items=12, recent=3, median_similarity=None, topic_id=None,
                 role="core", from_text="sources about tea", batch="fromtext:1", why="a blog"),
             cls(items=3, checked="pack"),

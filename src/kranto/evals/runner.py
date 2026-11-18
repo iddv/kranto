@@ -1,5 +1,5 @@
 """``kranto eval watching|ideas``: a stage asked again on the frozen set, through the product's own
-provider seam (the owner's D2), under a budget, into a dated scorecard.
+provider seam, under a budget, into a dated scorecard.
 
 - **The path is the product's:** every call goes through ``LLMClient`` with the configured
   provider (OpenRouter, the Claude API, an endpoint, or the Claude Code login), the same tier,

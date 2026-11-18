@@ -1,5 +1,4 @@
-"""First-run setup over HTTP, for Kranto UI's ``#/welcome`` and Settings › Watching
-(PLAN.md sections 1.4 and 1.5).
+"""First-run setup over HTTP, for Kranto UI's ``#/welcome`` and Settings › Watching.
 
 | Method and path          | Does                                                          |
 |--------------------------|---------------------------------------------------------------|
@@ -221,7 +220,7 @@ class SetupAPI:
                               500)
         return JSONResponse({"done": True, "at": at, "ingest": self._first_ingest(),
                              "build": setup.build_choice(store),
-                             # builds left Kranto (CUT): no loop.yaml is written; kept for a
+                             # builds left Kranto: no loop.yaml is written; kept for a
                              # page that reads the key
                              "loop_settings": None})
 

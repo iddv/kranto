@@ -323,7 +323,7 @@ def doctor_line(data_dir: Path | None) -> str:
 
 REPO = "iddv/kranto"
 # the release repository's issue form (.github/ISSUE_TEMPLATE/feedback.yml): it takes no blank
-# issue, so the link names the form, whose one field's id is ``body`` (FB)
+# issue, so the link names the form, whose one field's id is ``body``
 TEMPLATE = "feedback.yml"
 
 

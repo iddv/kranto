@@ -34,8 +34,8 @@ MODES = ("off", "local", "basic", "detailed")
 SENDING = ("basic", "detailed")
 ENV_MODE = "KRANTO_TELEMETRY"
 ENV_ENDPOINT = "KRANTO_TELEMETRY_ENDPOINT"
-# The controller's relay (ops/telemetry: CloudFront in front of a function and a bucket in
-# eu-west-1). Used only with basic or detailed chosen; the environment and the file override it.
+# The usage-report relay (a separate service: CloudFront in front of a function and a bucket
+# in eu-west-1). Used only with basic or detailed chosen; the environment and the file override it.
 DEFAULT_ENDPOINT = "https://dde6yrzwuxncv.cloudfront.net/v1/logs"
 DNT = "DO_NOT_TRACK"
 REFRESH_S = 60.0

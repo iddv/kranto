@@ -249,7 +249,7 @@ class SourcesAPI:
                                                               self.rt.cfg.retention)[source_id]})
 
     async def mute(self, request: Request):
-        """Mute a source for some days, have it read less, or undo either (UI-v4.md 2.3)."""
+        """Mute a source for some days, have it read less, or undo either."""
         from .app import _int
 
         body, err = await self._body(request)
