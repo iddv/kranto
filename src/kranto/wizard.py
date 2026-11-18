@@ -42,7 +42,7 @@ from pathlib import Path
 import yaml
 
 from . import config as config_mod
-from . import launcher, preflight
+from . import launcher, legacy, preflight, product
 from .launcher import FAIL, OK, WARN, Host, KrantoError
 
 SECTIONS = ("machine", "home", "claude", "caps", "watching", "search", "usage",
@@ -904,7 +904,14 @@ def start(run: Run) -> int:
         run.started = True
     else:
         if launcher.port_in_use(port):
-            run.io.say(f"  127.0.0.1:{port} already answers: using it")
+            home = Path(run.home or launcher.kranto_home(None, host))
+            if not launcher.serves_this_home(host, port, home):
+                raise AnswerError(
+                    f"127.0.0.1:{port} already answers, but not as Kranto serving "
+                    f"{launcher.tilde(home, host.home)} (another program, or another Kranto "
+                    "home); choose another port with --port"
+                )
+            run.io.say(f"  127.0.0.1:{port} already answers as this home's Kranto: using it")
         else:
             log = run.home / "serve.log"
             fd = os.open(log, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
@@ -1214,7 +1221,8 @@ def where(run: Run) -> list[str]:
         f"{launcher.tilde(run.home, h)} (settings, library)",
         f"{launcher.tilde(launcher.pointer_path(h).parent, h)} (tokens)",
         *([launcher.tilde(unit, h)] if unit.is_file() else []),
-        "~/.local/share/uv/tools/kranto and ~/.local/bin/{Kranto,afk,brb} (the program)",
+        f"~/.local/share/uv/tools/{product.DIST} and ~/.local/bin/{product.COMMAND} (the "
+        f"program; ~/.local/bin/{legacy.COMMAND} is the same command under its old name)",
     ]
 
 

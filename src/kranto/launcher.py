@@ -228,16 +228,18 @@ def _section_span(lines: list[str], name: str) -> tuple[int, int] | None:
     return start, end
 
 
-def brb_block(loop_home: str, root: str, harness: str = "claude-code") -> str:
+def brb_block(loop_home: str, root: str | None = None, harness: str = "claude-code") -> str:
+    """The ``brb:`` section: ``root`` only for an adopted install (its earlier builds' task
+    folder, which ``kranto paths`` lists); a new home has none."""
     return ("brb:\n"
             "  # the page: Kranto's web UI with its console, written by kranto up or kranto\n"
             "  # adopt. Served only when the server is bound to loopback (enabled: false serves\n"
             "  # the server alone, with no console). loop_home is the page's own folder: its\n"
-            "  # settings file loop.yaml, its database and its console sessions. root is the\n"
-            "  # task folder of an earlier release's builds.\n"
-            "  enabled: true\n"
+            "  # settings file loop.yaml, its database and its console sessions."
+            + (" root is the\n  # task folder of an earlier release's builds.\n" if root else "\n")
+            + "  enabled: true\n"
             f"  loop_home: {json.dumps(loop_home)}\n"
-            f"  root: {json.dumps(root)}\n"
+            + (f"  root: {json.dumps(root)}\n" if root else "")
             + (f"  harness: {harness}\n" if harness != "claude-code" else ""))
 
 
@@ -275,26 +277,19 @@ def home_config_text(home: Path, port: int, user_home: Path) -> str:
         "# The server workspace configuration.",
         "# Kranto configuration: the server's settings, then the brb section (the page and\n"
         "# its console). The page keeps its own settings in loop/loop.yaml.", 1)
-    text = set_section(text, "brb", brb_block(tilde(home / "loop", user_home),
-                                              tilde(home / "tasks", user_home)))
+    text = set_section(text, "brb", brb_block(tilde(home / "loop", user_home)))
     return set_in_section(text, "notify", "base_url", f"http://127.0.0.1:{port}")
 
 
 def loop_seed_text(home: Path, port: int, user_home: Path) -> str:
-    """The loop's settings for a new home: its task folder inside the home, the server's cards
-    through this server's API (so a ``brb loop`` command run by hand never opens the
-    database either), one build at a time, nothing pitched until the owner sends it."""
+    """The page's settings for a new home: where it reaches this server (its API, so the page
+    never opens the server's database). The builds' keys an earlier release wrote here
+    (``tasks_dir``, ``concurrency``, ``intake``, ``feed.ui_url``) are left out."""
     return ("# The page's own settings (any subset of its DEFAULTS), written once by kranto up:\n"
-            "# kranto.url is where the page reaches this server; the other keys below were for\n"
-            "# an earlier release's builds. kranto setup writes some keys here;\n"
-            "# the rest are edited by hand (no Settings page lists this file).\n"
-            f"tasks_dir: {json.dumps(tilde(home / 'tasks', user_home))}\n"
-            "concurrency: 1\n"
-            "intake:\n  auto:\n    mode: manual\n"
+            "# kranto.url is where the page reaches this server. kranto setup writes some keys\n"
+            "# here; the rest are edited by hand (no Settings page lists this file).\n"
             "kranto:\n"
-            f"  url: {json.dumps(f'http://127.0.0.1:{port}')}\n"
-            "feed:\n"
-            f"  ui_url: {json.dumps(f'http://127.0.0.1:{port}/brb/')}\n")
+            f"  url: {json.dumps(f'http://127.0.0.1:{port}')}\n")
 
 
 def make_home(home: Path, port: int, user_home: Path) -> list[str]:
@@ -359,6 +354,36 @@ def port_in_use(port: int, host: str = "127.0.0.1") -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.5)
         return s.connect_ex((host, port)) == 0
+
+
+def serves_this_home(host: Host, port: int, home: Path) -> bool | None:
+    """Whether what answers on 127.0.0.1:``port`` is Kranto serving ``home``: None when nothing
+    answers as Kranto there, else True only when every run the server lists is in this home's
+    library (read-only) and, for a server with no runs yet, the two hold as many observations.
+    /api/status names no home, so the runs it reads are how it is told apart."""
+    get = host.http_get or _http_get
+    try:
+        code, body = get(f"http://127.0.0.1:{port}/api/status", 3)
+        server = json.loads(body) if code == 200 else None
+    except Exception:  # noqa: BLE001 - not Kranto, or not answering
+        server = None
+    if not isinstance(server, dict) or "version" not in server:
+        return None
+    try:
+        cfg = config_mod.load(home, dotenv=False)
+        con = sqlite3.connect(f"file:{cfg.db_path}?mode=ro", uri=True, timeout=5)
+        try:
+            ours = {r[0] for r in con.execute("SELECT run_uuid FROM runs") if r[0]}
+            count = con.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
+        finally:
+            con.close()
+    except (ConfigError, OSError, sqlite3.Error):
+        return False
+    theirs = {r.get("run_uuid") for r in server.get("runs") or [] if isinstance(r, dict)}
+    theirs.discard(None)
+    if theirs:
+        return theirs <= ours
+    return server.get("observations") == count
 
 
 def pending_migrations(db: Path) -> list[int]:
@@ -900,7 +925,7 @@ def remove_data(home: Path, host: Host) -> list[str]:
 def cmd_uninstall(args, host: Host) -> int:
     """Undo what ``kranto up`` did to the machine: stop and disable the service, remove its
     unit and drop-ins, optionally turn lingering off. ``--program`` also removes the program
-    (``uv tool uninstall Kranto``); ``--data`` also deletes the data, after the home's path is
+    (``uv tool uninstall kranto``); ``--data`` also deletes the data, after the home's path is
     typed (or given as ``--confirm PATH``). Nothing on GitHub is deleted: the last lines say
     which two pages to visit."""
     home = kranto_home(args.home, host)
@@ -933,22 +958,29 @@ def cmd_uninstall(args, host: Host) -> int:
         print(f"  no systemd user manager to change ({why_not})")
     for p in removed:
         print(f"  removed {p}")
-    print("Kranto is stopped and will not start again.")
-    where = [f"the home {home}", f"the tokens {token_store(host).root}"]
     try:
         cfg = config_mod.load(home, dotenv=False) if config_mod.config_path(home) else None
     except config_mod.ConfigError:
         cfg = None
+    port = port_of(cfg) if cfg is not None else DEFAULT_PORT
+    if why_not is None:
+        print("Kranto is stopped and will not start again.")
+    elif port_in_use(port) and serves_this_home(host, port, home):
+        print(f"Kranto still runs in the foreground on 127.0.0.1:{port}: stop it with Ctrl-C "
+              "where it runs. Nothing starts it again by itself.")
+    else:
+        print("Kranto is not running, and nothing starts it by itself here.")
+    where = [f"the home {home}", f"the tokens {token_store(host).root}"]
     if cfg is not None and cfg.brb.enabled:
         loop = paths.loop_home(cfg.brb.loop_home)
         if not loop.is_relative_to(Path(home).resolve()):
-            where.append(f"the build loop {loop}")
+            where.append(f"the page's folder {loop}")
+    uninstall = f"uv tool uninstall {product.DIST}"
     if getattr(args, "program", False):
         uv = host.which("uv")
-        r = host.sh(uv, "tool", "uninstall", "kranto", timeout=120) if uv else None
-        print("  removed the program (uv tool uninstall Kranto)" if r is not None and
-              r.returncode == 0 else "  note: 'uv tool uninstall Kranto's did not run; run it "
-                                      "yourself")
+        r = host.sh(uv, "tool", "uninstall", product.DIST, timeout=120) if uv else None
+        print(f"  removed the program ({uninstall})" if r is not None and r.returncode == 0
+              else f"  note: '{uninstall}' did not run; run it yourself")
     if getattr(args, "data", False):
         for p in remove_data(home, host):
             print(f"  removed {p}")
@@ -956,7 +988,7 @@ def cmd_uninstall(args, host: Host) -> int:
     else:
         print("Your data is kept: " + ", ".join(where) + ".")
     if not getattr(args, "program", False):
-        print("Remove the program with: uv tool uninstall Kranto (or kranto uninstall --program)")
+        print(f"Remove the program with: {uninstall} (or kranto uninstall --program)")
     for line in GITHUB_PAGES:
         print(f"On GitHub, if you want: {line}")
     return 0
@@ -1116,7 +1148,7 @@ def status_lines(home: Path, host: Host) -> tuple[list[str], bool]:
         lines.append(f"server     http://127.0.0.1:{port}/ is not answering")
         good = False
     else:
-        lines.append(f"server     http://127.0.0.1:{port}/ answering (the server "
+        lines.append(f"server     http://127.0.0.1:{port}/ answering ({product.NAME} "
                      f"{server.get('version')}, scheduler "
                      f"{'on' if server.get('scheduler', True) else 'off'})")
         if server.get("paused"):
@@ -1426,11 +1458,13 @@ def prerequisite_checks(home: Path, host: Host) -> list[Check]:
         out.append(Check(OK, "claude", f"{named}: signed in") if r.returncode == 0 else
                    Check(WARN, "claude", f"{named} is not signed in: run 'claude' and log in "
                                          "(the console uses it)"))
-    out.append(_bwrap_check(which, "the console's and the post writers' sandbox", host))
+    out.append(_bwrap_check(which, "the sandbox of Open in Claude Code and of the post writers",
+                            host))
     out += gh_checks(which, host)
     uv = which("uv")
     out.append(Check(OK, "uv", uv) if uv else
-               Check(WARN, "uv", "uv is not on PATH ('uv tool upgrade Kranto's needs it)"))
+               Check(WARN, "uv", f"uv is not on PATH ('kranto update' installs releases with "
+                                 f"it: uv tool upgrade {product.DIST})"))
     return out
 
 
@@ -1780,8 +1814,8 @@ def _split_watch(argv: Sequence[str]) -> tuple[list[str], list[str]] | None:
 
 
 def cmd_trace(args, host: Host) -> int:
-    """``kranto trace list|show``: the page's ``brb trace`` for this home: a build's agent trace
-    (sessions, turns, tool calls, cost, the failure point) read from its files, redacted."""
+    """``kranto trace list|show``: an assistant session's agent trace for this home
+    (turns, tool calls, cost, the failure point), read from its files, redacted."""
     try:
         from kranto.page.host_api import add_trace_group
     except ImportError:
@@ -2675,7 +2709,7 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
         help="also turn off lingering (your user's services stop when you log out)",
     )
     s.add_argument(
-        "--program", action="store_true", help="also remove the program (uv tool uninstall Kranto)"
+        "--program", action="store_true", help="also remove the program (uv tool uninstall kranto)"
     )
     s.add_argument(
         "--data",
@@ -2879,9 +2913,13 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_eval)
 
     s = sub.add_parser("adopt", help="switch an older installation to Kranto, in place")
-    s.add_argument("-w", "--workspace", help="the server workspace (default ~/kranto-kb)")
     s.add_argument(
-        "--loop-home", help="the loop's home (default $KRANTO_LOOP_HOME, else ~/kranto-loop)"
+        "-w", "--workspace", help=f"the older install's workspace (default {legacy.WORKSPACE})"
+    )
+    s.add_argument(
+        "--loop-home",
+        help=f"the older install's page folder (default ${paths.LOOP_HOME_ENV}, else "
+        f"{legacy.LOOP_HOME})",
     )
     s.add_argument("--backups", help="where backups go (default <workspace>-backups)")
     s.add_argument("--port", type=int, help=f"default {DEFAULT_PORT}")

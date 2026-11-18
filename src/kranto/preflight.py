@@ -181,8 +181,8 @@ def run(host, *, port: int = 8765, claude: str | None = None, port_check=port_ho
     osr = os_release() if osr is None else osr
     if system == "Darwin":
         out.append(Item(WARN, "macos", f"macOS {platform.mac_ver()[0]} ({platform.machine()}): "
-                        "watching works; builds need Linux's bubblewrap sandbox",
-                        needs="builds and Open in Claude Code"))
+                        "watching works; Open in Claude Code and the post writers need Linux's "
+                        "bubblewrap sandbox", needs="Open in Claude Code and the post writers"))
     elif system == "Linux":
         out.append(Item(OK, "linux", f"{osr.get('PRETTY_NAME') or 'Linux'} ({platform.machine()})"))
     else:
@@ -195,9 +195,10 @@ def run(host, *, port: int = 8765, claude: str | None = None, port_check=port_ho
     if system != "Darwin":
         bw = host.which("bwrap")
         if not bw:
-            out.append(Item(FAIL, "bwrap", "not installed. Builds and Open in Claude Code run "
-                                           "inside it; watching does not need it",
-                            install_command("bwrap", fam), "builds and Open in Claude Code"))
+            out.append(Item(FAIL, "bwrap", "not installed. Open in Claude Code and the post "
+                                           "writers run inside it; watching does not need it",
+                            install_command("bwrap", fam),
+                            "Open in Claude Code and the post writers"))
         else:
             r = host.sh(bw, *BWRAP_PROBE, timeout=20)
             out.append(Item(OK, "bwrap", f"{_version(host, bw) or 'found'}: a sandbox with its own "
@@ -205,11 +206,12 @@ def run(host, *, port: int = 8765, claude: str | None = None, port_check=port_ho
                        Item(FAIL, "bwrap", f"installed but a sandbox cannot start here: "
                                            f"{userns_reason(proc_sys)}",
                             install_command("bwrap", fam) if fam == "debian" else None,
-                            "builds and Open in Claude Code"))
+                            "Open in Claude Code and the post writers"))
     exe, found = (None, "skipped") if system == "Darwin" else find_claude(host, claude)
     if system == "Darwin":
-        out.append(Item(OK, "builds", "skipped on macOS: no bubblewrap sandbox, so no builds; "
-                                      "bwrap, Claude Code and systemd are not checked"))
+        out.append(Item(OK, "sandbox", "skipped on macOS: no bubblewrap sandbox, so no Open in "
+                                       "Claude Code; bwrap, Claude Code and systemd are not "
+                                       "checked"))
     elif not exe and found == "given":
         out.append(Item(FAIL if builds else WARN, "claude",
                         f"--claude {claude}: not an executable file",
