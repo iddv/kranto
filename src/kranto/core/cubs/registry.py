@@ -171,8 +171,8 @@ def shown_manifest(cid: str, manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 # The site cub as a registry alias (the ``cubs`` row; CUT, handed over by): an
-# install row of the owner's ``examplecom`` that points at bearcubs' ``cubs/examplecom`` or at the
-# old
+# install row of the owner's ``examplecom`` that points at a git source's ``cubs/examplecom``
+# or at the old
 # example is read as Kranto's built-in ``blog``, at Kranto's version. Its rows are read, never
 # rewritten: the cub keeps its id underneath, so its process, its folder, its tickets and asks
 # (``f.examplecom.*``) keep working on their data. Listed, it is one cub, ``blog`` (none of its own
@@ -184,7 +184,7 @@ SITE_ALIASES = {"examplecom": "blog"}            # the old site cub's id -> the 
 
 def is_site_row(row: dict[str, Any] | None) -> bool:
     """Whether a registry row is the owner's site cub read as the built-in (``SITE_ALIASES``):
-    its id is one, and its source names it (bearcubs' ``cubs/examplecom``, the old example's
+    its id is one, and its source names it (a git source's ``cubs/examplecom``, the old example's
     folder) or says nowhere at all. Never assumes the stored shape of ``source``."""
     if not isinstance(row, dict) or row.get("cub") not in SITE_ALIASES:
         return False

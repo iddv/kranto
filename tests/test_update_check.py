@@ -485,7 +485,7 @@ def _dist(sp: Path, name: str, version: str, url: dict | None):
 
 def test_installed_from_git_and_from_wheels(tmp_path):
     git = tmp_path / "git" / "lib" / "python3.12" / "site-packages"
-    _dist(git, "kranto", "0.1.0", {"url": "https://github.com/octo-owner/x",
+    _dist(git, "kranto", "0.1.0", {"url": "https://github.com/jo-example/x",
                                    "vcs_info": {"vcs": "git", "commit_id": "1" * 40}})
     got = apply.installed(tmp_path / "git")
     assert got["channel"] == "main" and got["version"] == "0.1.0"
@@ -531,7 +531,7 @@ def test_an_install_made_before_the_rename_reads_as_the_compat_shape(tmp_path):
     # an old install from git (two repositories) is not one the helper can reinstall
     old_git = tmp_path / "oldgit" / "lib" / "python3.12" / "site-packages"
     for n in legacy.COMPAT_DISTS:
-        _dist(old_git, n, "0.6.0", {"url": "https://github.com/octo-owner/x",
+        _dist(old_git, n, "0.6.0", {"url": "https://github.com/jo-example/x",
                                     "vcs_info": {"vcs": "git", "commit_id": "3" * 40}})
     assert apply.installed(tmp_path / "oldgit")["spec"]["kind"] == "local"
 

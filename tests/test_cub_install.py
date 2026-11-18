@@ -628,4 +628,4 @@ def test_the_command_line(home, tmp_path, capsys):
     assert cub("resume", "hello") == 0
     assert cub("remove", "hello", "--yes", "--purge") == 0
     assert cub("inspect", "nope") == 2
-    assert cub("new", "post my pick") == 2 and "template" in capsys.readouterr().out
+    assert cub("new", "post my pick") == 2 and "kranto paths examples" in capsys.readouterr().out

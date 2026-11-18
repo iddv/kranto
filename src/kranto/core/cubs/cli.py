@@ -1,4 +1,4 @@
-"""``kranto cub …`` and ``python -m kranto cub …``: the same functions as the page's API,
+"""``kranto cub …`` and ``kranto watch cub …``: the same functions as the page's API,
 from a terminal. Every command prints words (``--json``: the record) and exits 0, 2 when Kranto
 refused it (with why), 1 on an error.
 
@@ -98,7 +98,7 @@ def add_parser(sub) -> argparse.ArgumentParser:
     ev = sp("eval", help="run a cub's own tests and the standard fixtures (your own cubs)")
     ev.add_argument("id")
     sp("jobs", help="fetch jobs and their states")
-    nw = sp("new", help="Kranto builds a cub from a sentence (0.6)")
+    nw = sp("new", help="not yet: says how to start a cub from one of Kranto's own")
     nw.add_argument("description", nargs="?")
     return p
 
@@ -587,12 +587,10 @@ def c_eval(rt, args, ask, out) -> int:
     return 0 if all(r is None or r["ok"] for r in report.values()) else ERROR
 
 
-TEMPLATE_URL = "https://github.com/octo-owner/bearcubs/tree/main/template"
-
-
 def c_new(rt, args, ask, out) -> int:
-    print("Kranto builds a cub from a sentence in 0.6; until then copy the template folder "
-          f"({TEMPLATE_URL}), edit it, and kranto cub check it", file=out)
+    print("Kranto cannot write a cub from a sentence yet. Copy one of Kranto's own (the folder "
+          "'kranto paths examples' prints), change it, then 'kranto cub check FOLDER' and "
+          "'kranto cub add FOLDER'", file=out)
     return REFUSED
 
 
