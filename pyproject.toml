@@ -37,7 +37,7 @@ dependencies = [
   "websockets>=13",
   "python-multipart>=0.0.9",
   "scikit-learn>=1.4",
-  "umap-learn>=0.5.6",
+  "umap-learn>=0.6",
   "scipy>=1.10",
   "trafilatura>=2.0",
   # Registrable domains from the public suffix list (bundled, read offline). Already installed

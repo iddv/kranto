@@ -90,6 +90,9 @@ def _umap(x: np.ndarray, dims: int, min_dist: float) -> np.ndarray:
         min_dist=min_dist,
         random_state=SEED,
         n_jobs=1,
+        # umap-learn 0.6 keeps the 0.5 layout only when asked; a later release changes the
+        # default and with it every map. The themes stay where they were until we choose.
+        compatibility_layout=True,
     )
     return reducer.fit_transform(x).astype(np.float32)
 

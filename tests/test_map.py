@@ -53,6 +53,18 @@ def corpus(store, embedder):
     return store
 
 
+def test_the_layout_is_umaps_kept_one_and_says_nothing():
+    """umap-learn 0.6 warns (FutureWarning) that a later release changes its default layout, and
+    with it every map; the map asks for the layout it was made with, so nothing warns."""
+    import warnings
+
+    x = np.random.default_rng(3).normal(size=(30, 8)).astype(np.float32)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FutureWarning)
+        out = compute._umap(x, 2, 0.1)
+    assert out.shape == (30, 2) and out.dtype == np.float32
+
+
 def test_structure_null_fails_on_noise_and_passes_on_structure():
     rng = np.random.default_rng(0)
     noise = rng.normal(size=(300, 32))
