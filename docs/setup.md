@@ -436,7 +436,7 @@ see [archive.md](archive.md).
 | `~/.config/kranto/` | `home` (which home `kranto` uses), `tokens/` (mode 600) |
 | `~/.config/systemd/user/kranto.service` | The service, when systemd runs Kranto |
 | `~/.local/share/uv/tools/kranto/`, `~/.local/bin/kranto` | The installed program |
-| `/tmp/fastembed_cache/`, `~/.cache/Microsoft/` | The embedding model's download and its runtime's cache |
+| `~/.cache/kranto/fastembed/`, `~/.cache/Microsoft/` | The embedding model (about 500 MB, downloaded once; a copy an older Kranto left in `/tmp/fastembed_cache/` is copied here once) and its runtime's cache |
 
 An install that was switched over from an older setup with `kranto adopt` keeps its data where it
 was; `kranto status` and `kranto doctor`
@@ -495,7 +495,7 @@ uv tool uninstall kranto
 claude mcp remove --scope user kranto
 
 # 3. the data, tokens and caches, if you want them gone (this cannot be undone)
-rm -rf ~/.kranto ~/.config/kranto
+rm -rf ~/.kranto ~/.config/kranto ~/.cache/kranto
 ```
 
 **You should see:** `Kranto is stopped and will not start again.` and a line naming where your
