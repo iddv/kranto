@@ -7,14 +7,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 README = (ROOT / "README.md").read_text()
-INSTALL = ("tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)\n"
-           "gh release download \"$tag\" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "
-           "\"kranto-$tag\"\n"
-           "(cd \"kranto-$tag\" && sha256sum -c SHA256SUMS)\n"
+INSTALL = ("base=https://github.com/iddv/kranto/releases/latest/download\n"
+           "curl -fsSLO \"$base/SHA256SUMS\"\n"
+           "wheel=$(grep -o 'kranto-[^ ]*\\.whl' SHA256SUMS)\n"
+           "curl -fsSLO \"$base/$wheel\"\n"
+           "sha256sum -c --ignore-missing SHA256SUMS\n"
            # the extras install.sh installs (a posting account needs connections)
            "uv tool install --python 3.12 \"kranto[connections,notify,mcp] @ "
-           "file://$(ls \"$PWD/kranto-$tag\"/kranto-*.whl)\"\n"
+           "file://$PWD/$wheel\"\n"
            "kranto up")
+ONE_LINE = "curl -fsSL https://github.com/iddv/kranto/releases/latest/download/install.sh | sh"
 
 
 def test_no_install_from_git():
@@ -24,6 +26,7 @@ def test_no_install_from_git():
 
 def test_kranto_is_installed_first():
     assert INSTALL in README
+    assert README.index(ONE_LINE) < README.index("## Who it is for")
     assert README.index(INSTALL) < README.index("## Usage reports")
     assert "## Research history" not in README and "src/kranto/page/lab/" not in README   # the lab left
 

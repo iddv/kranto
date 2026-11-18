@@ -10,14 +10,15 @@ It runs on your own Linux machine as one page in your browser. It needs one mode
 your Claude Code login) and costs cents a day. Nothing is posted until you say yes.
 
 ```
-gh release download -R iddv/kranto -p 'kranto-*.whl'
-uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$(ls "$PWD"/kranto-*.whl)"
-kranto up
+curl -fsSL https://github.com/iddv/kranto/releases/latest/download/install.sh | sh
 ```
 
-`kranto up` starts Kranto at http://127.0.0.1:8765/ and signs your browser in (`kranto open`
-prints a new sign-in link). Linux only, for now. Step by step, with what you should see:
-[docs/setup.md](docs/setup.md).
+That installs uv if you have none, downloads the latest release, checks it against the release's
+`SHA256SUMS`, installs Kranto and runs `kranto setup`: a few questions, each with a default that
+Enter keeps; then it starts Kranto at http://127.0.0.1:8765/ and signs your browser in (`kranto
+open` prints a new sign-in link). No GitHub account is needed. Linux only, for now. To
+read the script first, or to install without it: [Install](#install). Step by step, with what you
+should see: [docs/setup.md](docs/setup.md).
 
 ## Who it is for
 
@@ -71,28 +72,35 @@ Measured, each with what limits it:
 
 ## Install
 
-The three lines above install the wheel of the latest release with `gh` (while the repository is
-private, `gh` must be logged in with access to it). The same, with every file checked against the
-release's `SHA256SUMS` first:
+**With the script, read first.** Every release carries `install.sh`; this is the line above in
+three steps:
 
 ```
-tag=$(gh release view -R iddv/kranto --json tagName --jq .tagName)
-gh release download "$tag" -R iddv/kranto -p '*.whl' -p SHA256SUMS -D "kranto-$tag"
-(cd "kranto-$tag" && sha256sum -c SHA256SUMS)
-uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$(ls "$PWD/kranto-$tag"/kranto-*.whl)"
+curl -fsSLO https://github.com/iddv/kranto/releases/latest/download/install.sh
+less install.sh
+sh install.sh
+```
+
+`sh install.sh --version vX.Y.Z` installs that release instead of the latest, and `sh install.sh
+--help` lists the rest. It never runs sudo and writes nothing outside `~/.local` and a temporary
+folder.
+
+**By hand, without the script.** The release's wheel, checked against its `SHA256SUMS`, installed
+with uv (the same files are on the [release page](https://github.com/iddv/kranto/releases/latest)
+for a browser):
+
+```
+base=https://github.com/iddv/kranto/releases/latest/download
+curl -fsSLO "$base/SHA256SUMS"
+wheel=$(grep -o 'kranto-[^ ]*\.whl' SHA256SUMS)
+curl -fsSLO "$base/$wheel"
+sha256sum -c --ignore-missing SHA256SUMS
+uv tool install --python 3.12 "kranto[connections,notify,mcp] @ file://$PWD/$wheel"
 kranto up
 ```
 
 The extras are posting accounts (`connections`), messages to your phone or chat (`notify`) and
 `kranto mcp` (`mcp`); `install.sh` and `kranto update` install the same.
-
-Every release also carries `install.sh`, which installs uv when you have none, checks every file
-against `SHA256SUMS`, installs Kranto and runs `kranto setup`:
-
-```
-gh release download -R iddv/kranto -p install.sh
-sh install.sh
-```
 
 `kranto setup` checks the machine and prints this distribution's command for anything missing (it
 never runs sudo), then asks where Kranto lives, the port, whether it runs as a service, spend
@@ -129,7 +137,9 @@ fix for each failure.
 
 Most of Kranto's code is written by AI coding agents working from written briefs, and it is
 reviewed, tested and run every day by its one maintainer. Every change passes the test suite and
-a walk through the pages in a real browser before it ships. If you would rather not run software
+a walk through the pages in a real browser before it ships. The checks run on GitHub Actions
+([.github/workflows/ci.yml](.github/workflows/ci.yml)); a pull request from a fork runs them on
+GitHub's hosted runners, once the maintainer has approved the run. If you would rather not run software
 made this way, Kranto is not for you, and that is fine.
 
 ## Documentation
