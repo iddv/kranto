@@ -31,13 +31,13 @@ def old_model(tmp_path: Path) -> Path:
 
 
 def test_the_folder_is_under_the_users_cache():
-    assert embed.default_cache_dir({"HOME": "/home/u"}) == Path("/home/u/.cache/kranto/fastembed")
-    assert embed.default_cache_dir({"HOME": "/home/u", "XDG_CACHE_HOME": "/var/c"}) == \
+    assert embed.default_cache_dir({"HOME": "/srv/u"}) == Path("/srv/u/.cache/kranto/fastembed")
+    assert embed.default_cache_dir({"HOME": "/srv/u", "XDG_CACHE_HOME": "/var/c"}) == \
         Path("/var/c/kranto/fastembed")
     # a relative XDG_CACHE_HOME is not a cache folder (the XDG rule): the default stands
-    assert embed.default_cache_dir({"HOME": "/home/u", "XDG_CACHE_HOME": "c"}) == \
-        Path("/home/u/.cache/kranto/fastembed")
-    assert embed.default_cache_dir({"HOME": "/home/u", "FASTEMBED_CACHE_PATH": "/m"}) == \
+    assert embed.default_cache_dir({"HOME": "/srv/u", "XDG_CACHE_HOME": "c"}) == \
+        Path("/srv/u/.cache/kranto/fastembed")
+    assert embed.default_cache_dir({"HOME": "/srv/u", "FASTEMBED_CACHE_PATH": "/m"}) == \
         Path("/m")
     assert embed.OLD_CACHE.name == "fastembed_cache"
 
