@@ -36,6 +36,9 @@ _NAMES = {
     "term_cli": ("kranto.page.term.cli", "main"),
     "term_mcp_main": ("kranto.page.mcp.server", "term_session_main"),
     "term_doctor": ("kranto.page.term.launch", "doctor_lines"),
+    # the console's lines in a new home's loop.yaml (kranto up), and doctor's console line
+    "console_new_home_yaml": ("kranto.page.term.console", "NEW_HOME_YAML"),
+    "console_doctor_line": ("kranto.page.term.console", "doctor_line"),
     # kranto trace: the command group Kranto runs in-process
     "add_trace_group": ("kranto.page.trace.cli", "add_trace_group"),
     # the watcher's Claude Code provider (the server providers/claude_code.py, 4.5): one

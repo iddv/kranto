@@ -284,12 +284,18 @@ def home_config_text(home: Path, port: int, user_home: Path) -> str:
 def loop_seed_text(home: Path, port: int, user_home: Path) -> str:
     """The page's settings for a new home: where it reaches this server (its API, so the page
     never opens the server's database). The builds' keys an earlier release wrote here
-    (``tasks_dir``, ``concurrency``, ``intake``, ``feed.ui_url``) are left out."""
+    (``tasks_dir``, ``concurrency``, ``intake``, ``feed.ui_url``) are left out. The console's
+    lines (``console.NEW_HOME_YAML``): a new home's does not open by itself and asks first."""
+    try:
+        from kranto.page.host_api import console_new_home_yaml
+    except ImportError:          # a page without these lines: the console keeps its defaults
+        console_new_home_yaml = ""
     return ("# The page's own settings (any subset of its DEFAULTS), written once by kranto up:\n"
             "# kranto.url is where the page reaches this server. kranto setup writes some keys\n"
             "# here; the rest are edited by hand (no Settings page lists this file).\n"
             "kranto:\n"
-            f"  url: {json.dumps(f'http://127.0.0.1:{port}')}\n")
+            f"  url: {json.dumps(f'http://127.0.0.1:{port}')}\n"
+            + console_new_home_yaml)
 
 
 def make_home(home: Path, port: int, user_home: Path) -> list[str]:
@@ -1515,7 +1521,22 @@ def console_checks(cfg: config_mod.Config, svc: tuple[dict, str] | None = None) 
                                         "(reinstall Kranto)")]
     return [Check(OK if version >= REQUIRED_API else FAIL, "kranto.page",
                   f"API version {version} (needs {REQUIRED_API})"),
-            term_check(paths.loop_home(cfg.brb.loop_home), svc, dotenv_tokens(cfg.root))]
+            term_check(paths.loop_home(cfg.brb.loop_home), svc, dotenv_tokens(cfg.root)),
+            *console_line(paths.loop_home(cfg.brb.loop_home))]
+
+
+def console_line(loop_home: Path) -> list[Check]:
+    """Doctor's line for the console (your own Claude Code or Codex beside every page): whether
+    it opens by itself and whether it asks before an edit or a command, from this home's
+    loop.yaml as written (``console.doctor_line``); none from a page that cannot say."""
+    try:
+        from kranto.page.host_api import console_doctor_line
+    except ImportError:
+        return []
+    try:
+        return [Check(OK, "console", console_doctor_line(loop_home))]
+    except Exception as exc:  # noqa: BLE001 - doctor never fails on one line
+        return [Check(WARN, "console", f"its settings could not be read: {exc}")]
 
 
 TERM_CHECK = "open in claude code"    # doctor's line for the page's term (its sandboxed sessions)
