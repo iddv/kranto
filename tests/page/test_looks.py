@@ -384,7 +384,7 @@ def page_table() -> str:
     for id in [i for i in IDS if i != "custom"]:
         for base in ("light", "dark"):
             P, n = resolved(id, base), numbers(id, base)
-            least = lambda fgs: min(ratio(P[fg], P[bg]) for fg in fgs for bg in on)
+            least = lambda fgs, P=P: min(ratio(P[fg], P[bg]) for fg in fgs for bg in on)
             page = [x for x in n if any(x[0].endswith(" on " + s) for s in on) or "border on the page" in x[0]]
             worst = min(page, key=lambda x: x[1] / x[2])
             out.append(f"| {id} | {base} | {P['bg']} / {P['box']} | {least(('text',)):.1f} | {least(('muted', 'ink3')):.1f} | {least(('link',)):.1f} | "

@@ -1,6 +1,6 @@
 {
  "about": "mypy errors per file; a count may only fall (scripts/ci/typecheck.py)",
- "total": 510,
+ "total": 508,
  "files": {
   "src/kranto/cli.py": 14,
   "src/kranto/config.py": 1,
@@ -58,7 +58,7 @@
   "src/kranto/page/term/service.py": 16,
   "src/kranto/page/tokens.py": 3,
   "src/kranto/page/trace/afk.py": 2,
-  "src/kranto/page/trace/base.py": 5,
+  "src/kranto/page/trace/base.py": 4,
   "src/kranto/page/trace/cli.py": 3,
   "src/kranto/page/trace/payload.py": 12,
   "src/kranto/page/trace/readers/stream_json.py": 10,

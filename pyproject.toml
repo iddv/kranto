@@ -109,14 +109,18 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 # The page's code and tests: ignored until each is fixed by hand (a fix that changes code, not
-# a formatter's): long lines, closures over loop variables (each a possible bug, each with a
-# test), raise-from, open-without-with, the ContextVar default, and the rules after them.
-"src/kranto/page/**" = ["E501", "B023", "B904", "SIM115", "B039", "B007", "B017", "B905",
-                        "E402", "E702", "E731", "E741", "F402", "F811", "F841", "SIM102",
+# a formatter's): long lines, raise-from, open-without-with, the ContextVar default, and the
+# rules after them. A name defined twice (F811), a closure over a loop variable (B023) and
+# `pytest.raises(Exception)` (B017) are checked here as everywhere.
+"src/kranto/page/**" = ["E501", "B904", "SIM115", "B039", "B007", "B905",
+                        "E402", "E702", "E731", "E741", "F402", "F841", "SIM102",
                         "SIM105", "SIM108", "SIM201", "SIM222", "SIM401", "UP031"]
-"tests/page/**" = ["E501", "B023", "B904", "SIM115", "B039", "B007", "B017", "B905", "E402",
-                   "E702", "E731", "E741", "F402", "F811", "F841", "SIM102", "SIM105",
+"tests/page/**" = ["E501", "B904", "SIM115", "B039", "B007", "B905", "E402",
+                   "E702", "E731", "E741", "F402", "F841", "SIM102", "SIM105",
                    "SIM108", "SIM201", "SIM222", "SIM401", "UP031"]
+# The browser tests take their fixtures (browser, page_base) from test_browser_smoke by import,
+# as pytest finds them; a test's parameter of the same name is that fixture, not a redefinition.
+"tests/page/test_browser_*.py" = ["F811"]
 "scripts/dev/build_ui.py" = ["E501"]
 
 # The type check: scripts/ci/typecheck.py runs mypy with this table and compares each file's

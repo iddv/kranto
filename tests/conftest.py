@@ -14,6 +14,14 @@ from pathlib import Path
 # runs the server's, `pytest tests/page` the page's.
 collect_ignore = ["page"]
 
+# Hypothesis's per-example deadline (200 ms) is a timing assertion: on a loaded machine or two
+# workers it fails a test that is right. No test here is about speed; each that needs a limit
+# says so itself.
+from hypothesis import settings as _hypothesis  # noqa: E402
+
+_hypothesis.register_profile("kranto", deadline=None)
+_hypothesis.load_profile("kranto")
+
 # -- Isolation, before any Kranto import ------------------------------------------------------
 # No test may open the developer's kranto home, loop home, token store, gh login or a model:
 # HOME is a temp dir for the session (each xdist worker has its own), the network is loopback
@@ -147,6 +155,18 @@ def _no_reports_thread_left():
         errors._flusher = None
         assistant._server_home = None
     assert not left, "a test left the error reports' flusher running: stop it (fl.stop())"
+
+
+@pytest.fixture(autouse=True)
+def _loaded_cubs_restored():
+    """The cubs a test's runtime loaded (``cubs.registry.set_loaded``) are the registry's for
+    every later test in the same process otherwise: the next ``registry.check()`` then validates
+    a cub that test made. Each test starts and ends with the list it found."""
+    from kranto.core.cubs import registry as cubs_registry
+
+    saved = cubs_registry.loaded()
+    yield
+    cubs_registry.set_loaded(saved)
 
 
 @pytest.fixture(autouse=True)

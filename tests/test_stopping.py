@@ -126,6 +126,7 @@ def test_a_job_cut_off_by_the_stop_is_still_due_at_the_next_start(store):
     # no run was recorded, so the next server runs it again
     assert sched_mod.is_due(store, job, sched_mod.utcnow())
     release.set()
+    assert s.wait(5)                              # its thread ends before the store closes
 
 
 # -- the whole stop -----------------------------------------------------------------------------
@@ -164,6 +165,7 @@ def test_the_stop_keeps_to_its_budget_and_says_what_it_cut_off(store, caplog):
     assert "stop: done in" in caplog.text and "cut off (resumes after the start): cub " \
         "slowpoke; the ingest job" in caplog.text
     release.set()
+    assert s.wait(5)                              # its thread ends before the store closes
 
 
 def test_a_cub_left_is_named_and_a_clean_stop_says_so():

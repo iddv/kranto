@@ -612,6 +612,7 @@ def test_scheduler_stop_waits_for_a_running_job(store):
     assert s2.trigger("ingest") and started.wait(2)
     assert s2.stop(timeout=0.05) is False
     assert finished.wait(5)                     # the job still ends on its own
+    assert s2.wait(5)                           # and its thread with it, before the store closes
 
 
 def test_scheduler_stop_waits_at_most_its_timeout_in_all(store):
@@ -650,6 +651,7 @@ def test_scheduler_stop_waits_at_most_its_timeout_in_all(store):
     assert s.stop(timeout=0.6) is False
     assert time.monotonic() - t0 < 1.2        # one budget, not one per wait
     release.set()
+    assert s.wait(5)                          # every thread ends before the store closes
 
 
 def test_warmup_also_needs_the_first_map_to_be_old_enough(store):
