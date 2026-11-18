@@ -1,7 +1,8 @@
 name: ci
 # Every pull request and every push to main. Each job but sandbox runs on the runner the repository
-# variable RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, and for a
-# run started by hand with "hosted", on GitHub's own runner. sandbox always runs on GitHub's own
+# variable RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, for a run
+# started by hand with "hosted", and for every pull request from a fork, on GitHub's own runner: a
+# stranger's code never reaches a runner of the project's own. sandbox always runs on GitHub's own
 # runner (it needs a fresh /proc inside bubblewrap). The required checks are eight of the jobs
 # below: test, fast, slow, browser, frontend, lint, gitleaks and sandbox (install is not required
 # yet). A skipped required job is never green.
@@ -32,51 +33,51 @@ env:
 jobs:
   # The server's tests (tests/, without tests/page), serial.
   test:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra connections --extra notify
       - name: pytest (the cub sandbox tests are the sandbox job's)
         run: .venv/bin/pytest -q -rs tests
 
   # The page's tests, everything under 5 s (tests/page/.test_durations decides).
   fast:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra mcp
       # a test skipped because an import failed fails the run here (tests/page/conftest.py)
       - run: KRANTO_NO_IMPORT_SKIPS=1 uv run --no-sync pytest -q -rs tests/page -m "not slow" -n 4 --dist loadfile
 
   # The page's tests of 5 s or more.
   slow:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra mcp
       - run: KRANTO_NO_IMPORT_SKIPS=1 uv run --no-sync pytest -q -rs tests/page -m slow -n 4 --dist loadfile
 
   # The page in a real browser: every route on the fake app, no JS or HTTP error, no write.
   browser:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra mcp --group browser
       - run: python3 scripts/dev/build_ui.py
       - run: bash scripts/ci/browser.sh
@@ -84,7 +85,7 @@ jobs:
   # The page's sources: type and a11y checks with warnings as errors, the component tests, the
   # build within its size budget, and the audit of the lockfile. No install scripts.
   frontend:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 15
     defaults:
       run:
@@ -102,13 +103,13 @@ jobs:
 
   # Lint, the type check's ratchet, the stored-shape lint, the lock, and the public-tree scrub.
   lint:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - name: uv.lock matches pyproject.toml
         run: uv lock --check
       - run: uv sync --locked --extra dev --extra mcp
@@ -124,7 +125,7 @@ jobs:
   # The commits this run adds: no attribution, no-reply author and committer addresses, the
   # sign-off, the scrub's words over the messages and the pull request's text; and gitleaks.
   gitleaks:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -206,7 +207,7 @@ jobs:
           unshare --user --map-current-user --pid --fork --mount --mount-proc true
       # on GitHub's runner setup-uv would save its cache after the job, and it refuses
       # UV_CACHE_DIR's relative path; this job keeps no cache
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: false
       - run: uv sync --locked --extra dev --extra connections --extra mcp
@@ -226,7 +227,7 @@ jobs:
   # server started on loopback ('kranto up --foreground': no systemd) and every page it serves
   # read once. Not a required check yet.
   install:
-    runs-on: ${{ inputs.hosted && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
+    runs-on: ${{ (inputs.hosted || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 'ubuntu-latest' || fromJSON(vars.RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 30
     env:
       VERSION: 0.0.1.dev0
@@ -236,7 +237,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       # build.sh tags the commit it builds; on a runner of your own the checkout keeps that tag
       # from an earlier run, at another commit, and build.sh refuses it. It is only this job's.
       - name: forget the pretend tag an earlier run left here

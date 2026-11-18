@@ -5,6 +5,17 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+  # The page's sources (package.json and package-lock.json). CI installs with --ignore-scripts.
+  - package-ecosystem: npm
+    directory: /src/kranto/page/ui/web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # the dev tool chain (Vite, Svelte, vitest, types) moves together or not at all
+      dev-tools:
+        dependency-type: development
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:
