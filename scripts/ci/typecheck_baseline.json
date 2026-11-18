@@ -1,6 +1,6 @@
 {
  "about": "mypy errors per file; a count may only fall (scripts/ci/typecheck.py)",
- "total": 511,
+ "total": 510,
  "files": {
   "src/kranto/cli.py": 14,
   "src/kranto/config.py": 1,
@@ -51,7 +51,7 @@
   "src/kranto/page/gitcmd.py": 3,
   "src/kranto/page/mcp/tools.py": 3,
   "src/kranto/page/proc.py": 2,
-  "src/kranto/page/settings/store.py": 2,
+  "src/kranto/page/settings/store.py": 1,
   "src/kranto/page/term/asgi.py": 1,
   "src/kranto/page/term/launch.py": 3,
   "src/kranto/page/term/pty.py": 4,
