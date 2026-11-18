@@ -361,8 +361,9 @@ def serves_this_home(host: Host, port: int, home: Path) -> bool | None:
     answers as Kranto there, else True only when every run the server lists is in this home's
     library (read-only) and, for a server with no runs yet, the two hold as many observations.
     /api/status names no home, so the runs it reads are how it is told apart."""
+    get = host.http_get or _http_get
     try:
-        code, body = host.http_get(f"http://127.0.0.1:{port}/api/status", 3)
+        code, body = get(f"http://127.0.0.1:{port}/api/status", 3)
         server = json.loads(body) if code == 200 else None
     except Exception:  # noqa: BLE001 - not Kranto, or not answering
         server = None

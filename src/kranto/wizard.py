@@ -904,10 +904,11 @@ def start(run: Run) -> int:
         run.started = True
     else:
         if launcher.port_in_use(port):
-            if not launcher.serves_this_home(host, port, run.home):
+            home = Path(run.home or launcher.kranto_home(None, host))
+            if not launcher.serves_this_home(host, port, home):
                 raise AnswerError(
                     f"127.0.0.1:{port} already answers, but not as Kranto serving "
-                    f"{launcher.tilde(run.home, host.home)} (another program, or another Kranto "
+                    f"{launcher.tilde(home, host.home)} (another program, or another Kranto "
                     "home); choose another port with --port"
                 )
             run.io.say(f"  127.0.0.1:{port} already answers as this home's Kranto: using it")
