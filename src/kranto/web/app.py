@@ -751,7 +751,7 @@ class App:
                                  "error": f"Not started: {title}: {why}. Ask again when it "
                                           "has ended."}, status_code=409)
         if self.scheduler is None:
-            msg = "The scheduler is disabled; use 'python -m kranto run'."
+            msg = "The scheduler is off; run 'kranto watch run' to read now."
         elif self.scheduler.trigger(kind, origin="press", by=verbs.acting_by() or "ui"):
             msg = f"Started {kind}. Refresh to see it in the runs table when it finishes."
             if kind == "snapshot":
