@@ -95,7 +95,7 @@ describe("the server's forms", () => {
     await togglePause(null, true);
     await answerDialog(true);
     expect(net.calls.some(([u]) => u === "/pause")).toBe(false);
-    expect(flash()).toMatchObject({ text: "Pause is the server's, which is not hosting this page.", kind: "red" });
+    expect(flash()).toMatchObject({ text: "Pause is the server's, which is not answering.", kind: "red" });
   });
 });
 

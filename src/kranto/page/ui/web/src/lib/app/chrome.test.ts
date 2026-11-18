@@ -30,7 +30,7 @@ describe("the navigator: one tree of the doors' pages, the cubs in it", () => {
   it("is Home, Needs you, the doors' words, Cubs and Settings, with the entry lit", async () => {
     let t = await tree("#/ideas");
     expect(t.rows.slice(0, 2).map((x) => x.w)).toEqual(["Home", "Needs you"]);
-    expect(t.rows.filter((x) => x.head).map((x) => x.head)).toEqual(["Watch", "Ideas", "News", "Cubs", "Settings"]);
+    expect(t.rows.filter((x) => x.head).map((x) => x.head)).toEqual(["Watch", "Ideas", "News", "Features", "Settings"]);
     const under = (head: string) => {
       const i = t.rows.findIndex((x) => x.head === head);
       const j = t.rows.findIndex((x, k) => k > i && x.head);
@@ -61,7 +61,7 @@ describe("the navigator: one tree of the doors' pages, the cubs in it", () => {
   });
   it("has a Cubs row with what they ask you, then each cub that is on, in the home's order", async () => {
     const t = await tree("#/cub/digest");
-    expect(t.rows.find((x) => x.head === "Cubs")).toMatchObject({ to: "cubs", n: 3, tone: "wait" });
+    expect(t.rows.find((x) => x.head === "Features")).toMatchObject({ to: "cubs", n: 3, tone: "wait" });
     expect(t.rows.filter((x) => x.to.startsWith("cub/")).map((x) => [x.w, x.n])).toEqual([["Toot the pick", 2], ["Digest", 1]]);
     expect(t.rows.some((x) => x.to === "cub/news" || x.to === "cub/sleepy")).toBe(false); // a door, and a cub that is off
     expect(t.rows.find((x) => x.to === "cubs/approvals")).toMatchObject({ w: "Approvals", n: 3 });
@@ -83,7 +83,7 @@ describe("the navigator: one tree of the doors' pages, the cubs in it", () => {
     const t = navTree(parse());
     expect(t.rows.find((x) => x.head === "Watch")).toMatchObject({ add: null });
     expect(t.rows.some((x) => (x.to || "").startsWith("watch/topic/"))).toBe(false);
-    expect(t.rows.some((x) => x.head === "Cubs" || x.head === "News")).toBe(false);
+    expect(t.rows.some((x) => x.head === "Features" || x.head === "News")).toBe(false);
   });
 });
 
@@ -113,7 +113,7 @@ describe("the status bar", () => {
   it("says Healthy without the server, and that server is not hosting the page; Paused while watching is", async () => {
     await frame({ host: null });
     expect(facts().bar.word.text).toBe("Healthy");
-    expect(facts().bar.cells).toEqual(["the server is not hosting this page"]);
+    expect(facts().bar.cells).toEqual(["the server is not answering"]);
     expect(facts().bar.used).toBe(null);
     await frame({ host: hostStatus({ paused: "by hand" }) });
     expect(facts().bar.word).toEqual({ icon: "paused", colour: "amber", text: "Paused" });

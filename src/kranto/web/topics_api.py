@@ -57,18 +57,28 @@ RISING_SHOWN = 3
 
 
 FIRST_TICKS = 5     # places ticked for a topic that watches none yet
+QUIET_PER_DAY = 0.1  # under about three new items a month: little for a first brief
+
+
+def per_day(row: dict[str, Any]) -> float:
+    """New items a day, as the proposal list counts them: the place's own figure when it has
+    one, else its items in the last 30 days (``_recent``) over 30. A stored null counts as 0."""
+    ipd = row.get("items_per_day")
+    return float(ipd) if ipd is not None else float(row.get("_recent") or 0) / 30
 
 
 def first_ticks(rows: list[dict[str, Any]], topic_id: int) -> None:
-    """A topic that watches no place yet has at most ``FIRST_TICKS`` of its close matches ticked,
-    the best by fit; the rest stay proposed, unticked (its first read is the ticked places times
-    their items: five places put the first brief inside minutes). A topic that already watches
-    one keeps the rule as it was."""
+    """A topic that watches no place yet has at most ``FIRST_TICKS`` of its close matches ticked:
+    first the places that publish (at least ``QUIET_PER_DAY``), the best by fit, then quiet ones
+    only to fill what is left; the rest stay proposed, unticked (its first read is the ticked
+    places times their items: five places that publish put the first brief inside minutes). A
+    topic that already watches one keeps the rule as it was."""
     if any(r.get("review") == "approved" and any(t.get("id") == topic_id
                                                   for t in r.get("topics") or [])
            for r in rows):
         return
-    ticked = sorted((r for r in rows if r.get("pretick")), key=lambda r: -float(r["_sim"]))
+    ticked = sorted((r for r in rows if r.get("pretick")),
+                    key=lambda r: (per_day(r) < QUIET_PER_DAY, -float(r["_sim"])))
     for r in ticked[FIRST_TICKS:]:
         r["pretick"] = False
 
@@ -142,12 +152,14 @@ class TopicsAPI:
                 row["pretick"] = bool(row["review"] == "proposed" and row["role"] == "core"
                                       and sim is not None and sim >= line)
                 row["_sim"] = sim if sim is not None else -1.0
+                row["_recent"] = v.recent or 0
                 out.append(row)
         first = first_for if first_for is not None else topic_id
         if first is not None:
             first_ticks(out, first)
         for row in out:
             row.pop("_sim", None)
+            row.pop("_recent", None)
         return out
 
     def _counts(self) -> tuple[dict[int, int], dict[int, int]]:

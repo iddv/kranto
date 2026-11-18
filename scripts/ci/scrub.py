@@ -73,12 +73,6 @@ ALLOW: dict[str, dict[str, str]] = {
         "tests/test_public_tree.py": "tests for this scanner",
         # each until the change that rewords it is on main; then its line goes
         "docs/design/DESIGN.md": "a design paper from before the rename, rewritten separately",
-        "src/kranto/page/ui/help.md": "the page's help, reworded separately",
-        "src/kranto/page/ui/web/src/pages/post/post.svelte.test.ts": "a made-up handle in "
-        "a page test, renamed separately",
-        "src/kranto/page/ui/web/src/pages/settings/sources.svelte.test.ts": "the same",
-        "src/kranto/page/ui/web/src/pages/settings/featurepage.svelte.test.ts": "a page test's "
-        "old words for a gone feature folder, reworded separately",
     },
     "attribution": {
         "scripts/ci/no_attribution.py": "the check's own patterns",

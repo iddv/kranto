@@ -64,7 +64,7 @@
 <Detail back={view.back}>
   {#if !id || id === "reading"}
     {#if !host}
-      {@render gone("Watching's health needs the server, which is not hosting this page.")}
+      {@render gone("Watching's health needs the server, which is not answering.")}
     {:else if !d}
       <div class="pane-in"><Loading error={a?.error} /></div>
     {:else}
@@ -83,7 +83,7 @@
       </Pane>
     {/if}
   {:else if !host}
-    {@render gone("Watching's health needs the server, which is not hosting this page.")}
+    {@render gone("Watching's health needs the server, which is not answering.")}
   {:else if !d}
     <div class="pane-in"><Loading error={a?.error} /></div>
   {:else if k === "calls"}

@@ -59,19 +59,19 @@
     return H ? read<CubsList>(CUBS_API, 20000).data || null : null;
   });
   const lineOf = (id: string) => lines?.cubs.find((c) => c.id === id) || null;
-  const banner = $derived(!lines ? null : lines.stop_file ? "Every cub is stopped: cubs.STOP exists (~/.config/kranto/cubs.STOP). Nothing runs and every approval is practice until you remove the file."
-    : !lines.enabled ? "Cubs are off (cubs.enabled: false in your settings): none runs or starts. Their pages and what they ask you stay." : null);
+  const banner = $derived(!lines ? null : lines.stop_file ? "Every feature is stopped: the file cubs.STOP exists (~/.config/kranto/cubs.STOP). Nothing runs and every approval is practice until you remove the file."
+    : !lines.enabled ? "Added features are off (cubs.enabled: false in your settings): none runs or starts. Their pages and what they ask you stay." : null);
   const sel = $derived(view.w.r.sel || "");
   const ALLTABS: [string, string][] = [["installed", "Installed"], ["available", "Available"], ["made", "Made by Kranto"], ["approvals", "Approvals"]];
   const SUBNAV = $derived(shop ? ALLTABS : ALLTABS.filter(([k]) => k === "installed" || k === "approvals"));
   const tabHref = (k: string): string => href(k === "installed" ? "cubs" : "cubs/" + k);
   /** the head, declared to the shell */
   const head = $derived.by((): Partial<HeadDecl> => ({
-    crumb: [{ to: "cubs", w: "Cubs" }], glyph: "▦", wash: "grey",
-    facts: pending ? "reading your cubs…" : `${plural(cubs.length, "cub")} installed` + (open.length ? ` · ${open.length} waiting for you` : ""),
-    lede: "A cub can ask you to post, send or trade; it never does it itself, and you see who asked and on what before you confirm.",
-    primary: !shop ? undefined : lines ? { label: "Add a cub", id: "cubs-add", href: href(view.w.r.path.join("/"), { sel: "add" }) } : { label: "Check a manifest", id: "cubs-check", href: href(view.w.r.path.join("/"), { sel: "check" }) },
-    more: [{ label: "Arrange the home", id: "cubs-arrange", title: "Pin, order and hide the cubs' tiles on the home", run: () => (location.hash = "#/home?arrange=1") }],
+    crumb: [{ to: "cubs", w: "Features" }], glyph: "▦", wash: "grey",
+    facts: pending ? "reading your features…" : `${plural(cubs.length, "feature")} installed` + (open.length ? ` · ${open.length} waiting for you` : ""),
+    lede: "A feature can ask you to post, send or trade; it never does it itself, and you see who asked and on what before you confirm.",
+    primary: !shop ? undefined : lines ? { label: "Add a feature", id: "cubs-add", href: href(view.w.r.path.join("/"), { sel: "add" }) } : { label: "Check a manifest", id: "cubs-check", href: href(view.w.r.path.join("/"), { sel: "check" }) },
+    more: [{ label: "Arrange the home", id: "cubs-arrange", title: "Pin, order and hide the features' tiles on the home", run: () => (location.hash = "#/home?arrange=1") }],
     flash: banner ? { kind: "red", text: banner, link: null } : null, gear: "settings/system",
     sub: SUBNAV.map(([k, w]) => ({ to: tabHref(k).slice(2), w, n: k === "installed" ? cubs.length || null : k === "approvals" ? open.length || null : null, tone: k === "approvals" ? "wait" : "", on: tab === k })),
   }));
@@ -98,9 +98,9 @@
 
 {#snippet tag(word: string, tone: string)}<span class={"htag t-" + tone.replace(/[^a-z-]/g, "")}>{word}</span>{/snippet}
 
-<List title="Cubs" label="Cubs" {head}>
+<List title="Features" label="Features" {head}>
   {#if !H}
-    <Empty text="Cubs come from the server, which is not hosting this page." />
+    <Empty text="Features come from the server, which is not answering." />
   {:else if tab === "installed"}
     <Group id="cubs-installed" title="Installed" count={String(cubs.length)}>
       {#each cubs as x (x.id)}
@@ -109,7 +109,7 @@
         {#snippet end()}{#if (x.settings || []).some((r) => r.key === x.id + ".enabled")}<button class="btn sm sw" role="switch" data-cub-switch={x.id} aria-checked={x.enabled ? "true" : "false"} onclick={(e) => toggle(x, e.currentTarget)}>{x.enabled ? "On" : "Off"}</button>{/if}<a class="btn sm quiet" href={cubHref(x.id)} aria-label={`Open ${x.title}`}>›</a>{/snippet}
         <Row title={x.title} href={cubHref(x.id)} {meta} {end}>{#snippet st()}<span class="hglyph" aria-hidden="true">{glyphOf(x.manifest.ui.glyph)}</span>{/snippet}</Row>
       {/each}
-      {#if pending}<li class="gempty"><span class="muted">Loading…</span></li>{:else if !cubs.length}<Empty li text={shop ? "No cub yet: Kranto works without any. Add a cub installs one from a folder or a git address." : "No cub yet: Kranto works without any."} />{/if}
+      {#if pending}<li class="gempty"><span class="muted">Loading…</span></li>{:else if !cubs.length}<Empty li text={shop ? "No feature added yet: Kranto works without any. Add a feature installs one from a folder or a git address." : "No feature added yet: Kranto works without any."} />{/if}
     </Group>
     <!-- an update staged for an installed cub (Look for an update, or kranto cub update) waits here
          and on the cub's head until it is applied; the shop's, with cubs.developer -->
@@ -121,28 +121,28 @@
         <Row title={`${c.title} ${u.version}`} href={href("settings/" + c.id)}
           meta={`an update, staged · installed ${c.version}${u.adds && u.adds.length ? ` · it may now: ${u.adds.join("; ")}` : u.needs === "house" ? " · it adds a permission" : ""}`} {end} />
       {/each}
-      {#if !ups.length}<li class="gempty"><span class="muted">An update you looked for, and a cub Kranto builds for you (Made by Kranto), wait here until you have read them.</span></li>{/if}
+      {#if !ups.length}<li class="gempty"><span class="muted">An update you looked for waits here until you have read it.</span></li>{/if}
     </Group>{/if}
-    <p class="muted small">Each cub's switch here stops it; its page and its record stay. Hide a cub from the home under Arrange.</p>
+    <p class="muted small">Each feature's switch here stops it; its page and its record stay. Hide a feature from the home under Arrange.</p>
   {:else if tab === "available"}
-    <p class="flash blue" id="cubs-index">The cubs index opens at 0.7: other people's cubs, each marked reviewed, listed or unreviewed, with what it may do. Until then you can check a cub's manifest by pasting it.</p>
+    <p class="flash blue" id="cubs-index">There is no index of other people's features yet. When there is, each will be marked reviewed, listed or unreviewed, with what it may do. Until then you can check a feature's manifest by pasting it.</p>
     <dl class="perm"><dt>Reviewed</dt><dd>a maintainer read the code; signed</dd><dt>Listed</dt><dd>the index's automated checks passed on this version; nobody has read the code</dd><dt>Unreviewed</dt><dd>any address or folder; nobody has read the code, and the install dialog says so</dd></dl>
     <p><a class="btn" href={href("cubs/available", { sel: "check" })}>Check a manifest</a></p>
   {:else if tab === "made"}
-    <section class="box made" aria-labelledby="made-h"><h2 id="made-h">Kranto, build me a cub</h2>
+    <section class="box made" aria-labelledby="made-h"><h2 id="made-h">Kranto, build me a feature</h2>
       <label for="made-wish">What should it do?</label>
       <textarea id="made-wish" bind:value={wish} placeholder="When a brief mentions a conference in Europe, draft a trip with flights and a hotel under €800 and ask me before holding anything."></textarea>
       <p class="chips"><span class="muted small">Examples:</span>{#each EXAMPLES as x (x)}{" "}<button type="button" class="chip" onclick={() => (wish = x)}>{x}</button>{/each}</p>
       <p class="label">It may</p>
       <p class="chips">{#each MAY as m (m)}<button type="button" class="chip" aria-pressed={may.includes(m) ? "true" : "false"} onclick={() => (may = may.includes(m) ? may.filter((y) => y !== m) : [...may, m])}>{m}</button>{" "}{/each}</p>
-      <p class="muted small">The exam checks the built cub asks for no more than this, and for no high-trust grant you did not name. It is staged as made by Kranto: nothing runs until you have read its manifest, its tests and one practice run.</p>
-      <p class="flash amber small" id="made-later">Kranto builds a cub from a sentence in 0.6: until then there is no button for it here. Copy the template (kranto cub new says where) and Add a cub from its folder.</p>
+      <p class="muted small">The exam checks the built feature asks for no more than this, and for no high-trust grant you did not name. It is staged as made by Kranto: nothing runs until you have read its manifest, its tests and one practice run.</p>
+      <p class="flash amber small" id="made-later">Kranto cannot build a feature from a sentence yet, so there is no button for it here. Copy the template (kranto cub new says where) and add it with Add a feature, from its folder.</p>
     </section>
     <Group id="cubs-made" title="Staged, made by Kranto" count="0"><li class="gempty"><span class="muted">Nothing staged yet.</span></li></Group>
   {:else}
     <Group id="cubs-approvals" title="Approvals" count={String(open.length)}>
       <li class="asks"><AskLine tick={view.tick} titles={Object.fromEntries(cubs.map((c) => [c.id, c.title]))} /></li>
-      {#if !open.length}<Empty li text="Nothing waits for your approval: what a cub asks you comes here and to Needs you." />{/if}
+      {#if !open.length}<Empty li text="Nothing waits for your approval: what a feature asks you comes here and to Needs you." />{/if}
     </Group>
   {/if}
 </List>

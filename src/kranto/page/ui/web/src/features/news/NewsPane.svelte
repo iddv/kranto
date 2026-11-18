@@ -45,7 +45,7 @@
   {#if !id}
     {@render gone("Nothing selected.")}
   {:else if !host}
-    {@render gone("This comes from the server, which is not hosting this page.")}
+    {@render gone("This comes from the server, which is not answering.")}
   {:else if !b}
     <div class="pane-in"><Loading error={c?.error} /></div>
   {:else}

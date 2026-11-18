@@ -29,12 +29,12 @@
       {#snippet top()}<div class="caps"><label>Needs you <input type="number" id="hf-needs-cap" min="1" max="10" value={a.needs_cap} onchange={(e) => cap("shell.needs_cap", e)} /></label>
         <label>New today <input type="number" id="hf-new-cap" min="0" max="10" value={a.new_cap} onchange={(e) => cap("shell.new_cap", e)} /></label></div>
         {#if a.widgets}
-          <p class="small"><a href="#/home?arrange=1" id="hf-arrange">Arrange the home</a>: move, size, add and remove its widgets; the cubs' pins; which cubs may add rows (each widget's ⋯).</p>
-          <p class="small"><button class="btn sm" id="hf-reset" onclick={(e) => a && resetHome(a, e.currentTarget)}>Reset to default</button> <span class="muted">the home as it came: its seven parts in their order, every cub pinned in install order; Undo for a few seconds.</span></p>
-        {:else}<p class="small"><a href="#/home?arrange=1">Arrange the home</a>: the pins, what is hidden, which cubs may add rows.</p>{/if}{/snippet}
+          <p class="small"><a href="#/home?arrange=1" id="hf-arrange">Arrange the home</a>: move, size, add and remove its widgets; the features' pins; which features may add rows (each widget's ⋯).</p>
+          <p class="small"><button class="btn sm" id="hf-reset" onclick={(e) => a && resetHome(a, e.currentTarget)}>Reset to default</button> <span class="muted">the home as it came: its seven parts in their order, every added feature pinned in install order; Undo for a few seconds.</span></p>
+        {:else}<p class="small"><a href="#/home?arrange=1">Arrange the home</a>: the pins, what is hidden, which features may add rows.</p>{/if}{/snippet}
     </Pane>
   {:else}
-    <div class="pane-empty"><p class="empty">The home comes from the server, which is not hosting this page.</p></div>
+    <div class="pane-empty"><p class="empty">The home comes from the server, which is not answering.</p></div>
   {/if}
 </Detail>
 

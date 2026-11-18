@@ -553,7 +553,7 @@ def test_doctor_says_the_console_is_ready(user_home, monkeypatch):
     said["line"] = (
         "warn",
         "Open in Claude Code is off: set term.enabled: true in loop.yaml "
-        "(Settings › Building lists it) and restart Kranto.",
+        "and restart Kranto.",
     )
     c = by_name(launcher.console_checks(cfg))["open in claude code"]
     assert c.detail == "not ready: off: set term.enabled: true and restart Kranto."

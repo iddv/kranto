@@ -68,16 +68,16 @@
 <div id="cub-add">
   {#if !job}
     <label for="cub-source">A folder on this machine, or a git URL</label>
-    <input id="cub-source" bind:value={source} placeholder="~/cubs/my-cub or https://github.com/you/my-cub" autocomplete="off" spellcheck="false" />
+    <input id="cub-source" bind:value={source} placeholder="~/my-feature or https://github.com/you/my-feature" autocomplete="off" spellcheck="false" />
     {#if git}<label for="cub-ref">Tag, branch or commit</label><input id="cub-ref" bind:value={ref} placeholder="v1.0.0 (empty: its default branch)" autocomplete="off" spellcheck="false" />{/if}
-    <p class="muted small">{git ? "From a git URL a cub is unreviewed: nobody at Kranto has read it. Kranto fetches it without any credential of yours." : "From a folder a cub is yours. Kranto copies it; edit it there and Update to take a change."}</p>
-    <p class="foot"><span class="muted small">kranto reads it and shows you what it may do; nothing runs or installs yet.</span><button class="btn primary" id="cub-fetch" disabled={!source.trim()} onclick={(e) => fetchIt(e.currentTarget)}>Read it</button></p>
+    <p class="muted small">{git ? "From a git URL a feature is unreviewed: nobody at Kranto has read it. Kranto fetches it without any credential of yours." : "From a folder a feature is yours. Kranto copies it; edit it there and Update to take a change."}</p>
+    <p class="foot"><span class="muted small">Kranto reads it and shows you what it may do; nothing runs or installs yet.</span><button class="btn primary" id="cub-fetch" disabled={!source.trim()} onclick={(e) => fetchIt(e.currentTarget)}>Read it</button></p>
   {:else if JOB_WORKING.includes(job.state)}
     <p class="muted" id="cub-job" role="status">{STEP[job.state] || job.state}</p>
   {:else if job.state === "awaiting_confirm" && c}
     <h3>{c.title} <span class={"htag t-" + c.trust}>{trustWord(c.trust)}</span></h3>
     <p class="lede">{`${c.id} ${c.version}${c.sha ? " · commit " + c.sha.slice(0, 12) : ""} · ${c.inventory.files} files · licence ${c.inventory.licence}`}</p>
-    {#if c.trust === "unreviewed"}<p class="flash amber small"><b>Nobody at Kranto has read this code.</b> It runs in the sandbox like every cub, with only what is listed here.</p>{/if}
+    {#if c.trust === "unreviewed"}<p class="flash amber small"><b>Nobody at Kranto has read this code.</b> It runs in the sandbox like every added feature, with only what is listed here.</p>{/if}
     <dl class="perm" id="cub-words">{#each c.words as [k, w], i (i)}<dt>{k}</dt><dd>{w}</dd>{/each}</dl>
     {#if c.inventory.findings.length}
       <p class="about-k">What Kranto found in its code</p>

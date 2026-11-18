@@ -36,7 +36,7 @@ DEV_MODULES = ("kranto.features.post.evals", "kranto.page.proc", "kranto.page.mc
                "kranto.page.cli")
 # Files whose printed commands another pull request in flight rewrites; each leaves this set
 # when that change is on main.
-PENDING = {"docs/setup.md", "CONTRIBUTING.md"}
+PENDING: set[str] = set()
 # kranto subcommands whose words after them another program parses as it likes
 FREE_TAIL = {"term", "trace", "eval", "settings"}
 STOP = {"|", "||", "&&", ";", "#", ">", ">>", "2>", "2>&1", "&", "<", "\\"}

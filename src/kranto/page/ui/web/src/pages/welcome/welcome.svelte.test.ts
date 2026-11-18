@@ -61,7 +61,7 @@ describe("first run", () => {
     stub();
     ui.facts = null;
     const none = await draw(Welcome, at("welcome"));
-    expect(none.target.querySelector("strong")?.textContent).toBe("Setup needs the server. ");
+    expect(none.target.querySelector("strong")?.textContent).toBe("Setup needs Kranto's server, which is not answering. ");
     none.done();
   });
 

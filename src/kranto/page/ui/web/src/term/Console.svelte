@@ -18,7 +18,7 @@
   import { app, ui } from "../lib/shell.svelte";
   import { HOME_API, type HomeAnswer } from "../features/home";
 
-  // off: this server serves no terminal (`brb ui` alone): the panel is not drawn at all
+  // off: this server serves no terminal (the page's own test server): the panel is not drawn at all
   type Phase = "loading" | "off" | "none" | "starting" | "running" | "ended";
   let phase = $state<Phase>("loading");
   let st = $state<C.ConsoleState | null>(null);

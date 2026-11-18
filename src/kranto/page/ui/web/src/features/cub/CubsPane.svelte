@@ -39,28 +39,28 @@
 
 {#snippet checkForm()}
   {#if !checked || !checked.ok}
-    <label for="cub-yaml">Paste the cub's manifest</label>
+    <label for="cub-yaml">Paste the feature's manifest (its cub.yaml)</label>
     <textarea id="cub-yaml" rows="10" bind:value={text}></textarea>
     {#if checked && checked.error}<p class="flash red small" id="cub-check-error">{checked.error}</p>{/if}
     <p class="foot"><span class="muted small">Checked by Kranto's one validator; nothing is installed or run.</span><button class="btn primary" id="cub-check" onclick={(e) => check(e.currentTarget)}>Check</button></p>
   {:else}
     {@const m = checked.manifest || {}}
     <h3>{String(m.title || m.id)} {@render tag(trustWord(checked.trust || "unreviewed"), checked.trust || "unreviewed")}</h3>
-    <p class="lede">{`${String(m.id)} ${String(m.version)} · speaks ${String(m.api)}.`} <b>Nobody at Kranto has read this code.</b> It would run in the sandbox like every cub, in practice (nothing sent) until you say otherwise.</p>
+    <p class="lede">{`${String(m.id)} ${String(m.version)} · speaks ${String(m.api)}.`} <b>Nobody at Kranto has read this code.</b> It would run in the sandbox like every added feature, in practice (nothing sent) until you say otherwise.</p>
     <p class="lede">{String(m.says || "")}</p>
-    <p class="about-k">This cub will</p>
+    <p class="about-k">This feature will</p>
     <dl class="perm" id="cub-will">{#each permissionWords(m) as [k, w] (k)}<dt>{k}</dt><dd>{w}</dd>{/each}</dl>
     <p class="muted small">{CANNOT}</p>
     <p class="about-k">After install</p>
-    <p class="small muted">Pinned at its manifest's hash; an update that adds no permission applies by itself, any other shows the diff and each new permission first. A tile appears on your home under Cubs; it may not add rows to Needs you until you allow it on its Settings page. Its widgets wait in the library until you add them.</p>
+    <p class="small muted">Pinned at its manifest's hash; an update that adds no permission applies by itself, any other shows the diff and each new permission first. A tile appears on your home under Features; it may not add rows to Needs you until you allow it on its Settings page. Its widgets wait in the library until you add them.</p>
     <p class="foot"><button class="btn quiet" onclick={() => (checked = null)}>Check another</button><span class="flash amber small" id="cub-install-later">{checked.why}</span></p>
   {/if}
 {/snippet}
 
 <Detail back={view.back}>
   {#if lines && (sel === "add" || sel === "check")}
-    <div class="pane-in cubs-sheet" id="cubs-sheet" data-title="Add a cub">
-      <p class="dk mono">Add a cub · in practice</p>
+    <div class="pane-in cubs-sheet" id="cubs-sheet" data-title="Add a feature">
+      <p class="dk mono">Add a feature · in practice</p>
       <AddCub done={(cid) => (location.hash = cid ? cubHref(cid) : href("cubs"))} />
       <details class="fold" id="cub-check-fold" open={sel === "check"}><summary>Check a manifest first: paste a cub.yaml, nothing is installed</summary>{@render checkForm()}</details>
     </div>

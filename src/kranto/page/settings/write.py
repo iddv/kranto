@@ -1,14 +1,14 @@
-"""Writing the loop's settings store, ``loop.yaml`` (PLAN.md section 1.4: written by the
-settings pages, not by hand).
+"""Writing the page's settings file, ``loop.yaml``.
 
-A value is set, or unset (back to the default in ``config.DEFAULTS``), at a dotted path such
-as ``build.models.verify``. The file is edited as text, so the owner's comments and the
+A value is set, or unset (back to the default in ``store.DEFAULTS``), at a dotted path such
+as ``term.daily_usd``. The file is edited as text, so the owner's comments and the
 order of keys survive; the result is parsed and checked before it replaces the file in one
 step. A file the text edit cannot handle (a flow-style mapping on the path) is rewritten
 from its parsed form instead, keeping its leading comment.
 
-Only the keys in ``RULES``, each checked by ``check`` (and each role's model,
-``kranto.page.models.ROLES``, and the caps of Settings › Spend) are written through the API.
+Only the keys in ``RULES``, each checked by ``check``, are written from a request
+(``POST api/term/settings``); the console's own settings (``ask``) are written by
+``term/service.py``, and the wizard writes ``build.claude_command``.
 """
 from __future__ import annotations
 
@@ -20,8 +20,6 @@ from pathlib import Path
 import yaml
 
 UNSET = object()
-# Spend caps: USD or null (no cap). Settings › Spend.
-CAPS = {"daily_usd": ("daily_usd",), "build_max_usd": ("build", "max_usd")}
 
 
 def _scalar(value) -> str:
@@ -178,139 +176,14 @@ def write(path: Path, keys: tuple[str, ...], value=UNSET) -> None:
 REPO_NAME = re.compile(r"[A-Za-z0-9-]{1,39}/[A-Za-z0-9._-]{1,100}")
 
 
-# Settings › Publishing › Projects: each key under ``projects`` the page may write, with its
-# check: ("bool",) | ("enum", choices) | ("int", lo, hi) | ("float", lo, hi) | ("usd",) |
-# ("model",) | ("list", choices). A per-project override (the project page's Settings) takes the
-# same keys but the first two, which are kranto-wide.
-PROJECTS = {
-    "enabled": ("bool",), "create.on": ("enum", ("publish", "public")),
-    "charter.model": ("model",),
-    "topic.create": ("enum", ("auto", "ask", "off")),
-    "topic.approve": ("enum", ("core", "none", "all")),
-    "evolve.every_days": ("int", 1, 365), "evolve.skip_when_quiet": ("bool",),
-    "evolve.min_hours_between": ("int", 0, 720), "evolve.model": ("model",),
-    "evolve.max_ideas": ("int", 1, 20),
-    "evolve.max_maintenance": ("int", 0, 20),
-    "evolve.concurrency": ("int", 0, 4),
-    "evolve.dup_sim": ("float", 0.0, 1.0),
-    "autonomy.preset": ("enum", ("quiet", "hands-on", "off")),
-    "autonomy.patch": ("enum", ("auto", "ask", "list", None)),
-    "autonomy.minor": ("enum", ("auto", "ask", "list", None)),
-    # a scope change always goes to the owner: never auto
-    "autonomy.scope": ("enum", ("ask", "list", None)),
-    "gate.min_confidence": ("float", 0.0, 1.0),
-    "gate.min_agree_runs.patch": ("int", 1, 10), "gate.min_agree_runs.minor": ("int", 1, 10),
-    "gate.require_evidence_kinds": ("list", ("customer_ask", "feature", "maintenance")),
-    "changes.file_issues_outside": ("bool",), "decline_days": ("int", 1, 365),
-    "budget.monthly_usd": ("usd",), "health.stale_pr_days": ("int", 1, 365)}
-PROJECT_WIDE = ("enabled", "create.on")
-
-# Every loop.yaml setting the app writes, by its dotted key, with its check (#2: one writer,
-# ``POST api/loop/settings``, for Settings › Building and its Weekly editor, and the check
-# Settings › Publishing › Maintenance and Projects use too). The kinds are PROJECTS' plus ("int?", lo, hi)
-# and ("float?", lo, hi), where empty is null (off), and ("repos",), a list of owner/name.
-# A key not here is set in loop.yaml by hand on purpose: commands and test hooks and credentials
-# are never written from a request. The kinds for the rest (UP #3): ("path",) a folder that exists
-# and Kranto can write; ("loopback_url",) an http(s) address on this machine, or empty; ("hosts",)
-# host names; ("policy",) a bundled policy's name. Only the page's and the command line's tokens
-# write here at all (``api.caller``), and the keys in SENSITIVE also need the request's
-# ``confirm: true``, which the page sends after its dialog says what changes.
-_SCORE = ("float?", 0.0, 1.0)
+# Every loop.yaml setting the page writes from a request, by its dotted key, with its check:
+# ("bool",) | ("enum", choices) | ("usd",) (a number of dollars, or empty for no cap). A key not
+# here is set in loop.yaml by hand on purpose: commands, paths and the network allow-lists
+# are never written from a request.
 RULES: dict[str, tuple] = {
-    "intake.auto.mode": ("enum", ("manual", "rule", "editor")),
-    "concurrency": ("int", 1, 8),
-    "daily_usd": ("usd",), "build.max_usd": ("usd",), "build.auto_repair": ("int", 0, 5),
-    "build.flow": ("enum", ("v5", "simple", "lean")), "build.fix_rounds": ("int?", 0, 5),
-    "kranto.enabled": ("bool",), "kranto.include_unsupported": ("bool",),
-    "pitch.min_buildability": ("float", 0.0, 1.0),
-    **{f"pitch.min_{k}": _SCORE for k in ("insight", "differentiation", "grounding",
-                                         "durability", "breadth")},
-    "pitch.interpret_claims": ("bool",), "pitch.topic_words": ("bool",),
-    "exam.reruns": ("int", 0, 10), "exam.intermittent_hold_min": ("int", 1, 5),
-    "exam.flaky_retire": ("bool",), "exam.adopt": ("enum", ("fixes", "all", "off")),
-    "exam.evidence_asset": ("bool",),
-    "corpus.auto_add": ("bool",), "corpus.replay_daily": ("bool",),
-    "publish.approval": ("enum", ("required", "auto")),
-    "publish.maintenance_files": ("enum", ("policy", "all", "none")),
-    "mcp.actions": ("bool",),
-    "revise.enabled": ("bool",), "revise.max_per_build": ("int?", 1, 100),
     "term.enabled": ("enum", (None, True, False)), "term.daily_usd": ("usd",),
-    "term.allow_api_key": ("bool",), "build.allow_api_key": ("bool",),
-    "ideas.cadence": ("enum", ("weekly", "daily")), "ideas.max_per_week": ("int", 0, 7),
-    "ideas.nominee_auto_build": ("bool",),
-    "ideas.editor.day": ("enum", ("monday", "tuesday", "wednesday", "thursday", "friday",
-                                  "saturday", "sunday")),
-    "ideas.editor.hour": ("int", 0, 23),
-    "ideas.research.enabled": ("bool",), "ideas.research.max_usd": ("usd",),
-    "trace.page_kb": ("int", 16, 1024), "trace.payload_max_mb": ("int", 1, 64),
-    "trace.export.otlp_url": ("loopback_url",), "trace.export.content": ("bool",),
-    "maintain.enabled": ("bool",), "maintain.poll_s": ("int", 60, 86400),
-    "maintain.cache_s": ("int", 0, 86400), "maintain.triage_max_per_poll": ("int", 1, 86400),
-    "maintain.repos": ("repos",), "maintain.concurrency": ("int", 0, 8),
-    "maintain.max_usd": ("usd",), "maintain.net": ("enum", ("allowlist", "public")),
-    "maintain.lesson_label": ("bool",), "maintain.doctor_days": ("int", 0, 90),
-    "maintain.identity": ("enum", ("auto", "app", "token", "login")),
-    "maintain.refresh_max": ("int", 0, 5),
-    "maintain.self": ("bool",), "maintain.exam": ("enum", ("report", "require", "off")),
-    # SF: a token file is named in loop.yaml by hand; the page only removes the setting
-    # (Remove this token setting, once GitHub refused the token): {key, clear: true}
-    "maintain.token_env_file": ("remove",),
-    # UP #3: the Building and Publishing rows that said "set by hand in your settings"
-    "tasks_dir": ("path",), "kranto.url": ("loopback_url",), "build.policy": ("policy",),
-    "exam.indexes": ("hosts",),
-    "publish.anyway.may_override": ("list", ("tests", "completeness", "safe_defaults")),
-    **{f"projects.{k}": r for k, r in PROJECTS.items()}}
-# what each sensitive key's change does, said in the page's confirm dialog before it is written
-SENSITIVE = {
-    "tasks_dir": "Builds make their task folders in this folder from the next pitch on; the "
-                 "folders already made stay where they are.",
-    "kranto.url": "The loop reads idea cards from this address on this machine; empty reads "
-                    "the server's database file, read-only.",
-    "build.policy": "Every build from the next one runs this pipeline.",
-    "exam.indexes": "The install phase of the checks may reach these package indexes, through "
-                    "the proxy, and nothing else; empty means no network at all.",
-    "publish.anyway.may_override": "Publish anyway may publish over these holds, into a "
-                                   "private repo with the override disclosed. Nothing "
-                                   "delivered, an open security finding, secrets and a product "
-                                   "listening beyond loopback are never overridden.",
-    # BL: the owner's default is the Claude plan; the dialog says what turning it on bills
-    "build.allow_api_key": "Builds will bill your Claude API key: without a Claude login token, "
-                           "builds, fixes, pitches and Open in Claude Code log in with the "
-                           "watcher's Claude API key (Kranto's .env), at API prices. Off, a build "
-                           "is held until you set up your Claude plan.",
-    "maintain.token_env_file": "Maintenance stops using this token file and acts as the identity "
-                               "shown instead. The file itself stays where it is: delete it, and "
-                               "the token on GitHub, yourself.",
-}
-HOST = re.compile(r"(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}")
-LOOPBACK = ("127.0.0.1", "localhost", "[::1]")
-# Settings › Publishing › Maintenance's keys (under ``maintain``), in the order the page sends them
-MAINTAIN = ("enabled", "poll_s", "cache_s", "triage_max_per_poll", "repos", "concurrency",
-            "max_usd", "net", "lesson_label", "doctor_days", "identity", "refresh_max")
+    "term.allow_api_key": ("bool",)}
 _WORDS = {True: "true", False: "false", None: "empty"}
-
-
-def policies() -> list[str]:
-    """The build pipelines Kranto ships: none since the factory left (CUT)."""
-    return []
-
-
-def rule_view(rule: tuple) -> dict:
-    """A check as the page's form reads it: ``{kind, choices?, min?, max?, empty?}``."""
-    kind = rule[0].rstrip("?")
-    if kind == "policy":
-        return {"kind": "enum", "choices": policies(), "empty": False}
-    if kind in ("path", "loopback_url"):
-        return {"kind": kind, "empty": kind == "loopback_url"}
-    if kind == "hosts":
-        return {"kind": "hosts", "empty": True}
-    if kind == "remove":
-        return {"kind": "remove", "empty": True}
-    return {"kind": kind,
-            **({"choices": list(rule[1])} if kind in ("enum", "list") else {}),
-            **({"min": rule[1], "max": rule[2]} if kind in ("int", "float") else {}),
-            "empty": rule[0].endswith("?") or kind in ("usd", "model")
-            or (kind == "enum" and None in rule[1])}
 
 
 def check(key: str, value):
@@ -325,15 +198,6 @@ def check(key: str, value):
 
 def checked(rule: tuple, key: str, value):
     kind = rule[0]
-    if kind == "remove":                  # a credential's file: removed here, never named
-        if value is None:
-            return None
-        raise ValueError(f"{key} is only removed here (clear: true); to name a file, set it "
-                         "in loop.yaml")
-    if kind.endswith("?"):
-        if value is None or value == "":
-            return None
-        kind = kind[:-1]
     if kind == "bool":
         if not isinstance(value, bool):
             raise ValueError(f"{key} is true or false")
@@ -346,15 +210,6 @@ def checked(rule: tuple, key: str, value):
             raise ValueError(f"{key} is one of " + ", ".join(
                 _WORDS.get(c, str(c)) if not isinstance(c, str) else c for c in rule[1]))
         return value
-    if kind == "int":
-        if isinstance(value, bool) or not isinstance(value, int) or not rule[1] <= value <= rule[2]:
-            raise ValueError(f"{key} is a whole number from {rule[1]} to {rule[2]}")
-        return value
-    if kind == "float":
-        if isinstance(value, bool) or not isinstance(value, int | float) \
-                or not rule[1] <= value <= rule[2]:
-            raise ValueError(f"{key} is a number from {rule[1]:g} to {rule[2]:g}")
-        return round(float(value), 3)
     if kind == "usd":
         if isinstance(value, str) and value.strip().lower() in ("none", "null"):
             return None
@@ -364,79 +219,7 @@ def checked(rule: tuple, key: str, value):
             except ValueError:
                 pass
         return usd_or_none(value, key)
-    if kind == "model":
-        from .schema import check_model
-        return check_model(value)
-    if kind == "repos":
-        if isinstance(value, str):
-            value = value.replace(",", " ").split()
-        if not isinstance(value, list) or len(value) > 100 or any(
-                not isinstance(x, str) or not REPO_NAME.fullmatch(x) for x in value):
-            raise ValueError(f"{key} is a list of owner/name")
-        return list(dict.fromkeys(value))
-    if kind == "path":
-        return _folder(key, value)
-    if kind == "loopback_url":
-        return _loopback_url(key, value)
-    if kind == "hosts":
-        if isinstance(value, str):
-            value = value.replace(",", " ").split()
-        if not isinstance(value, list) or len(value) > 20 or any(
-                not isinstance(x, str) or not HOST.fullmatch(x.strip().lower()) for x in value):
-            raise ValueError(f"{key} is a list of host names (pypi.org files.pythonhosted.org): "
-                             "no scheme, port or path; at most 20")
-        return list(dict.fromkeys(x.strip().lower() for x in value))
-    if kind == "policy":
-        raise ValueError(f"{key}: builds are not part of Kranto any more")
-    if isinstance(value, str):                       # a form's field: the choices as words
-        value = value.replace(",", " ").split()
-    if not isinstance(value, list) or any(x not in rule[1] for x in value):
-        raise ValueError(f"{key} is a list of " + ", ".join(rule[1]))
-    return list(dict.fromkeys(value))
-
-
-def _folder(key: str, value) -> str:
-    """A folder Kranto writes in: ``~`` allowed, absolute once expanded, there, and writable."""
-    text = str(value or "").strip()
-    if not text or "\n" in text or "\x00" in text:
-        raise ValueError(f"{key} is a folder: ~/tasks or /srv/tasks")
-    p = Path(os.path.expanduser(text))
-    if not p.is_absolute():
-        raise ValueError(f"{key} is a whole path from / (or ~): {text} is not")
-    if not p.is_dir():
-        raise ValueError(f"{key}: there is no folder {p}; make it first")
-    if not os.access(p, os.W_OK | os.X_OK):
-        raise ValueError(f"{key}: Kranto cannot write in {p}")
-    return text
-
-
-def _loopback_url(key: str, value) -> str | None:
-    """An http(s) address on this machine (127.0.0.1, localhost, [::1]), no credentials; empty:
-    None. Cards are read from it, so nothing elsewhere is accepted."""
-    from urllib.parse import urlsplit
-    text = str(value or "").strip()
-    if not text or text.lower() in ("none", "null"):
-        return None
-    try:
-        u = urlsplit(text)
-        port = u.port
-    except ValueError:
-        raise ValueError(f"{key} is an address like http://127.0.0.1:8765") from None
-    host = (u.hostname or "").lower()
-    host = f"[{host}]" if ":" in host else host
-    if u.scheme not in ("http", "https") or host not in LOOPBACK or u.username or u.password \
-            or (port is not None and not 0 < port < 65536):
-        raise ValueError(f"{key} is an address on this machine (http://127.0.0.1:<port>, "
-                         "localhost or [::1]), with no user or password; or empty")
-    return text.rstrip("/")
-
-
-def project_value(key: str, value):
-    """A Settings › Publishing › Projects value from a request, checked; ValueError says why (in words)."""
-    rule = PROJECTS.get(key)
-    if rule is None:
-        raise ValueError(f"projects.{key} is not a setting this page writes")
-    return checked(rule, key, value)
+    raise ValueError(f"{key}: no check of kind {kind}")
 
 
 def usd_or_none(value, what: str) -> float | None:

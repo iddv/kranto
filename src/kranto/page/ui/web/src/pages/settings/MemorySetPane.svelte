@@ -26,7 +26,7 @@
     if (!L || !m) return;
     const old = m.setting;
     void saveUndo(btn, {
-      write: () => L.api(SERVICE_SETTINGS, { memory: to }), what: () => `kranto' memory ${to === "auto" ? "auto" : `${to} GB at most`}`, effect: "now",
+      write: () => L.api(SERVICE_SETTINGS, { memory: to }), what: () => `Kranto's memory ${to === "auto" ? "auto" : `${to} GB at most`}`, effect: "now",
       undo: () => L.api(SERVICE_SETTINGS, { memory: old }),
       after: () => {
         val = null;

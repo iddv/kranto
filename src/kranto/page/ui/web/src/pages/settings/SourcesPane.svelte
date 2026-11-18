@@ -52,12 +52,12 @@
     {:else if adding}
       <DescribePane {view} />
     {:else if !host}
-      {@render gone("Sources need the server, which is not hosting this page.")}
+      {@render gone("Sources need the server, which is not answering.")}
     {:else if !d}
       <div class="pane-in"><Loading error={c?.error} /></div>
     {:else}
       {@const reddit = d.reddit.watched}
-      <Pane title="Where the kranto read" acts={addBtn} sections={[{ id: "topics", w: "Topics", n: d.topics.length }, { id: "counts", w: "By state", about: { text: `Items a day: the last 7 days, before filtering. Kept and yield: the last 30 days. A source is kept ${d.default_retention_days} days by default.` } }]}>
+      <Pane title="Where Kranto reads" acts={addBtn} sections={[{ id: "topics", w: "Topics", n: d.topics.length }, { id: "counts", w: "By state", about: { text: `Items a day: the last 7 days, before filtering. Kept and yield: the last 30 days. A source is kept ${d.default_retention_days} days by default.` } }]}>
         {#snippet kind()}<Glyph name="dot" colour="blue" word="Sources" />{kindLine("sources")}{/snippet}
         {#snippet top()}{#if reddit}<div class="note c-amber" role="status"><Icon name="warn" /><div><strong>{"Reddit's feeds stop on 13 Nov 2026. "}</strong>{`${plural(reddit, "Reddit source")} you watch will stop then. Click Scout more on their topics: the scout proposes replacements for each.`}</div></div>{/if}{/snippet}
         {#snippet section(s)}
