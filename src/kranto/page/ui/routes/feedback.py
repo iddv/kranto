@@ -1,4 +1,4 @@
-"""Feedback (FB): where the sheet's issue goes, and filing it as the person.
+"""Feedback: where the sheet's issue goes, and filing it as the person.
 
 ``GET /api/feedback/issue`` is what the sheet reads when it opens (``kranto.page.feedback.status``:
 the repository, whether the person's own ``gh`` can file there, whether GitHub answers, what

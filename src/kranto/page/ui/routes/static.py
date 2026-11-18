@@ -13,8 +13,8 @@ from .base import Prefix
 UI_DIR = Path(__file__).resolve().parents[1]
 STATIC = UI_DIR / "static"
 APP_PAGE = UI_DIR / "app.html"
-# the old pages' addresses, kept as forwards into the app (O-2)
-MOVED = {"/classic": "#/", "/loop": "#/"}          # the old builds and loop pages (CUT)
+# the old pages' addresses, kept as forwards into the app
+MOVED = {"/classic": "#/", "/loop": "#/"}          # the old builds and loop pages (gone)
 # The page's own scripts and styles are linked at static/v<version>/: a new release is a new
 # address, so a host may cache one for good (``handle_with_headers``: immutable); any version
 # segment serves today's file, so a page loaded just before an update still draws.
@@ -93,7 +93,7 @@ def _static(app, r):
     m = VERSIONED.fullmatch(r.path)
     name = m.group(1) if m else r.path[len("/static/"):]
     f = APP_DIR / name[4:] if name.startswith("app/") else STATIC / name
-    # one level down only for the brand assets (static/brand/, UI-v4.md 1.5) and the built UI
+    # one level down only for the brand assets (static/brand/) and the built UI
     # (static/app/, never its.vite/)
     if not re.fullmatch(r"(brand/|app/)?[A-Za-z0-9_.-]+", name) or not f.is_file():
         raise HttpError(404, "not found")

@@ -115,7 +115,7 @@ def _ask(a, tid: str, sel: str) -> dict:
 
 
 def _idea(a, iid: str, sel: str) -> dict:
-    # an idea is its card (card:<n>); the build loop's own ideas (i<id>) left with it (CUT)
+    # an idea is its card (card:<n>); the build loop's own ideas (i<id>) left with it
     n = iid.split(":", 1)[1] if iid.startswith("card:") else None
     card = None
     if n is not None:

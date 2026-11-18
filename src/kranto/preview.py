@@ -20,7 +20,7 @@ the
    cubs' own updates (``core.cubs.updates.run``, ``install.apply_update``) are off;
 5. ``/api/status`` carries ``preview`` (the status bar's sentence and the copy's date);
 6. ``kranto serve`` refuses to start with the switch on when its home or loop home is the live
-   install's, or its port is live's (``refusal``).
+   install's, or its port is the live install's (``refusal``).
 7. a key pasted on the page is never tested or kept (``NO_KEY_TEST``): the watcher's
    (``web/setup_api``, a provider that takes a key), a writer's OpenAI key
    (``web/prose_api.writer_key``) and the live search's (``web/websearch_api``); testing one is
@@ -158,7 +158,7 @@ def mark_away(home: Path | str, days: int = 9, now: datetime | None = None) -> d
     (``home.visit``) ``days`` ago on the preview's copy, so "While you were away" can be seen
     there (a copy is otherwise never away: the marker starts at the first draw). Refuses on any
     home whose own config file does not carry ``preview.enabled: true``: the environment is not
-    enough, so it never writes live's marker. Answers the marker as stored."""
+    enough, so it never writes the live install's marker. Answers the marker as stored."""
     import json
     from datetime import timedelta
 
@@ -235,8 +235,8 @@ def _add_live_home(found: set, live_home: Path | None) -> None:
 def refusal(home: Path, loop_home: Path | None, port: int | None,
             user_home: Path | None = None) -> str | None:
     """Why ``kranto serve`` must not start as the preview here, or None. Only asked with the
-    switch on: a home or a loop home that is (or holds, or sits in) one of live's folders, or
-    live's port."""
+    switch on: a home or a loop home that is (or holds, or sits in) one of the live install's
+    folders, or the live install's port."""
     user_home = Path(user_home or Path.home())
     live = live_places(user_home)
     for what, p in (("home", home), ("loop home", loop_home)):

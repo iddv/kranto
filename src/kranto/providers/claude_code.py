@@ -2,12 +2,12 @@
 the page's ``host_api.claude_print``, which gives the model no tool, no MCP server and no
 settings, pipes Kranto's token (or lets claude use its own login) and refuses a session that
 started with a tool. Offered only as an explicit choice, never the default, with
-``TERMS`` shown where it is chosen (the owner's D2).
+``TERMS`` shown where it is chosen.
 
 Billing is the plan: a call's ``cost_usd`` is 0 and the CLI's list-price estimate
-(``total_cost_usd``) is kept as ``equiv_usd`` (D10). When a usage window closes ("You've hit
+(``total_cost_usd``) is kept as ``equiv_usd``. When a usage window closes ("You've hit
 your session limit · resets 3:45pm"), watching pauses until the reset time it names, else for
-an hour (D8): nothing is consumed and nothing fails. An expired login stops the run with the
+an hour: nothing is consumed and nothing fails. An expired login stops the run with the
 command to run. The exact shape of a usage-limit result is unverified until one happens: any
 error result is kept, scrubbed, in the call's row.
 """

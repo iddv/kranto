@@ -544,8 +544,8 @@ class Stored:
     # -- odd values --
     @classmethod
     def named_odd(cls) -> list[Self]:
-        """The odd cases a contract names by hand (the RCA's row, a pack's record): what a real
-        writer stores that the derived set (:meth:`odd`) would not make on its own."""
+        """The odd cases a contract names by hand (a row that once broke, a pack's record): what
+        a real writer stores that the derived set (:meth:`odd`) would not make on its own."""
         return []
 
     @classmethod

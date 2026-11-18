@@ -399,7 +399,7 @@ def summary(home: Path) -> dict:
             "channel": inst.get("channel"), "chosen": settings(home).channel,
             "state": st.get("state", "idle"),
             "detail": st.get("detail"), "reason": st.get("reason"),
-            # the self-check that rolled it back (RCA D1): how many pages failed, the first
+            # the self-check that rolled it back: how many pages failed, the first
             # one's error id (Needs you's Send this error files it), None when it passed
             "broke": {"pages": len(failed), "error_id": next(
                 (f.get("error_id") for f in failed if f.get("error_id")), None)}

@@ -314,7 +314,7 @@ def describe(rt) -> dict:
     request kind's read-back schema."""
     from ..rowsafe import each
     shown = [f for f in features() if listed(rt.cfg, f)]
-    # one feature or cub that cannot be read is listed as such, never the list (RCA A3)
+    # one feature or cub that cannot be read is listed as such, never the list
     rows = each(shown, lambda f: _described(rt, f), "feature",
                 keep=lambda f: {"title": f.title, "trust": f.trust})
     return {"features": rows, "api": m_api(), "reads": list(api.V1),

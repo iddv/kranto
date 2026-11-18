@@ -1,4 +1,4 @@
-"""Outcomes: what happened to an idea card after it was written (PLAN 4.7), one append-only row
+"""Outcomes: what happened to an idea card after it was written, one append-only row
 each, written by the page through ``POST /api/ideas/{id}/outcome`` (migration 24).
 
 ``kind`` says which step decided (``KINDS``); ``value`` is that step's word, ``detail`` its
@@ -10,12 +10,12 @@ week, ``2026-W41``) and ``why`` (the gate that decided, in one sentence).
 (``proceed``, ``revise``, ``drop``), ``detail`` when it searched, the risk, what exists with URLs
 and dates, what shipped since the card's newest observation.
 
-The loop (the page ``loop/outcomes.py``) wrote one row at each step a card taken in went
-through (CON L1): ``intake`` (taken in, sent to build, skipped), ``pitch`` (accepted, rejected,
+The build loop (since removed) wrote one row at each step a card taken in went
+through: ``intake`` (taken in, sent to build, skipped), ``pitch`` (accepted, rejected,
 error), ``build`` (building, queued, paused, held), ``gate`` (ready, held), ``publish``
 (published, public, kept) and ``verdict`` (closed, rejected); each ``detail`` names the loop's
 idea (``idea``), and a publish row its ``repo`` and ``url``. ``built`` reads them. Since builds
-left Kranto (CUT) these kinds, with ``editor``, ``signals`` and ``research`` (``LOOP_ONLY``),
+left Kranto these kinds, with ``editor``, ``signals`` and ``research`` (``LOOP_ONLY``),
 take no new row; the old rows are read as they are.
 
 ``decision`` is the owner's word on a card in the server: ``later`` with

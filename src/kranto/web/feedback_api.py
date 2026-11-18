@@ -69,8 +69,8 @@ class FeedbackAPI:
         q = request.query_params
         target = q.get("target") or ""
         if target in feedback.RETIRED_TARGETS:
-            # a build's, a project's or a theme's rows (CUT): skipped, never an error for a
-            # page that still asks
+            # a build's, a project's or a theme's rows (gone with builds): skipped, never an
+            # error for a page that still asks
             if q.get("target_id"):
                 return JSONResponse({"target": target, "target_id": q["target_id"],
                                      "history": []})

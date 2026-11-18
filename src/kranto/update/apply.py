@@ -799,7 +799,7 @@ class Helper:
 
     def api(self, method: str, path: str, body: dict | None = None) -> tuple[int, dict | None]:
         token = cli_token(self.env, self.unit) if method not in ("GET", "HEAD") else None
-        if token:                                 # writes say who they are (OI); never logged
+        if token:                                 # writes say who they are; never logged
             return self.http(method, self.base + path, body,
                              headers={"Authorization": f"Bearer {token}"})
         return self.http(method, self.base + path, body)

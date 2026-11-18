@@ -1,4 +1,4 @@
-"""The page's usage counters (section 4.2): lines handed to the host's
+"""The page's usage counters: lines handed to the host's
 recorder.
 
 The page keeps nothing itself and decides nothing: ``kranto serve`` gives it the server's
@@ -8,10 +8,10 @@ line) ``record`` does nothing. It never raises.
 
 ``telemetry.json`` is the page's part of the allow-list: the page nodes (nodes.json) and the
 origins. ``schema()`` reads it for the host; a test keeps the nodes equal to nodes.json. The
-registry's ``action`` line and the build's ``build`` line left with the factory (CUT).
+registry's ``action`` line and the build's ``build`` line left with the build factory.
 
 ``facts(loop_home)``: the few numbers the daily report takes from the page's settings (whether
-Open in Claude Code is on); never a name. The build loop's numbers left with it (CUT).
+Open in Claude Code is on); never a name. The build loop's numbers left with it.
 """
 from __future__ import annotations
 

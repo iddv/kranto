@@ -1,4 +1,4 @@
-"""First-run setup (PLAN.md section 1.5): the model key, the two logins builds need, and
+"""First-run setup: the model key, the two logins builds need, and
 the few config values onboarding writes.
 
 The key is kept like a connection's token: never in the YAML, the library, a log line or
