@@ -352,10 +352,11 @@ words; Settings › Posting changes it later). Either way the home shows **The f
 read as it goes and the topic's four rows, Sources, First read, First brief (as soon as 8 items
 are kept), First ideas (after the map, once 30 items are kept). The status bar says "Reading for
 the first time" until the first read ends. The console stays on its rail, starting nothing,
-until setup is done; then, with Claude Code installed and signed in, it **starts by itself**
-beside the page (untick Settings › Assistant › **Open the console when Kranto opens** to stop
-that): Claude Code, as you,
-not in a sandbox, asking once whether to trust Kranto's folder.
+until you open it (✦, or ⌘J): Claude Code, as you, not in a sandbox, asking once whether to
+trust Kranto's folder and then before every edit and command. Settings › Assistant can make it
+open when Kranto opens (**Open the console when Kranto opens**) and ask less. A home made by
+an earlier version keeps what it had: the console opens by itself, in Claude Code's auto mode, until
+you change it there.
 
 **You should see:** the home, with **Needs you** at its top, `Kranto is reading <your topic> for
 the first time.` and **The first hour**.

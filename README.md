@@ -44,9 +44,10 @@ read every item (use a feed reader) or schedule posts across many networks (use 
   posts it once you approve. With nothing connected, copy the text.
 - **The console.** Your own Claude Code in a panel beside every page, working on the same
   library through the same tools. It runs as you, not in a sandbox
-  ([docs/threat-model.md](docs/threat-model.md)), and opens by itself once setup is done
-  (Settings › Assistant turns that off). What it changes that costs money or shapes your posts
-  waits for your yes. Optional: Kranto works without it.
+  ([docs/threat-model.md](docs/threat-model.md)). On a new install it opens only when you open
+  it, and asks before every edit and command; Settings › Assistant lets it open by itself or ask
+  less. What it changes that costs money or shapes your posts waits for your yes. Optional:
+  Kranto works without it.
 
 ## What it costs, and how long it takes
 
