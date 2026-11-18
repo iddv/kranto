@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Decide the next release: one version, one checkout of the one repository, on one of the two
-lines (the owner's decisions of 2026-10-24).
+lines (decided 24 October 2026).
 
 - **nightly** (the default): every cut from ``main``. Numbered toward the next stable minor:
   while the newest stable tag is ``v0.6.x`` nightly is ``v0.7.0-devN`` (wheel ``0.7.0.devN``),
   ``N`` the newest existing dev tag for that target plus one, never a date. ``previous`` is the
   nightly before it for the same target, else the newest stable tag.
-- **promotion** (``--from-tag vX.Y.0-devN``): the owner's choice to make a nightly build stable.
+- **promotion** (``--from-tag vX.Y.0-devN``): the maintainer's choice to make a nightly build
+  stable.
   Version ``X.Y.0``, cut from the dev tag's own commits; ``previous`` is the newest stable tag;
   ``branch`` is the ``release/X.Y`` the cut creates. Time never decides it.
 - **stable** (``--line stable``): a fix cut from ``release/X.Y`` (the checkout's HEAD), the
@@ -25,7 +26,7 @@ commit being cut is green (``scripts/ci/checks.py``).
 **rc_check** (``rc_check.required``): the release's changes since ``previous`` touch the update,
 the install, the packaging, a migration or the service unit (``RC_PATHS``), or it is a
 promotion (always). The check runs on the published build itself (``rc_check.sh TAG
-PREVIOUS``) before the owner's install takes a nightly, and before a held stable is released.
+PREVIOUS``) before the maintainer's install takes a nightly, and before a held stable is released.
 
 **Never an empty release**: when the head has no commit since ``previous``, nothing is cut.
 

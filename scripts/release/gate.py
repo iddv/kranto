@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""The promotion gate (with the owner's decisions of 2026-10-24): stable is
-always a choice the owner makes, never a matter of time.
+"""The promotion gate (decided 24 October 2026): stable is
+always a choice the maintainer makes, never a matter of time.
 
 Nothing here counts days or hours, and nothing is promoted, offered or flagged as ready because
 time passed. What it does:
 
-- ``tick`` (hourly, the maintainer's ``kranto-release-gate.timer``; and at once when the owner
-  presses Promote, which starts the unit): writes the **candidate** to the owner's install
+- ``tick`` (hourly, the maintainer's ``kranto-release-gate.timer``; and at once when the maintainer
+  presses Promote, which starts the unit): writes the **candidate** to the maintainer's install
   (``<home>/update/candidate.json``), the facts the Needs you row shows whenever nightly is
-  ahead of stable: the nightly build (the one the owner's install runs, else the newest), the
+  ahead of stable: the nightly build (the one the maintainer's install runs, else the newest), the
   pull requests since the last stable with the ``big`` ones named, each setting whose stable
   default keeps the old behaviour, and the **health checks**, which block the press:
 
-  1. a rollback of this build (the owner's ``update/history.jsonl``; other installs'
+  1. a rollback of this build (the maintainer's ``update/history.jsonl``; other installs'
      ``kranto.updates_by_day``);
   2. an error first seen on a build after the last stable, up to this one, that still occurs
-     (seen in the last 24 hours): the owner's ``<home>/data/errors.jsonl``, and the telemetry
+     (seen in the last 24 hours): the maintainer's ``<home>/data/errors.jsonl``, and the telemetry
      store's ``kranto.errors_by_signature`` when it exists (else the daily reports'
      ``kranto.errors_by_version``). A signature marked ``known`` (with a reason) does not block;
-  3. ``kranto doctor --routes`` on the owner's install, when it runs this build;
+  3. ``kranto doctor --routes`` on the maintainer's install, when it runs this build;
   4. every page on the odd installs (``scripts/dev/odd_walk.sh`` with the installed Kranto).
 
   A check that cannot read its source is said as blind, never assumed clean; a blind check does
-  not block (the owner's Q4). Until the relay is redeployed the telemetry store has no error
+  not block. Until the relay is redeployed the telemetry store has no error
   reports, and the candidate says so.
 
   Then, when ``<home>/update/promote.json`` (``{tag, by, at}``, written by the press) names the
@@ -46,7 +46,7 @@ Every promotion and every ``known``/``withdraw`` is logged, one JSON line each, 
 ``$XDG_STATE_HOME/kranto-release/gate.jsonl``.
 
 Settings: ``REPO`` (public.toml's repo: the one repository), ``KRANTO_GATE_HOME`` (the
-owner's kranto home, ~/kranto-kb), ``KRANTO_BIN`` (Kranto), ``GATE_CLICKHOUSE``
+maintainer's kranto home, ~/kranto-kb), ``KRANTO_BIN`` (Kranto), ``GATE_CLICKHOUSE``
 (the telemetry store's ClickHouse HTTP address, set by the gate's unit; unset or ``off``: not
 read),
 ``GATE_PORT`` (8942: rc_check's and the odd walk's scratch ports, this and the next),
@@ -216,7 +216,7 @@ def history(home: Path) -> list[dict]:
 
 
 def nightly_since(hist: list[dict]) -> str | None:
-    """When the owner's install last moved onto the nightly line (information only, never a
+    """When the maintainer's install last moved onto the nightly line (information only, never a
     gate): the finish of the first update to a nightly build after its last stable one."""
     since = None
     for h in hist:
@@ -298,7 +298,7 @@ def _errors_log(home: Path) -> list[dict]:
 
 def new_errors_here(home: Path, stable: str | None, build: str, now: datetime,
                     known: dict) -> list[dict]:
-    """The owner's install's errors first seen on a version after ``stable`` and up to
+    """The maintainer's install's errors first seen on a version after ``stable`` and up to
     ``build``, still occurring (seen in the last 24 hours), not marked known."""
     by: dict[str, dict] = {}
     for e in _errors_log(home):
@@ -501,8 +501,8 @@ def stable_defaults(kranto: str, run=run) -> list[dict]:
 
 
 class Gate:
-    """The gate on the owner's machine. ``odd`` and ``routes``: (build, installed) -> Check, for
-    the slow checks (default check_odd and check_routes)."""
+    """The gate on the maintainer's machine. ``odd`` and ``routes``: (build, installed) ->
+    Check, for the slow checks (default check_odd and check_routes)."""
 
     def __init__(self, gh: GitHub, home: Path, *, kranto: str = "kranto", run: Callable = run,
                  query: Callable | None = None, now: Callable[[], datetime] = _now,
@@ -662,7 +662,7 @@ class Gate:
                           work / "rc_check.log")
         self._step(cand, asked, "releasing")
         checks = "; ".join(f"{c['name']}: {c['said']}" for c in cand.get("checks") or [])
-        how = (f"from nightly {build} by {asked.get('by') or 'the owner'}, pressed "
+        how = (f"from nightly {build} by {asked.get('by') or 'the maintainer'}, pressed "
                f"{asked.get('at') or 'now'}; rc_check passed against {stable}; {checks}")
         try:
             promote(self.gh, tag=to, now_reason=how, say=say, chosen=True, now=self.now)
@@ -693,7 +693,7 @@ def new_body(body: str, line: str) -> str:
 def promote(gh: GitHub, *, tag: str, now_reason: str, run=run, now=_now,
             log_to: Path | None = None, say=print, chosen: bool = False) -> int:
     """Release the held stable ``tag`` at once. 0 released (or already), 1 refused (said
-    why). ``chosen``: the owner's press (the tick), not the maintainer's word."""
+    why). ``chosen``: the maintainer's press (the tick), not the maintainer's word."""
     if not now_reason.strip():
         say("gate: --now needs --reason (it is said in the release's notes and logged)")
         return 1
@@ -705,7 +705,7 @@ def promote(gh: GitHub, *, tag: str, now_reason: str, run=run, now=_now,
         return 1
     if not STABLE.match(tag):
         say(f"gate: {tag} is not a stable tag (vX.Y.Z); a nightly build is promoted by cutting "
-            "it (the owner's press: gate.py tick)")
+            "it (the maintainer's press: gate.py tick)")
         return 1
     if not rel.get("prerelease"):
         say(f"gate: {tag} is already released (not a prerelease)")
@@ -849,7 +849,8 @@ def main(argv: list[str] | None = None) -> int:
             return offer(gh, a.tag)
         if a.cmd == "promote":
             if not a.now or not a.tag:
-                print("gate: time never promotes a release: the owner presses Promote to stable "
+                print("gate: time never promotes a release: the maintainer presses Promote to "
+                      "stable "
                       "(gate.py tick carries it out), or the maintainer releases a held stable "
                       "with promote --now --tag T --reason WHY", file=sys.stderr)
                 return 1

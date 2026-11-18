@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cut a kranto release on this machine, with the owner's own gh login and git remotes: decide,
+# Cut a kranto release on this machine, with the maintainer's own gh login and git remotes: decide,
 # build, smoke, notes, publish. This is the one way releases are cut (a GitHub workflow that
 # did the same never ran green and was deleted; it is in git history for the day the repos
 # go public).
@@ -8,11 +8,11 @@
 #                                [--shape final|compat] [--must-include kranto@SHA]...
 #                                [--plan] [--dry-run]
 #
-# The two lines (the owner's decisions of 2026-10-24; decide.py numbers them):
+# The two lines (decided 24 October 2026; decide.py numbers them):
 #   (no flag)            a nightly build from main's newest green commits: vX.Y.0-devN, a GitHub
 #                        prerelease. Installs on the nightly channel see it; stable never does.
 #   --from-tag vX.Y.0-devN
-#                        a promotion: the owner chose to make that nightly build stable. vX.Y.0
+#                        a promotion: the maintainer chose to make that nightly build stable. vX.Y.0
 #                        from the dev tag's own commit, published held (a
 #                        prerelease with its vX.Y.Z tag), and release/X.Y created
 #                        at that commit (release branches older than the two newest are
@@ -22,7 +22,7 @@
 # A held release reaches stable installs when gate.py promote --now releases it, after
 # rc_check.sh passed on it. When decide.py says rc_check is required (rc_check.required: the
 # update, the install, the packaging, a migration, the unit, and always for a promotion), the
-# cut prints the rc_check.sh line to run on the published build before the owner's install
+# cut prints the rc_check.sh line to run on the published build before the maintainer's install
 # takes a nightly, or before a held release is released. Such a nightly is published unoffered
 #: its notes open with "**Do not install:** being checked", so no install is
 # offered it; rc_check.sh checks it by tag, the maintainer checks no one asked to hold it, and
@@ -278,7 +278,7 @@ case "$KIND" in
       echo "  $check_line"
       echo "  scripts/release/gate.py offer $TAG"
     fi
-    echo "nightly: on the owner's install: kranto update --to $TAG --yes" ;;
+    echo "nightly: on the maintainer's install: kranto update --to $TAG --yes" ;;
   *)
     echo "held: $TAG is a GitHub prerelease until it is released to stable:"
     echo "  $check_line"

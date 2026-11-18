@@ -22,51 +22,31 @@ identity.
   published held and released by `gate.py promote` after `rc_check.sh` passed on it. `README`'s
   install lines take the newest stable release.
 
-## The first release: 0.7.0
+## Where the numbers start
 
-The first number is **0.7.0**: above the last release of the earlier install (0.6.0.dev18), so
-its updater takes it; the first nightly `decide.py` allows (`FLOOR`, `v0.7.0-dev1`); and inside
-the range the shipped cubs declare (`>=0.5.19,<0.8`), so they run for real, not dry.
+The first number is **0.7.0**. Installs made before the product took its name were on 0.6.x,
+and their updater can only install a release in their old shape (three wheels). So
+`v0.7.0-dev1` was cut once in that shape (`--shape compat`), only to carry those installs
+across; `install.sh` refuses it for a new install. Every release after it, from `v0.7.0-dev2`
+on, is the one wheel. `decide.py`'s `FLOOR` keeps the numbering above it, and the features
+Kranto ships declare `>=0.5.19,<0.8`, so 0.7.x runs them for real.
 
-It takes three cuts, because an install made before the rename can only install the old shape
-(three wheels) with its own updater:
+`scripts/release/rehearse_way_back.py` rehearses that crossing and its way back on a scratch
+HOME in a sandbox (it fails if a real unit file changes). It is kept for the record; a later
+release does not need it.
 
-1. **The crossing, `v0.7.0-dev1`, the old shape.** On green main:
+### Stable 0.7.0
 
-       scripts/release/cut_local.sh --shape compat --plan     # says v0.7.0-dev1 and the commit
-       scripts/release/cut_local.sh --shape compat
+From the nightly that was run and checked:
 
-   Read the commit list it prints. A new install cannot take this release (`install.sh`
-   refuses it); it exists for the crossing only.
-2. **One merge on main** after it (an empty release is refused): the pull request that moves
-   `## 0.7.0` in `CHANGELOG.md` from "the first release" to its date is enough.
-3. **The one-wheel nightly, `v0.7.0-dev2`.** On green main: `scripts/release/cut_local.sh`
-   (no flag; the shape guard refuses it until the crossing exists). If it prints an
-   `rc_check.sh` line, run it on a free port, then `scripts/release/gate.py offer v0.7.0-dev2`.
-4. **Rehearse the crossing on the published sets** (a scratch HOME in a sandbox; no real unit
-   is touched, it fails if one changes): download each release's wheels and `SHA256SUMS` into a
-   folder named by its tag, then
+    scripts/release/cut_local.sh --from-tag v0.7.0-devN
 
-       systemd-run --user --scope -p MemoryMax=3G -- python3 scripts/release/rehearse_way_back.py \
-         --work ~/kranto-rehearsal-$(date +%s) --old <dir>/v0.6.0-dev18 \
-         --k0 <dir>/v0.7.0-dev1 --k1 <dir>/v0.7.0-dev2 --port <a free port>
-
-   Every step must say `"ok": true` and `"real_units_same": true`.
-5. **Your own install crosses** (docs/setup.md › Updating): `update.repo: iddv/kranto` in its
-   settings, a backup, `update.auto: off`; then the old command's
-   `update --to v0.7.0-dev1 --yes`, the walk; then `kranto update --to v0.7.0-dev2 --yes`, the
-   walk. Each step goes back with `update --rollback --yes`; a rollback or a stop warning stops
-   the release.
-6. **Stable `v0.7.0`** from the nightly you ran:
-
-       scripts/release/cut_local.sh --from-tag v0.7.0-dev2
-
-   with `RELEASE_INTRO=docs/releases/0.7.0.md` set (the notes open with it). It is published
-   held and makes `release/0.7`. Run the `rc_check.sh` line it prints, then
-   `scripts/release/gate.py promote --now --tag v0.7.0 --reason "the first release"`.
-7. **Check the release page:** the wheel `kranto-0.7.0-py3-none-any.whl`, `SHA256SUMS`,
-   `manifest.json`, `install.sh`, and the notes. On a clean user, README's install lines and
-   `kranto up` reach the page.
+with `RELEASE_INTRO=docs/releases/0.7.0.md` set (the notes open with it). It is published held
+and makes `release/0.7`. Run the `rc_check.sh` line it prints, then
+`scripts/release/gate.py promote --now --tag v0.7.0 --reason "the first release"`. Then check
+the release page (the wheel `kranto-0.7.0-py3-none-any.whl`, `SHA256SUMS`, `manifest.json`,
+`install.sh`, the notes) and, as a new user, that README's install lines and `kranto up` reach
+the page.
 
 ## Each later release
 
@@ -85,7 +65,8 @@ It takes three cuts, because an install made before the rename can only install 
   carries the fix.
 - Never move, reuse or delete a published tag; release the next number instead.
 
-## Once, before the repository is public
+## Repository settings
 
-The maintainer's settings, none of which a cut needs: a ruleset on `main` (pull requests only,
-the required checks, squash only), a tag ruleset for `v*`, private vulnerability reporting.
+None of these is needed by a cut, but the repository relies on them: a ruleset on `main` (pull
+requests only, the required checks, squash only), a tag ruleset for `v*`, private
+vulnerability reporting.
