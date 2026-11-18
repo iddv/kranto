@@ -60,7 +60,7 @@ llm:
   # One tier on another provider: tiers: {reason: {provider: anthropic, model: ...}}.
   # The Claude API (provider anthropic): its key's variable, one prompt-cache breakpoint on the
   # system prompt, and per call (screen, judge, name) schema-enforced replies and the thinking
-  # effort (low, medium, high; unset: the model's default). 'python -m kranto provider replay'
+  # effort (low, medium, high; unset: the model's default). 'kranto watch provider replay'
   # measures both.
   # anthropic: {api_key_env: ANTHROPIC_API_KEY, base_url: https://api.anthropic.com,
   #             cache: true, structured: {}, effort: {}}
@@ -188,13 +188,13 @@ retention:
   # Per source kind (rss, hackernews, reddit, arxiv, bluesky, mastodon, github,
   # youtube, producthunt, stackexchange, x, parallax), e.g. {reddit: 30}. x is kept 30
   # days unless set here (stored X posts have to track X's; a default you may raise). A single
-  # source can be set with 'python -m kranto sources retention ID DAYS' or on its page;
+  # source can be set with 'kranto watch sources retention ID DAYS' or on its page;
   # newsletter publications added from the catalog are kept 30 days. youtube is
   # capped at 30 days (YouTube's policies for API data): more is refused.
-  # parallax (an archive imported with 'python -m kranto import parallax') is kept forever
+  # parallax (an archive imported with 'kranto watch import parallax') is kept forever
   # unless set here: its observations are older than default_days when imported.
   by_kind: {}
-  # How often compaction runs under 'python -m kranto serve' (after the snapshot).
+  # How often compaction runs under 'kranto serve' (after the snapshot).
   every_hours: 24
 
 activity:
@@ -240,7 +240,7 @@ look:
   screen_batch: 20
 
 deep_dive:
-  # Deep dives left Kranto in wave 3 (the job and 'python -m kranto deepdive'); the observations
+  # Deep dives left Kranto in wave 3 (their job and their command); the observations
   # they found stay, linked to theirs. Reading one step from an item is look:'s.
   # These keys are accepted so existing files load; only Settings › Watching and
   # the usage report still show enabled and daily_usd.
@@ -369,7 +369,7 @@ telemetry:
   mode: local
 
 parallax:
-  # An archive imported from Parallax ('python -m kranto import parallax', 'python -m kranto import
+  # An archive imported from Parallax ('kranto watch import parallax', 'kranto watch import
   # parallax-dispatches'): its observations are browsable in the Library under
   # their "(Parallax)" sources and count in the map, but are never new on Today
   # and never arrivals in the map's movement.
@@ -813,7 +813,7 @@ class NotifyConfig:
 
 @dataclass(frozen=True)
 class BrbConfig:
-    """The page's builds UI, mounted at /brb/ by 'python -m kranto serve' when the page is
+    """The page's builds UI, mounted at /brb/ by 'kranto serve' when the page is
     installed in
     the same environment. Off by default. ``root`` is the task folder it lists (default: the
     loop's tasks_dir, ~/tasks) and ``loop_home`` the loop's home (default: ~/kranto-loop)."""
@@ -1179,8 +1179,8 @@ def load(root: Path, *, dotenv: bool = True) -> Config:
         load_dotenv(root / ".env")
     path = config_path(root)
     if path is None:
-        raise ConfigError(f"no {CONFIG_FILENAME} in {root}; run "
-            f"'python -m kranto init {root}' first")
+        raise ConfigError(f"no {CONFIG_FILENAME} in {root}: 'kranto up' makes a Kranto home "
+                          f"('kranto watch init {root}' a watcher-only workspace)")
     try:
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except yaml.YAMLError as exc:
@@ -1664,7 +1664,7 @@ def init_workspace(root: Path) -> Path:
 def find_workspace(explicit: str | None = None) -> Path:
     """Resolve the workspace: explicit flag, then $KRANTO_HOME, then $KRANTO_HOME (a kranto home
     is a workspace), then the current directory, then the home ``kranto setup`` recorded
-    (``~/.config/kranto/home``), so ``afk`` works after an install without a flag."""
+    (``~/.config/kranto/home``), so ``kranto watch`` works after an install without a flag."""
     candidate = (explicit or os.environ.get(WORKSPACE_ENV) or os.environ.get(KRANTO_HOME_ENV)
                  or os.getcwd())
     root = Path(candidate).expanduser()
@@ -1675,7 +1675,8 @@ def find_workspace(explicit: str | None = None) -> Path:
             return found
     if config_path(root) is None:
         raise ConfigError(
-            f"{root} is not a workspace (no {CONFIG_FILENAME}). "
-            f"Pass --workspace, set ${WORKSPACE_ENV}, or run 'python -m kranto init <dir>'."
+            f"{root} is not a Kranto home (no {CONFIG_FILENAME}): 'kranto up' makes one; "
+            f"'kranto watch -w DIR' names another, 'kranto watch init DIR' makes a "
+            f"watcher-only workspace."
         )
     return root

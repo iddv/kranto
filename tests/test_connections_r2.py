@@ -105,8 +105,8 @@ class FakeGitHub:
         headers = {"x-oauth-scopes": self.classic_scopes} if self.classic_scopes is not None \
             else {}
         if path == "/user":
-            return httpx.Response(200, json={"login": "octo-owner"}, headers=headers)
-        if path == "/users/octo-owner/starred":
+            return httpx.Response(200, json={"login": "jo-example"}, headers=headers)
+        if path == "/users/jo-example/starred":
             assert request.url.params["sort"] == "updated"
             return httpx.Response(200, json=[{"full_name": "automerge/automerge"},
                                              {"full_name": "gone/away"}])
@@ -356,7 +356,7 @@ class FakeProductHunt:
         body = json.loads(request.content)
         self.queries.append(body)
         if "viewer" in body["query"]:
-            viewer = {"user": {"username": "octo-owner"}}
+            viewer = {"user": {"username": "jo-example"}}
             return httpx.Response(200, json={"data": {"viewer": viewer}})
         return httpx.Response(
             200,
@@ -479,7 +479,7 @@ def test_github_fine_grained_token_is_tested_kept_and_reads_starred_releases(
 ):
     conns = make_conns(store, tmp_path, world, machine_id)
     conn = conns.paste("github", {"token": world.github.token})
-    assert conn["account"] == "@octo-owner" and conn["instance"] == "github.com"
+    assert conn["account"] == "@jo-example" and conn["instance"] == "github.com"
     assert json.loads(conn["scopes"]) == ["public repositories, read-only"]
     src = build("github", {"what": "starred_releases"}, conns.http, connections=conns)
     [item] = src.fetch()
@@ -504,7 +504,7 @@ def test_github_classic_token_that_can_write_is_refused_and_not_kept(
     assert world.github.token not in str(info.value)
     assert conns.accounts() == [] and conns.vault.keys() == []
     world.github.classic_scopes = ""
-    assert conns.paste("github", {"token": world.github.token})["account"] == "@octo-owner"
+    assert conns.paste("github", {"token": world.github.token})["account"] == "@jo-example"
     with pytest.raises(OAuthError, match="refused this token"):
         conns.paste("github", {"token": secrets.token_hex(20)})
     with pytest.raises(OAuthError, match="required"):
@@ -557,7 +557,7 @@ def test_github_device_flow_honours_interval_and_slow_down(store, tmp_path, worl
     world.github.token = world.github.device_replies[0]["access_token"]
     clock.now += 1
     done = conns.device_poll("github", cookie)
-    assert done["state"] == "connected" and done["account"] == "@octo-owner"
+    assert done["state"] == "connected" and done["account"] == "@jo-example"
     with pytest.raises(OAuthError, match="already used"):
         conns.device_poll("github", cookie)
     with pytest.raises(OAuthError, match="does not match"):
@@ -814,7 +814,7 @@ def test_product_hunt_developer_token(store, tmp_path, world, machine_id):
     with pytest.raises(OAuthError, match="refused this token"):
         conns.paste("producthunt", {"token": secrets.token_urlsafe(20)})
     conn = conns.paste("producthunt", {"token": world.ph.token})
-    assert conn["account"] == "@octo-owner" and json.loads(conn["scopes"]) == ["public"]
+    assert conn["account"] == "@jo-example" and json.loads(conn["scopes"]) == ["public"]
     src = build(
         "producthunt",
         {"what": "launches", "topic": "developer-tools"},
@@ -943,7 +943,7 @@ def test_every_provider_through_the_web_and_no_secret_anywhere(rig, caplog):
 
         # Pasted credentials.
         r = web.post("/api/connections/github/credentials", json={"token": world.github.token})
-        assert r.json()["ok"] and r.json()["account"] == "@octo-owner"
+        assert r.json()["ok"] and r.json()["account"] == "@jo-example"
         assert web.post(
             "/api/connections/producthunt/credentials", json={"token": world.ph.token}
         ).json()["ok"]

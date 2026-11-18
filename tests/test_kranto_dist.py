@@ -28,8 +28,8 @@ def test_versions_find_the_distribution_by_its_package_not_its_name(monkeypatch)
     def version(name):
         asked.append(name)
         return "9.9.9"
-    monkeypatch.setattr(md, "packages_distributions", lambda: {"kranto": ["octo-owner.kranto"]})
+    monkeypatch.setattr(md, "packages_distributions", lambda: {"kranto": ["jo-example.kranto"]})
     monkeypatch.setattr(md, "version", version)
     v = launcher.versions()
-    assert v["kranto"] == "9.9.9" and asked[0] == "octo-owner.kranto"
+    assert v["kranto"] == "9.9.9" and asked[0] == "jo-example.kranto"
     assert launcher.version_line(v) == "kranto 9.9.9"

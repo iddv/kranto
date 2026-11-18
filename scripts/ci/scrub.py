@@ -69,6 +69,17 @@ ALLOW: dict[str, dict[str, str]] = {
     },
     "plan-ref": {},
     "owner-site": {},
+    "foreign-account": {
+        "tests/test_public_tree.py": "tests for this scanner",
+        # each until the change that rewords it is on main; then its line goes
+        "docs/design/DESIGN.md": "a design paper from before the rename, rewritten separately",
+        "src/kranto/page/ui/help.md": "the page's help, reworded separately",
+        "src/kranto/page/ui/web/src/pages/post/post.svelte.test.ts": "a made-up handle in "
+        "a page test, renamed separately",
+        "src/kranto/page/ui/web/src/pages/settings/sources.svelte.test.ts": "the same",
+        "src/kranto/page/ui/web/src/pages/settings/featurepage.svelte.test.ts": "a page test's "
+        "old words for a gone feature folder, reworded separately",
+    },
     "attribution": {
         "scripts/ci/no_attribution.py": "the check's own patterns",
         "scripts/release/notes.py": "release notes drop these lines: the patterns that find them",
@@ -221,6 +232,10 @@ _PLAN_PATTERNS = [
 # project id): refused anywhere, built from pieces so this file does not hold them whole
 _OWNER_SITE = ["ueyw" + "95bi"]
 
+# a GitHub account that is not the project's, and the collection of features it was said to
+# hold (it never existed): code, docs and tests once sent people there; refused anywhere
+_FOREIGN = [r"\bocto" + r"-owner\b", "bear" + "cub"]
+
 _ATTRIBUTION = ["Co-" + "Authored-By:", "Gener" + "ated with", "noreply" + "@" + "anthropic"]
 _ATTRIBUTION_RX = r"\b(?:" + "|".join(re.escape(a) for a in _ATTRIBUTION) + ")"
 
@@ -253,6 +268,7 @@ RULES: list[Rule] = [
     ),
     Rule("plan-ref", re.compile("|".join(_PLAN_PATTERNS))),
     Rule("owner-site", re.compile("|".join(re.escape(n) for n in _OWNER_SITE), re.I)),
+    Rule("foreign-account", re.compile("|".join(_FOREIGN), re.I)),
     Rule(
         "attribution",
         re.compile(_ATTRIBUTION_RX, re.I),

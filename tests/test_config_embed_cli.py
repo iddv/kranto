@@ -48,7 +48,7 @@ def test_dotenv_in_workspace_is_loaded_without_overriding(tmp_path, monkeypatch)
 
 def test_missing_workspace_has_helpful_error(tmp_path, monkeypatch):
     monkeypatch.delenv(config_mod.WORKSPACE_ENV, raising=False)
-    with pytest.raises(config_mod.ConfigError, match="python -m kranto init"):
+    with pytest.raises(config_mod.ConfigError, match="kranto up. makes one"):
         config_mod.find_workspace(str(tmp_path))
 
 
@@ -96,4 +96,4 @@ def test_cli_init_status_pause_resume(tmp_path, capsys):
 def test_cli_reports_missing_workspace(tmp_path, capsys, monkeypatch):
     monkeypatch.delenv(config_mod.WORKSPACE_ENV, raising=False)
     assert cli.main(["-w", str(tmp_path / "nope"), "status"]) == 2
-    assert "not a workspace" in capsys.readouterr().err
+    assert "is not a Kranto home" in capsys.readouterr().err

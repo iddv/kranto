@@ -202,8 +202,7 @@ def test_a_failed_look_is_said_and_the_others_go_on(home, tmp_path):  # noqa: F8
 
 
 def test_a_cub_whose_folder_is_gone_stays_as_installed_and_fails_nothing(home, tmp_path):  # noqa: F811
-    """A reference cub a release no longer ships (examplecom left Kranto's package for bearcubs),
-    or a
+    """A reference cub a release no longer ships (examplecom left Kranto's package), or a
     folder the owner deleted: the cub keeps running as installed; the daily look says nothing
     and is not degraded."""
     added(home, make_cub(tmp_path / "hello"))
@@ -253,11 +252,14 @@ def test_a_gone_source_is_said_once_with_the_command_that_points_it_elsewhere(ho
     waits = [w for w in activity_read.Reader(home.store).read()["waiting"]
              if w["kind"] == updates.GONE]
     assert len(waits) == 1 and waits[0]["words"].endswith("source is gone: it gets no updates")
-    # Kranto's own example cubs (examplecom, 0.6.0.dev2 and before): the reinstall line names
-    # bearcubs
-    ours = updates.gone_words("examplecom", "/x/site-packages/kranto/cubs/examples/examplecom")
-    assert ours["fix"] == ("kranto cub source examplecom https://github.com/octo-owner/bearcubs"
-                           "#subdirectory=cubs/examplecom")
+    # a cub this Kranto ships is pointed at Kranto's own copy; one it no longer ships
+    # (examplecom, 0.6.0.dev2 and before) is asked where it lives: no repository is named
+    ours = updates.gone_words("newsletter", "/x/site-packages/kranto/cubs/examples/newsletter")
+    assert ours["fix"] == 'kranto cub source newsletter "$(kranto paths examples)/newsletter"'
+    assert "Kranto's own copy" in ours["words"]
+    left = updates.gone_words("examplecom", "/x/site-packages/kranto/cubs/examples/examplecom")
+    assert left["fix"] == "kranto cub source examplecom <its folder or git URL>"
+    assert "github.com" not in left["words"]
 
 
 def test_kranto_cub_source_rewrites_the_source_only(home, tmp_path):  # noqa: F811
@@ -282,7 +284,7 @@ def test_kranto_cub_source_rewrites_the_source_only(home, tmp_path):  # noqa: F8
     assert {k: after[k] for k in same} == {k: before[k] for k in same}
     assert json.loads(after["source"]) == {"path": str(moved.resolve())}
     assert views.row(home, "hello")["source_gone"] is None
-    # a git URL with a subdirectory, as bearcubs holds them
+    # a git URL with a subdirectory: a repository that holds several cubs
     install.set_source(home, "hello", "https://example.invalid/cubs.git#subdirectory=cubs/hello")
     row = registry.latest(home.store, "hello")
     assert row["source_kind"] == "git"

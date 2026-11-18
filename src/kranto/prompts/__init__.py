@@ -166,7 +166,7 @@ REGISTRY: tuple[Entry, ...] = (
            "today": ("today's date", False)}, subject="topic"),
     Entry("resolve", "Resolve a pasted list", "topics",
           "Turns a pasted list of sources into catalog presets, without adding any of its own.",
-          "Settings › Add source › Describe what to add, and python -m kranto sources describe",
+          "Settings › Add source › Describe what to add, and kranto watch sources describe",
           {"presets": ("the catalog: the presets a line may become, which accounts are "
                        "connected, and what is not offered", False),
            "max_proposals": ("how many proposals at most", False),

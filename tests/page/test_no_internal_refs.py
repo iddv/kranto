@@ -115,7 +115,7 @@ ROOT = PKG.parents[2]
 def test_no_tracked_file_carries_the_owners_home():
     """Not even the research record: paths there are written /home/user."""
     import subprocess
-    home = "/home/" + "octo-owner"
+    home = "/home/" + "jo-example"
     files = subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True,
                            text=True, check=True).stdout.split()
     bad = [f for f in files if (ROOT / f).is_file()

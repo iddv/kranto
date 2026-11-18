@@ -1,4 +1,4 @@
-"""``python -m kranto news``: on, off, run, list, show, article, articles, eval."""
+"""``kranto watch news``: on, off, run, list, show, article, articles, eval."""
 
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ def _cmd(ctx: Any, args: Any) -> int:
             [t for t in ctx.read("topics.list")["topics"]
              if brief.topic_setting(ctx, t["id"])["enabled"]]
         if not topics:
-            print("News is on for no topic: python -m kranto news on TOPIC")
+            print("News is on for no topic: kranto watch news on TOPIC")
             return 0
         for t in topics:
             made = brief.write(ctx, t, trigger="cli")
@@ -118,7 +118,7 @@ def _cmd(ctx: Any, args: Any) -> int:
 
 
 def _article(ctx: Any, args: Any) -> int:
-    """``python -m kranto news article BRIEF ITEM [--dry-run]``: the deep dive for one item now
+    """``kranto watch news article BRIEF ITEM [--dry-run]``: the deep dive for one item now
     (one model
     call), or with ``--dry-run`` the material and the prompt it would send (no call, no row)."""
     r = ctx.db.query_one("SELECT * FROM news_briefs WHERE id = ?", (args.brief,))

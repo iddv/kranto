@@ -47,7 +47,8 @@ from starlette.websockets import WebSocket
 
 from .auth import IDENTITY
 
-log = logging.getLogger(__name__)
+# named for what it does: the module's own name is the page's old address (legacy.KEPT)
+log = logging.getLogger("kranto.web.page")
 
 REQUIRED_API = 1
 LOOPBACK_BINDS = frozenset({"127.0.0.1", "localhost", "::1"})
