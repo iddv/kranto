@@ -17,14 +17,12 @@ the article for one item, in the background; refused while one is being written 
 
 from __future__ import annotations
 
-import re
 import threading
 from datetime import timedelta
 from typing import Any
 
-from kranto import legacy
 from kranto.core import rows as rowsafe
-from kranto.core.text import is_backend_label, iso, outlet
+from kranto.core.text import OLD_VERB_ON, is_backend_label, iso, outlet
 
 from . import articles, brief
 from .stored import BriefChecks, BriefItems, BriefSearch
@@ -40,11 +38,6 @@ def _int(params: dict[str, Any], key: str, default: Any=None) -> Any:
         return int(v)
     except (TypeError, ValueError):
         raise ValueError(f"{key} is a whole number") from None
-
-
-# Briefs written before the prompt's change open a why line with the verb that was also the old
-# product's name ("<verb> on robot costs"); legacy.COMMAND is that word.
-OLD_VERB_ON = re.compile(rf"^\s*(?:it\s+)?{re.escape(legacy.COMMAND)}\s+on\s+", re.IGNORECASE)
 
 
 def plain_why(why: Any) -> Any:
