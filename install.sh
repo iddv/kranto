@@ -1,62 +1,49 @@
 #!/bin/sh
-# Install kranto, then run its setup (the owner's D1 of 2026-10-17).
+# Install Kranto from a GitHub release, then run its setup.
 #
-#   sh install.sh [--version vX.Y.Z | vX.Y.0-devN] [--from DIR] [--no-setup] [-- SETUP-ARGS...]
+#   curl -fsSL https://github.com/iddv/kranto/releases/latest/download/install.sh | sh
+#   sh install.sh [--version vX.Y.Z] [--from DIR] [--no-setup] [--fetch-gh] [-- SETUP-ARGS...]
 #
-# 1. uv: found on PATH or in ~/.local/bin, else installed with astral's installer.
-# 2. A GitHub login for the download, while the repositories are private: your logged-in gh
-#    when there is one, else GitHub's device flow with kranto' OAuth App (a code you type at
-#    github.com/login/device). Public: no login at all.
-# 3. The release's one wheel (kranto's) and SHA256SUMS, every hash checked before anything
-#    installs. A release without a kranto wheel is refused in one line.
-# 4. uv tool install, as kranto update installs a release.
-# 5. exec kranto setup, which keeps the device flow's login as kranto' own GitHub connection
-#    (--github-token-file; the file is removed once read), so you sign in once.
+# 1. uv: found on PATH or in ~/.local/bin, else installed with uv's own installer.
+# 2. The release's SHA256SUMS and the wheel it names, from the release's download addresses
+#    (https://github.com/<repo>/releases/latest/download/<file>, or
+#    .../releases/download/<tag>/<file> with --version). No GitHub account, token or gh needed.
+# 3. Every file checked against SHA256SUMS before anything installs. A release without a
+#    kranto wheel is refused in one line.
+# 4. uv tool install, the same install kranto update does.
+# 5. kranto setup (its questions read the terminal, also under curl ... | sh).
 #
-# It never runs sudo, writes nothing outside ~/.local (uv, the tool) and a temporary folder,
-# and prints no token. Environment: KRANTO_REPO (default iddv/kranto), KRANTO_VERSION,
-# KRANTO_GITHUB_CLIENT_ID (overrides the client id below; "" for gh only),
-# KRANTO_INSTALL_FROM (as --from);
-# KRANTO_GITHUB_API and KRANTO_GITHUB_WEB point the tests at a fake GitHub on loopback.
+# A release you can only see while signed in to GitHub (a pre-release of a private repository)
+# is downloaded with your gh login instead, when gh is installed and logged in.
+#
+# It never runs sudo, writes nothing outside ~/.local (uv, the tool) and a temporary folder, and
+# keeps no login. Environment: KRANTO_REPO (default iddv/kranto), KRANTO_VERSION (as --version),
+# KRANTO_INSTALL_FROM (as --from), KRANTO_DOWNLOAD_BASE (default https://github.com; the tests
+# point it at a stand-in on loopback).
+#
+# Everything runs from main at the bottom, so a download cut off half way runs nothing.
 set -eu
 
 REPO="${KRANTO_REPO:-iddv/kranto}"
-# kranto' OAuth App "kranto" (a client id is public by GitHub's definition; there is no client
-# secret and none is ever used). Kept equal to src/kranto/page/github_user.py's CLIENT_ID by tests in
-# both repositories. KRANTO_GITHUB_CLIENT_ID overrides it; set to "" it turns the device flow
-# off, and the download then needs a logged-in gh.
-CLIENT_ID="Ov23lismfFcZrfTLDoxm"
-CLIENT_ID="${KRANTO_GITHUB_CLIENT_ID-$CLIENT_ID}"
-SCOPES="repo workflow read:org"
+BASE="${KRANTO_DOWNLOAD_BASE:-https://github.com}"
 VERSION="${KRANTO_VERSION:-}"
 FROM="${KRANTO_INSTALL_FROM:-}"
 SETUP=1
 FETCH_GH=0
+NOT_FOUND=3        # the helper's exit status for "no such release or file" (HTTP 404)
 
 say() { printf '%s\n' "$*"; }
 die() { printf 'install.sh: %s\n' "$*" >&2; exit 1; }
 
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --version) [ $# -ge 2 ] || die "--version needs a tag"; VERSION="$2"; shift 2 ;;
-    --from) [ $# -ge 2 ] || die "--from needs a folder"; FROM="$2"; shift 2 ;;
-    --no-setup) SETUP=0; shift ;;
-    --fetch-gh) FETCH_GH=1; shift ;;
-    --) shift; break ;;
-    -h|--help) say "usage: sh install.sh [--version vX.Y.Z | vX.Y.0-devN] [--from DIR] [--no-setup] [--fetch-gh] [-- SETUP-ARGS...]"
-               say "  --fetch-gh  when gh is missing, kranto setup fetches a pinned, checksum-checked gh"
-               say "              into kranto' own folder (asked first; after -- add --yes to skip asking)"
-               exit 0 ;;
-    *) die "unknown option $1 (setup's own options go after --)" ;;
-  esac
-done
-
-case "$(uname -s)" in
-  Linux) ;;
-  Darwin) say "macOS: kranto installs the watcher only. Builds need Linux's bubblewrap sandbox, so"
-          say "bwrap, systemd and the build checks are skipped; kranto serves in the foreground." ;;
-  *) die "kranto runs on Linux (and macOS for watching only); this is $(uname -s)" ;;
-esac
+usage() {
+  say "usage: sh install.sh [--version vX.Y.Z] [--from DIR] [--no-setup] [--fetch-gh] [-- SETUP-ARGS...]"
+  say "  --version   install this release (a tag from https://github.com/$REPO/releases);"
+  say "              without it, the latest stable release"
+  say "  --from      install from a folder holding the wheel and SHA256SUMS"
+  say "  --no-setup  install only; run 'kranto setup' yourself later"
+  say "  --fetch-gh  when gh is missing, kranto setup fetches a pinned, checksum-checked gh"
+  say "              into Kranto's own folder (asked first; after -- add --yes to skip asking)"
+}
 
 distro_hint() {   # $1: a package name; prints the command for this machine's package manager
   if command -v apt-get >/dev/null 2>&1; then say "sudo apt install $1"
@@ -73,112 +60,46 @@ fetch() {   # $1 URL: to stdout, with curl or wget
   else die "neither curl nor wget is installed: $(distro_hint curl)"; fi
 }
 
-# -- 1. uv --------------------------------------------------------------------------------------
-PATH="$HOME/.local/bin:$PATH"
-export PATH
-if ! command -v uv >/dev/null 2>&1; then
-  say "Installing uv (https://docs.astral.sh/uv/) into ~/.local/bin"
-  fetch https://astral.sh/uv/install.sh | sh
-  command -v uv >/dev/null 2>&1 || die "uv did not install; see https://docs.astral.sh/uv/"
-fi
-say "uv: $(uv --version)"
-
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/kranto-install.XXXXXX")"
-chmod 700 "$WORK"
-cleanup() { rm -rf "$WORK"; }
-trap cleanup EXIT INT TERM
-TOKEN_FILE=""
-GITHUB_HOW=""
-
-helper() {   # the download's HTTP, JSON and hashes, in uv's Python (3.12, fetched when missing)
+helper() {   # the download and the hashes, in uv's Python (3.12, fetched when missing)
   uv run --quiet --no-project --python 3.12 python -I - "$@" <<'PY'
-import hashlib, json, os, sys, time, urllib.error, urllib.parse, urllib.request
+import hashlib, sys, urllib.error, urllib.request
 from pathlib import Path
 
-API = os.environ.get("KRANTO_GITHUB_API", "https://api.github.com").rstrip("/")
-WEB = os.environ.get("KRANTO_GITHUB_WEB", "https://github.com").rstrip("/")
+NOT_FOUND = 3
 
-def req(url, *, token=None, data=None, accept="application/vnd.github+json"):
-    r = urllib.request.Request(url, data=data, headers={"Accept": accept, "User-Agent": "kranto-install"})
-    if token:
-        r.add_header("Authorization", f"Bearer {token}")
-    return urllib.request.urlopen(r, timeout=60)
-
-def release(repo, tag, token):
-    path = f"tags/{tag}" if tag else "latest"
-    with req(f"{API}/repos/{repo}/releases/{path}", token=token) as r:
-        return json.load(r)
-
-def want(name):
-    return name.endswith(".whl") or name == "SHA256SUMS"
-
-cmd, args = sys.argv[1], sys.argv[2:]
-if cmd == "public":                       # exit 0: the release is readable without a login
-    repo, tag = args
+def get(url):
+    r = urllib.request.Request(url, headers={"User-Agent": "kranto-install"})
     try:
-        release(repo, tag, None)
-    except urllib.error.HTTPError:
-        sys.exit(1)
+        with urllib.request.urlopen(r, timeout=120) as resp:      # follows GitHub's redirect
+            return resp.read()
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            print(f"not found: {url}", file=sys.stderr)
+            sys.exit(NOT_FOUND)
+        sys.exit(f"GitHub answered HTTP {exc.code} for {url}; try again in a few minutes")
     except OSError as exc:
-        sys.exit(f"cannot reach GitHub: {exc}")
-elif cmd == "device":                     # the device flow; the token goes to a 0600 file only
-    client, scopes, out = args
-    form = urllib.parse.urlencode({"client_id": client, "scope": scopes}).encode()
-    with req(f"{WEB}/login/device/code", data=form, accept="application/json") as r:
-        code = json.load(r)
-    print(f"\nOpen {code['verification_uri']} and enter   {code['user_code']}\n"
-          f"(waiting up to {int(code['expires_in']) // 60} minutes)", flush=True)
-    interval, deadline = int(code.get("interval", 5)), time.monotonic() + int(code["expires_in"])
-    form = urllib.parse.urlencode({"client_id": client, "device_code": code["device_code"],
-                                   "grant_type": "urn:ietf:params:oauth:grant-type:device_code"}).encode()
-    while time.monotonic() < deadline:
-        time.sleep(interval)
-        with req(f"{WEB}/login/oauth/access_token", data=form,
-                 accept="application/json") as r:
-            got = json.load(r)
-        err = got.get("error")
-        if err == "authorization_pending":
-            continue
-        if err == "slow_down":
-            interval += 5
-            continue
-        if err:
-            sys.exit({"expired_token": "the code expired; run install.sh again",
-                      "access_denied": "the sign-in was cancelled on GitHub"}.get(err, err))
-        granted = set((got.get("scope") or "").replace(",", " ").split())
-        if not granted <= set(scopes.split()):
-            sys.exit("GitHub granted wider scopes than kranto asked for; nothing was kept")
-        p = Path(out)
-        p.touch(mode=0o600)
-        # an OAuth App with expiring tokens also gives a refresh token: kranto setup keeps it
-        # (0600), and kranto renews the eight-hour token with it
-        extra = {"GH_REFRESH_TOKEN": got.get("refresh_token"),
-                 "GH_TOKEN_EXPIRES_IN": got.get("expires_in"),
-                 "GH_REFRESH_EXPIRES_IN": got.get("refresh_token_expires_in")}
-        p.write_text(f"GH_TOKEN={got['access_token']}\n"
-                     + "".join(f"{k}={v}\n" for k, v in extra.items() if v))
-        print("Signed in to GitHub.", flush=True)
-        sys.exit(0)
-    sys.exit("the code expired; run install.sh again")
-elif cmd == "download":                   # the wheels and SHA256SUMS of a release, by API
-    repo, tag, dest, token_file = args
-    token = None
-    if token_file:
-        token = next((ln.partition("=")[2].strip() for ln in Path(token_file).read_text().splitlines()
-                      if ln.startswith("GH_TOKEN=")), None)
-    rel = release(repo, tag, token)
-    for a in rel.get("assets") or []:
-        if want(a["name"]):
-            with req(a["url"], token=token, accept="application/octet-stream") as r:
-                (Path(dest) / Path(a["name"]).name).write_bytes(r.read())
-    print(rel["tag_name"])
-elif cmd == "verify":                     # every wheel listed in SHA256SUMS, every hash matching
-    dest = Path(args[0])
-    sums = {}
-    for line in (dest / "SHA256SUMS").read_text().splitlines():
+        sys.exit(f"cannot reach {url}: {exc}")
+
+def sums_of(text):
+    out = {}
+    for line in text.splitlines():
         h, _, name = line.strip().partition("  ")
         if h and name:
-            sums[name.lstrip("*")] = h
+            out[name.lstrip("*")] = h
+    return out
+
+cmd, args = sys.argv[1], sys.argv[2:]
+if cmd == "download":            # SHA256SUMS, then every wheel it names
+    base, repo, tag, dest = args
+    where = f"{base}/{repo}/releases/" + (f"download/{tag}" if tag else "latest/download")
+    sums = get(f"{where}/SHA256SUMS")
+    (Path(dest) / "SHA256SUMS").write_bytes(sums)
+    for name in sums_of(sums.decode()):
+        if name.endswith(".whl") and "/" not in name:
+            (Path(dest) / name).write_bytes(get(f"{where}/{name}"))
+elif cmd == "verify":            # one kranto wheel, listed in SHA256SUMS, its hash matching
+    dest = Path(args[0])
+    sums = sums_of((dest / "SHA256SUMS").read_text())
     wheels = sorted(p.name for p in dest.glob("*.whl"))
     if not any(w.split("-", 1)[0] == "kranto" for w in wheels):
         sys.exit("this release has no kranto wheel (it only updates an install made before the "
@@ -193,76 +114,103 @@ elif cmd == "verify":                     # every wheel listed in SHA256SUMS, ev
 PY
 }
 
-# -- 2 and 3. the wheels ------------------------------------------------------------------------
-DIST="$WORK/dist"
-mkdir -p "$DIST"
-if [ -n "$FROM" ]; then
-  say "Installing from $FROM"
-  cp "$FROM"/*.whl "$FROM"/SHA256SUMS "$DIST"/
-elif helper public "$REPO" "$VERSION" 2>/dev/null; then
-  say "Downloading the release from $REPO (public)"
-  VERSION="$(helper download "$REPO" "$VERSION" "$DIST" "")"
-elif command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  if [ -z "$VERSION" ]; then
-    VERSION="$(gh release view -R "$REPO" --json tagName --jq .tagName)" ||
-      die "gh cannot see $REPO's releases: accept the invitation at https://github.com/$REPO/invitations"
+gh_ready() { command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; }
+
+download() {   # into $DIST: the release's files, without a login, else with a logged-in gh
+  if [ -n "$VERSION" ]; then what="$VERSION"; else what="the latest release"; fi
+  say "Downloading $what of $REPO"
+  status=0
+  helper download "$BASE" "$REPO" "$VERSION" "$DIST" || status=$?
+  [ "$status" = 0 ] && return 0
+  [ "$status" = "$NOT_FOUND" ] || exit 1
+  if gh_ready; then
+    tag="$VERSION"
+    if [ -z "$tag" ]; then
+      tag="$(gh release view -R "$REPO" --json tagName --jq .tagName 2>/dev/null)" || tag=""
+    fi
+    if [ -n "$tag" ]; then
+      say "Not found without a login; trying again with your gh login"
+      if gh release download "$tag" -R "$REPO" -p '*.whl' -p SHA256SUMS -D "$DIST" 2>/dev/null; then
+        return 0
+      fi
+    fi
   fi
-  say "Downloading $VERSION from $REPO with your gh login"
-  gh release download "$VERSION" -R "$REPO" -p '*.whl' -p SHA256SUMS -D "$DIST"
-  GITHUB_HOW="gh"
-elif [ -n "$CLIENT_ID" ]; then
-  say "Signing in to GitHub to download kranto ($REPO is private before launch)."
-  say "Kranto asks for: $SCOPES (it publishes builds to your account and reads the repositories you pick)."
-  TOKEN_FILE="$WORK/github.env"
-  helper device "$CLIENT_ID" "$SCOPES" "$TOKEN_FILE"
-  VERSION="$(helper download "$REPO" "$VERSION" "$DIST" "$TOKEN_FILE")"
-else
-  say "Kranto's repository is private before launch, so the download needs a GitHub login."
-  if command -v gh >/dev/null 2>&1; then
-    say "gh is installed but not logged in. Run:"
+  if [ -n "$VERSION" ]; then
+    die "$REPO has no release $VERSION. The releases: https://github.com/$REPO/releases"
+  fi
+  die "$REPO has no stable release yet. Name one from https://github.com/$REPO/releases: sh install.sh --version <tag>"
+}
+
+main() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --version) [ $# -ge 2 ] || die "--version needs a tag"; VERSION="$2"; shift 2 ;;
+      --from) [ $# -ge 2 ] || die "--from needs a folder"; FROM="$2"; shift 2 ;;
+      --no-setup) SETUP=0; shift ;;
+      --fetch-gh) FETCH_GH=1; shift ;;
+      --) shift; break ;;
+      -h|--help) usage; exit 0 ;;
+      *) die "unknown option $1 (setup's own options go after --)" ;;
+    esac
+  done
+
+  case "$(uname -s)" in
+    Linux) ;;
+    Darwin) say "macOS: Kranto installs the watcher only, and nobody has tested it on a Mac yet."
+            say "The console and the post writers need Linux's bubblewrap sandbox, so they stay off;"
+            say "Kranto serves in the foreground (no systemd)." ;;
+    *) die "Kranto runs on Linux (and macOS for watching only); this is $(uname -s)" ;;
+  esac
+
+  # -- 1. uv ------------------------------------------------------------------------------------
+  PATH="$HOME/.local/bin:$PATH"
+  export PATH
+  if ! command -v uv >/dev/null 2>&1; then
+    say "Installing uv (https://docs.astral.sh/uv/) into ~/.local/bin"
+    fetch https://astral.sh/uv/install.sh | sh
+    command -v uv >/dev/null 2>&1 || die "uv did not install; see https://docs.astral.sh/uv/"
+  fi
+  say "uv: $(uv --version)"
+
+  WORK="$(mktemp -d "${TMPDIR:-/tmp}/kranto-install.XXXXXX")"
+  chmod 700 "$WORK"
+  trap 'rm -rf "$WORK"' EXIT INT TERM
+
+  # -- 2 and 3. the wheel -----------------------------------------------------------------------
+  DIST="$WORK/dist"
+  mkdir -p "$DIST"
+  if [ -n "$FROM" ]; then
+    say "Installing from $FROM"
+    cp "$FROM"/*.whl "$FROM"/SHA256SUMS "$DIST"/
   else
-    say "Install the GitHub CLI (https://cli.github.com):"
-    say "  $(distro_hint gh)"
-    say "then run:"
+    download
   fi
-  say "  gh auth login"
-  say "and accept the invitation at https://github.com/$REPO/invitations, then"
-  say "run 'sh install.sh' again."
-  exit 1
-fi
-helper verify "$DIST"
+  helper verify "$DIST"
 
-# -- 4. install ---------------------------------------------------------------------------------
-WHEEL="$(ls "$DIST"/kranto-*.whl)"
-uv tool install --force --python 3.12 "kranto[connections,notify,mcp] @ file://$WHEEL"
-command -v kranto >/dev/null 2>&1 || die "kranto is installed but not on PATH: open a new terminal (uv put ~/.local/bin on it)"
-kranto --version
+  # -- 4. install -------------------------------------------------------------------------------
+  WHEEL="$(ls "$DIST"/kranto-*.whl)"
+  uv tool install --force --python 3.12 "kranto[connections,notify,mcp] @ file://$WHEEL"
+  command -v kranto >/dev/null 2>&1 || die "kranto is installed but not on PATH: open a new terminal (uv put ~/.local/bin on it)"
+  kranto --version
 
-# -- 5. setup -----------------------------------------------------------------------------------
-if [ "$SETUP" = 0 ]; then
-  say "Installed. Run 'kranto setup$([ "$FETCH_GH" = 1 ] && printf ' --fetch-gh')' when you are ready."
-  exit 0
-fi
-if ! kranto setup --help >/dev/null 2>&1; then     # a release from before the wizard
-  say "This release has no 'kranto setup' yet; starting kranto with 'kranto up'."
-  exec kranto up
-fi
-if [ -n "$TOKEN_FILE" ]; then
-  # kranto setup moves the login into its own store (0600) and removes this file
-  KEEP="$HOME/.config/kranto/github"
-  mkdir -p "$KEEP"
-  chmod 700 "$HOME/.config/kranto" "$KEEP"
-  mv "$TOKEN_FILE" "$KEEP/install-login.env"
-  set -- --github-token-file "$KEEP/install-login.env" "$@"
-elif [ "$GITHUB_HOW" = gh ]; then
-  set -- --github gh "$@"
-fi
-if [ "$FETCH_GH" = 1 ]; then
-  set -- --fetch-gh "$@"
-fi
-trap - EXIT INT TERM
-cleanup
-if [ ! -t 0 ] && (exec </dev/tty) 2>/dev/null; then
-  exec kranto setup "$@" </dev/tty   # curl ... | sh: the questions read the terminal, not the pipe
-fi
-exec kranto setup "$@"
+  # -- 5. setup ---------------------------------------------------------------------------------
+  if [ "$SETUP" = 0 ]; then
+    say "Installed. Run 'kranto setup$([ "$FETCH_GH" = 1 ] && printf ' --fetch-gh')' when you are ready."
+    exit 0
+  fi
+  rm -rf "$WORK"
+  trap - EXIT INT TERM
+  if ! kranto setup --help >/dev/null 2>&1; then     # a release from before the wizard
+    say "This release has no 'kranto setup' yet; starting Kranto with 'kranto up'."
+    exec kranto up
+  fi
+  if [ "$FETCH_GH" = 1 ]; then
+    set -- --fetch-gh "$@"
+  fi
+  if [ ! -t 0 ] && (exec </dev/tty) 2>/dev/null; then
+    exec kranto setup "$@" </dev/tty   # curl ... | sh: the questions read the terminal, not the pipe
+  fi
+  exec kranto setup "$@"
+}
+
+main "$@"
