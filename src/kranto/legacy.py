@@ -76,6 +76,14 @@ SANITY_META = f"{_OLD}Meta"
 TRACE_PREFIX = _OLD
 # the browser's stored keys, read once when the new one is missing (legacy.ts holds the page's)
 BROWSER_KEYS = tuple(f"{_OLD}.{k}" for k in ("theme", "look", "look.custom", "layout"))
+# The connected accounts' vault (``connections.vault``) as the old server wrote it: the HKDF
+# ``info`` and the AES-GCM associated data. A vault in these is read as it is, and written back
+# in Kranto's own at its next write.
+VAULT_INFO = f"{_OLD}afk connections v1".encode()
+VAULT_AAD = f"{_OLD}afk-connections".encode()
+# the console's ``ask.config`` value for "the product's own Claude config", as the old page saved
+# it in loop.yaml (now ``kranto``)
+CONSOLE_CONFIG = _OLD
 
 
 def new_env_name(name: str) -> str | None:
