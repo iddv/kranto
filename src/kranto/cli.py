@@ -1574,8 +1574,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("observation_id", type=int)
     p.set_defaults(func=cmd_explain)
 
-    p = sub.add_parser("import", help="import observations from another library, or idea "
-                                      "cards from your Parallax dispatches")
+    p = sub.add_parser("import", help="bring in an archive from Parallax, an earlier watcher "
+                                      "whose files Kranto reads: its observations, or idea "
+                                      "cards from its dispatches (its written reports). "
+                                      "Without such an archive you never need this")
     p.add_argument("format", choices=["parallax", "parallax-dispatches"],
                    help="parallax: observations (library.jsonl); parallax-dispatches: one "
                         "card per pitch of each dispatch, after the observations")

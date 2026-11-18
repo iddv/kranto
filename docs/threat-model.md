@@ -78,7 +78,7 @@ The console is your own Claude Code (or Codex) in a panel beside every page. Tre
 terminal on your machine, because it is one:
 
 - **It runs as you, without a sandbox,** in Kranto's home. It can read and change what you can.
-- **In a new home it waits for you.** It does not open by itself (✦ or ⌘J opens it), and it asks
+- **In a new home it waits for you.** It does not open by itself (✦ or Ctrl+J, ⌘J on a Mac, opens it), and it asks
   before every edit and command. Settings › Assistant can open it with the page and let it decide
   edits and commands by itself (Claude Code's auto mode). A home an earlier version made keeps
   what it had: it opens by itself in auto mode until you change it there. `kranto doctor` says

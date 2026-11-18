@@ -7,6 +7,7 @@
   import { ui } from "../lib/shell.svelte";
   import { consoleUi, setPlace } from "../term/console.svelte";
   import { DOORS, DOOR_GLYPH } from "./doors";
+  import { keyLabel } from "../lib/keys";
 
   const here = $derived.by(() => {
     void ui.drawn;
@@ -15,4 +16,4 @@
   const open = $derived(consoleUi.place === "open");
 </script>
 
-<nav id="tabbar" aria-label="Doors">{#each DOORS as [id, w, to] (id)}<a href={to} id={"tab-" + id} aria-current={here === id ? "page" : null}><span class="g" aria-hidden="true">{DOOR_GLYPH[id]}</span><span class="w">{w}</span></a>{/each}<button type="button" id="tab-console" aria-label={open ? "Close the console" : "Open the console"} aria-pressed={open ? "true" : "false"} title="The console (⌘J)" onclick={() => setPlace(open ? "min" : "open")}><span class="g" aria-hidden="true">✦</span><span class="w">Console</span></button></nav>
+<nav id="tabbar" aria-label="Doors">{#each DOORS as [id, w, to] (id)}<a href={to} id={"tab-" + id} aria-current={here === id ? "page" : null}><span class="g" aria-hidden="true">{DOOR_GLYPH[id]}</span><span class="w">{w}</span></a>{/each}<button type="button" id="tab-console" aria-label={open ? "Close the console" : "Open the console"} aria-pressed={open ? "true" : "false"} title={`The console (${keyLabel("⌘J")})`} onclick={() => setPlace(open ? "min" : "open")}><span class="g" aria-hidden="true">✦</span><span class="w">Console</span></button></nav>

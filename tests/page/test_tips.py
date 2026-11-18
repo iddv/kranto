@@ -89,3 +89,14 @@ def test_the_help_page_is_served_and_escaped():
     assert "&lt;idea id&gt;" in page or "&lt;name&gt;" in page          # every text is escaped
     assert helpdoc.render("## A <b> {#x}\n\nhi `<i>` [l](javascript:alert(1))") == \
         '<h2 id="x">A &lt;b&gt;</h2>\n<p>hi <code>&lt;i&gt;</code> [l](javascript:alert(1))</p>'
+
+
+def test_the_help_page_names_keys_as_the_readers_computer_does():
+    """help.md writes ⌘K once; the page shows Ctrl+K on Linux and Windows and ⌘K on a Mac
+    (theme.js marks a Mac on <html>, kranto.css shows the one that fits)."""
+    assert helpdoc.render("Press ⌘K.") == ('<p>Press <span class="modkey"><span class="k-pc">'
+                                          'Ctrl+K</span><span class="k-mac">⌘K</span></span>.</p>')
+    assert "ctrl J)" not in helpdoc.HELP.read_text()       # the label says it now
+    static = Path(helpdoc.__file__).with_name("static")
+    assert 'setAttribute("data-mac"' in (static / "theme.js").read_text()
+    assert "html[data-mac] .modkey .k-mac" in (static / "kranto.css").read_text()

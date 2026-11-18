@@ -100,3 +100,6 @@ code, .code { font-family: var(--mono); font-size: 12px; background: var(--inset
 .helpdoc-in h2 { font-size: 16px; margin: 28px 0 8px; scroll-margin-top: 16px; }
 .helpdoc-in h2:target { color: var(--link); }
 .helpdoc-in p { margin: 0 0 10px; line-height: 1.55; max-width: 68ch; }
+/* a key with ⌘ or Ctrl: Ctrl+K on Linux and Windows, ⌘K on a Mac (theme.js sets html[data-mac]) */
+.modkey .k-mac, html[data-mac] .modkey .k-pc { display: none; }
+html[data-mac] .modkey .k-mac { display: inline; }

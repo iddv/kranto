@@ -8,6 +8,7 @@
   import Mark from "../../shell/Mark.svelte";
   import type { View } from "../../lib/pages.svelte";
   import { app } from "../../lib/shell.svelte";
+  import { keyLabel } from "../../lib/keys";
   import { customNow, customTokens, removeCustom, saveCustom, setTheme, themeNow, type Base } from "../../lib/theme";
   import { groupOf, kindLine, SET_ST } from "../../ui/settings";
   import { BASES, CUSTOM_FIELDS, CUSTOM_SEED, DRAFT } from "./appearance.svelte";
@@ -48,7 +49,7 @@
   {#if s.id === "layout"}<p class="small" id="layout-one">One layout: the home and its doors. A file that says Classic opens in it too, and keeps what it says.</p>
   {:else if s.id === "mode"}{@render box()}
   {:else if s.id === "looks"}<LookGrid tick={view.tick} base={now.base} />
-  {:else}<p class="small">In this browser's storage, the only things the page ever stores. The ◐ button in the top bar switches light and dark; the palette (⌘K) has every theme.</p>{/if}
+  {:else}<p class="small">In this browser's storage, the only things the page ever stores. The ◐ button in the top bar switches light and dark; {`the palette (${keyLabel("⌘K")}) has every theme.`}</p>{/if}
 {/snippet}
 
 <Detail back={view.back}>

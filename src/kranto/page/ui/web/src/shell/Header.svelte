@@ -20,6 +20,7 @@
   import { DOORS } from "./doors";
   import { needsTotal, waitsWords } from "../pages/front/needstotal";
   import type { Host } from "../pages/front/needs";
+  import { keyLabel } from "../lib/keys";
 
   const f = $derived(ui.facts?.header);
   // the doors' pages (either layout): the mark goes home; in the new layout Settings is the gear
@@ -66,7 +67,7 @@
   {:else}
     <span class="host" title="the page, on this machine">on this machine</span>
   {/if}
-  <button class="search" id="hd-search" type="button" aria-label="Search and commands (⌘K)" onclick={() => openPalette("")}><Icon name="search" /><span class="grow">{home ? "Search" : "Search ideas, evidence, sources…"}</span><kbd>⌘K</kbd></button>
+  <button class="search" id="hd-search" type="button" aria-label={`Search and commands (${keyLabel("⌘K")})`} onclick={() => openPalette("")}><Icon name="search" /><span class="grow">{home ? "Search" : "Search ideas, evidence, sources…"}</span><kbd>{keyLabel("⌘K")}</kbd></button>
   <!-- Needs you's count, only when something waits: the same number as
        Needs you's head and the home's sentence (needstotal.ts) -->
   {#if home && waiting > 0}<a class="hd-needs" id="hd-needs" href="#/needs" aria-current={door === "needs" ? "page" : null} title={waitsWords(waiting)}>Needs you <span class="n">{waiting}</span></a>{/if}
@@ -78,11 +79,11 @@
       {#if f.update}{@const u = f.update}<a class="hd-st" id="hd-update" href="#/settings/updates" title={u.title + (u.detail ? ": " + u.detail : "")}><Mark name={u.icon} colour={u.colour} word={u.word} /></a>{/if}
     </span>
     <button class="btn sm" id="pause" title={paused ? `Resume ${f.pauses}` : `Pause everything: stops ${f.pauses}.`} onclick={(e) => app()?.togglePause(e.currentTarget, !paused)}>{paused ? "Resume" : asks ? "Pause" : "Pause"}</button>
-    {#if consoleUi.place === "min" && consoleUi.chip}<button type="button" class="btn sm quiet" id="console-min" title="Open the console (⌘J)" aria-label={`Open ${consoleUi.chip}`} onclick={() => setPlace("open")}><span class="glyph" aria-hidden="true">✦</span><span class="cm-w"> {consoleUi.chip}</span></button>{/if}
+    {#if consoleUi.place === "min" && consoleUi.chip}<button type="button" class="btn sm quiet" id="console-min" title={`Open the console (${keyLabel("⌘J")})`} aria-label={`Open ${consoleUi.chip}`} onclick={() => setPlace("open")}><span class="glyph" aria-hidden="true">✦</span><span class="cm-w"> {consoleUi.chip}</span></button>{/if}
     {#if gear}<button type="button" class="btn sm quiet" id="hd-gear" aria-haspopup="menu" title="Settings (g s) and Send feedback" aria-label="Settings and feedback" onclick={(e) => app()?.menu(e.currentTarget, [
         { label: "Settings", title: "Settings (g s)", run: () => { location.hash = "#/settings"; } },
         { label: "Send feedback", title: "A bug, an idea or a question, as an issue on Kranto's GitHub, from you", run: () => openFeedback() }])}>⚙</button>
-    {:else}<button class="btn sm quiet" id="hd-feedback" type="button" aria-label="Feedback" title="Send feedback: a bug, an idea or a question, as an issue on Kranto's GitHub, from you (⌘K: Send feedback)" onclick={() => openFeedback()}><span class="fb-w">Feedback</span><span class="fb-i" aria-hidden="true"><Icon name="chat" /></span></button>{/if}
+    {:else}<button class="btn sm quiet" id="hd-feedback" type="button" aria-label="Feedback" title="Send feedback: a bug, an idea or a question, as an issue on Kranto's GitHub, from you (the palette's Send feedback too)" onclick={() => openFeedback()}><span class="fb-w">Feedback</span><span class="fb-i" aria-hidden="true"><Icon name="chat" /></span></button>{/if}
     <button class="btn sm quiet" id="theme" type="button" title={`Theme: ${theme}. Click for ${other} (also under Settings › Appearance).`} aria-label={`Theme: ${theme}; switch to ${other}`} onclick={toggleTheme}>◐</button>
   </div>
 {:else}

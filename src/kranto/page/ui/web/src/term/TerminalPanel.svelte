@@ -258,7 +258,7 @@
     {#if session?.on || (subject.kind === "sources" ? listing?.sources_on : listing?.on)}
       <span class="dim" id="term-on">· {session?.on || (subject.kind === "sources" ? listing?.sources_on : listing?.on)}</span>{/if}
     {#if session && session.usd}<span class="dim">· ${session.usd.toFixed(2)}</span>{/if}
-    {#if phase === "running"}<span class="dim">· <kbd>ctrl+]</kbd> back to the page</span>{/if}
+    {#if phase === "running"}<span class="dim">· <kbd>Ctrl+]</kbd> back to the page</span>{/if}
     <span class="grow"></span>
     {#if session && phase !== "loading" && phase !== "unavailable"}
       <!-- an earlier session of this subject too, before it is opened again -->

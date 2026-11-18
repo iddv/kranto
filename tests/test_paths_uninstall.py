@@ -4,6 +4,8 @@ the user's home, and nothing on GitHub is touched."""
 
 from __future__ import annotations
 
+import sqlite3
+
 import pytest
 
 from kranto import launcher
@@ -38,8 +40,27 @@ def test_data_goes_only_after_the_home_is_typed(user_home, installed, capsys):  
     out = capsys.readouterr().out
     assert not installed.exists() and not (user_home / ".config" / "kranto").exists()
     assert not (user_home / ".cache" / "kranto").exists()
-    assert "https://github.com/settings/applications" in out and "Your data is deleted." in out
+    assert "Your data is deleted." in out
+    assert "github.com" not in out          # this home never connected GitHub
     assert user_home.is_dir()
+
+
+def test_githubs_pages_only_for_a_home_that_connected_it(user_home, installed, capsys):  # noqa: F811
+    from kranto.store import Store
+
+    host = make_host(user_home)
+    db = installed / "data" / "kranto.db"
+    Store.open(db).close()
+    assert launcher.main(["uninstall"], host) == 0
+    assert "github.com" not in capsys.readouterr().out
+    with sqlite3.connect(db) as con:           # a GitHub connection made once (rows stay)
+        con.execute("INSERT INTO connections (provider, instance, account, scopes, created_at) "
+                    "VALUES ('github', 'github.com', 'someone', '', '2026-11-18T00:00:00Z')")
+    con.close()
+    assert launcher.main(["uninstall"], host) == 0
+    out = capsys.readouterr().out
+    assert "On GitHub, if you want: Kranto's GitHub connection: revoke it at " \
+           "https://github.com/settings/applications" in out
 
 
 def test_the_users_home_is_never_removed(user_home, capsys):  # noqa: F811

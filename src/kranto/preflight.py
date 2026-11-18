@@ -102,11 +102,29 @@ def _version_key(p: Path) -> tuple:
     return tuple(int(x) if x.isdigit() else -1 for x in re.split(r"[.\-+]", p.name))
 
 
+def npm_global_prefix(home: Path, npm: str) -> Path:
+    """npm's global folder as ``npm prefix -g`` would say it, without running npm (every npm run
+    leaves a log under ``~/.npm/_logs``, a folder a person who never used npm did not have): the
+    ``NPM_CONFIG_PREFIX`` variable, else ``prefix=`` in ``~/.npmrc``, else the folder npm itself is
+    in (``<prefix>/bin/npm``, npm's default)."""
+    env = os.environ.get("NPM_CONFIG_PREFIX")
+    if env:
+        return Path(env).expanduser()
+    try:
+        for line in (home / ".npmrc").read_text().splitlines():
+            m = re.match(r"\s*prefix\s*=\s*(\S.*?)\s*$", line)
+            if m:
+                return Path(m.group(1).replace("${HOME}", str(home))).expanduser()
+    except (OSError, UnicodeDecodeError):
+        pass
+    return Path(npm).parent.parent
+
+
 def claude_places(host) -> list[Path]:
     """Where the installers put ``claude`` when PATH has none, in order: the
     native installer's ``~/.local/bin/claude`` (a symlink into ``~/.local/share/claude/
     versions/``) and, without the symlink, its newest version; the old local install; npm's
-    global folder (``npm prefix -g``, else the usual prefixes)."""
+    global folder (``npm_global_prefix``), then the usual prefixes."""
     home = Path(host.home)
     out = [home / ".local" / "bin" / "claude"]
     versions = home / ".local" / "share" / "claude" / "versions"
@@ -118,10 +136,7 @@ def claude_places(host) -> list[Path]:
     out.append(home / ".claude" / "local" / "claude")
     npm = host.which("npm")
     if npm:
-        r = host.sh(npm, "prefix", "-g", timeout=15)
-        prefix = (r.stdout or "").strip().splitlines()[-1:] if r.returncode == 0 else []
-        if prefix and prefix[0].startswith("/"):
-            out.append(Path(prefix[0]) / "bin" / "claude")
+        out.append(npm_global_prefix(home, npm) / "bin" / "claude")
     out += [home / ".npm-global" / "bin" / "claude", home / ".local" / "share" / "npm" / "bin" /
             "claude", Path("/usr/local/bin/claude")]
     return out

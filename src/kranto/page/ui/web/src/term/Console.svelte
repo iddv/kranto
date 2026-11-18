@@ -17,6 +17,7 @@
   import { peek } from "../lib/reads.svelte";
   import { app, ui } from "../lib/shell.svelte";
   import { HOME_API, type HomeAnswer } from "../features/home";
+  import { keyLabel } from "../lib/keys";
 
   // off: this server serves no terminal (the page's own test server): the panel is not drawn at all
   type Phase = "loading" | "off" | "none" | "starting" | "running" | "ended";
@@ -470,7 +471,7 @@
 <aside id="console" class="console" aria-label="Console" hidden={consoleUi.place === "min" || phase === "loading" || phase === "off"}
   class:rail={consoleUi.place === "rail"} class:sheet={phone && !full}>
   {#if consoleUi.place === "rail"}
-    <button type="button" class="con-rail" title="Open the console (⌘J)" aria-label="Open the console"
+    <button type="button" class="con-rail" title={`Open the console (${keyLabel("⌘J")})`} aria-label="Open the console"
       onclick={() => setPlace("open")}>
       <span class="glyph" aria-hidden="true">✦</span>
       <span class="vert">{info?.name ?? "Console"}</span>

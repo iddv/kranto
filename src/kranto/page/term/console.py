@@ -104,6 +104,14 @@ def settings(cfg: dict | None) -> dict:
     return out
 
 
+def open_key(platform: str | None = None) -> str:
+    """The console's key as this machine names it: ⌘J on a Mac, Ctrl+J on Linux and Windows
+    (the page's keyLabel says the same in the browser)."""
+    import sys
+
+    return "⌘J" if (platform or sys.platform) == "darwin" else "Ctrl+J"
+
+
 def describe(cfg: dict | None) -> dict[str, Any]:
     """What the console does in this home, for ``kranto doctor`` and the docs: ``{open,
     permission, said, words}``. ``said`` is whether loop.yaml (or Settings › Assistant) chose
@@ -112,7 +120,7 @@ def describe(cfg: dict | None) -> dict[str, Any]:
     raw = raw if isinstance(raw, dict) else {}
     s = settings(cfg)
     said = isinstance(raw.get("open"), bool) and raw.get("permission") in PERMISSIONS
-    opens = "opens by itself" if s["open"] else "opens when you click ✦ (or ⌘J)"
+    opens = "opens by itself" if s["open"] else f"opens when you click ✦ (or {open_key()})"
     words = f"{opens}; {PERMISSION_WORDS[s['permission']]}"
     if not said:
         words += " (Kranto's default when loop.yaml does not say; Settings › Assistant changes it)"

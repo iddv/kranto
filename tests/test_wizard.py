@@ -448,23 +448,29 @@ def test_claude_off_path_is_found_where_the_installers_put_it(user_home):  # noq
     assert preflight.find_claude(host) == ("/usr/bin/claude", "PATH")
 
 
-def test_claude_from_npms_global_folder(user_home, tmp_path):  # noqa: F811
+def test_claude_from_npms_global_folder(user_home, tmp_path, monkeypatch):  # noqa: F811
+    """npm's global folder is worked out, never asked of npm: each npm run leaves a log in
+    ~/.npm/_logs, which stayed behind after Kranto was removed."""
+    monkeypatch.delenv("NPM_CONFIG_PREFIX", raising=False)
     prefix = tmp_path / "npm-global"
     exe = _exe(prefix / "bin" / "claude")
     machine = FakeMachine()
     machine.tools.pop("claude")
-    machine.tools["npm"] = "/usr/bin/npm"
-    real_run = machine.run
-
-    def run(cmd, timeout=30):
-        if Path(cmd[0]).name == "npm":
-            machine.calls.append(list(cmd))
-            return types.SimpleNamespace(returncode=0, stdout=f"{prefix}\n", stderr="")
-        return real_run(cmd, timeout)
-    machine.run = run
+    machine.tools["npm"] = str(tmp_path / "node" / "bin" / "npm")
     host = make_host(user_home, machine)
+    # ~/.npmrc's prefix
+    (user_home / ".npmrc").write_text(f"fund=false\nprefix = {prefix}\n")
     assert preflight.find_claude(host) == (str(exe), "found")
-    assert ["/usr/bin/npm", "prefix", "-g"] in machine.calls
+    # the variable wins over the file
+    other = _exe(tmp_path / "from-env" / "bin" / "claude")
+    monkeypatch.setenv("NPM_CONFIG_PREFIX", str(tmp_path / "from-env"))
+    assert preflight.find_claude(host) == (str(other), "found")
+    monkeypatch.delenv("NPM_CONFIG_PREFIX")
+    # neither: npm's own folder (<prefix>/bin/npm)
+    (user_home / ".npmrc").unlink()
+    beside = _exe(tmp_path / "node" / "bin" / "claude")
+    assert preflight.find_claude(host) == (str(beside), "found")
+    assert not [c for c in machine.calls if Path(c[0]).name == "npm"]
 
 
 def test_the_doctor_and_the_unit_use_the_configured_claude(user_home, tmp_path):  # noqa: F811

@@ -24,6 +24,19 @@ export interface QueueKey {
 export const KEYMAP: readonly KeyRow[] = KEYS_JSON.KEYMAP;
 export const QUEUE_KEYS: readonly QueueKey[] = KEYS_JSON.QUEUE_KEYS;
 
+/** Whether this browser runs on a Mac (or an iPad or iPhone with a keyboard), where the key that
+ * goes with K and J is ⌘; elsewhere (Linux, Windows) it is Ctrl. Both work everywhere (keyName). */
+export function isMac(nav: { platform?: string; userAgent?: string; userAgentData?: { platform?: string } } | undefined =
+  typeof navigator === "undefined" ? undefined : (navigator as never)): boolean {
+  if (!nav) return false;
+  const p = nav.userAgentData?.platform || nav.platform || nav.userAgent || "";
+  return /mac|iphone|ipad|ipod/i.test(p);
+}
+/** A key as this platform says it: KEYMAP's names keep ⌘ ("⌘K"), shown as "Ctrl+K" off a Mac. */
+export function keyLabel(k: string, mac: boolean = isMac()): string {
+  return mac ? k : k.replace(/⌘/g, "Ctrl+");
+}
+
 /** The name a keydown is known by in KEYMAP: "j", "⇧x", "⌘K", "⌘a", "enter", "esc", "?". */
 export function keyName(e: Pick<KeyboardEvent, "key" | "altKey" | "metaKey" | "ctrlKey" | "shiftKey">): string | null {
   const k = e.key || "";

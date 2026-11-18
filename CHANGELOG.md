@@ -19,8 +19,17 @@ will carry; the pre-releases `v0.7.0-devN` carry parts of it.
   again (it fell back to your own config).
 - The daily job that reads back the numbers of sent posts now records its run, so it runs once a
   day instead of once a minute.
+- A ? tip's **More in the docs** opens the help page; it opened an address that does not exist.
 
 ### Changed since the pre-release v0.7.0-dev2
+
+- **An unfinished setup shows on the home**, on a phone too: "Kranto is not set up yet", what is
+  still missing (a model, a topic, a place to read) and **Set up**, which opens Welcome there.
+- **Keys are shown as your computer names them:** Ctrl+K and Ctrl+J on Linux and Windows, ⌘K
+  and ⌘J on a Mac, on the page, in the help and in `kranto doctor`.
+- Plainer words: `kranto doctor`'s page line, `kranto down` without systemd, `kranto watch
+  import`'s help; `kranto uninstall` names GitHub's pages only when GitHub was connected, and
+  looking for Claude Code no longer runs npm (which left `~/.npm/_logs` behind).
 
 - **Installing needs no GitHub account:** `install.sh` and the guide's by-hand steps download
   the release's wheel and `SHA256SUMS` from its public addresses and check every hash.
@@ -79,7 +88,7 @@ wheel, with `install.sh` or by hand, no GitHub account needed (it is not on PyPI
   a checker that underlines what reads like AI and what breaks a site's limits; the fix; a
   time to send at. **Nothing is posted without your yes:** Open hands the draft to the site, or,
   with an account connected, Kranto posts it once you approve.
-- **The console.** Claude Code beside every page (✦, or ⌘J). It runs as you, not in a
+- **The console.** Claude Code beside every page (✦, or Ctrl+J; ⌘J on a Mac). It runs as you, not in a
   sandbox (`docs/threat-model.md`). What an assistant changes that costs money or shapes your
   posts waits for your yes on Needs you; the spend caps and the update settings are yours only.
 - **Your own assistant.** `kranto mcp` gives Claude Code, Codex or any MCP client the same

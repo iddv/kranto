@@ -373,7 +373,8 @@ def test_serve_without_a_home_says_run_up(user_home, capsys):
 def test_down_and_logs_without_systemd(user_home, tmp_path, capsys):
     host = make_host(user_home, FakeMachine(systemd=False))
     assert launcher.main(["down"], host) == 1
-    assert "Ctrl-C" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "Ctrl-C" in out and "kranto serve" not in out and "the installer" in out
     host = make_host(user_home)
     assert launcher.main(["down"], host) == 0
     assert ["systemctl", "--user", "stop", "kranto.service"] in host.machine.calls
@@ -528,8 +529,10 @@ def test_doctor_says_the_console_is_ready(user_home, monkeypatch):
         term_doctor=lambda loop_home, environ=None, dotenv=(): said["line"],
     )
     checks = by_name(launcher.console_checks(cfg))
-    assert set(checks) == {"kranto.page", "open in claude code"}
-    assert checks["kranto.page"].status == OK
+    assert set(checks) == {"page", "open in claude code"}
+    assert checks["page"].status == OK
+    # words a person reads, not the page's API numbers ("API version 7 (needs 1)")
+    assert checks["page"].detail == "installed, and it works with this server"
     term = checks["open in claude code"]
     assert (term.status, term.detail) == (
         OK,
@@ -561,7 +564,7 @@ def test_doctor_says_the_console_is_ready(user_home, monkeypatch):
     assert by_name(launcher.console_checks(cfg))["open in claude code"].detail == \
         "off (term.enabled is false)"
     brbfake.missing(monkeypatch)  # no page at all
-    assert [(c.status, c.name) for c in launcher.console_checks(cfg)] == [(FAIL, "kranto.page")]
+    assert [(c.status, c.name) for c in launcher.console_checks(cfg)] == [(FAIL, "page")]
 
 
 def test_doctor_runs_afk_doctor_and_the_console_checks(user_home, monkeypatch):
@@ -584,7 +587,7 @@ def test_doctor_runs_afk_doctor_and_the_console_checks(user_home, monkeypatch):
     assert checks["migrations"].status == OK
     assert checks["library"].status == OK and checks["api key"].status == OK
     assert checks["judge model"].status == OK
-    assert checks["kranto.page"].status == FAIL  # Kranto needs both halves
+    assert checks["page"].status == FAIL  # Kranto needs both halves
     assert checks["claude"].status == OK
     for gone in (
         "build login",

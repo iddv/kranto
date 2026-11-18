@@ -352,7 +352,7 @@ words; Settings › Posting changes it later). Either way the home shows **The f
 read as it goes and the topic's four rows, Sources, First read, First brief (as soon as 8 items
 are kept), First ideas (after the map, once 30 items are kept). The status bar says "Reading for
 the first time" until the first read ends. The console stays on its rail, starting nothing,
-until you open it (✦, or ⌘J): Claude Code, as you, not in a sandbox, asking once whether to
+until you open it (✦, or Ctrl+J; ⌘J on a Mac): Claude Code, as you, not in a sandbox, asking once whether to
 trust Kranto's folder and then before every edit and command. Settings › Assistant can make it
 open when Kranto opens (**Open the console when Kranto opens**) and ask less. A home made by
 an earlier version keeps what it had: the console opens by itself, in Claude Code's auto mode, until
@@ -500,7 +500,8 @@ rm -rf ~/.kranto ~/.config/kranto ~/.cache/kranto
 ```
 
 **You should see:** `Kranto is stopped and will not start again.` and a line naming where your
-data is kept, then uv's `Uninstalled` line, and `kranto` is no longer found.
+data is kept (and, if you ever connected GitHub, the two GitHub pages where you may revoke it),
+then uv's `Uninstalled` line, and `kranto` is no longer found.
 
 On a version without `kranto uninstall` (`kranto uninstall --help` fails), step 1 by hand is:
 
@@ -537,7 +538,7 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | `FAIL  claude login` in `kranto doctor` | Run the command it names (`claude auth login`, or `claude update` for an old version). |
 | `Watching paused until … (spend limit set in the Claude Console reached)` in the top bar or in Health | The Claude API refused calls for a spend limit. Watching resumes by itself at that time. To go on sooner, raise the limit in the Claude Console, then click **Resume now** in Settings › System › Health (or run `kranto watch resume`). |
 | `FAIL  claude … is not signed in` | `claude auth login`, then `kranto doctor` again. |
-| The header says `Can't check for updates: GitHub's limit on requests without a login (60 an hour for this address) is used up; it lifts at …` | Nothing is wrong with Kranto: **Check for updates** (click the version, or ⌘K) after the time it names. With `gh` installed and logged in (`gh auth login`), Kranto asks through it and the limit is thousands an hour. |
+| The header says `Can't check for updates: GitHub's limit on requests without a login (60 an hour for this address) is used up; it lifts at …` | Nothing is wrong with Kranto: **Check for updates** (click the version, or Ctrl+K; ⌘K on a Mac) after the time it names. With `gh` installed and logged in (`gh auth login`), Kranto asks through it and the limit is thousands an hour. |
 | The header says `Can't check for updates: GitHub answered 404 …` | The release list cannot be seen without a login (a repository that is not public): `gh auth login` with an account that can see it, then **Check for updates**. |
 | The sign-in link says it expired or was used | Each link works once, within 10 minutes: `kranto open --no-browser` for a new one. |
 | A script's write answers `cross-origin request refused` | Your Kranto is older than 0.3.30: `kranto update`, or send `Origin: http://127.0.0.1:8765` (your port) with the `Authorization` header (step 9). |
