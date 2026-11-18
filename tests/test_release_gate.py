@@ -312,7 +312,7 @@ def test_the_pages_check_runs_only_on_the_build_installed(tmp_path):
 
 def press(g, tag="v0.6.0-dev3"):
     (g.home / "update" / "promote.json").write_text(json.dumps(
-        {"tag": tag, "by": "octo-owner", "at": iso(0)}))
+        {"tag": tag, "by": "jo-example", "at": iso(0)}))
 
 
 def test_the_hourly_tick_writes_the_candidate_and_promotes_nothing(tmp_path):

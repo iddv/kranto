@@ -63,7 +63,7 @@ def test_a_developer_sees_kranto_cub_in_help():
 # the earlier product's words in a command's help: its builds, its loop, its names, the page's
 # projects ("pause … (the page's Pause pauses building too)", "sources: what the kranto watch")
 RETIRED = re.compile(r"\b(?:build(?:s|ing)?|" + "|".join(legacy.COMMANDS) + r"s?)\b|\bloop\b"
-                     r"|\bprojects\b|kranto watch", re.I)
+                     r"|\bprojects\b|\bthe kranto watch", re.I)
 # a developer's commands (cub: Made by Kranto builds one), the evals (an eval set is built) and
 # adopt (which reads an older install's loop home) say their own words
 OWN_WORDS = ("cub", "eval", "adopt")

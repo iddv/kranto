@@ -34,7 +34,7 @@ other people write, are in [cubs.md](cubs.md).
 | `permissions` | the closed list below | what its context can do |
 | `events` | `publishes`, `subscribes` (with `min_trust` and an optional handler) | the bus's kind registry (one publisher per kind); delivery with cursors |
 | `ui` | `nav`, `pages`, `today_rows`, `cards` (declarative), and the seven generic surfaces below | the page draws it (the web UI's `src/features/`, or the core's generic cub page) |
-| `spend`, `telemetry`, `prompts`, `grades`, `docs`, `cli` | its purposes and caps, counters, prompts (editable in Settings › Prompts), grade targets and their chips, words, `python -m kranto.cli <id> …` | Spend, the allow-list, the prompt registry and lock, the one grades table, the glossary, the command line |
+| `spend`, `telemetry`, `prompts`, `grades`, `docs`, `cli` | its purposes and caps, counters, prompts (editable in Settings › Prompts), grade targets and their chips, words, `kranto watch <id> …` | Spend, the allow-list, the prompt registry and lock, the one grades table, the glossary, the command line |
 
 ## The seven generic surfaces
 
@@ -191,4 +191,4 @@ narrowed to some topics), `events.read`,
 2. Its tables in a numbered migration in `store.py` (pre-assigned numbers, add-only).
 3. Its prompt files in `src/kranto/prompts/` and a line in `prompts.lock.json`.
 4. Its page in the web UI's `src/kranto/page/ui/web/src/features/<id>/`.
-5. `python -m kranto.cli features <id>` prints the manifest as the core sees it.
+5. `kranto watch features <id>` prints the manifest as the core sees it.
