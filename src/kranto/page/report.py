@@ -48,7 +48,7 @@ class ReportError(RuntimeError):
 
 
 def places(cfg=None) -> list[tuple[str, str]]:
-    """The paths that become labels, longest first: the tasks dir (``<tasks>``), the loop
+    """The paths that become labels, longest first: the loop
     home (``<loop>``), the kranto home (``<Kranto>``), the home (``<home>``)."""
     out: list[tuple[str, str]] = []
 
@@ -61,7 +61,6 @@ def places(cfg=None) -> list[tuple[str, str]]:
             out.append((s, label))
     if cfg is not None:
         try:
-            add(cfg.tasks_dir, "<tasks>")
             add(cfg.home, "<loop>")
         except Exception:                           # noqa: BLE001 - a bare config
             pass
