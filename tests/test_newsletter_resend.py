@@ -1,4 +1,4 @@
-"""The newsletter through Resend (MAIL), against ``FakeResend`` (Resend's documented shapes;
+"""The newsletter through Resend, against ``FakeResend`` (Resend's documented shapes;
 nothing leaves the machine): Save and test only reads and says what is missing; a draft is a
 draft broadcast; the press sends it once (no idempotency key exists for broadcasts, so Kranto
 reads the status first), or schedules it; each answer has its outcome; the read-back carries

@@ -32,7 +32,7 @@ def test_the_loop_homes_files_are_named_by_the_layout(tmp_path):
 
 
 def test_no_module_joins_the_loop_homes_names_by_hand():
-    """The loop home's entries are named in paths.py only (S-8 step 2)."""
+    """The loop home's entries are named in paths.py only."""
     import re
     names = r"loop\.yaml|loop\.db|daemon\.(?:pid|lock|log)|actions\.jsonl|PAUSE|STOP"
     join = re.compile(rf"/\s*[\"'](?:{names})[\"']")

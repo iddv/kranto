@@ -1,6 +1,6 @@
 <script lang="ts">
   import { pageUrl } from "../../lib/base";
-  // First-run setup (#/welcome, PLAN.md section 1.5;): the mark and
+  // First-run setup (#/welcome): the mark and
   // the steps line, then the step the route names: Model (welcome: the ways in), First topic
   // (welcome/topics: Add topic), Ready (welcome/finish: the first brief, the cost, the console,
   // usage reports, Start reading) and How you write (welcome/voice: the screen Start reading

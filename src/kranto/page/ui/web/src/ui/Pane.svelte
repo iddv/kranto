@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-  // A whole pane (WORKSPACE.md 1.6; the old page's paneOf() and paneHeader()): the head sticks to
+  // A whole pane (the old page's paneOf() and paneHeader()): the head sticks to
   // the top of the pane: the kind line, the title, a lede, the actions with a note at the right,
   // and the outline ("On this page", one muted line of links, never tabs; the scroll-spy marks
   // the current section). Then notes about the object, then the sections. At most three actions

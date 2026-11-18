@@ -266,7 +266,7 @@ describe("Ideas", () => {
     done();
   });
 
-  it("leaves out a theme that lost its name, never \"theme null\" (QA B7)", async () => {
+  it("leaves out a theme that lost its name, never \"theme null\"", async () => {
     old();
     answering({ [IDEAS_API]: [{ ...RAW[0], theme: { name: null } }] });
     const { target, done } = await draw(IdeaPane, pane("3", "topics/1/ideas"), "#/topics/1/ideas");

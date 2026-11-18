@@ -1,6 +1,6 @@
-// The toast (UI-v4.md 3): one line at the bottom right, with Undo; never part of the page, so a
+// The toast: one line at the bottom right, with Undo; never part of the page, so a
 // page's redraw leaves it be (Toast.svelte draws it, once one has been said). A red one is an
-// error: Feedback's details name the last few, and it offers Tell us (FB).
+// error: Feedback's details name the last few, and it offers Tell us.
 import { noteError } from "./feedback";
 
 export const TOAST = $state<{ text: string; undo: (() => void) | null; kind: string; shown: boolean; hidden: boolean }>({

@@ -88,7 +88,7 @@ describe("Library › Map", () => {
     const { target, done } = await draw(MapList, at());
     await settle();
     expect(target.querySelector(".box p")?.textContent).toMatch(/^No map yet\. A map needs at least 30 observations/);
-    // the clusters say there is no map: /api/map is never asked for its 404 (QA B20)
+    // the clusters say there is no map: /api/map is never asked for its 404
     expect(asked).toContain("/api/clusters");
     expect(asked).not.toContain("/api/map");
     expect(target.querySelector(".box p.muted")?.textContent).toBe("12 of 30 observations so far.");

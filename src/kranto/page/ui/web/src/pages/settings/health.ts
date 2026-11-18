@@ -24,7 +24,7 @@ export const msgWord = (m: Message): St =>
   m.kind === "alarm" ? ["warn", "red", "Alarm"] : m.kind === "strike" ? ["check", "blue", "Strike"] : ["dot", "grey", (m.kind[0] || "").toUpperCase() + m.kind.slice(1)];
 export const words = (s: string | null | undefined): string => (s || "").replace(/_/g, " ");
 /** a run's job in words: a feature's job "news.brief" is "News: brief", a core job its word
- * ("ingest") (QA B8: the Runs rows showed the job's id); an old run of a feature that left Kranto
+ * ("ingest") (the Runs rows showed the job's id); an old run of a feature that left Kranto
  * (Invest's, the radar's: their rows stay in the history) says only that */
 export function runKind(kind: string): string {
   const [f, ...rest] = kind.split(".");

@@ -79,7 +79,7 @@
       {#snippet lede()}Who may act on Kranto.<Tip id="access" about="access" />{/snippet}
     </Pane>
   {:else if id === "new-agent"}
-    <Pane title="Add an agent" lede="An agent that drives Kranto (a fleet track, your own coding agent) gets a token of its own, so what it does says its name and stays within what it may run."
+    <Pane title="Add an agent" lede="An agent that drives Kranto (a script, your own coding agent) gets a token of its own, so what it does says its name and stays within what it may run."
       sections={[{ id: "form", w: "The agent" }, { id: "cli", w: "From the command line" }]}>
       {#snippet kind()}<Glyph name={SET_ST.set[0]} colour={SET_ST.set[1]} word={SET_ST.set[2]} />{" token · new agent"}{/snippet}
       {#snippet section(s)}

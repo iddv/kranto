@@ -19,7 +19,7 @@
 #   ssh -t -L 8766:127.0.0.1:8766 <this machine> '~/kranto-preview/bin/kranto-preview open; exec $SHELL -l'
 #
 # Live is never written: its home and loop home are read with rsync and SQLite's backup opened
-# read-only, and `kranto serve` refuses to start as the preview on live's folders or port.
+# read-only, and `kranto serve` refuses to start as the preview on the live install's folders or port.
 set -euo pipefail
 # uv and the maintainer's own tools live here; an ssh command has no login PATH
 PATH="$HOME/.local/bin:$PATH"

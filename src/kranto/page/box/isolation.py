@@ -7,7 +7,7 @@ cannot reach the den, the page package or anything else of the user's.
 run (``require_sandbox``) unless the owner sets ``$KRANTO_ALLOW_UNSANDBOXED=1``; then it runs
 in a network namespace only, or on the host.
 
-Moved from ``problems/tsp/contract.py`` (S-1): TSP's solver was the first user.
+Moved from ``problems/tsp/contract.py``: TSP's solver was the first user.
 """
 from __future__ import annotations
 

@@ -249,14 +249,14 @@ def test_the_error_reports_are_read_when_the_server_has_them(tmp_path):
 
 
 def test_a_refused_key_is_the_installs_setup_and_does_not_block(tmp_path):
-    """live's gate said "blocked" from 2026-10-25 09:01 because the owner's
+    """A real install's gate said "blocked" from 2026-10-25 09:01 because the owner's
     OpenRouter key expired: four "new errors" that were the install's setup, filed as a release
     regression. The 401 class is said as the install's and does not block."""
     def q(sql):
         if sql.startswith("SHOW TABLES"):
             return [{"name": "errors_by_signature"}]
         if "errors_by_signature" in sql:
-            # live's row (2026-10-27): the job's failure, its message scrubbed to a template
+            # an install's row (2026-10-27): the job's failure, its message scrubbed to a template
             return [{"signature": "420298f2ce06f955", "type": "JobFailed",
                      "route_or_job": "ingest", "message": "HTTP <n> from <x> <x> key <x>.",
                      "first_version": "0.6.0", "seen": "2026-10-24 11:00:00"}]

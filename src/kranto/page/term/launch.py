@@ -2,7 +2,7 @@
 ``kranto term open`` (a test asserts they are equal), so continuing in your own terminal with
 Kranto's limits grants exactly what the page's session has.
 
-What the session gets (with the owner's D5, D6 and D8):
+What the session gets:
 
 - **claude**, its normal tools except sub-agents (``TOOLS``; ``Task`` and ``Agent`` denied),
   the default permission mode (it asks before edits and commands, in the terminal), bypass and
@@ -57,7 +57,7 @@ TOKEN_FD_ENV = handoff.TOKEN_FD_ENV
 # for downloads.claude.ai, github.com, raw.githubusercontent.com and Datadog's intake; with these
 # only raw.githubusercontent.com, its changelog, which term.quiet_hosts refuses without a card).
 # Never CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: with it 2.1.287 offered only read-only MCP
-# tools, so kranto_propose disappeared (TS); 2.1.300 offers it again, but that is not relied on.
+# tools, so kranto_propose disappeared; 2.1.300 offers it again, but that is not relied on.
 QUIET_ENV = {"DISABLE_AUTOUPDATER": "1", "DISABLE_UPDATES": "1", "DISABLE_TELEMETRY": "1",
              "DISABLE_ERROR_REPORTING": "1", "DISABLE_INSTALLATION_CHECKS": "1",
              "CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL": "1",

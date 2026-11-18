@@ -1,6 +1,6 @@
 <script lang="ts">
   import { pageUrl } from "../../lib/base";
-  // Today's empty states (PLAN.md 1.5; UI-v4.md 1.4; the old page's readingLine): with no topic,
+  // Today's empty states (the old page's readingLine): with no topic,
   // the mark, what will appear and when, and Add a topic, at the top of the list (main); while
   // the library is small (under 30 observations), what Kranto is reading, in the pane (side).
   import type { Setup } from "../../api/afk.gen";

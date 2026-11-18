@@ -1,4 +1,4 @@
-"""prompts.lock.json (the owner's D4): a change to a prompt the server ships, or
+"""prompts.lock.json: a change to a prompt the server ships, or
 to TENETS, fails here until the lock names the scorecard that evaluated the new version (or
 says why it was skipped). The only place CI touches evaluation; it costs nothing."""
 

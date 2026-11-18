@@ -204,7 +204,7 @@ class NewsletterAdapter:
         return platform.send(ctx, d, when, snd)
 
     def ask(self, kind: str, fields: dict, store, rt) -> dict:
-        """The plain dialog's parts (SEND): the subject, whom it goes to by name and count, the
+        """The plain dialog's parts: the subject, whom it goes to by name and count, the
         body, and what stops a send now (no account, or one that needs its setup finished),
         with the account to connect. Built from the ticket's fields and Kranto's own rows; the
         count is the platform's, read when the dialog opens (kept 5 minutes)."""

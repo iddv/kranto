@@ -1,4 +1,4 @@
-"""A refused model key, in a real browser: live's OpenRouter key expired on 25 Oct and
+"""A refused model key, in a real browser: a real install's OpenRouter key expired on 25 Oct and
 for two days the home put a held build above the failure, the console squeezed or covered Needs
 you, and the top bar said "Quiet". Here the incident is the first thing on the home and on Needs
 you, seen without scrolling and not under the console (docked, open, as live has it), at 1400 px

@@ -130,7 +130,7 @@ def _json(text: str) -> dict | None:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--home", required=True, help="a scratch kranto home (never live's)")
+    ap.add_argument("--home", required=True, help="a scratch kranto home (never your real one)")
     ap.add_argument("--budget", type=float, default=3.0, help="stop at this many dollars")
     ap.add_argument("--items", type=int, default=20)
     ap.add_argument("--sites", default="blog,toot")

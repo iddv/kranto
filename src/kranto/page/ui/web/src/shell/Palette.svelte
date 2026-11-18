@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The command palette (⌘K, UI-v4.md 2.4): one input; results grouped Ideas · Evidence · Sources
+  // The command palette (⌘K): one input; results grouped Ideas · Evidence · Sources
   // · Topics · Commands, the group with the best match first and its first result selected. The
   // ideas, topics and commands come from the app's palItems; the evidence and the sources from
   // the server's /api/search (words and meaning), asked a moment after the typing stops, ranking

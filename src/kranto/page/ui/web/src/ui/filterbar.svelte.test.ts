@@ -1,6 +1,6 @@
 // The list's search box (FilterBar.svelte) hands the keys back: after / + text + Enter the list has
 // them (j moves the cursor, it does not type "j" into the box), and esc leaves the box without
-// closing what is open (QA B5).
+// closing what is open.
 import { flushSync, mount, unmount } from "svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import FilterBar from "./FilterBar.svelte";

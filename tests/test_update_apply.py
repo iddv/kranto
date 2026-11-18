@@ -915,10 +915,10 @@ def uv_calls(world):
 
 
 def test_the_crossing_there_and_back_twice(world):
-    """old -> K0 -> back -> K0 -> K1 -> back -> K1, as the rehearsal runs it."""
+    """old -> crossing -> back -> crossing -> next -> back -> next, as the rehearsal runs it."""
     old_install(world)
     assert world.tool == legacy.TOOL and not (world.bin / "kranto").exists()
-    # K0: the old shape in the same tool, now with both commands
+    # the crossing release: the old shape in the same tool, now with both commands
     h = world.helper(to="v0.7.0-dev1")
     assert h.unit == legacy.UNIT and h.tool_env == world.tools / legacy.TOOL
     assert h.run_all() == "done"
@@ -928,11 +928,11 @@ def test_the_crossing_there_and_back_twice(world):
     assert backup[0] == str(world.bin / legacy.COMMAND)    # the old version's only command
     assert ["systemctl", "--user", "stop", legacy.UNIT] in world.calls
     assert ["uv", "tool", "uninstall"] not in [c[:3] for c in uv_calls(world)]
-    # back to the version before the rename (its own command only), then K0 again
+    # back to the version before the rename (its own command only), then the crossing one again
     assert world.helper(to="previous").run_all() == "done"
     assert world.version == OLD and not (world.bin / "kranto").exists()
     assert world.helper(to="v0.7.0-dev1").run_all() == "done"
-    # K1: the old tool goes first, then kranto, which carries both commands
+    # the next release: the old tool goes first, then kranto, which carries both commands
     world.calls.clear()
     assert world.helper(to="v0.7.0-dev2").run_all() == "done"
     assert world.version == "0.7.0.dev2" and world.tool == "kranto"

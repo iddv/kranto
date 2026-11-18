@@ -4,7 +4,7 @@ The server's ``kranto serve`` mounts it at ``/brb/`` (``brb ui``'s own stdlib se
 calls it too). The function knows nothing about either server: it takes the path below its
 mount point and returns ``(status, content_type, body_bytes)``. Guards stay with the server:
 loopback only, and no cross-origin POST (both servers refuse with 403). Who is calling is the
-server's to say too (OI): it checks the request's token and passes ``identity``; a write acts as
+server's to say too: it checks the request's token and passes ``identity``; a write acts as
 that caller, never as the body's ``origin``.
 
 What it serves since the factory left (cut 3): the page's document and assets, the
@@ -234,7 +234,7 @@ class App:
 
     def afk(self, method: str, path: str, body: dict | None = None, owner: bool = False) -> dict:
         """The server's API on loopback: the page never touches its files. A state-changing call
-        carries the server's own origin, as its guard requires, and the UI's token (OI).
+        carries the server's own origin, as its guard requires, and the UI's token.
         ``owner``: a read that is the owner's only (a run's model calls, for its agent trace)
         carries the token too."""
         import urllib.error
@@ -278,7 +278,7 @@ def configure(root: str | Path | None = None, harness: str = "claude-code",
     global _default
     try:
         from ..box import handoff
-        handoff.mark_dotenv()    # the processes Kranto starts tell the watcher's key (BL)
+        handoff.mark_dotenv()    # the processes Kranto starts tell the watcher's key
     except (ImportError, AttributeError):
         pass
     _default = App(Path(root).expanduser() if root else None, harness,
@@ -330,7 +330,7 @@ def handle(method: str, path: str, query=None, body=None, app: App | None = None
     is a dict or a query string; ``body`` is the raw JSON body (or a dict). Returns
     ``(status, content_type, body)``. Never raises.
 
-    ``identity`` (OI): the caller a server found from the request's token (``{"origin":
+    ``identity``: the caller a server found from the request's token (``{"origin":
     "ui"|"mcp"|"cli"|"agent:<name>", "actions"}``; the server's guard, or ``brb ui``'s). A write
     then acts as that caller, whatever the body's ``origin`` says (a mismatch is logged); a
     read that ``read_needs_identity`` names (a trace) is the owner's only. None
@@ -350,8 +350,8 @@ def handle(method: str, path: str, query=None, body=None, app: App | None = None
     except SystemExit as e:
         return _json(400, {"error": str(e)})
     except Exception as e:                       # noqa: BLE001
-        # the details go to the log once by the error's id, never to the client (CR-REVIEW
-        # C-1); the answer is Kranto's error JSON: the id, the version, Send this error (RCA B3)
+        # the details go to the log once by the error's id, never to the client;
+        # the answer is Kranto's error JSON: the id, the version, Send this error
         rec = rowsafe.note(e, f"{method} {_pattern(path)}", kind="response")
         from .. import __version__
         return _json(500, {"error": rowsafe.said(rec["id"]), "error_id": rec["id"],
@@ -404,7 +404,7 @@ def stream(path: str, query=None, app: App | None = None, last: str | None = Non
     bytes that blocks between events, for the host to write as they come; None for every
     other path (``handle`` answers those). ``last``: the ``Last-Event-ID`` a reconnecting
     page sends. When every stream place is taken, a stream that says ``busy`` and ends (the
-    page polls; a 503 was an error in its console, QA B20). A loopback GET like every read: it
+    page polls; a 503 was an error in its console). A loopback GET like every read: it
     needs no token and carries no secret."""
     if (path or "").rstrip("/") != STREAM_PATH:
         return None

@@ -4,12 +4,12 @@
   // order they are offered (MP D12): the Claude API (an Anthropic key), OpenRouter, another
   // OpenAI-compatible endpoint (its base URL written to llm.base_url when its key passes), then
   // Claude Code's login when the server offers it: never preselected, its terms sentence shown where
-  // it is chosen (the owner's D2), no key, and the press says terms: true. The
+  // it is chosen (as the owner decided), no key, and the press says terms: true. The
   // press goes to the server's /api/setup/provider, which tests the key, keeps it in .env and makes
   // the choice the watcher's at once. The key is a secret the owner types: a password field, read
   // only at the press, sent once and cleared then, never kept in state or logged. A key already set
   // for the choice (in .env or the environment) can be chosen without pasting it. Tested on paste
-  // (UI-v4.md 2.5): a paste presses Test and save after a short pause, and so does a pause after
+  // too: a paste presses Test and save after a short pause, and so does a pause after
   // typing something key-length.
   import FLabel from "../../ui/FLabel.svelte";
   import { read } from "../../lib/reads.svelte";

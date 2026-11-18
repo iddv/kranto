@@ -93,7 +93,7 @@ describe("the live feed", () => {
     f.stop();
   });
 
-  it("polls when the feed says busy, says live updates are paused, and is live again on a real stream (QA B20)", async () => {
+  it("polls when the feed says busy, says live updates are paused, and is live again on a real stream", async () => {
     const f = live(L);
     const s = FakeSource.all[0] as FakeSource;
     s.emit("open"); // the busy answer is a 200: open fires first

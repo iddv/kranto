@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Topics, the pane (WORKSPACE.md 2.7): with nothing selected, a topic's pages show the topic
+  // Topics, the pane: with nothing selected, a topic's pages show the topic
   // (TopicCard: its facts, what is rising, its best sources; Scout more, Pause, Add source), and
   // the Topics node says "Nothing selected."; a row of the Topics node is its topic (sel=t<id>).
   // A source (sel=s<id>), an observation (sel=o<id>) or a theme (sel=c<n>) is its home's moved

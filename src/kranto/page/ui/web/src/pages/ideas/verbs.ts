@@ -1,4 +1,4 @@
-// The decision on an open idea card, the same everywhere (UI-v4.md 2.3: Ideas, a topic's Ideas, the
+// The decision on an open idea card, the same everywhere (Ideas, a topic's Ideas, the
 // card's sheet): Pass asks why (one chip) and grades it not useful; Later puts it off for a
 // week. Both are the server's: Pass is the grade, Later is ``idea.later``
 // (POST /api/ideas/<n>/later). ⌘K and a row's menu take them as items (ideaItems).

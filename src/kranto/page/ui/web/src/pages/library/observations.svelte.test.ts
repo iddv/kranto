@@ -115,7 +115,7 @@ describe("Library › Observations", () => {
     const { target, done } = await draw(ObsList, at(["library"], q));
     expect([...target.querySelectorAll(".grp h2")].map((h) => h.textContent)).toEqual(["Best matches", "Compacted weeks"]);
     expect(target.querySelector(".flash.amber")?.textContent).toContain("the closest observation scores 0.20, below 0.30");
-    expect(target.querySelector("#watch-this")).toBeNull(); // watches are retired (WT)
+    expect(target.querySelector("#watch-this")).toBeNull(); // watches are retired
     expect(target.querySelector("p.quiet-topics")?.textContent).toBe('The 1 observation that best match "sync". Observations more than 0.05 less similar than the closest are left out.');
     const r = target.querySelector('[data-sel="u7"]')!;
     expect(r.querySelector("a.r-title")?.getAttribute("href")).toBe("#/library?q=sync&sel=u7");
@@ -194,7 +194,7 @@ describe("Library › an observation", () => {
     // the three numbers and the meter; the run's trace (model, tokens, raw response) is Activity's
     expect([...target.querySelectorAll("#s-judgment dl.mt dd")].map((x) => x.textContent)).toEqual(["topic (0.61)"]);
     expect(target.querySelector("#s-judgment details")).toBeNull();
-    expect(target.querySelector("#watch-obs")).toBeNull(); // watches are retired (WT)
+    expect(target.querySelector("#watch-obs")).toBeNull(); // watches are retired
     (target.querySelector("#mute-obs") as HTMLButtonElement).click();
     expect(L.popover).toHaveBeenCalledWith(expect.any(HTMLElement), "Mute HN", [], expect.anything());
     expect([...document.querySelectorAll(".pop.menu button[role=menuitem]")].map((b) => b.textContent)).toEqual(["Mute for 7 days", "Mute for 30 days", "Read less", "Retire"]);

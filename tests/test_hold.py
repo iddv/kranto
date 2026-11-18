@@ -1,6 +1,6 @@
 """The update's drain (section 4.2): ``POST /api/hold`` starts no job and holds
 every lane, whose next tick then starts nothing long; ``DELETE`` undoes it; ``stop_builds``
-asks each lane that can to stop what it runs. Kranto runs no loop lane since the cut (CUT), so
+asks each lane that can to stop what it runs. Kranto runs no loop lane since builds left, so
 the lane here is a stand-in for any second lane: no page, no model."""
 
 from __future__ import annotations

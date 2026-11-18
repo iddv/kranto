@@ -1,4 +1,4 @@
-"""The ``kranto`` command: one app, one runtime (PLAN.md sections 1.1 to 1.7).
+"""The ``kranto`` command: one app, one runtime.
 
 ``kranto`` is what the ``kranto`` distribution (``packages/kranto``) installs. A kranto home
 (``--home``, else ``$KRANTO_HOME``, else the one ``kranto up`` or ``kranto adopt`` recorded in
@@ -494,7 +494,7 @@ UNIT_DESCRIPTION = f"{product.NAME}: news in, ideas out, posts when you say"
 
 
 def render_unit(home: Path, exe: Path, port: int, user_home: Path) -> str:
-    """``kranto.service`` (PLAN.md section 1.2). ``KillMode=process``: stopping the unit ends
+    """``kranto.service``. ``KillMode=process``: stopping the unit ends
     the server, which ends its own children; detached builds keep running and the next start
     adopts them by pid. ``TimeoutStopSec``: the server stops within 10 s of SIGTERM and its
     watchdog exits at 12 s (``stopping.py``), so systemd's kill at 15 s is only the last
@@ -1182,7 +1182,7 @@ def status_lines(home: Path, host: Host) -> tuple[list[str], bool]:
             # degraded only for what the band says (Kranto's own); a feature's is a Needs you row
             if any(x.startswith("INCIDENT") for x in said):
                 good = False
-    # builds left Kranto (CUT): no loop lane, loop, build spend or build login line
+    # builds left Kranto: no loop lane, loop, build spend or build login line
     lines.append("spend      watching "
                  f"${runs.get('_spend', {}).get('month', 0):.2f} "
                  + (f"{cfg.budget.of()} this month" if cfg.budget.capped
@@ -1360,7 +1360,7 @@ def claude_store(host: Host) -> Path:
     """Kranto's store for the Claude login token the console uses: ``$KRANTO_CLAUDE_DIR``, else
     ``~/.config/kranto/claude`` (``claude.<unit>`` for another ``$KRANTO_UNIT``). The page's
     ``claude_login`` reads it at each launch and pipes the token to claude; the path and the
-    format are pinned by a test in each repository."""
+    format are pinned by a test on each side, the server's and the page's."""
     if os.environ.get("KRANTO_CLAUDE_DIR"):
         return Path(os.environ["KRANTO_CLAUDE_DIR"]).expanduser()
     return legacy.unit_store("claude", user_home=host.home)
@@ -1421,7 +1421,7 @@ GH_NOT_LOGGED_IN = "gh is not logged in: 'File a Kranto issue' needs it (gh auth
 
 
 def prerequisite_checks(home: Path, host: Host) -> list[Check]:
-    """What cannot be installed for the customer (PLAN.md section 1.7), and the unit's PATH.
+    """What cannot be installed for the customer, and the unit's PATH.
     Commands are looked up on the unit's PATH when a unit is installed, since that is the
     PATH the console runs with."""
     out: list[Check] = []
@@ -1864,7 +1864,7 @@ def cmd_eval(args, host: Host) -> int:
     return evals_cli.main(list(args.rest or []), home, threshold=threshold)
 
 
-# -- tokens and signing in (OI) -------------------------------------------------------------------
+# -- tokens and signing in ------------------------------------------------------------------------
 
 
 def token_store(host: Host):
@@ -1920,7 +1920,7 @@ def cmd_open(args, host: Host) -> int:
 
 
 def cmd_token(args, host: Host) -> int:
-    """``kranto token list|add|rotate|revoke|actions|path``: the local tokens (OI). Values are
+    """``kranto token list|add|rotate|revoke|actions|path``: the local tokens. Values are
     never printed: each lives in its own file at mode 600."""
     from . import tokens
 
@@ -1989,8 +1989,8 @@ def cmd_doctor(args, host: Host) -> int:
 
 
 def doctor_routes(home: Path, args) -> int:
-    """``kranto doctor --routes``: the post-update self-check on the running server (RCA D1,
-    ``update/apply.py``'s ``route_check``): every page it serves, read once, read-only, on this
+    """``kranto doctor --routes``: the post-update self-check on the running server
+    (``update/apply.py``'s ``route_check``): every page it serves, read once, read-only, on this
     install's own data. Exit 1 when one answers 500 or above, or does not answer."""
     from .update.apply import route_check, selfcheck_words
 

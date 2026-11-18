@@ -1,4 +1,4 @@
-// The command palette's items (⌘K, UI-v4.md 2.4; drawn by Palette.svelte). Ideas (the server's cards,
+// The command palette's items (⌘K; drawn by Palette.svelte). Ideas (the server's cards,
 // /api/ideas) and topics are searched here; evidence and sources come from the server's /api/search
 // (words and meaning), which the palette asks and passes in (srv). enter opens; ⌘enter runs the
 // row's primary action.
@@ -83,7 +83,7 @@ function palCommands(): Item[] {
   const t = navTree(parse()), H = host(), doors = shellDoors(!!H);
   if (doors) out.push(...doorsGo(), { g: "Commands", title: "Add topic", go: "#/topics/new" });
   // a topic's own Sources, Evidence and Map by the word ("sources" found ideas before
-  // these; WT: Watch is topic-first, its pages a topic's), and All topics' (doorsGo: Watch › …)
+  // these; Watch is topic-first, its pages a topic's), and All topics' (doorsGo: Watch › …)
   for (const tp of H ? H.topics : []) {
     for (const [k, w] of WATCH_PAGES) out.push({ g: doors ? "Go to" : "Commands", title: `${doors ? "" : "Go to "}${tp.name} › ${w}`, detail: k === "sources" ? "the sources this topic reads" : k === "evidence" ? "what this topic kept" : "this topic's themes",
       go: doors ? "#/" + watchPath(tp.id, k) : href(k === "map" ? `topics/${tp.id}/themes` : `topics/${tp.id}/${k}`) });
@@ -134,7 +134,7 @@ function palCommands(): Item[] {
   const paused = afkPaused();
   if (H) out.push({ g: "Commands", title: paused ? "Resume" : "Pause", detail: PAUSES, run: () => togglePause(null, !paused) });
   const dark = isDark(), look = lookNow();
-  const to = flipTo(); // Auto again when the other scheme is the device's (QA B18)
+  const to = flipTo(); // Auto again when the other scheme is the device's
   out.push({ g: "Commands", title: dark ? "Switch to light" : "Switch to dark", detail: to === "auto" ? "back to Auto: follows your device" : themeNow() === "auto" ? "Auto is off until you choose it again (Settings › Appearance)" : "Settings › Appearance",
     run: () => { setTheme(to); render(); toast(baseWords(to)); } });
   for (const [id, lw, blurb] of lookChoices()) out.push({ g: "Commands", title: "Theme: " + lw, detail: id === look ? "in use" : blurb, run: () => { setLook(id); render(); } });

@@ -54,7 +54,7 @@ describe("Library › Clusters", () => {
     expect(a!.querySelector(".c-aside svg.spark")?.getAttribute("aria-label")).toBe("share over 2 maps: 10.0% to 12.0%");
     expect(a!.querySelector(".c-age")?.textContent).toBe("+10");
     expect(a!.querySelector(".grade")).toBeNull(); // a theme has no grade: Card it now is its action
-    expect(a!.querySelector(".r-act button")).toBeNull(); // watches are retired (WT): no Watch on a theme
+    expect(a!.querySelector(".r-act button")).toBeNull(); // watches are retired: no Watch on a theme
     expect(b!.querySelector(".gl")?.getAttribute("aria-label")).toBe("Burst");
     expect(b!.querySelector(".c-age")?.textContent).toBe("");
     // the archive: alive or long-lived only, each listing its members in Observations
@@ -114,11 +114,11 @@ describe("Library › Clusters", () => {
     expect([...target.querySelectorAll("#s-movement dd")].map((x) => x.textContent)).toEqual(["11.8%", "+2.00 pts", "2"]);
     expect([...target.querySelectorAll("#s-mix dt")].map((x) => x.textContent)).toEqual(["stories", "sources", "topics", "keywords"]);
     expect(target.querySelector("#s-mix dd:nth-of-type(3)")?.textContent).toBe("AI tooling 3, Local-first 30");
-    expect([...target.querySelectorAll(".acts button")].map((b) => b.textContent)).not.toContain("Watch"); // retired (WT)
+    expect([...target.querySelectorAll(".acts button")].map((b) => b.textContent)).not.toContain("Watch"); // retired
     done();
   });
 
-  it("cards a theme on request, after a confirm that says the cost (CON D-1)", async () => {
+  it("cards a theme on request, after a confirm that says the cost", async () => {
     const L = lib();
     answering({ "/api/clusters": { ...D, clusters: [cl(12)] }, "/api/observations?cluster=12&sort=signal&limit=20": { total: 0, offset: 0, cluster_label: null, seen_at: null, marker: "", since: null, new_total: 0, results: [] } });
     const { target, done } = await draw(ThemePane, at(["library", "clusters", "12"], {}, "theme"), "#/library/clusters");
@@ -136,7 +136,7 @@ describe("Library › Clusters", () => {
   });
 
   it("lists a theme's ideas by its lineage, never by its cluster number (snapshot 17's replay)", async () => {
-    // live's map of 2026-10-18: cluster 18 is a new robotics lineage, and no card is on it; earlier
+    // a real install's map of 2026-10-18: cluster 18 is a new robotics lineage, and no card is on it; earlier
     // maps gave the number 18 to other themes, which have cards
     const withHost = () => { stub({ host: { topics: [], sources: [] } }); hosted(); };
     withHost();

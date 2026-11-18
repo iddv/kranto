@@ -11,7 +11,7 @@ from .test_web import rt  # noqa: F401 - fixture
 # -- the routes: Write a post as short posts, I posted it, Settings › Posting --------------------
 
 def test_the_console_may_write_short_posts_and_nothing_is_sent(rt, monkeypatch):  # noqa: F811
-    """SOC-11: the console's post.write {as: short} is prepared like any write (202); every
+    """POSTING-11: the console's post.write {as: short} is prepared like any write (202); every
     ask a short post files waits for the page's confirm."""
     import time
 

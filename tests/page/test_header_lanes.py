@@ -1,5 +1,5 @@
-"""The header says what Kranto is doing in one item (the owner's D-2), in place
-of the two lane words fleet2 track H drew (watching, building): "Quiet · next: reading your sources
+"""The header says what Kranto is doing in one item, in place
+of the two lane words it once drew (watching, building): "Quiet · next: reading your sources
 at 18:00", "2 running · writing the News brief", "Paused", a red dot once when
 something failed. One "Idle" beside a Pause that pauses everything read as "the whole app is
 idle"; the item never says it. Pause's tooltip, its confirmation and its flash say what it stops.

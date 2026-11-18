@@ -1,4 +1,4 @@
-// Settings › Watching and onboarding's first step (PLAN.md section 1.5): the server's /api/setup says
+// Settings › Watching and onboarding's first step: the server's /api/setup says
 // whether setup is done, which provider watches and whether its key is set (never the key), its
 // last answer, and Claude Code's login (Welcome's Ready); /api/setup/provider (the server's providers.detect)
 // says which keys are found, so a key already set can be chosen without pasting it. The key goes in a password field that is read once when it is

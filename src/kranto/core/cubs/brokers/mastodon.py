@@ -176,7 +176,7 @@ class MastodonAdapter:
         return {"state": "refused", "note": f"refused: the instance answered {r.status_code}"}
 
     def ask(self, kind: str, fields: dict, store, rt=None) -> dict:
-        """The plain dialog's parts (SEND): the toot's text, whom it goes to (the account and the
+        """The plain dialog's parts: the toot's text, whom it goes to (the account and the
         visibility), and the posting account to connect when it is not."""
         conn = connection_of(store, self.provider)
         needs = None

@@ -1,6 +1,6 @@
 """A cub reaches the right half of the spine: ``objects.get`` still knows the kinds
 of before wave 3, but a trend is not found since the radar left Kranto (cut 2), and a
-build, a product and a project are not found since builds left (CUT), nor for a cub narrowed to
+build, a product and a project are not found since builds left, nor for a cub narrowed to
 some topics; an unknown kind names the kinds."""
 
 import pytest

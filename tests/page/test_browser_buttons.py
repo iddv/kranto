@@ -115,8 +115,8 @@ def test_the_named_pages_draw_what_the_owner_saw(browser, page_base):
                                                                  body=json.dumps({"origin": "owner", "require_token": True})))
     page.goto(f"{page_base}/#/cub/newsletter?list=issues")
     until(page, "document.querySelector('#rows li.row')", 15)
-    assert page.locator("#rows [data-act=ask-open]").first.inner_text() == "Send"   # its own verb (SEND)
-    # The page's one head (STD) says its last update among its facts, and the staged one is
+    assert page.locator("#rows [data-act=ask-open]").first.inner_text() == "Send"   # its own verb
+    # The page's one head says its last update among its facts, and the staged one is
     # in its ⋯; this file ran in no CI job until so it still read the old page
     until(page, "document.body.innerText.includes('updated to 1.2.0 by itself, 2026-10-23')", 15)
     page.locator("#page-head .verbs .btn.more").click()

@@ -64,7 +64,7 @@ def test_claude_codes_background_hosts_are_refused_quietly_and_others_ask(tmp_pa
 
 
 def test_questions_asked_before_a_host_was_quiet_are_not_cards(tmp_path, monkeypatch):
-    """Live's first session (0.3.65) recorded four questions about Claude Code's own hosts; the
+    """A real install's first session (0.3.65) recorded four questions about Claude Code's own hosts; the
     page draws each asked host as a card, so they would come back on the next Open."""
     term = make_term(tmp_path, monkeypatch, token=canary("claude"))
     tid = term.store.new_tid()

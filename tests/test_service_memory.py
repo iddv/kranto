@@ -1,7 +1,7 @@
 """service.memory: the owner asked the console to raise Kranto's memory and it
 edited the systemd drop-in by hand, for want of a setting. The setting writes Kranto's own
 drop-in, reloads and applies it to the running service at once, shows the use beside it, and
-is refused anywhere but inside Kranto's own service (a scratch copy never touches live's)."""
+is refused anywhere but inside Kranto's own service (a scratch copy never touches the real one)."""
 from types import SimpleNamespace
 
 import pytest

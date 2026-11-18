@@ -1,6 +1,6 @@
 """A refused model key is one blocking incident.
 
-Live's OpenRouter key expired on 2026-10-25 08:15 UTC; ingest, ideas and the newsletter cub
+An install's OpenRouter key expired on 2026-10-25 08:15 UTC; ingest, ideas and the newsletter cub
 failed for two days as three Fix rows (after the second failure each), nine "ingest run
 failed" messages and no word for the cause. These tests hold the incident that replaces them.
 Nothing touches a model or the network."""

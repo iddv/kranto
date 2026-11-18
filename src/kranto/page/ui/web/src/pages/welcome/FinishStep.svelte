@@ -3,7 +3,7 @@
   // and a button, inside the first screen at 1400 × 900 and on a phone. The first brief: when it
   // comes. What it costs, by provider (the server's words: a key's dollars, or the Claude plan's
   // usage on the login). The console: Claude Code ready, and that it asks once whether to trust
-  // Kranto's folder (Kranto never answers it: D1); or how to get it, since Kranto works without it.
+  // Kranto's folder (Kranto never answers it); or how to get it, since Kranto works without it.
   // Usage reports: off until the person turns them on (nothing is sent before an
   // answer), the three choices under "What they hold". **Start reading** (the primary) marks
   // setup done, starts the first read and opens How you write while kranto reads (F-13).

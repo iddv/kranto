@@ -1,5 +1,4 @@
-"""The term door: how a session reaches Kranto, and why it can change nothing by itself
-(the owner's D5).
+"""The term door: how a session reaches Kranto, and why it can change nothing by itself.
 
 - **The socket.** Each session has its own unix socket, ``run/api.sock``, bound into its sandbox
   at ``/run/kranto/api.sock`` (nothing else of Kranto's loopback is reachable from inside). Every

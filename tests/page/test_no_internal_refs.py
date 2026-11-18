@@ -1,5 +1,6 @@
-"""What a user reads carries no internal references: no private plan citations (``X-PLAN``,
-``§``), no track codes (``track OI``, ``(OI)``), no "example-host" and no personal paths. Checked:
+"""What a user reads carries no internal references: no private plan citations (a code ending in
+``-PLAN``, ``§``), no track codes (``track`` and a short capital code, or one in parentheses), no
+"example-host" and no personal paths. Checked:
 every ``kranto trace`` help text, the page's strings (``app.js``), the help page (``help.md``) and the
 files Kranto writes into a product's repo (``maintain/templates``)."""
 import argparse

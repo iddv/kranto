@@ -1,6 +1,6 @@
-"""A draft waits until it is seen, and Post's one read (package POST's P1).
+"""A draft waits until it is seen, and Post's one read.
 
-Live's asks as they stand on 11 November (read from a copy): five drafts, seven asks, six of
+An install's asks as they stood on 11 November (read from a copy): five drafts, seven asks, six of
 them expired unread. #1 the newsletter's first issue under an earlier release's kind; #2
 example.com's
 post, offered again as #5, which ran out of time too; #3 the issue of 27 Oct, practiced, offered
@@ -65,7 +65,7 @@ def issue(store, subject: str, at: datetime, *, service: str = "newsletter",
 
 
 def live_copy(rt) -> dict:  # noqa: F811
-    """Live's five drafts and seven asks, filed under the limits the kinds had then."""
+    """A real install's five drafts and seven asks, filed under the limits the kinds had then."""
     store = rt.store
     old_kind, old = next(iter(newsletter.legacy_kinds().items()))
     with old_limits():

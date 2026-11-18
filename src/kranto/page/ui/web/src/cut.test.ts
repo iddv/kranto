@@ -17,7 +17,7 @@ const GONE_FILES = [
   "pages/settings/MergeSec", "pages/settings/BackfillDialog", "pages/settings/AdoptedPane", "pages/settings/AddPane", "pages/settings/AccountsList",
   "pages/welcome/BuildingStep", "pages/welcome/ReposStep", "pages/welcome/RepoPicker", "pages/welcome/repos", "pages/trace/Compare", "api/actions.gen",
 ];
-/** the factory's routes on the page's own server (CUT/PLAN.md: they answer 404 after C2) */
+/** the factory's routes on the page's own server: they answer 404 after C2 */
 const GONE_ROUTES = ["loop/", "maintain", "projects", "builds", "act"].map((r) => "api/" + r);
 
 /** a file's imports: static, dynamic and type-only */

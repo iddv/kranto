@@ -1,4 +1,4 @@
-// First run (PLAN.md section 1.5; UI-v4.md 1.4, 2.5) and Add topic (WORKSPACE.md 2.13). Before
+// First run and Add topic. Before
 // setup a fresh install opens on #/hello (the splash, whose one button is Set up Kranto); #/welcome
 // is setup's three steps, drawn in the stage layout without the panes: the
 // model key (Settings › Watching's form), the first topic (Add topic, which is Topics › Add topic
@@ -13,8 +13,8 @@ import { Product } from "../../lib/product";
  * you write" (F-13) is the screen Start reading opens, while kranto reads: it adds nothing to the
  * time to the first brief, and it can be skipped */
 export const STEPS: [string, string][] = [["", "Model"], ["topics", "First topic"], ["finish", "Ready"], ["voice", "How you write"]];
-/** step 1's ways in, in the order they are drawn. The owner's F-3 (the Claude
- * Code login first when found) is not answered: the login stays last, as the owner's D2 placed it,
+/** step 1's ways in, in the order they are drawn. Whether the Claude
+ * Code login comes first when found is not decided: the login stays last, as the owner placed it,
  * and the change is this one line, ["login", "key"] */
 export type Way = "key" | "login";
 export const WAYS: Way[] = ["key", "login"];
@@ -25,7 +25,7 @@ export const afterTopics = (): string => "welcome/finish";
 /** the step a route opens (welcome, welcome/topics, welcome/finish), 0 when it names none */
 export const stepAt = (sub: string | undefined): number => Math.max(0, stepsNow().findIndex((s) => s[0] === (sub || "")));
 /** a step's tick: only when what it sets is set (the key, a topic, Ready's Start reading), never
- * for having passed it (QA B13: Watching was ticked with no key) */
+ * for having passed it (Watching was ticked with no key) */
 export const stepDone = (i: number, s: { key?: { set?: boolean } | null; topics?: number; done?: boolean } | null): boolean =>
   !!s && (i === 0 ? !!s.key?.set : i === 1 ? (s.topics || 0) > 0 : i === 2 ? !!s.done : false);
 /** where Start reading goes: How you write, while the first read runs (F-13) */

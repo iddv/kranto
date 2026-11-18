@@ -131,7 +131,7 @@ def _age_s(at: str) -> float:
 
 def jobs(store: Any, cfg: Any, limit: int = 20, unreadable: bool = False) -> list[dict[str, Any]]:
     """The newest install jobs. One that cannot be read is kept once by its error's id and left
-    out; ``unreadable`` lists it as "Couldn't read this job" instead (the page's list, RCA A3)."""
+    out; ``unreadable`` lists it as "Couldn't read this job" instead (the page's list)."""
     from ...rowsafe import each, is_unreadable
     ids = [r["job_id"] for r in store.query(
         "SELECT job_id, MAX(id) AS last FROM cub_installs GROUP BY job_id ORDER BY last DESC "

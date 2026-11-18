@@ -44,7 +44,7 @@ def test_the_page_is_registered_lazily():
 def test_the_apis_href_is_the_route():
     assert _href("a/b", None, "session") == "#/sessions/a%2Fb/trace"   # one segment
     assert _href("u-1", None, "afk") == "#/afk/u-1/trace"
-    # the build loop's old rows open nowhere (CUT): their pages left with it
+    # the build loop's old rows open nowhere: their pages left with it
     assert _href("sample-r1", 1) is None and _href("fix-1", 1, "maint") is None
 
 

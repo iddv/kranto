@@ -1,4 +1,4 @@
-"""The command palette's search (UI-v4.md 2.4): topics, sources and observations in one list,
+"""The command palette's search: topics, sources and observations in one list,
 from the library's own search, with no model call."""
 
 from kranto import library

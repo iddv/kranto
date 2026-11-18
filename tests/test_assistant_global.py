@@ -1,4 +1,4 @@
-"""Add Kranto to your own Claude Code or Codex from Settings › Assistant (the owner's Q6 of
+"""Add Kranto to your own Claude Code or Codex from Settings › Assistant (as the owner decided on
 2026-10-25: "nothing outside Kranto's folder unless asked; a Settings › Assistant action and a
 console request both work, the change shown first";). Before, only the command line
 did it. ``GET /api/assistant/global`` shows the exact change; ``POST`` makes it, on the owner's

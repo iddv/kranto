@@ -1,6 +1,6 @@
 <script lang="ts">
-  // One topic's pages, the list (PLAN.md 2.3; WORKSPACE.md 2.7, 8): the topic itself, and its
-  // Sources, Evidence and Map (Watch is topic-first, WT: #/watch/topic/<id>[/sources|/evidence|
+  // One topic's pages, the list: the topic itself, and its
+  // Sources, Evidence and Map (Watch is topic-first: #/watch/topic/<id>[/sources|/evidence|
   // /map], "Robotics › Sources"); Themes and Ideas by their old addresses (a page it does
   // not know is the topic, as before). One read of /api/topics/<id> for all of them, shared with
   // the pane and the navigator's counts. Evidence is the library's Observations with the topic

@@ -16,7 +16,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 PKG = ROOT / "src" / "kranto" / "page"
 
-# every top-level package and module of the page's that left with the factory (CUT)
+# every top-level package and module of the page's that left with the factory
 REMOVED = [
     "capabilities", "chat", "costs", "custom_prompts", "den", "errors", "evals", "events",
     "extensions", "github_app", "github_cli", "github_repos", "github_user", "harness", "lab",

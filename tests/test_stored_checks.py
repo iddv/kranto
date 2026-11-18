@@ -1,7 +1,7 @@
 """The two checks beside the contracts:
 the stored-shape lint (``scripts/ci/stored_shape_lint.py``) and the type check's ratchet
-(``scripts/ci/typecheck.py``). The lint's cases are the RCA's read in the six shapes probed,
-and one case per guard it understands."""
+(``scripts/ci/typecheck.py``). The lint's cases are the unguarded similarity read in the six
+shapes probed, and one case per guard it understands."""
 from __future__ import annotations
 
 import importlib.util
@@ -50,9 +50,9 @@ def rules(tmp_path: Path, code: str) -> set[str]:
     return {r for r, _ in findings(tmp_path, code)}
 
 
-# -- the RCA's read, six shapes (the probe) --
+# -- the unguarded similarity read, six shapes (the probe) --
 
-def test_the_rca_line_as_it_was_is_found(tmp_path):
+def test_the_unguarded_similarity_line_is_found(tmp_path):
     """mypy and pyright see nothing here, strict or not."""
     assert rules(tmp_path, '''
         def status(s):

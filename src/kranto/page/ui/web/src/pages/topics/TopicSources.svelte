@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A topic's Sources (WORKSPACE.md 1.5, 2.5; WT: #/watch/topic/<id>/sources,
+  // A topic's Sources (#/watch/topic/<id>/sources,
   // titled "Robotics › Sources", the topic's own, as Watch shows by default), one line of
   // the topic's own facts (the numbers its page says: one read, /api/topics/<id>), Add source
   // and Edit the topic, then its rows (TopicSourceRows, which the topic page's Sources section

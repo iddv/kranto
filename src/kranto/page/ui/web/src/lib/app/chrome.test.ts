@@ -36,7 +36,7 @@ describe("the navigator: one tree of the doors' pages, the cubs in it", () => {
       const j = t.rows.findIndex((x, k) => k > i && x.head);
       return t.rows.slice(i + 1, j < 0 ? undefined : j).filter((x) => !x.sub).map((x) => x.w);
     };
-    // Watch is topic-first (WT): Topics, each topic, the scoped one's Sources, Evidence and Map
+    // Watch is topic-first: Topics, each topic, the scoped one's Sources, Evidence and Map
     // under it (the last topic looked at; with none, the first), then All topics
     expect(under("Watch")).toEqual(["Topics"]);
     expect(t.rows.find((x) => x.head === "Watch")).toMatchObject({ to: "topics", add: "topics/new" });

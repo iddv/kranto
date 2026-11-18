@@ -221,7 +221,7 @@ def watching_metrics(res: dict) -> list[dict]:
                                 recorded=round(sum(not r["want"] for r in sc) / len(sc), 3))]
         kept = [r for r in sc if r["kept"]]
         if kept:
-            rows.append(m("screen_keeps_kept", "screen passes what live's judge kept",
+            rows.append(m("screen_keeps_kept", "screen passes what the live judge kept",
                           sum(r["got"] for r in kept), len(kept), step="screen"))
     if jd:
         rows += [m("judge_agree", "judge agrees with the recorded outcome",

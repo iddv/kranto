@@ -1,5 +1,5 @@
 """Installing, updating, stopping and removing cubs, and the security
-plan's rows that are about what gets installed (S17 to S22) and who may change it (S27).
+plan's rows that are about what gets installed and who may change it.
 
 Folders are made by the test; git sources are local repositories (``file://``): nothing here
 touches the network.
@@ -279,7 +279,7 @@ def test_sec8_where_only_rlimits_apply_the_install_says_a_strangers_cub_will_not
     assert not [t for t in findings(allowed) if said in t]
 
 
-# -- what is refused at the folder: S20, S21, S22 -------------------------------------------------
+# -- what is refused at the folder ---------------------------------------------------------------
 
 
 def _failed(home, folder) -> str:
@@ -329,7 +329,7 @@ def test_s22_ids_that_clash(home, tmp_path):
     assert "hello.said" in _failed(home, make_cub(tmp_path / "thief", thief))
 
 
-# -- update: S19 ----------------------------------------------------------------------------------
+# -- update ---------------------------------------------------------------------------------------
 
 
 def test_an_update_shows_its_delta_and_a_grown_one_goes_dry_again(home, tmp_path):
@@ -472,7 +472,7 @@ def test_remove_keeps_the_history_and_frees_the_id(home, tmp_path):
         == 2                                                 # pins are kept for ever
 
 
-# -- S17, S18: the files changed after the confirm ------------------------------------------------
+# -- the files changed after the confirm -----------------------------------------------------------
 
 
 def test_s17_a_changed_byte_pauses_the_cub_and_an_update_shows_the_change(home, tmp_path):
@@ -523,7 +523,7 @@ def test_a_crash_mid_install_is_recovered(home, tmp_path):
     assert registry.latest(home.store, "hello") is None
 
 
-# -- the HTTP API and its doors: S27 --------------------------------------------------------------
+# -- the HTTP API and its doors --------------------------------------------------------------------
 
 
 def test_s27_the_doors_of_the_api(home, tmp_path):

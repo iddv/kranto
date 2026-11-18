@@ -162,7 +162,7 @@ def test_a_ninth_stream_is_refused_and_a_closed_one_gives_its_place_back(app, mo
     monkeypatch.setattr(live, "MAX_STREAMS", 2)
     a, b = api.stream("/api/stream", app=app), api.stream("/api/stream", app=app)
     # the one past the places says busy and ends, with a 30 s retry: no 503 in the page's
-    # console (QA B20,)
+    # console
     busy = list(api.stream("/api/stream", app=app))
     assert busy[0] == b"retry: 30000\n\n"
     assert events(busy[1:])[0][0] == "busy"

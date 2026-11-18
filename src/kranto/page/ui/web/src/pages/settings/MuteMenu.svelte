@@ -1,6 +1,6 @@
 <script lang="ts">
   // Mute's menu: 7 days, 30 days, read less, or Retire; each acts on every topic the source
-  // feeds, and says so when that is more than one (reach: "everywhere: all 4 topics", SRC D3).
+  // feeds, and says so when that is more than one (reach: "everywhere: all 4 topics").
   let { label, pick, reach = null }: { label: string; pick: (what: string) => void; reach?: string | null } = $props();
 </script>
 

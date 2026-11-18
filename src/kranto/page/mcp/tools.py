@@ -713,7 +713,7 @@ def verb_schema(v: dict) -> dict:
         elif f.get("choices") and f.get("type") in ("line", "text"):
             s["enum"] = list(f["choices"])          # a word of a few (a grade, a verdict)
         if isinstance(f.get("max"), int) and f.get("type") in ("line", "text"):
-            s["maxLength"] = f["max"]               # the press's own limit (PAR)
+            s["maxLength"] = f["max"]               # the verb field's own limit
         if isinstance(f.get("min"), int) and f["min"] > 0 and f.get("type") in ("line", "text"):
             s["minLength"] = f["min"]
         if f.get("says"):

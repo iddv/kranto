@@ -1,4 +1,4 @@
-// Feedback (FB), drawn: the sheet in the one dialog, what Include details shows, Open on GitHub's
+// Feedback, drawn: the sheet in the one dialog, what Include details shows, Open on GitHub's
 // link, File it's confirm and the filing (the server answered here), no network, and Tell us.
 import { flushSync, mount, unmount } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

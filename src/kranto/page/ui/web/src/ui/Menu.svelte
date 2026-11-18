@@ -1,7 +1,7 @@
 <script lang="ts">
   // ⋯'s items in the one popover (ui/popover.ts's menu()): each group of verbs between rules; a
   // verb that is not on now is greyed, with its why (its title, and in words for a reader); a
-  // verb's note is a second line under it (what it reaches: SRC D3).
+  // verb's note is a second line under it (what it reaches).
   import type { MenuItem } from "../lib/app/types";
 
   let { items, press }: { items: MenuItem[]; press: (x: MenuItem) => void } = $props();

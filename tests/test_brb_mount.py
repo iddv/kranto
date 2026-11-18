@@ -292,7 +292,7 @@ def test_shared_header_on_kranto_pages(rt, fake_api):
                 'href="/#/library"'):
         assert tab in page, tab
     assert "/#/chat" not in page                 # the project chat went (the page)
-    assert "/#/builds" not in page and "building" not in page     # builds left (CUT)
+    assert "/#/builds" not in page and "building" not in page     # builds left
     assert not [c for c in fake_api.calls if c[1] == "/api/header"]   # no builds' figures
     assert 'action="/pause"' in page and 'name="next" value="/connections"' in page
     assert "Kranto afk, still watching" not in page
@@ -300,7 +300,7 @@ def test_shared_header_on_kranto_pages(rt, fake_api):
 
 
 def test_kranto_pages_draw_in_the_appearance_chosen(rt, fake_api):
-    """QA B18 (the owner's B2, "appearance resets when you click on some things"): a page the server
+    """Appearance resets when you click on some things: a page the server
     draws itself (connecting an account, its continuation, the install page) followed only the
     OS's scheme. It loads static/theme.js before its styles, and its colours follow data-theme."""
     with client(rt) as web:
@@ -314,7 +314,7 @@ def test_kranto_pages_draw_in_the_appearance_chosen(rt, fake_api):
 
 
 def test_old_pages_redirect_to_their_hash_routes_when_mounted(rt, fake_api):
-    """UI-v4.md 2.3: with Kranto UI mounted, the server's old page addresses answer 302 to
+    """With Kranto UI mounted, the server's old page addresses answer 302 to
     the hash route that replaced them, their query kept; their forms still post where they
     did. /topics and a strike's /grade/... link (pages until) go there too."""
     want = {"/library": "/#/library",
@@ -386,7 +386,7 @@ def test_too_old_says_so(rt, fake_api):
 
 
 def test_pause_is_watchings_alone(rt, fake_api):
-    """Builds left Kranto (CUT): Pause pauses the watcher and never calls the loop's pause."""
+    """Builds left Kranto: Pause pauses the watcher and never calls the loop's pause."""
     with client(rt) as web:
         r = web.post("/pause", data={"reason": "night", "next": "/library"},
                      follow_redirects=False)

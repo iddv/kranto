@@ -291,7 +291,7 @@ class SanityAdapter:
                 + (f" ({why})" if why else "")}
 
     def ask(self, kind: str, fields: dict, store, rt=None) -> dict:
-        """The plain dialog's parts (SEND): the title, where it goes (a draft in the owner's
+        """The plain dialog's parts: the title, where it goes (a draft in the owner's
         Sanity project, published by them in Studio), the body, and Sanity to connect when it is
         not."""
         d = draft_of(store, fields["draft_ref"]) or {"content": {}}

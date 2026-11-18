@@ -1,7 +1,7 @@
 // Settings › Spend: the one page with dollars (the owner's ruling, 2026-10-09). Where it went
 // first, as rows: by topic (watching's model calls this month); then the caps. With nothing
 // selected the pane is Totals and caps: the table, every cap field and Save, so seeing spend is
-// one click (S11). All of it is the server's.
+// one click. All of it is the server's.
 export const TOPICS = "/api/spend/topics";
 export const WATCH = "/api/settings/spend";
 /** The server's Settings › Watching › Reading (UP #3): how often sources are read, deep dives on */

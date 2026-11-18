@@ -1,4 +1,4 @@
-// The command palette's ranking (⌘K, UI-v4.md 2.4): results grouped Ideas · Evidence · Sources ·
+// The command palette's ranking (⌘K): results grouped Ideas · Evidence · Sources ·
 // Topics · Commands, the group with the best match first; with the doors on also
 // the last things opened (Recent), Settings by name or key, and Go to.
 export const PGROUPS = ["Recent", "Ideas", "Evidence", "Sources", "Topics", "Settings", "Go to", "Commands"] as const;

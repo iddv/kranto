@@ -1,4 +1,4 @@
-"""A theme carded on request (L11, the owner's D-1 of 2026-10-22): one card on the
+"""A theme carded on request (asked for on 2026-10-22): one card on the
 theme the owner names, outside the daily selection, one card call and its check; the same
 evidence is not carded twice; a theme that is not on the map is refused; the daily run is not
 skipped because of it; the page's route starts it in the background."""

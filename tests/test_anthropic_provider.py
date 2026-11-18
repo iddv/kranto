@@ -453,7 +453,7 @@ def test_the_doctor_tests_the_key_the_models_and_the_prices(api, home, store, mo
 
 def test_the_doctor_says_when_the_console_would_bill_the_anthropic_key(home, monkeypatch):
     cfg = config_mod.load(home, dotenv=False)
-    # the claude Kranto starts is the console's, whatever builds.enabled says (CUT)
+    # the claude Kranto starts is the console's, whatever builds.enabled says
     monkeypatch.setattr(config_mod, "builds_on", lambda c: True)
     line = doctor.watch_login(cfg, {"ANTHROPIC_API_KEY"})
     assert line.name == "claude login" and "build" not in line.detail

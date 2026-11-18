@@ -1,6 +1,7 @@
-"""What a user reads carries no internal references: no private plan citations (``X-PLAN``,
-``§``), no track codes (``track OI``, ``(OI)``), no "example-host" and no personal paths. Checked:
-every ``afk`` and ``kranto`` help text, the page templates and the page's script."""
+"""What a user reads carries no internal references: no private plan citations (a code ending in
+``-PLAN``, ``§``), no track codes (``track`` and a short capital code, or one in parentheses), no
+"example-host" and no personal paths. Checked: every ``afk`` and ``kranto`` help text, the page
+templates and the page's script; and, tree-wide, none of the builders' own words and codes."""
 from __future__ import annotations
 
 import argparse
@@ -108,6 +109,42 @@ def test_the_tree_holds_none_of_the_builders_own_words():
     bad = [f"{n}:{_line(t, m.start())}: {m.group(0)}" for n, t in tracked_text() if n != me
            for m in BUILDERS.finditer(t)]
     assert bad == []
+
+
+# the builders' private codes: their incident review and its rows, their release steps and gates,
+# their design notes and checklists, the maintainer's own install named as "live's", the check
+# ids of their acceptance lists, and the work tracks a sentence once cited in parentheses. A
+# track code is matched only where it stands alone, so a call such as page(POST) or
+# relative_to(SRC) is not one, and the pushed authorization request's "(PAR)" is not either.
+_TRACKS = ("CUT|WT|OI|SEND|FB|SRC|TH|MAIL|POST|PROSE|MEM|REL|ONE|STD|BL|W1|ACT|SOCIAL|TS|BG|UF"
+           "|SL|PAR")
+CODES = re.compile(r"\bRCA\b|UI-v4|MAINTAIN\.md|\b[Ll]ive's|\bK0\b|\bK1\b|\bKREL\b|\bKVAULT\b"
+                   r"|\bREVK\b|\bGate [AB]\b|ops/telemetry"
+                   r"|\b(?:CUT|PREV|HOUR|POST|ARCH|PROSE|FE|SOC)-\d+\b"
+                   r"|WORKSPACE\.md|PLAN\.md|CLICKS-v4|LEARNING\.md|\bQA B\d+|\bS-\d+\b"
+                   r"|(?<![-\w])fleet2\b|\bfleet track"
+                   rf"|(?<![\w.])(?<!request )\((?:{_TRACKS})\)")
+
+
+def test_the_tree_holds_none_of_the_builders_codes():
+    me = "tests/test_no_internal_refs.py"
+    bad = [f"{n}:{_line(t, m.start())}: {m.group(0)}" for n, t in tracked_text() if n != me
+           for m in CODES.finditer(t)]
+    assert bad == []
+
+
+def test_the_codes_check_knows_a_code_from_a_call():
+    for code in ("the RCA's row", "UI-v4.md 2.4", "see MAINTAIN.md", "live's judge", "K0 then K1",
+                 "Gate B", "ops/telemetry", "CUT-3", "PREV-1", "FE-13", "Feedback (FB): the",
+                 "watches are retired (WT)", "the press's limit (PAR)", "WORKSPACE.md 2.5",
+                 "PLAN.md section 1.5", "CLICKS-v4.md", "LEARNING.md 3.4", "QA B20", "SOC-7",
+                 "the page's S-12", "fleet2 track H", "a fleet track"):
+        assert CODES.search(code), code
+    for fine in ("page.evaluate(CUT)", "relative_to(SRC)", "page(POST)", "run_uuid(ONE)",
+                 "A pushed authorization request (PAR) with PKCE", "(USD)", "BSD-2", "BSD-3",
+                 "PREVIEW-1", "a live install", "Gateway", "a quiet fleet of watchers",
+                 "fleet rentals", "CLICKS = (", "POSTING-7", '"brb" + "-fleet2"'):
+        assert not CODES.search(fine), fine
 
 
 # the rename's broken sentences: an article doubled ("a the page", "this the server"), or "the

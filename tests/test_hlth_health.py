@@ -25,7 +25,7 @@ from .test_web import rt  # noqa: F401 - fixture
 
 NOW = FIXED_NOW
 RUN = "3ad8f80e82ef43f481c2aa8905c68e48"
-# live's 12:42 reply and its row, as they are stored
+# a real install's 12:42 reply and its row, as they are stored
 FILTERED = json.dumps({"choices": [{"finish_reason": "content_filter", "message": {
     "content": None, "refusal": "This request triggered cyber-related safeguards."}}]})
 LIVE_ERROR = ("provider reported cost None; counted at a conservative estimate of $0.4379 for "
@@ -60,7 +60,7 @@ def clean(reason: str | None) -> None:
 
 
 def test_a_failed_run_on_live_s_refusal_says_what_happened_and_opens_its_trace(store):
-    """Live's 12:36 run, as stored before its error is about pricing, its call says
+    """A real install's 12:36 run, as stored before its error is about pricing, its call says
     the reply was a safety filter's."""
     run(store, "failed", error=LIVE_ERROR, at=NOW.replace(hour=12, minute=42))
     call(store, error="reply had no content; provider reported cost None; counted at a "

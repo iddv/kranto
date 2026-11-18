@@ -182,7 +182,7 @@ describe("Topics", () => {
     expect(th.target.querySelector(".wl")?.getAttribute("data-title")).toBe("Topic 1 · Themes");
     expect(th.target.querySelector(".ghd .muted")?.textContent).toBe("mapped 2026-10-15 · ");
     expect([...th.target.querySelectorAll("li.row .r-title")].map((x) => x.textContent)).toEqual(["Theme 8", "Theme 5"]);
-    // watches are retired (WT): a theme's row has no Watch
+    // watches are retired: a theme's row has no Watch
     expect(th.target.querySelector("li.row .r-act button")).toBeNull();
     th.done();
     // the topic's Map (#/watch/topic/1/map): its themes, titled by the topic, the map above them
@@ -209,7 +209,7 @@ describe("Topics", () => {
     const { L } = old();
     answering({ [topicApi(1)]: PAGE, [`/api/feedback?target=source&ids=1,2,3,4`]: { grades: {} } });
     const { target, done } = await draw(TopicList, at("topics/1/sources"));
-    // "<topic> › Sources" (WT), the topic's own numbers in one line, Add source to it
+    // "<topic> › Sources", the topic's own numbers in one line, Add source to it
     expect(target.querySelector("h1")?.textContent).toBe("Topic 1 › Sources");
     expect(target.querySelector("#topic-sources-facts")?.textContent).toBe("2 watched · 20 items a day, 25% kept · 15k tokens this month · 2 proposed");
     expect(target.querySelector(".tbn a.btn")?.getAttribute("href")).toBe("#/settings/sources/new?topic=1");

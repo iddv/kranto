@@ -65,7 +65,7 @@ describe("first run", () => {
     none.done();
   });
 
-  it("ticks only a step whose state is set, and offers no Scout that can only fail (QA B13)", async () => {
+  it("ticks only a step whose state is set, and offers no Scout that can only fail", async () => {
     stubbed();
     hosted();
     answering({ [SETUP_API]: S, "/api/topics": { topics: [] }, [SOURCES_API]: { sources: [] } });

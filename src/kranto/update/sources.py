@@ -7,7 +7,7 @@
   the token from ``token_env_file`` (Kranto's own GitHub connection) when there is one, so a
   private repo answers, and downloading assets through the API's asset address; anonymous
   when there is none (a public repo).
-- ``GitMain``: the ``main`` channel: the head commit of each repo's ``main``.
+- ``GitMain``: the ``main`` channel: the head commit of ``main`` in each repository it follows.
 
 A ``PyPI`` source (the meta-package as ``kranto==X``) is a later third implementation.
 Nothing here calls a model; tests pass a fake ``run`` and ``http_get``.
@@ -44,7 +44,7 @@ class Release:
     notes_url: str | None = None
     notes: list[str] = field(default_factory=list)
     assets: list[str] = field(default_factory=list)
-    commits: dict[str, str] | None = None   # the main channel: each repo's head
+    commits: dict[str, str] | None = None   # the main channel: each repository's head
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -329,7 +329,8 @@ class GitHubReleases:
 
 
 class GitMain:
-    """The ``main`` channel: each repo's ``main`` head, compared with the installed commits."""
+    """The ``main`` channel: each repository's ``main`` head, compared with the installed
+    commits."""
 
     def __init__(self, repos: dict[str, str] | None = None, *,
                  run: Callable[..., subprocess.CompletedProcess] = _run,

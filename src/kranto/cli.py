@@ -748,7 +748,7 @@ def cmd_ideas(args) -> int:
 
 
 def cmd_ideas_card(args) -> int:
-    """One card on one theme now (the owner's D-1): one card call and its check."""
+    """One card on one theme now, on the owner's request: one card call and its check."""
     from . import websearch
     from .ideate.cards import card_theme
 

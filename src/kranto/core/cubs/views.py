@@ -189,7 +189,7 @@ def as_alias(out: dict[str, Any] | None, shown: str, cid: str) -> dict[str, Any]
 def listing(rt: Any, *, removed: bool = False) -> dict[str, Any]:
     rows = registry.latest_rows(rt.store)
     from ...rowsafe import each
-    # one cub that cannot be read is listed as such, never the whole list (RCA A3); the
+    # one cub that cannot be read is listed as such, never the whole list; the
     # owner's site cub is listed once, as Kranto's blog writer (registry.listed)
     cubs = each([x for x in registry.listed(rows) if removed or x[2]["state"] != "removed"],
                 lambda x: as_alias(row(rt, x[1], x[2]), x[0], x[1]), "cub",

@@ -17,7 +17,7 @@ import { shellDoors } from "../../features/shell";
 
 let LOADED = false; // the first read is done: the page draws
 let HOST: Status | false | null = null; // the server's /api/status when it hosts this page; false when it doesn't
-let WHO: { origin: string | null; require_token?: boolean } | null = null; // GET /api/whoami (OI): origin null: not signed in
+let WHO: { origin: string | null; require_token?: boolean } | null = null; // GET /api/whoami: origin null: not signed in
 
 /** the first read is done (boot): the page draws */
 export const loaded = (): boolean => LOADED;
@@ -50,10 +50,10 @@ export async function api(path: string, body?: unknown): Promise<unknown> {
   // provider refused a key) from Kranto's own failure (5xx: Tell us)
   if (!r.ok) throw new ApiError(r.status, refusalText(j, t, r.status, r.statusText));
   // a read's rows that could not be read are taken out of its lists, kept for the page's
-  // "Couldn't read" lines (RCA A3: lib/unreadable)
+  // "Couldn't read" lines (lib/unreadable)
   return j === null ? t : body === undefined ? contain(path, j) : j;
 }
-/** who this browser acts as: the session cookie a one-time code from kranto open set (OI). The
+/** who this browser acts as: the session cookie a one-time code from kranto open set. The
  * page reads without it; a press needs it. Absolute: the server (or brb ui) answers it. */
 export async function loadWho(): Promise<void> {
   try {
@@ -120,7 +120,7 @@ export const takeFlash = (): Flash | null => {
 };
 /** a flash at the list's top, drawn now */
 export const say = (text: string, kind?: string): void => {
-  if (kind === "red") noteError(text); // Feedback's details name the last few (FB)
+  if (kind === "red") noteError(text); // Feedback's details name the last few
   FLASH = { text, kind };
   render();
 };
@@ -161,7 +161,7 @@ export async function act(btn: HTMLElement | null, fn: () => Promise<unknown>, d
   }
 }
 
-/** Not signed in (OI): the page reads, but every press is refused until this browser has the
+/** Not signed in: the page reads, but every press is refused until this browser has the
  * session cookie. `kranto open` on the machine Kranto runs on prints a one-time link (10 minutes);
  * its code also works in the list's sign-in line (the shell's ListHead.svelte, which calls this).
  * Agents never use this: they send their own token. */

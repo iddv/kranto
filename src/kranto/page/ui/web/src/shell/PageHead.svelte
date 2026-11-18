@@ -7,7 +7,7 @@
   // at most one primary, Stop, ⋯ and ⚙ at the right; one facts line; the Activity line; one
   // notice; the subnav as underlined words with counts, never pills, never tabs.   // the lede's sentence is the title's ? (help is help), and a page's own notice is one quiet line
   // (a k-note), never a coloured box: the box is Kranto's own trouble, the band.
-  // Watch is topic-first (WT): its subnav is Topics, then the scoped topic's name with its
+  // Watch is topic-first: its subnav is Topics, then the scoped topic's name with its
   // Sources, Evidence and Map ("Topics · Robotics › Sources Evidence Map"), or All topics' on their
   // pages; on one of those pages the crumb is "Watch › Robotics › Sources", the topic a switcher
   // (another topic, or All topics) that keeps the page.

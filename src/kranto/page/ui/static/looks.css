@@ -1,7 +1,7 @@
 /* looks.css: the themes (Settings › Appearance). A theme colours the navigator, with its hover, its
    current row, its badge and its dot, an accent for links and the primary button, and the whole page:
    the background, the panes and cards, the borders, the head and inset surfaces, the ink and the
-   scrollbars, as tinted neutrals in its hue (TH). The light or dark base of kranto.css is chosen apart
+   scrollbars, as tinted neutrals in its hue. The light or dark base of kranto.css is chosen apart
    (auto, light, dark), so every theme comes in both. High contrast makes the base stark instead.
    The default's block repeats the base, so its card in the picker draws the base under any theme.
    A theme is html[data-look=<id>] (static/theme.js sets it before the first paint; none is the

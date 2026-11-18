@@ -246,7 +246,7 @@ def test_the_default_endpoint_is_the_relay_and_the_environment_and_file_override
 
 def test_unanswered_local_and_off_open_no_socket(home, relay, monkeypatch):
     """Nothing is sent before an answer, or with local or off, though the default endpoint is
-    set: no connection, no lookup, no process (an audit hook, as the proof on live's copy)."""
+    set: no connection, no lookup, no process (an audit hook, as on an install's copy)."""
     global _NET
     timing.note("/api/status", 200, 3.0)
     timing.flush()

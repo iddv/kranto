@@ -120,7 +120,7 @@ describe("Needs you's helpers", () => {
   });
 });
 
-// the one thing (the owner's D-1): by rule, never by a model
+// the one thing: by rule, never by a model
 describe("nextOf", () => {
   const c = (key: string, want: Want, at: number | null) => ({ key, want, at });
   it("is the newest Approve, whatever waits to be fixed or decided", () => {
@@ -234,7 +234,7 @@ describe("Needs you (the one inbox)", () => {
     done();
   });
 
-  it("says a version that broke on your data was rolled back, with Send this error (RCA D1)", async () => {
+  it("says a version that broke on your data was rolled back, with Send this error", async () => {
     const dialog = await import("../../ui/dialog.svelte");
     const open = vi.spyOn(dialog, "openDialog").mockImplementation(() => {});
     const back = { ...UPDATE, available: null, state: "rolled_back", to: "0.5.23", reason: "0.5.23 broke on your data: GET /api/topics/7 answered 500 (error 1a2b3c4d); 1 more",

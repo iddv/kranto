@@ -1,4 +1,4 @@
-"""Kranto's plugin and your own assistant (the owner's Q3, Q6 and Q9, 2026-10-25).
+"""Kranto's plugin and your own assistant (as the owner decided on 2026-10-25).
 
 The plugin ships in the wheel (``kranto paths plugin``) and the server repo is its marketplace.
 (``claude plugin validate --strict`` passes on both; tests may not run the real Claude

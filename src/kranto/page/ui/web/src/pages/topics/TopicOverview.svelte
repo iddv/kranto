@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A topic's Overview (WORKSPACE.md 8, W3): a digest of its pages, each group with its "all"
+  // A topic's Overview: a digest of its pages, each group with its "all"
   // link: its sources first (proposals, then the five that keep the most; TopicSourceRows,
   // which the topic's Sources page draws too), its themes (rising first), the ideas waiting, the top evidence by signal (new since your
   // visit when there is any). The toolbar says what is new and links the proposals waiting for

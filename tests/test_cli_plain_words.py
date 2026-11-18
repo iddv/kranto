@@ -72,7 +72,7 @@ def test_the_old_cli_module_docstring_names_the_command():
     assert legacy.COMMANDS[1] not in (cli.__doc__ or "").split()
 
 
-# -- S13: GitHub's rate limit --------------------------------------------------------------------
+# -- GitHub's rate limit -------------------------------------------------------------------------
 
 def test_an_anonymous_rate_limit_says_what_when_and_the_way_round():
     said = sources.rate_limited(403, {"X-RateLimit-Remaining": "0",

@@ -1,6 +1,6 @@
 """What a session reads is data (``kranto.page.term.text``): a fenced document can never close its
-own fence, and a line holding a secret is redacted whole. Moved from the factory's chat context
-(CUT): the console and Open in Claude Code fence what they hand a session the same way."""
+own fence, and a line holding a secret is redacted whole. Moved from the factory's chat context:
+the console and Open in Claude Code fence what they hand a session the same way."""
 from kranto.page.term import text as T
 
 

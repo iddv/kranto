@@ -99,7 +99,7 @@ export const headActions = (f: FeatureRow): ActionDecl[] => {
 export const actionOf = (f: FeatureRow, kind: string): ActionDecl | null => actionsOf(f).find((a) => a.kind === kind) || null;
 
 /** the words of what a cub may do (the About sheet and the install dialog: the manifest in words) */
-/** a manifest's kind in words: "emails.create_draft" is "emails create draft" (QA B10: the
+/** a manifest's kind in words: "emails.create_draft" is "emails create draft" (the
  * About sheet listed the ids) */
 export const kindWords = (k: string): string => k.replace(/[._]+/g, " ").trim();
 export function permissionWords(m: Record<string, unknown>): [string, string][] {

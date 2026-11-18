@@ -322,7 +322,7 @@ def test_a_slow_a_broken_and_a_hostile_widget_never_hold_the_home(home_app, monk
     row = s["1"]["data"]["rows"][0]
     assert row["title"] == HTML and row["meta"] == "<b>bold</b>"      # text, as it came
     assert "open" not in row                                          # never off its page
-    # its words, and the id Send this error files it under (RCA B3)
+    # its words, and the id Send this error files it under
     assert {k: v for k, v in s["2"].items() if k != "error_id"} == {
         "state": "error", "error": "the cub fell over"}
     assert len(s["2"]["error_id"]) == 8

@@ -1,5 +1,5 @@
 """Open in Claude Code's limits, tested adversarially in real bubblewrap with a fake claude that
-takes its token the way the product hands it over (TS.REVIEW R1, the owner's D8). Each test
+takes its token the way the product hands it over. Each test
 plants canaries made at run time (a Claude token in Kranto's environment, a GitHub token, a Kranto
 token file, an SSH key) and runs a probe as a tool command inside the session, then looks for
 them in everything the session could print or keep.

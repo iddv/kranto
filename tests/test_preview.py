@@ -345,7 +345,7 @@ def test_5_api_status_says_preview(tmp_path, store, embedder, make_client):
             assert got is None
 
 
-# -- 6. kranto serve refuses live's folders and live's port --------------------------------------
+# -- 6. kranto serve refuses the live install's folders and port ------------------------------
 
 
 @pytest.fixture

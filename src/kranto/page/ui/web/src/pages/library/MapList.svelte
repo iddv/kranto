@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Library › Map, the list (WORKSPACE.md 4, 5): the clusters' legend (each shows alone on the
+  // Library › Map, the list: the clusters' legend (each shows alone on the
   // map, ?c=, or opens its theme), then the points as rows, by cluster, highest signal first; a
   // point's row selects it on the map (?p=; j and k walk the points). "Highlight observations
   // containing…" dims the others on the map in the pane (MAP.words). Before the first map: what

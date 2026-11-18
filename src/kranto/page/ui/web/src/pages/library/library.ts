@@ -1,4 +1,4 @@
-// The Library's Observations (and a topic's Evidence, the same list) and Rollups (WORKSPACE.md 1.4, 2.1; W3): the server's
+// The Library's Observations (and a topic's Evidence, the same list) and Rollups: the server's
 // /api/observations (a page of the library, or a search by meaning), one observation's page
 // (/api/observations/<id>?k=12), the latest grades of a page's rows (/api/feedback?target=&ids=)
 // and the compacted weeks (/api/rollups). The shapes are the server's, generated from its

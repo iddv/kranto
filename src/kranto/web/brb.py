@@ -70,8 +70,8 @@ class Brb:
 
     def call(self, method: str, path: str, query: str = "", body: Any = None,
              identity: dict | None = None) -> tuple[int, str, bytes]:
-        """One request to the page. ``identity``: the caller the host's token check found
-        (OI); the page acts as that caller and ignores the body's ``origin``."""
+        """One request to the page. ``identity``: the caller the host's token check found;
+        the page acts as that caller and ignores the body's ``origin``."""
         if identity is not None and "identity" in _params(self.api.handle):
             return self.api.handle(method, path, query, body, identity=identity)
         return self.api.handle(method, path, query, body)

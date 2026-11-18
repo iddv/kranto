@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Library › Clusters, the list (WORKSPACE.md 2.6): the latest map's clusters as themes, largest
+  // Library › Clusters, the list: the latest map's clusters as themes, largest
   // first, most cross-source, or moving beyond what the sources explain; each opens in the pane
   // (library/clusters/<n>). Under them the Parallax archive's themes (Parallax's own clusters,
   // followed across its snapshots: the alive ones and those that ran eight snapshots or more),

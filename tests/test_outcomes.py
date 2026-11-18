@@ -73,7 +73,7 @@ def test_the_loops_old_steps_still_say_what_was_built(web, rt, cards):  # noqa: 
     assert listed[old]["built"] is None and listed[old]["outcomes"]["verdict"]["value"] == "closed"
     ids = outcomes.by_kind(rt.store, [new, old, 99999])
     assert set(ids) == {new, old} and outcomes.built(ids.get(99999)) is None
-    # the loop's kinds take no new row (CUT)
+    # the loop's kinds take no new row
     for kind in outcomes.LOOP_ONLY:
         r = web.post(f"/api/ideas/{old}/outcome", json=loop_step(kind, "building"))
         assert r.status_code == 400 and "not part of Kranto any more" in r.json()["error"], kind
@@ -81,8 +81,8 @@ def test_the_loops_old_steps_still_say_what_was_built(web, rt, cards):  # noqa: 
 
 
 def test_built_reads_any_stored_shape(rt, cards):  # noqa: F811
-    """The RCA rule: a stored value's shape is never assumed (a detail that is not an object, a
-    repo that is not text, a null)."""
+    """The rule a crash taught: a stored value's shape is never assumed (a detail that is not an
+    object, a repo that is not text, a null)."""
     store = rt.store
     old_row(store, cards["new"], {"kind": "publish", "value": "public", "detail": "[1, 2]"})
     old_row(store, cards["old"], {"kind": "publish", "value": "public",

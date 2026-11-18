@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Needs you (D-1, D-2; #/needs, where #/today and g t land): the one inbox.
+  // Needs you (#/needs, where #/today and g t land): the one inbox.
   // Every row that waits on you, from every source (an assistant's proposals and prepared items,
   // proposed and failing sources, the review queue, the idea cards waiting, the cubs' tickets,
   // messages, an update), grouped by the verb you will press: Answer · Decide · Approve · Review ·

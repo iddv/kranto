@@ -705,7 +705,7 @@ _MIGRATIONS: list[tuple[int, str]] = [
         used_at TEXT
     );
     """),
-    # 19: feedback (LEARNING.md 2.4, track L1). The owner's grades, pairs and confirmed
+    # 19: feedback. The owner's grades, pairs and confirmed
     # actions on anything Kranto surface, from the app, the review queue and chat, in
     # one append-only table: the latest grade row on a target counts, and a cleared grade
     # is a new row with value 'skip'. No CHECK on target or value: feedback.py validates

@@ -96,11 +96,11 @@ export function count(el: Element, what: string): { words: number; controls: num
   return c;
 }
 /** what the owner reads in an element: its text without the places a key belongs (a code span,
- * an Advanced fold, a field), as the browser smoke's OWNER_TEXT reads a page (QA B10) */
+ * an Advanced fold, a field), as the browser smoke's OWNER_TEXT reads a page */
 export function ownerText(el: Element): string {
   const c = el.cloneNode(true) as Element;
   c.querySelectorAll("code, kbd, pre, input, textarea, select, details.advanced, script, style").forEach((e) => e.remove());
   return c.textContent || "";
 }
-/** a setting key, as it would read in a sentence (QA B10;) */
+/** a setting key, as it would read in a sentence */
 export const SETTING_KEY = /\b(?:connections|news|update|cubs|newsletter|shell|term|watch)\.[a-z_]+(?:\.[a-z_]+)*\b/;

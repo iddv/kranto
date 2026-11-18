@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A list row (WORKSPACE.md 1.5;): one line, always. Fixed cells: the tick, the
+  // A list row: one line, always. Fixed cells: the tick, the
   // state (a glyph, and its word where the group shows it: .grp.words), the number, the title with
   // its one fact inline after it (the fact gives way first), the aside, the age, the end (its one
   // action, its grade). There is no second line: what explains a row is its pane.

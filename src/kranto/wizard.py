@@ -7,7 +7,7 @@ service mode), **caps** (offered, never set unless typed: no spend cap is the de
 something of the person's first; 5.1), **ready** (Claude Code for the
 console, what Kranto costs, the usage answer; then the first read), **finish**: the three things
 are the model key, the first topic and ready, as Welcome asks them. The builds' sections
-(GitHub, repositories, the build caps) left with builds (CUT); their flags are still accepted,
+(GitHub, repositories, the build caps) left with builds; their flags are still accepted,
 and ignored with one line. **claude** (the console's long-lived Claude login token, once
 "building") is asked by its own name, ``kranto setup claude`` or ``assistant``.
 ``kranto setup <section>`` runs one. Each question has a default (the current value, else the
@@ -56,7 +56,7 @@ ALIASES = {"service": "home"}
 # asked by its own name only, never in a full run (the console's login token: Welcome's Ready
 # says how Claude Code signs in); a token flag (--claude-token-file) runs it in a full run too
 BY_NAME_ONLY = ("claude",)
-# the builds' flags (CUT): accepted so a script or an older install.sh that passes them still
+# the builds' flags: accepted so a script or an older install.sh that passes them still
 # runs, and ignored with one line
 RETIRED_FLAGS = ("cap_daily", "cap_build", "github", "adopt", "adopt_org")
 RETIRED_WORDS = "builds are not part of Kranto any more"
@@ -437,7 +437,7 @@ def claude(run: Run) -> int:
     (the page's ``claude_login``) and handed to each console session by pipe, never in an
     environment. No drop-in and no restart: every launch reads it. An API key pasted here goes,
     as before, to a 0600 file the unit loads (a key you give the unit on purpose). The token is
-    never printed. Builds left (CUT); the console keeps this, so it is asked by its own name
+    never printed. Builds left; the console keeps this, so it is asked by its own name
     (``kranto setup claude`` or ``assistant``), never in a full run."""
     run.io.say("Assistant › Your Claude plan for the console")
     host = run.host
@@ -687,7 +687,7 @@ def watching(run: Run) -> int:
 
 def _watch_claude_code(run: Run, now: str) -> int:
     """Claude Code's login, only when its terms were agreed to: asked in a terminal, or
-    ``--watch-accept-terms`` / ``watch.terms: true`` (the owner's D2)."""
+    ``--watch-accept-terms`` / ``watch.terms: true``."""
     from . import providers
     from . import setup as su
     if now == "claude_code":
@@ -814,7 +814,7 @@ USAGE_CHOICES = {"1": "basic", "2": "detailed", "3": "off"}
 
 
 def usage(run: Run) -> int:
-    """Usage reports, asked once (the owner's D1: opt-in, Enter sends nothing).
+    """Usage reports, asked once (opt-in, Enter sends nothing).
     Unanswered stays ``local``: counted on this machine, never sent. ``--telemetry`` and the
     answers file's ``telemetry`` answer it without asking; ``--yes`` leaves it unanswered."""
     from . import telemetry

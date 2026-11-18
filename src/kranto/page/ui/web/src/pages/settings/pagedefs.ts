@@ -1,4 +1,4 @@
-// Settings' pages (the owner's D1;): what you set up, in the order
+// Settings' pages: what you set up, in the order
 // you set it up. The navigator, the Overview and each page's pane with nothing selected read this table.
 export interface SetPage {
   /** the route under settings/ */

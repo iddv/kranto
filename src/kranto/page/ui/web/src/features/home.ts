@@ -11,7 +11,7 @@ import { SHELL_API, type Arrangement } from "./shell";
 import type { HomeToday } from "../api/afk.gen";
 
 export const HOME_API = "/api/home";
-/** the home was seen (POST): the ordinary home says so as it draws; While you were away only when
+/** the home was seen: the ordinary home says so as it draws; While you were away only when
  * one of its rows is opened or Show today chosen */
 export const VISIT_API = HOME_API + "/visit"; // joined, so no literal reads like a home folder (test_no_internal_refs)
 export type Size = "S" | "M" | "L";

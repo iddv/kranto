@@ -560,7 +560,7 @@ def test_a_provider_pause_halts_the_run_unconsumed_and_skips_until_it_ends(
 
 
 def test_a_run_says_how_far_it_is_and_forgets_it_after(cfg, store, make_client, embedder):
-    """S2 (MEM): a first read ran 39 minutes with nothing said. Each source as it starts,
+    """A first read ran 39 minutes with nothing said. Each source as it starts,
     once its new items are known, and before each item; ``current_progress`` while running."""
     from kranto import tick
 

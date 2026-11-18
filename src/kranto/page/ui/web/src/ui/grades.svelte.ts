@@ -101,7 +101,7 @@ export async function postGrade(target: string, id: number | string, value: stri
   if (o.done) o.done(after);
   return true;
 }
-/** the "why" chips (LEARNING.md 3.3), from the server's vocabulary: they attach to the grade, so
+/** the "why" chips, from the server's vocabulary: they attach to the grade, so
  * they wait for one; a second press takes a chip off */
 export function chipsOf(target: string): Chip[] {
   if (!app()?.host()) return [];

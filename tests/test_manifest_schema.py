@@ -167,7 +167,7 @@ REFUSALS = [
     (_mut("jobs.0.days", ["monday"]), "is one of mon"),
     (lambda m: m["settings"]["keys"]["newsletter.max_items"].update(default=99),
      "its default does not fit"),
-    # a key's place on its Settings page; D-1: Settings' pages are not cub ids
+    # a key's place on its Settings page; Settings' pages are not cub ids
     (lambda m: m["settings"]["keys"]["newsletter.max_items"].update(group="x" * 25),
      "at most 24 characters"),
     (lambda m: m["settings"]["keys"]["newsletter.max_items"].update(advanced="yes"),

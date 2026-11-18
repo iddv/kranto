@@ -1,4 +1,4 @@
-"""Kranto's own GitHub connection left with builds (CUT): the update source and Welcome's gh row
+"""Kranto's own GitHub connection left with builds: the update source and Welcome's gh row
 read gh's own login (or ``update.token_env_file``), and never ask the page, even one from before
 the cut that still has the connection."""
 

@@ -109,7 +109,7 @@ def topics(ctx: Ctx) -> None:
 
 def validation_odd_values(ctx: Ctx) -> None:
     """One source for each odd value of the Validation type (derived: every optional field
-    null, every list empty, every word, plus its named cases: the RCA's row, a pack's, a
+    null, every list empty, every word, plus its named cases: the unmeasured row, a pack's, a
     hand-added one, a preset's, a site watched through live search, an invalid one, a
     wildcard), each proposed, linked to the user topic."""
     for i, v in enumerate(Validation.odd()):
@@ -123,7 +123,7 @@ def validation_odd_values(ctx: Ctx) -> None:
 
 def described_without_a_topic(ctx: Ctx) -> None:
     """Add sources by describing them, no topic chosen: the similarity is not measured
-    (the RCA's row, as resolve.take stores it)."""
+    (the row whose null similarity once broke a page, as resolve.take stores it)."""
     v = Validation(status="valid", items=12, recent=3, median_similarity=None, topic_id=None,
                    role="core", why="a blog about tea", from_text="tea blogs",
                    batch="fromtext:1")
@@ -506,7 +506,7 @@ CASES: list[Case] = [
          "no sources", (), topics),
     Case("sources", "every odd value of sources.validation", (Validation,),
          validation_odd_values),
-    Case("sources", "a source described without a topic (the RCA)", (Validation,),
+    Case("sources", "a source described without a topic (no similarity)", (Validation,),
          described_without_a_topic),
     Case("sources", "a Parallax import: validation NULL", (Validation,), parallax_import),
     Case("sources", "linked to none, to two, unlinked again, a project's", (), linking),

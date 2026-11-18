@@ -1,4 +1,4 @@
-"""Your own assistant and Kranto (the owner's Q6, 2026-10-25).
+"""Your own assistant and Kranto (as the owner decided on 2026-10-25).
 
 Kranto ships one plugin for Claude Code (``plugin/``, in the wheel: ``kranto paths plugin``): its
 MCP server (``kranto mcp``), a skill that says what Kranto is and how its tools work, two short

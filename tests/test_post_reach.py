@@ -1,4 +1,4 @@
-"""Reach (SOC-9): the numbers of the posts Kranto sent, read back once a day where the site
+"""Reach (POSTING-9): the numbers of the posts Kranto sent, read back once a day where the site
 gives them to the person's own account, shown on Sent; the sites that give none say so once;
 what was learned (``GET /api/post/learned``); LinkedIn's 60-day reminder. Every answer is a
 documented shape (``tests/fixtures/social/reach.json``); nothing touches the network."""

@@ -88,7 +88,7 @@ def library_observations(ctx, params: dict) -> dict:
         ctx.store, ObservationFilter(topic_id=topic, since=str(since) if since else None,
                                      kind="!beat" if params.get("signal_only") else None),
         sort=str(params.get("sort") or "new"), limit=limit)
-    # a row that cannot be read is left out of a cub's read (its schema has none; RCA A3)
+    # a row that cannot be read is left out of a cub's read (its schema has none)
     return {"observations": readable(rows, _obs_line, "observation"), "total": total}
 
 
@@ -237,7 +237,7 @@ def ideas_list(ctx, params: dict) -> dict:
     want = params.get("editor_class")
     if want is not None and want not in EDITOR_CLASSES:
         raise ReadError(f"editor_class is one of {', '.join(EDITOR_CLASSES)}")
-    # a card that cannot be read is not handed to a cub (its schema has no such row; RCA A3)
+    # a card that cannot be read is not handed to a cub (its schema has no such row)
     rows = [r for r in read_ideas(ctx.store) if not r.get("unreadable")
             and (not since or r["created_at"] > str(since))]
     rows.sort(key=lambda r: r["id"], reverse=True)

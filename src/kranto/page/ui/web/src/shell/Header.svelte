@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The top bar (WORKSPACE.md 1.2, UI-v4.md 2.1), 40 px: ☰ (the navigator's drawer, under
+  // The top bar, 40 px: ☰ (the navigator's drawer, under
   // 1180 px), the mark and wordmark (→ Home), the doors, the search button (the palette), then
   // the state: what Kranto is doing, one item (D-2: "Quiet · next: reading your
   // sources at 18:00", "2 running · writing the News brief", "Paused"),
@@ -49,7 +49,7 @@
   function toggleTheme(): void {
     const L = app();
     if (!L) return;
-    const to = flipTo(); // back to Auto when the other scheme is the device's (QA B18)
+    const to = flipTo(); // back to Auto when the other scheme is the device's
     L.setTheme(to);
     L.render();
     L.toast(baseWords(to));

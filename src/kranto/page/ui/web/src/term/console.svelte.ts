@@ -105,7 +105,7 @@ export const consoleUi: { place: Place; known: boolean; harness: string | null; 
   known: false,
   harness: null,
   focusN: 0,
-  /** Restart the console now (Settings › Assistant, the owner's Q2): the panel ends its session
+  /** Restart the console now (Settings › Assistant): the panel ends its session
    * and starts it again, resumed, with the settings saved (``harness``: another assistant) */
   restart: { n: 0, harness: null },
   /** this server runs consoles (Kranto itself; not the page's own test server): only then is the page's place told */

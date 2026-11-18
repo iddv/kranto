@@ -540,7 +540,7 @@ class IdeasAPI:
         return JSONResponse({"id": row_id, "outcome": got})
 
     async def card_theme(self, request: Request) -> Response:
-        """One card on a theme of the latest map, on the owner's request (CON D-1): started in
+        """One card on a theme of the latest map, on the owner's request: started in
         the background (one card call and its check, about $0.06, under the card writer's lock
         and the budget); 202 ``{"started", "lineage"}``. The card appears with the theme's
         cards; a run that cannot (no such theme, too little evidence, a run already writing

@@ -134,8 +134,8 @@ class AfkTrace(Trace):
             spans[s.id] = s
 
     def head_line(self, calls: int, usd: float | None) -> str | None:
-        """The trace's plain head line: what the run is, its stage, its calls, its spend (the
-        owner's D-1: dollars here)."""
+        """The trace's plain head line: what the run is, its stage, its calls, its spend (in
+        dollars here)."""
         a = ((self.act or {}).get("run") or {})
         if not a:
             return None

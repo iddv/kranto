@@ -73,7 +73,7 @@ def _shipped(cid: str) -> bool:
 
 
 def gone_words(cid: str, path: str) -> dict:
-    """What a cub whose source folder is gone says (live's examplecom pointed at a
+    """What a cub whose source folder is gone says (a real install's examplecom pointed at a
     folder that no longer exists, its daily look said ok, and it would never update).
     A cub this Kranto ships is pointed at Kranto's own copy; any other comes from a folder or a
     git address the person gives (the project keeps no collection of features to point at)."""

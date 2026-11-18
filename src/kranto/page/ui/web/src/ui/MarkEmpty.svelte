@@ -1,6 +1,6 @@
 <script lang="ts">
   import { pageUrl } from "../lib/base";
-  // An empty state (PLAN.md 1.5; UI-v4.md 1.4; the old page's markEmpty): the mark, one sentence
+  // An empty state (the old page's markEmpty): the mark, one sentence
   // that says what will appear and when, and one link.
   import type { Snippet } from "svelte";
 

@@ -12,7 +12,7 @@ import { answerDialog, dialogShown } from "../../ui/testing";
 const TOKENS: Tokens = {
   require_token: true, default_actions: ["add_idea", "publish", "retry"],
   tokens: [{ name: "ui", file: "/t/ui.token", last_used: null }, { name: "mcp", file: "/t/mcp.token" },
-           { name: "agent:rc", file: "/t/agent-rc.token", actions: ["add_idea"], note: "the fleet" }],
+           { name: "agent:rc", file: "/t/agent-rc.token", actions: ["add_idea"], note: "a release check" }],
 };
 const where = (sel: string | null): Where => ({
   r: { path: ["settings", "access"], q: {}, sel }, node: "settings/access", list: ["settings", "access"],
@@ -54,7 +54,7 @@ describe("Settings › Privacy & access", () => {
     const rows = [...target.querySelectorAll("li.row")];
     expect(rows.map((r) => r.getAttribute("data-sel"))).toEqual(["etok:ui", "etok:mcp", "etok:agent:rc"]);
     expect(rows[0]?.querySelector(".r-title")?.textContent).toBe("This page");
-    expect(rows[2]?.querySelector(".c-meta")?.textContent).toBe("may run 1 action · not used since Kranto started · the fleet");
+    expect(rows[2]?.querySelector(".c-meta")?.textContent).toBe("may run 1 action · not used since Kranto started · a release check");
     expect(target.querySelector("#add-agent")?.getAttribute("href")).toBe("#/settings/access?sel=enew-agent");
     expect(target.querySelector(".tbn")).toBeNull(); // tokens are required: no warning
     expect(target.querySelector("input, textarea, select")).toBeNull(); // never a field in the list

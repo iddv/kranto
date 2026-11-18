@@ -18,7 +18,7 @@ export function fail(o: Partial<ActivityFail> = {}): ActivityFail {
     tries: 3, error: "GitHub answered 401", verb: "Try again", trace: "#/afk/u3/trace", runs: [], ...o };
 }
 
-/** live's incident of 2026-10-25: the OpenRouter key expired, reading and idea cards stopped */
+/** a real install's incident of 2026-10-25: the OpenRouter key expired, reading and idea cards stopped */
 export function incident(o: Partial<ActivityIncident> = {}): ActivityIncident {
   return { id: "auth:openrouter", provider: "openrouter", name: "OpenRouter", cause: "expired", blocking: true,
     title: "Your OpenRouter key is refused (expired)",

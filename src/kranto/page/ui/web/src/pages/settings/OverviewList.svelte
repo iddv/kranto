@@ -103,7 +103,7 @@
 </List>
 {/if}
 
-<!-- Feedback (FB): the sheet, opened by ?feedback=1 on this page's address -->
+<!-- Feedback: the sheet, opened by ?feedback=1 on this page's address -->
 {#snippet feedback()}
   <Group id="set-feedback-g" title="Feedback" count="" kind="sets">
     <Row title="Send feedback" href={href("settings", { feedback: "1" })} meta="a bug, an idea or a question: an issue on Kranto's GitHub, from you"></Row>

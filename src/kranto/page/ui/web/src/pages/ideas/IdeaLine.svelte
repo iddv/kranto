@@ -1,5 +1,5 @@
 <script lang="ts">
-  // An idea card as one row of Ideas (WORKSPACE.md 1.5, 2.2;): its state, #n (the
+  // An idea card as one row of Ideas: its state, #n (the
   // card's name, in the sans face: D-8), the title and one fact: its rank line ("ranked up: like 2
   // cards you upvoted"), else Later's date, else where it came from, else its topic; when
   // it was written; the grade. Its title opens it in the sheet, which has the rest.

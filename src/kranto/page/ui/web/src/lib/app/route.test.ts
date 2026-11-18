@@ -70,7 +70,7 @@ describe("the draw", () => {
     await frame({ hash: "#/settings/watches" });
     const push = vi.spyOn(history, "pushState"), replace = vi.spyOn(history, "replaceState");
     render();
-    expect(location.hash).toBe("#/watch"); // watches are retired (WT): Watch's Topics
+    expect(location.hash).toBe("#/watch"); // watches are retired: Watch's Topics
     expect(replace).toHaveBeenCalled();
     expect(push).not.toHaveBeenCalled();
     push.mockRestore();

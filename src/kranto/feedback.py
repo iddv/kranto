@@ -1,4 +1,4 @@
-"""Feedback: the owner's grades, pairs and confirmed actions (LEARNING.md 2.4, track L1).
+"""Feedback: the owner's grades, pairs and confirmed actions.
 
 One append-only table (migration 19) for every grade Kranto UI, the review queue and
 chat record, on any target: an observation, an idea card, a source, a topic, a message, or a
@@ -9,15 +9,15 @@ Kranto, stay and are skipped by every reader (``RETIRED_TARGETS``).
   a new row with ``value = skip``, so the history stays legible. ``latest`` leaves a cleared
   target out, as if never graded.
 - **The vocabulary lives here**, not in the schema: ``TARGETS``, ``KINDS``, the values per
-  kind, ``ORIGINS`` and the "why" chips per target (LEARNING.md 3.3). A new target is a line
+  kind, ``ORIGINS`` and the "why" chips per target. A new target is a line
   here, not a migration.
-- **The review queue** (``build_queue``, LEARNING.md 3.4) is computed, never stored, and
+- **The review queue** (``build_queue``) is computed, never stored, and
   holds only what a grade is read for today: this week's ungraded cards in the order
   of what they stand on. Pairs, themes, random controls and
   what was opened are no longer asked (their old rows stay, and the API still takes a pair).
   A queue skip hides an item for the rest of the week; a second queue skip, in a later week,
   hides it for good.
-- **The learning summary** (``learning``, LEARNING.md 5.2) is a stub until tracks L2-L5:
+- **The learning summary** (``learning``) is a stub until the policies are built:
   this month's signal counts, every policy as *Waiting for signal* (or *Blocked*) with what
   it needs, and the one honest number once controls have been graded.
 
@@ -52,7 +52,7 @@ LABELS = {"useful": "useful", "not_useful": "not useful", "wrong": "wrong",
           "worth_waking": "worth waking me", "not_worth_it": "not worth it",
           "a": "the first", "b": "the second", "tie": "a tie"}
 
-# The "why" chips (LEARNING.md 3.3): a closed vocabulary per target, in key order a, b, c...
+# The "why" chips: a closed vocabulary per target, in key order a, b, c...
 CHIPS: dict[str, list[tuple[str, str]]] = {
     "idea": [("not_my_topic", "not my topic"), ("already_exists", "already exists"),
              # the keys stay (stored grades); the words a person reads say no build
@@ -257,7 +257,7 @@ def history(store: Store, target: str, target_id) -> list[dict]:
         (target, str(target_id)))]
 
 
-# -- the review queue (LEARNING.md 3.4) ----------------------------------------------------
+# -- the review queue -------------------------------------------------------------------------
 
 
 def _week(now: datetime) -> str:

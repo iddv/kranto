@@ -1,5 +1,5 @@
 <script lang="ts">
-  // File it's confirm (FB): exactly the issue that is filed (the repository, who files it, the
+  // File it's confirm: exactly the issue that is filed (the repository, who files it, the
   // title, the labels, the body) and nothing else. File it posts that title and body; the server
   // scrubs them again and files only when its scrub changes nothing. When it would, nothing is
   // filed and this confirm shows its version (note). Back returns to the sheet with the draft.

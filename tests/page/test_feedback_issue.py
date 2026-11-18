@@ -1,4 +1,4 @@
-"""Feedback (FB): where the issue goes and filing it as the person, through their own gh.
+"""Feedback: where the issue goes and filing it as the person, through their own gh.
 
 The fake gh (``scripts/dev/fake_gh.py``) runs as a real subprocess, as a scratch server runs
 it on PATH: the login, the repository, its labels and the issue it files; nothing reaches

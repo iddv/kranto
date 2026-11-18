@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A source (WORKSPACE.md 2.5; the old page's paneSource): the topics it feeds first (each
+  // A source (the old page's paneSource): the topics it feeds first (each
   // with Remove, this topic only, and Add to another topic), its facts, fetches, how it is read
   // and what it kept lately; the verbs by its state: Approve and watch (proposed, when its topic is
   // known: the topic page it is open on, else its own), Review, Dismiss; Fetch now, Mute or
@@ -72,7 +72,7 @@
       const x = r as { state: string; fetched: number; new: number; error: string };
       L.say(x.state === "ok" ? `Fetched ${x.fetched} items, ${x.new} new. Nothing is judged until the next run.` : `The fetch failed: ${x.error}`, x.state === "ok" ? "blue" : "red");
     }) });
-    // Mute, Read less and Retire act on every topic it feeds: their title says so (SRC D3)
+    // Mute, Read less and Retire act on every topic it feeds: their title says so
     const ref = { id: s.id, label: s.label, topics: s.topics.length }, reach = reachWords(s.topics.length);
     if (watched && s.mute) out.push({ label: "Unmute", cls: "btn sm", run: (b) => void L.act(b, () => L.api(`/api/sources/${s.id}/mute`, { days: null }), () => {
       L.afkStale("/api/sources", "/api/topics/");

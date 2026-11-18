@@ -103,7 +103,7 @@ function classicTree(r: Route): NavFacts {
   return { here, rows: out, topic: null };
 }
 
-/* Watch in the classic tree (WT): its head opens the last topic you looked at (#/topics); then
+/* Watch in the classic tree: its head opens the last topic you looked at (#/topics); then
    Topics, each of your topics, and the one Watch is scoped to (the address's, else the last one)
    with its Sources, Evidence and Map under it; then All topics, whose pages show while you are on
    one of them. A topic you are on that is not one of yours (paused, a project's) has its row too. */
@@ -128,7 +128,7 @@ function sourcesCount(topic: string | null): number | null {
   if (!topic) return allProposed(t) || null;
   return (t ? [...t.topics, ...(t.project_topics || [])].find((x) => String(x.id) === topic)?.proposed : 0) || null;
 }
-/** the topic Watch's pages are for (WT): the address's, All topics on its pages, else the last
+/** the topic Watch's pages are for: the address's, All topics on its pages, else the last
  * topic you looked at (the first with none yet); null topic and all false: no topics at all */
 export function watchScope(r: Route): { topic: string | null; name: string; page: WatchPage | null; all: boolean } {
   const path = r.path.join("/"), s = scopeOf(r.path);
@@ -145,7 +145,7 @@ export function watchScope(r: Route): { topic: string | null; name: string; page
 export const DOOR_NAV: Record<string, { word: string; items: [string, string][] }> = {
   needs: { word: "Needs you", items: [] },
   activity: { word: "Activity", items: [] },
-  // Watch's Sources, Evidence and Map are a topic's (WT): doorFacts scopes them (watchScope)
+  // Watch's Sources, Evidence and Map are a topic's: doorFacts scopes them (watchScope)
   watch: { word: "Watch", items: [["watch", "Topics"], ["watch/sources", "Sources"], ["watch/evidence", "Evidence"], ["watch/map", "Map"]] },
   ideas: { word: "Ideas", items: [["ideas", "Cards"], ["ideas/review", "Review"]] },
   news: { word: "News", items: [["news", "Today"], ["news/earlier", "Earlier"], ["news/topics", "Topics"]] },
@@ -160,8 +160,8 @@ export function doorNav(id: string): { word: string; items: [string, string][] }
 }
 // the posting cubs' pages are Post's ("the posting cubs are drawn as Post")
 const DOOR_OF: Record<string, string> = { topics: "watch", library: "watch", review: "ideas", cubs: "post", cub: "post" };
-/* pages kept on an old route that belong to another door's subnav word (the owner's O3:
-   Add topic and Add source stay pages this release, drawn under Watch): [door, subnav route] */
+/* pages kept on an old route that belong to another door's subnav word
+   (Add topic and Add source stay pages this release, drawn under Watch): [door, subnav route] */
 const PLACED: Record<string, [string, string]> = { "settings/sources/new": ["watch", "watch/sources"], "topics/new": ["watch", "watch"] };
 /** the door a route is in, with the doors on */
 export function doorId(path: string[]): string | null {
@@ -173,7 +173,7 @@ function doorFacts(r: Route): DoorFacts | null {
   const id = doorId(r.path);
   if (!id) return null;
   // without the doors' frame (no server) Watch's pages still have the crumb, for the topic
-  // switcher (WT: "Classic and the phone: the same")
+  // switcher (the classic tree and the phone draw it the same)
   if (!frameNew(!!host())) return id === "watch" && shellDoors(!!host()) ? { ...watchFacts(r, DOOR_NAV.watch!.word, doorCounts()), crumbOnly: true } : null;
   const d = doorNav(id), here = r.path.join("/"), counts = doorCounts();
   if (id === "watch") return watchFacts(r, d.word, counts);
@@ -207,7 +207,7 @@ export function navTree(r: Route): NavFacts {
   return classicTree(r);
 }
 
-/* The status bar's service line (WORKSPACE.md 1.7; StatusBar.svelte draws it): the service in one
+/* The status bar's service line (StatusBar.svelte draws it): the service in one
    word and a few cells. The word and why are the server's (health.py: `ingest.health` on
    /api/today), worked out once on the server so the page, the phone and the console say the same:
    Paused (watching paused, or the watcher's provider paused until a time), Degraded (no ingest
@@ -243,7 +243,7 @@ function serviceLine(): Facts["bar"] {
     svc.judge_calls_24h ? `judge errors ${svc.judge_errors_24h} of ${svc.judge_calls_24h}` : null]
     : [H ? "reading the server's health…" : "the server is not answering"];
   const size = svc ? `${plural(svc.sources, "source")} · ${plural(svc.topics, "topic")} · ${svc.observations.toLocaleString("en-GB")} observations` : null;
-  // the live feed's places all taken: the page polls and says so (QA B20)
+  // the live feed's places all taken: the page polls and says so
   const all = [...cells, livePaused() ? "live updates paused" : null];
   // the preview: a second Kranto on a copy of the owner's data says so on every page
   const preview = H?.preview?.line || null;

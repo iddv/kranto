@@ -233,7 +233,7 @@ def test_every_voice_field_waits_unless_the_owner_chose_for_the_verb():
     assert verbs.choice_for(off, v, {"voice": "x"}).choice == "never"
 
 
-# -- what waits for the owner's yes (the owner's D1, safe side) -----------------------------------
+# -- what waits for the owner's yes (the safe side) ----------------------------------------------
 
 @pytest.mark.parametrize("kind, ladder", [
     ("settings.models", "spend"), ("settings.reading", "spend"), ("prompt.save", "reversible"),

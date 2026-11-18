@@ -394,7 +394,7 @@ def test_a_final_release_needs_a_previous_one_with_the_two_shape_helper():
     assert guards.TWO_SHAPE_MIN == "0.7.0.dev1"
     k0 = _rel("v0.7.0-dev1", *COMPAT)
     refuse = guards.shape_refusal
-    assert refuse("final", "v0.7.0-dev2", [k0]) is None                   # K1, after K0
+    assert refuse("final", "v0.7.0-dev2", [k0]) is None   # the release after the crossing one
     assert "no release before" in refuse("final", "v0.7.0-dev1", [])
     assert "no release before" in refuse("final", "v0.7.0-dev2", [_rel("v0.7.0-dev1", *COMPAT,
                                                                         draft=True)])

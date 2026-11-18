@@ -1,5 +1,5 @@
-"""Where Kranto keeps its files: the homes, how each is found, and what is inside them
-(S-8; review D-6). The one module that knows these names.
+"""Where Kranto keeps its files: the homes, how each is found, and what is inside them.
+The one module that knows these names.
 
 A **kranto home** (``kranto_home()``: ``--home``, else ``$KRANTO_HOME``, else the home ``kranto
 up`` or ``kranto adopt`` recorded, else ``~/.kranto``) is a workspace with the ``brb``
@@ -12,7 +12,7 @@ The **loop home** (``loop_home()``: the configured one, else ``$KRANTO_LOOP_HOME
 build loop's ledger, settings and control files (``LoopLayout``).
 
 Standard library only. Kept byte-identical in the server (``src/kranto/paths.py``) and the page
-(``src/kranto/page/paths.py``); a test in each repo compares them, as for ``tokens.py``.
+(``src/kranto/page/paths.py``); a test compares them, as for ``tokens.py``.
 """
 from __future__ import annotations
 

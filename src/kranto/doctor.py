@@ -131,7 +131,7 @@ def _compat(cfg: Config, transport: httpx.BaseTransport | None) -> list[Check]:
 
 def _claude_code(cfg: Config, store: Store) -> list[Check]:
     """Claude Code's login as the watching model: installed, signed in, a page version that can run
-    it; what this month used at list prices; and what choosing it means (the owner's D2)."""
+    it; what this month used at list prices; and what choosing it means."""
     from . import providers
     result = providers.test("claude_code")
     out = [Check(OK if result.ok else FAIL, "claude login", result.detail)]
@@ -207,10 +207,9 @@ BUILDS_RETIRED = "this feature is not part of Kranto any more; its settings are 
 
 def retired_builds(cfg: Config) -> list[Check]:
     """One line when the settings still turn builds on (``builds.enabled: true``): builds left
-    Kranto (CUT), so the section is read and ignored."""
-    # Until ``builds`` joins config.RETIRED (agreed: whichever of the A2 and CUT's C2 merges
-    # second adds it). Once it does, the loader leaves the section unread, builds.enabled reads
-    # false here, and retired_sections says the one line instead: never both.
+    Kranto, so the section is read and ignored."""
+    # Until ``builds`` joins config.RETIRED. Once it does, the loader leaves the section unread,
+    # builds.enabled reads false here, and retired_sections says the one line instead: never both.
     from .config import RETIRED
     if "builds" in RETIRED:
         return []

@@ -1,4 +1,4 @@
-"""The question (the owner's D1: opt-in, asked once, Enter sends nothing):
+"""The question (opt-in, asked once, Enter sends nothing):
 `kranto setup` asks it once and Enter leaves Kranto counting on this machine only; `--yes` asks
 nothing and answers nothing; `--telemetry` and the answers file answer it; a re-run never
 undoes a later choice; Today's reminder comes once after seven unanswered days; the notice names

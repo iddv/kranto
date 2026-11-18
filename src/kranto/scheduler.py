@@ -13,7 +13,7 @@ coexist.
 
 A scheduler may also carry **lanes**: something that ticks on its own short
 interval, on its own thread, started and stopped with the job thread. ``kranto
-serve`` ran the page's build loop as one until builds left Kranto (CUT); it runs
+serve`` ran the page's build loop as one until builds left Kranto; it runs
 none today, and the seam stays for the next thing that needs its own pace.
 """
 

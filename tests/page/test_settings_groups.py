@@ -1,4 +1,4 @@
-"""Settings as lists and panes (WORKSPACE.md 2.12, 8 W5): every Settings page is a list of its
+"""Settings as lists and panes: every Settings page is a list of its
 setting groups and real rows with no field in it; a group's form, with its Save, is in the detail
 pane when the group is selected (sel=e<key>), and the page's context is the pane with nothing
 selected. Also Settings › Prompts (PM-API.md), the default selections, Health's ?message=, the
@@ -77,7 +77,7 @@ def test_a_moved_settings_page_is_a_list_and_a_pane_too():
         body, p = src("pages/" + lst), "".join(src("pages/" + f) for f in (pane, *TYPES.get(k, ())))
         for f in TYPES.get(k, ()):
             assert f"import {f.split('/')[-1].split('.')[0]} from \"./{f.split('/')[-1]}\"" in src("pages/" + pane), f
-        # Sources is Watch's page with the doors on: its crumb says so (SRC D7)
+        # Sources is Watch's page with the doors on: its crumb says so
         assert '<List title=' in body and ('crumb="Settings"' in body or (k == "" and "crumb={addCrumb}" in body)), k
         # no field in the list pane (a toolbar's filter is the only input there), and its rows are
         # setting groups that open in the pane, or its real rows (lessons, sources, kinds)
@@ -122,8 +122,8 @@ def test_pages_open_with_their_main_group_selected():
     by = {n["route"]: n for n in nodes()}
     assert by["settings/watching"]["sel"] == "ekey" and by["settings/models"]["sel"] == "erole:afk:judge"
     assert by["settings/posting"]["sel"] == "enl" and by["settings/appearance"]["sel"] == "etheme"
-    assert "sel" not in by["settings/prompts"]      # the factory's house rules left with it (CUT)
-    # Spend opens on its breakdown with Totals and caps in the pane (S11 = 1): nothing selected
+    assert "sel" not in by["settings/prompts"]      # the factory's house rules left with it
+    # Spend opens on its breakdown with Totals and caps in the pane (one click): nothing selected
     assert "sel" not in by["settings/spend"] and "sel" not in by["settings"]
     # the route's sel on open, not on a phone (where a selection covers the list), and without
     # the server the first of the page's roles: pressed in lib/app/route.test.ts ("selects a settings
@@ -164,7 +164,7 @@ def test_models_save_only_on_save():
     # pages/settings/models.svelte.test.ts ("writes nothing until Save, then saves the role's choice")
     pane = src("pages/settings/ModelsPane.svelte")
     assert "L.api(AFK_MODELS, { role: r.role.role" in pane and "MODELS_API" not in pane   # the page's roles left
-    # the first role is selected on open: S12 is Models, the select, Save
+    # the first role is selected on open: Models, the select, Save
     assert 'key={"role:" + x.key}' in src("pages/settings/ModelsList.svelte")
 
 

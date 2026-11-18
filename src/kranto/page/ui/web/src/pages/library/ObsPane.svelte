@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Library › Observations, the pane (WORKSPACE.md 2.1): an observation (#/library/o/<id>), the
+  // Library › Observations, the pane: an observation (#/library/o/<id>), the
   // judge's words, its source and the topics it feeds (why it is here:), the idea cards that cite it, its neighbourhood and the judgment;
   // one read of /api/observations/<id>; away from the library too (sel=o<id> on Today or a
   // topic's page). A search's compacted week (sel=u<id>) is Rollups' pane. With nothing

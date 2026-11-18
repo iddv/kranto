@@ -208,7 +208,7 @@ def _builds_switch_restored():
 
 @pytest.fixture(autouse=True)
 def _token_dir(monkeypatch, tmp_path_factory):
-    """Each test has its own token store (OI): never the developer's ~/.config/kranto."""
+    """Each test has its own token store: never the developer's ~/.config/kranto."""
     monkeypatch.setenv("KRANTO_TOKENS_DIR", str(tmp_path_factory.mktemp("tokens")))
     monkeypatch.delenv("KRANTO_UNIT", raising=False)
     # a broker's sign-in (core.brokers.mcp): its own ~/.config/kranto per test, and never a
@@ -340,7 +340,7 @@ __all__ = ["FIXED_NOW", "ModelPrice", "chat_response", "llm_config"]
 def web_client(app, base_url: str = "http://127.0.0.1", signed_in: bool = True):
     """A test client that behaves like a browser on the UI's own pages: POSTs
     carry an Origin header, which the server requires, and the browser is
-    signed in (OI): it has the session cookie, read from the test's token store."""
+    signed in: it has the session cookie, read from the test's token store."""
     from starlette.testclient import TestClient
 
     client = TestClient(app, base_url=base_url, headers={"origin": base_url})

@@ -1,5 +1,5 @@
 // Settings › Posting's sites: "Settings › Posting lists the sites I post to, one line each, and one
-// Add a site. No wall of logos." (SOC-7, with four sites ticked), Post directly per site, Mastodon's
+// Add a site. No wall of logos." (POSTING-7, with four sites ticked), Post directly per site, Mastodon's
 // server, and Add a site's sheet with what is not possible today and why.
 import { afterEach, describe, expect, it } from "vitest";
 import { flushSync, mount, unmount } from "svelte";
@@ -45,7 +45,7 @@ describe("Settings › Posting › Sites you post to", () => {
     expect(target.querySelector("#posting-add")?.textContent).toBe("Add a site");
     expect(target.textContent).toContain("short posts link to https://example.org/blog");
     expect(target.textContent).not.toMatch(/copy and open|\bcubs?\b|\bticket\b/i);
-    // SOC-7's budget with four sites ticked: 80 words, 7 controls
+    // POSTING-7's budget with four sites ticked: 80 words, 7 controls
     const c = count(target, "settings/posting, four sites ticked");
     expect(c.words, JSON.stringify(c)).toBeLessThanOrEqual(80);
     expect(c.controls, JSON.stringify(c)).toBeLessThanOrEqual(7);

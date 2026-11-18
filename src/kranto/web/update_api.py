@@ -98,7 +98,7 @@ class UpdateAPI:
         if preview.enabled(self.home):
             return JSONResponse({**check.view(self.home), "busy": self.busy(), "ok": False,
                                  "off": True, "error": PREVIEW_OFF})
-        # a press is a run (ACT): its runs row is the update check's, so its Fix row goes when
+        # a click is a run: its runs row is the update check's, so its Fix row goes when
         # it works and it counts as a try when it does not
         await run_in_threadpool(check.check_pressed, self.home, self.app.rt.store)
         return JSONResponse({**check.view(self.home), "busy": self.busy()})

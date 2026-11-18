@@ -95,7 +95,7 @@ def test_continued_outside_is_said(tr, tmp_path):
 
 
 def test_an_empty_trace_says_why(tr, tmp_path):
-    """ 3: live's four sessions kept no transcript and drew one RUN row with nothing said;
+    """ 3: a real install's four sessions kept no transcript and drew one RUN row with nothing said;
     the page now reads the trace's note."""
     t = make_session(tmp_path / "loop")
     assert tr.summary(f"session:{TID}")["note"] is None           # it talked: nothing to say

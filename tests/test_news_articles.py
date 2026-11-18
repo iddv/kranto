@@ -261,8 +261,8 @@ def test_the_prompt_fences_every_block_and_says_the_rule(n):
 
 
 def test_citation_labels_in_the_prose_never_reach_the_reader(n):
-    # live's first article (2026-10-24, the reason model through OpenRouter) wrote its cites into
-    # the paragraphs too: "… the present. [obs 10570] [page 1]"
+    # a real install's first article (2026-10-24, the reason model through OpenRouter) wrote its
+    # cites into the paragraphs too: "… the present. [obs 10570] [page 1]"
     inline = good_reply(standfirst={"text": "Solar reaches 30% of rural Kenya [obs 1].",
                                     "cites": ["obs 1"]},
                         sections=[{"id": "what", "title": "What happened", "paragraphs": [
@@ -284,7 +284,7 @@ def test_citation_labels_in_the_prose_never_reach_the_reader(n):
 
 
 def test_a_sites_logo_is_not_the_storys_picture(n):
-    # live's first article took arXiv's sharing image, its logo (2026-10-24)
+    # a real install's first article took arXiv's sharing image, its logo (2026-10-24)
     assert articles.brand_image("https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png")
     assert articles.brand_image("https://site.com/assets/default-og.png")
     assert not articles.brand_image("https://cdn.site.com/2026/10/robot-arm-photo.jpg")
@@ -471,7 +471,7 @@ def test_the_manifest_declares_the_grant_purposes_and_settings():
     keys = NEWS.settings.keys
     assert keys["news.articles_per_day"].default == 1
     assert keys["news.depth"].default == "standard"
-    assert keys["news.lead_image"].default is True          # the owner's D3, 2026-10-23
+    assert keys["news.lead_image"].default is True          # decided on 2026-10-23
     assert keys["news.sources"].default == list(articles.SOURCES)
     assert keys["news.article_min"].by_hand
     assert "news_articles" in NEWS.owns and "news_article_pages" in NEWS.owns

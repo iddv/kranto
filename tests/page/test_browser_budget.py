@@ -93,7 +93,7 @@ def test_every_page_keeps_the_budget_in_both_layouts_and_on_a_phone(browser, pag
 
 
 # a full day on Needs you and the home: Kranto's own trouble (the band), a prepared item, idea cards
-# waiting, a week's review queue, a cub's ask: live's 29 Oct had 35 primaries on Needs you (most of
+# waiting, a week's review queue, a cub's ask: a real install on 29 Oct had 35 primaries on Needs you (most of
 # them builds, which left with the factory)
 QUEUE = {"week": "2026-W44", "items": [{"target": "idea", "id": 40 + i, "slot": "card", "title": f"Card {i}"} for i in range(4)]}
 PREPARED = {"uuid": "f1", "verb": "b.factory_issue", "title": "File a Kranto issue", "by_words": "by Claude Code", "page": "#/needs", "words": None,

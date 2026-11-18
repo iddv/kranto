@@ -2,7 +2,7 @@
 redirect) opens with the server answered in the page (PageAfk: no model, no network), and none of
 them throws, logs a console error, gets a server error or sends a write; the shell's keys, palette
 and theme work. The tests that read the page as text can't see any of that: a typo in a
-function no test reads, a module that fails to load (S-3b, S-4). The page is the built UI since
+function no test reads, a module that fails to load. The page is the built UI since
 so these need a build (``python3 scripts/dev/build_ui.py``; CI's browser job builds first).
 
 The page server (``brb ui``'s ``make_server``) serves the page and its own routes; everything
@@ -115,9 +115,9 @@ OWNER_TEXT = """() => {
   b.querySelectorAll("code, kbd, pre, input, textarea, select, details.advanced, #set-advanced, script, style").forEach((e) => e.remove());
   return b.innerText;
 }"""
-# words that are only ever a bug on a page (QA B7, B10: "theme null", a setting key in a row)
+# words that are only ever a bug on a page ("theme null", a setting key in a row)
 NOT_WORDS = re.compile(r"\b(null|undefined|NaN)\b|\[object |Traceback")
-# names retired with the doors (QA B11) and with the factory (CUT)
+# names retired with the doors and with the factory
 RETIRED = re.compile(r"Go to Today|\(the Library\)|Needs you \(Today\)|Settings › (Publishing|Building)|\bBuild tools\b|"
                      r"\bBuilds?\b|\bProjects\b|\bRepos\b|GitHub App")
 
@@ -376,8 +376,8 @@ def _story(browser, afk=None, width=1360, height=900):
 
 def test_every_route_draws_without_an_error(browser, page_base):
     """... with the server answered in the page, and says nothing the owner should not read: no
-    setting key outside its code span or Advanced, no null or undefined, no retired name (QA B7,
-    B10, B11; CUT: no Build, Projects, Repos). A read this fake the server does not answer is a 404
+    setting key outside its code span or Advanced, no null or undefined, no retired name (no
+    Build, Projects, Repos). A read this fake the server does not answer is a 404
     and the page says it could not read it: only a server error counts here."""
     keys = setting_keys()
     afk = PageAfk(topics=["Clinics"], new_kept=3, cards=CARDS)
@@ -569,7 +569,7 @@ def test_a_tip_opens_on_focus_and_click_and_a_missing_page_says_so(browser, page
     page.goto(f"{page_base}/#/no/such/page")
     page.wait_for_selector("#rows >> text=There is no page at #/no/such/page")
     assert page.title() == "Not found · Kranto"
-    page.click("#rows a.btn >> text=Go home")       # never the retired "Go to Today" (QA B11)
+    page.click("#rows a.btn >> text=Go home")       # never the retired "Go to Today"
     page.wait_for_url(re.compile(r"\#/(home)?$"))
     page.close()
     assert not errors, errors
@@ -593,13 +593,13 @@ def test_while_term_is_off_c_says_how_to_turn_it_on(browser, page_base, monkeypa
     assert not errors and not sent, errors + sent
 
 
-# -- the click stories (CLICKS-v4.md), played on the hosted page ------------------------------
-# Each story counts what CLICKS-v4.md counts: a click, a key that replaces one, the click that
+# -- the click stories, played on the hosted page ---------------------------------------------
+# Each story counts a click, a key that replaces one, the click that
 # focuses a field (none when the page already put the cursor there) and a scroll (a screen of
 # the pane the target sits in, or of what the story reads).
 
-def test_s01_first_install_to_first_topic(browser, page_base):
-    """S01 (Welcome in three steps): the splash's Set up Kranto, the key pasted (tested on
+def test_first_install_to_first_topic(browser, page_base):
+    """Welcome in three steps: the splash's Set up Kranto, the key pasted (tested on
     paste), Continue, a suggested topic, Scout, the proposals read, Watch these and continue, Start
     reading: on the topic's page, the close matches watched."""
     afk = PageAfk(setup=True)
@@ -630,8 +630,8 @@ def test_s01_first_install_to_first_topic(browser, page_base):
     assert c.n <= 12, (c.n, c.log)          # Paste a key and Skip for now are the two added
 
 
-def test_s02_add_a_topic_and_approve_its_sources(browser, page_base):
-    """S02 (8 measured, 6 designed; 6 here): the navigator's + add, the name (the field has the cursor),
+def test_add_a_topic_and_approve_its_sources(browser, page_base):
+    """Six clicks here: the navigator's + add, the name (the field has the cursor),
     the sentence, Scout, the proposals read, one ticked and one unticked, Watch these and open the
     topic: on its Sources, what was ticked watched."""
     afk = PageAfk(topics=["Lab tools"])
@@ -688,8 +688,8 @@ def test_s07_add_sources_by_describing_them(browser, page_base, theme):
     assert c.n <= 5, (c.n, c.log)
 
 
-def test_s04_review_an_idea_and_decide(browser, page_base):
-    """S04 (3 here): Needs you's one row for the idea cards waiting opens Ideas;
+def test_review_an_idea_and_decide(browser, page_base):
+    """Three clicks here: Needs you's one row for the idea cards waiting opens Ideas;
     a card's title opens it in the pane; Later in its head puts it off (the server's idea.later,
     answered in the page). Nothing reaches the page server."""
     afk = PageAfk(topics=["Clinics"], cards=CARDS)
@@ -735,7 +735,7 @@ def test_the_grade_keys_on_evidence_and_no_ticks(browser, page_base):
     assert not errors and not sent, errors + sent
 
 
-# -- the layout: every list fills its column (UF) ----------------------------------------------
+# -- the layout: every list fills its column ---------------------------------------------------
 # Review's queue was drawn as a 760 px block on a blue wash, its week's header a cell beside the
 # rows: the group's kind ("queue") also named two old rules. A list group's kind is a bare class,
 # so any page-wide rule of the same name lands on it; this is the check that sees it.
@@ -839,7 +839,7 @@ def test_every_list_fills_its_column(browser, page_base):
 
 
 def test_a_lists_scroll_survives_a_reload(browser, page_base):
-    """QA B19: the list scrolls inside #rows, not the document, so a reload put it back at the
+    """The list scrolls inside #rows, not the document, so a reload put it back at the
     top (the sheet, the filter and the selection stayed). Its place comes back with the rows."""
     page = browser.new_page(viewport={"width": 1360, "height": 320})
     page.goto(f"{page_base}/#/settings")
@@ -863,7 +863,7 @@ PHONE_TARGETS = """() => {
 
 
 def test_on_the_phone_every_verb_is_a_thumb_target_and_no_lede_is_cut(browser, page_base):
-    """QA B24: at 390 px a row's verb was 22 px tall and a page's lede was cut with an
+    """At 390 px a row's verb was 22 px tall and a page's lede was cut with an
     ellipsis. Every visible row verb and sheet action is at least 44 px tall, and the lede wraps."""
     page, errors, sent, _ = _story(browser, PageAfk(topics=["Clinics"], cards=CARDS), 390, 844)
     seen, flagged = 0, {}

@@ -1,4 +1,4 @@
-"""GET /api/ideas: idea cards for the page's intake and Kranto UI (PLAN.md 1(d), 2.5)."""
+"""GET /api/ideas: idea cards for the page's intake and Kranto UI."""
 
 import json
 
@@ -85,7 +85,7 @@ def test_lists_every_card_with_status_score_grade(web, cards):  # noqa: F811
     r = web.get("/api/ideas")
     assert r.status_code == 200
     body = r.json()
-    assert body["count"] == 3 and "default_output_kind" not in body      # builds' (CUT)
+    assert body["count"] == 3 and "default_output_kind" not in body      # builds'
     assert not [i for i in body["ideas"] if "intake" in i]
     by_id = {i["id"]: i for i in body["ideas"]}
     # the owner's order: the card graded useful first, then the rest by taste
@@ -111,7 +111,7 @@ def test_lists_every_card_with_status_score_grade(web, cards):  # noqa: F811
 def test_old_cards_tolerate_missing_96_fields_and_get_citations(web, cards):  # noqa: F811
     old = web.get(f"/api/ideas/{cards['old']}").json()
     assert old["who"] is None and old["smallest_v1"] == "" and old["demand"] is None
-    assert old["output_kind"] is None              # none written; no build's default (CUT)
+    assert old["output_kind"] is None              # none written; no build's default
     assert [c["url"] for c in old["citations"]] == ["https://ex.com/1", "https://ex.com/2"]
     c = old["citations"][0]
     assert c == {"observation_id": cards["oids"][0], "url": "https://ex.com/1",
@@ -174,7 +174,7 @@ def test_topics_come_from_the_evidence_not_the_theme(web, rt, cards):  # noqa: F
 
 
 def test_snapshot_17_a_new_theme_on_a_reused_cluster_number_has_no_ideas(web, rt):  # noqa: F811
-    """Live's snapshot 17 (2026-10-18): cluster 18 is a new robotics lineage; earlier maps
+    """A real install's snapshot 17 (2026-10-18): cluster 18 is a new robotics lineage; earlier maps
     gave the number 18 to other themes, which have cards. No card is on the new lineage, and
     a broad theme with one robotics member in 590 does not make its card a robotics idea."""
     store = rt.store

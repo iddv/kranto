@@ -1,8 +1,8 @@
 <script lang="ts">
-  // Library › Clusters, the pane (WORKSPACE.md 2.6): a theme (#/library/clusters/<n>, a cluster
+  // Library › Clusters, the pane: a theme (#/library/clusters/<n>, a cluster
   // of the latest map), what it has in common, the idea cards on its lineage, its highest-signal
   // members, its movement and its mix; Watch it, Card it now (one card on this theme on request,
-  // the owner's D-1: one card call and its check, after a confirm that says the cost), or see it
+  // as the owner decided: one card call and its check, after a confirm that says the cost), or see it
   // on the map. With nothing selected, "Nothing selected.". Its grade,
   // Watch's popover and Explain are the old module's, shared with Today's theme rows until Today
   // moves. A theme shown away from here (sel=c<n> on a topic's page or Today) is this pane too.

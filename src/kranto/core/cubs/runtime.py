@@ -280,7 +280,7 @@ class CubRuntime:
         modes = self.kind_modes(cub)
         if modes and all(m == "live" for m in modes.values()):
             return "live"
-        # the owner's word for dry (SEND): an approval in practice sends nothing
+        # the owner's word for dry: an approval in practice sends nothing
         return "practice"
 
     # -- pause and resume -----------------------------------------------------------------------
@@ -665,7 +665,7 @@ class CubRuntime:
         return out
 
     def page_read(self, cid: str, name: str, params: dict) -> dict:
-        """A read as the pages get it (SEND): every ticket it names that is no longer open is
+        """A read as the pages get it: every ticket it names that is no longer open is
         named as none, so no list offers a dialog on it; the read of the cub's Needs you rows
         (``ui.today_rows``, its primary one of its asks) has the core's asks in place of the
         cub's own rows of tickets; its tile's count is those asks' (``core.asks``)."""

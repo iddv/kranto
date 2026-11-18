@@ -75,7 +75,7 @@ SIDE = ("side-bg", "side-text", "side-muted", "side-hover", "side-active", "side
 ACCENT = ("link", "primary", "primary-text", "focus", "meter", "sel", "selbar")
 SURFACES = ("bg", "box", "subtle", "head")       # the page, a card, hover, a card's head and the header
 MORE_SURFACES = ("inset", "btn", "sel")          # code and wells, a button, the selected row
-# a tinted theme (TH) colours the whole page, not only the sidebar: its surfaces, borders and ink, and
+# a tinted theme colours the whole page, not only the sidebar: its surfaces, borders and ink, and
 # the scrollbars' thumbs (--scroll on the page, --side-scroll in the navigator; the default and High
 # contrast keep the browser's own)
 PAGE = ("bg", "box", "subtle", "head", "inset", "border", "border-2", "btn", "btn-border", "counter", "text", "muted", "ink3")
@@ -209,7 +209,7 @@ def test_the_default_is_the_base_exactly():
         assert re.search(rule, CSS), rule
 
 
-# a custom theme's page (TH), worked out as app.js's customPage does, from the table it keeps
+# a custom theme's page, worked out as app.js's customPage does, from the table it keeps
 _CP = re.search(r"const CUSTOM_PAGE[^=]*= \{(.*?)\};\n", JS, re.S).group(1)
 CUSTOM_PAGE = {b: {k: (float(L), float(S)) for k, L, S in re.findall(r'"?([a-z0-9-]+)"?: \[([\d.]+), ([\d.]+)\]', re.search(b + r": \{(.*?)\}", _CP, re.S).group(1))}
                for b in ("l", "d")}
@@ -329,8 +329,8 @@ def test_the_picker_the_palette_and_the_first_paint_name_the_same_themes():
     closed = re.search(r"\n  function closed\(.*?\n  }\n", src("shell/Palette.svelte"), re.S).group(0)
     assert "if (d?.open) return;" in closed and "ui.palette = null;" in closed
     head = src("shell/Header.svelte")
-    # ◐ flips what you see, and is Auto again when the flip is the device's own scheme (QA B18:
-    # a press from Auto stored a fixed scheme for good)
+    # ◐ flips what you see, and is Auto again when the flip is the device's own scheme (a
+    # click from Auto once stored a fixed scheme for good)
     assert "const to = flipTo();" in head and "L.setTheme(to)" in head and "THEME_NEXT" not in JS
     flip = re.search(r"\nexport function flipTo\(.*?\n}\n", src("lib/theme.ts"), re.S).group(0)
     assert '=== deviceDark() ? "auto" : want' in flip
@@ -378,7 +378,7 @@ def table() -> str:
 
 
 def page_table() -> str:
-    """The page's own surfaces (TH): the least of each kind of ink over the page, a card, hover, the
+    """The page's own surfaces: the least of each kind of ink over the page, a card, hover, the
     head, an inset, a button and the selected row."""
     out, on = [], SURFACES + MORE_SURFACES
     for id in [i for i in IDS if i != "custom"]:

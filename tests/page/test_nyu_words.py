@@ -29,7 +29,7 @@ def said(text: str) -> bool:
     return bool(WORD.search(ALLOW.sub("", str(text))))
 
 
-# live's own incident on 2026-10-29 (dev14), as the server #407 answers it
+# a real install's incident on 2026-10-29, as the server answers it
 LIVE = {"id": "auth:openrouter", "title": "OpenRouter credit is low: calls wait and try again",
         "cause": "low credit", "blocking": False, "since": "2026-10-28T20:44:46Z",
         "last": "2026-10-28T20:44:46Z", "tries": 1,
@@ -172,7 +172,7 @@ def test_no_mcp_tool_and_no_string_page_serves_says_ticket_or_dry():
     assert bad == []
 
 
-# -- "cub" in the MCP tools (CUT): a cub is the cub developer's word. The default tool set says it
+# -- "cub" in the MCP tools: a cub is the cub developer's word. The default tool set says it
 # nowhere, neither in a tool's name nor in its words; a cub's own verbs (kranto_cub_*) are tools
 # only with cubs.developer on (test_mcp_verbs.py).
 CUB = re.compile(r"\bcubs?\b|_cub_|\bcub[_.]", re.I)

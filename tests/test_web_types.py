@@ -260,7 +260,7 @@ def test_every_typed_route_answers_its_type(seeded):
     assert any(s["mute"] for s in seen["/api/sources"]["sources"])
     assert any(s["validation"] for s in seen["/api/sources"]["sources"])
     clusters = seen["/api/clusters"]["clusters"]
-    # a theme's old grade (feedback target cluster) is skipped since the cut (CUT)
+    # a theme's old grade (feedback target cluster) is skipped since builds left
     assert any(c["movement"] for c in clusters) and not any(c["grade"] for c in clusters)
     assert seen["/api/observations?q=solar+battery&cutoff=1"]["rollups"]
     assert seen["/api/map"]["points"]["id"] and seen["/api/rollups"]["results"]
@@ -397,7 +397,7 @@ def test_the_cards_and_the_review_queue_answer_their_types(web, rt, cards):  # n
 def test_status_carries_the_host_api_version(seeded):
     status = seeded.get("/api/status").json()
     assert status["host_api"] == T.HOST_API_VERSION
-    # 2 since the cut (CUT): the page's afk.gen.ts is regenerated with it in the page
+    # 2 since builds left: the page's afk.gen.ts is regenerated with it in the page
     assert T.HOST_API_VERSION == 2
 
 

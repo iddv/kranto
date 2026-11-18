@@ -1,10 +1,10 @@
 <script lang="ts">
-  // Feedback (FB): the sheet. The kind, one box for the words, and Include details (on), which
+  // Feedback: the sheet. The kind, one box for the words, and Include details (on), which
   // shows exactly what it adds before anything is sent. File it (the person's own gh can file on
   // the repository) confirms the whole issue first; Open on GitHub opens GitHub's new-issue page,
   // prefilled, where the person presses Submit. The draft is kept in this browser while the sheet
   // is closed, and cleared once filed. With no network, it says so and keeps the draft. Send this
-  // error (RCA B3) opens it with an error's id: its report (the server's /api/errors/<id>: the id,
+  // error opens it with an error's id: its report (the server's /api/errors/<id>: the id,
   // its kind, Kranto's own code lines, the version, the OS, the doctor's summary) is shown here
   // whole, and goes in the issue as shown.
   import { onMount, untrack } from "svelte";
