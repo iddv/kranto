@@ -2,7 +2,7 @@
 # Merge the base branch into the branch checked out here, and make the generated files again
 # instead of stopping on their conflicts.
 #
-#   scripts/ci/merge_base.sh [BASE]          (default: oss; run in the PR's clone, on its branch)
+#   scripts/ci/merge_base.sh [BASE]          (default: main; run in the PR's clone, on its branch)
 #
 # Fetches origin, merges origin/BASE (a merge commit, never a rebase). When the only conflicts are
 # in files that are made by a command (GENERATED below), it takes either side, runs the command,
@@ -15,7 +15,7 @@
 # conflicted there (five merges in wave 2). REGEN_PAGE overrides the command (tests).
 set -euo pipefail
 
-BASE="${1:-oss}"
+BASE="${1:-main}"
 [ $# -le 1 ] || { echo "usage: $0 [BASE]" >&2; exit 2; }
 TOP="$(git rev-parse --show-toplevel)"
 cd "$TOP"

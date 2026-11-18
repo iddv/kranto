@@ -67,4 +67,4 @@ Every page in this repository, by what you are trying to do.
 | [design/VISION.md](design/VISION.md) | The idea Kranto comes from |
 | [design/TENETS.md](design/TENETS.md) | How Kranto is asked to think (sent to the model with every judging call) |
 | [design/DECISIONS.md](design/DECISIONS.md) | Why each mechanism exists, with the evidence |
-| [design/DESIGN.md](design/DESIGN.md) | The original plan, kept as written |
+| [design/DESIGN.md](design/DESIGN.md) | The design principles every change is checked against |

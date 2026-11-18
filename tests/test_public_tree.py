@@ -102,6 +102,7 @@ LEAKS = [
     ("attribution", {"docs/a.md": "Co-" + "Authored-By: a bot\n"}),
     ("attribution", {"docs/a.md": "Gener" + "ated with a tool.\n"}),
     ("big-file", {"data/blob.bin": b"\x00" * 1_000_001}),
+    ("nul-byte", {"docs/a.md": b"# A page\x00\x00\nwith a NUL\n"}),
     ("workflow", _workflow("jobs:\n  a:\n    runs-on: [self" + "-hosted]\n")),
     ("workflow", _workflow("on: pull_request" + "_target\n")),
     ("workflow", _workflow("on:\n  workflow" + "_run:\n")),
@@ -194,6 +195,14 @@ def test_excerpt_hides_the_match(tmp_path):
     assert findings[0].line == 2
     assert address not in findings[0].excerpt
     assert findings[0].excerpt == "mail *** now"
+
+
+def test_a_text_file_with_a_nul_byte_is_still_read(tmp_path):
+    """git and a plain reader take such a file for binary and skip it; the scan names the bytes
+    and reads the rest."""
+    files = _build(tmp_path, {"docs/a.md": ("See " + OLD + "-notes.").encode() + b"\x00\n"})
+    kinds = {f.kind for f in _scan(tmp_path, files)}
+    assert {"nul-byte", "old-name"} <= kinds
 
 
 def test_path_is_checked(tmp_path):

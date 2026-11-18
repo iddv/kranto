@@ -2,7 +2,7 @@
 # The check of a published build, for a release that changes what it can find a fault in
 # (decide.py's rc_check.required: the update, the install, the packaging, a migration, the
 # service unit, and every promotion to stable). It runs on the build itself, any tag: a nightly
-# (vX.Y.0-devN) before the owner's install takes it, a held stable (vX.Y.Z: a promotion or a
+# (vX.Y.0-devN) before the maintainer's install takes it, a held stable (vX.Y.Z: a promotion or a
 # fix) before gate.py releases it; an old rc tag (vX.Y.Z-rcN) still works. On a scratch
 # instance (scripts/release/e2e_update.sh: no model is called), as its own unit on
 # 127.0.0.1:$PORT:

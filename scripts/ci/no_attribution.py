@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Fail on a tool-attribution line in the commits a push or pull request brings, and in the
-pull request's title and body (the owner's rule: no co-author trailer naming an AI tool, no
+pull request's title and body (the maintainer's rule: no co-author trailer naming an AI tool, no
 session link, no "generated with" footer, in any repo).
 
     no_attribution.py RANGE            e.g. BASE..HEAD, as the gitleaks job computes it
     no_attribution.py --all            every commit since SINCE (older history is the
-                                       owner's decision, not rewritten here)
+                                       maintainer's decision, not rewritten here)
 
 The pull request's title and body are read from the environment (``PR_TITLE``, ``PR_BODY``)
 when set: a squash merge's commit is the title and the commits' messages. Prints one line per
@@ -19,7 +19,7 @@ import re
 import subprocess
 import sys
 
-SINCE = "2026-10-09"          # the rule has held in both repos' commits since this day
+SINCE = "2026-10-09"          # the rule has held in this repository's commits since this day
 PATTERNS = [re.compile(p, re.IGNORECASE) for p in (
     r"co-authored-by:\s*claude",
     r"claude-session:",
