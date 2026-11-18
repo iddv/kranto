@@ -257,7 +257,7 @@ rate-limited. Hacker News, GitHub (through your connection) and arXiv are search
   memory and may be stale" wherever its output is shown. One caller at a time:
   `search.callers.<name>: off` in `kranto.yaml` (scout, cards, editor, research, resolve,
   pitch, evolve, sources).
-- **Check it:** `python -m kranto.cli websearch "local-first sync engines"` (the watcher's own
+- **Check it:** `kranto watch websearch "local-first sync engines"` (the watcher's own
   command, [watcher.md](watcher.md#the-watcher-alone)) prints the dated results; `kranto
   doctor` has a `search` line. Every search is counted on Settings › Spend (the free ones at
   $0); `search.monthly_usd` caps the paid ones (no cap by default).
@@ -267,7 +267,7 @@ rate-limited. Hacker News, GitHub (through your connection) and arXiv are search
 Step 2, **First topic** (later: **Watch › Topics**). A topic is a name and one
 sentence in your own words, such as *Home server tooling: small tools that make running a home
 server easier and safer.* Click **Find places to read**: one model call proposes places to read,
-and every proposal is test-read. It takes about two minutes; while it runs the page says what it
+and every proposal is test-read. It takes a few minutes; while it runs the page says what it
 is doing ("Searching the web, Hacker News, GitHub and arXiv, then test-reading each place it
 finds"); stay on the page.
 
@@ -314,15 +314,15 @@ day. Kranto counts every read on **Settings › Spend**; your Developer Console 
    (empty, the default, is no cap); reached, X sources wait until the first of next month.
 
 Disconnect revokes the tokens at X. X's posts are kept 30 days by default; a post deleted on X
-leaves within a week (a weekly check of up to 100 kept posts), and `python -m kranto.cli sources
+leaves within a week (a weekly check of up to 100 kept posts), and `kranto watch sources
 forget <post URL>` removes one at once. Without an X developer account, an xAI key can search X through Grok
-instead (`python -m kranto.cli provider xai --key-stdin`, then **X / Twitter › Search through Grok** in Add
+instead (`kranto watch provider xai --key-stdin`, then **X / Twitter › Search through Grok** in Add
 source; xAI bills $5 per 1,000 posts Grok reads, plus the model's tokens).
 
 A post writer can run on its own model, apart from the models that watch your sources
 (`docs/prose.md`, "The writer's model"). On **Settings › Posting › How you write**, under **Who
 writes**, choose a writer's provider and type the model's name, then Save. For a GPT model,
-paste an OpenAI key there and choose **Save and test** (or `kranto provider openai --key-stdin`
+paste an OpenAI key there and choose **Save and test** (or `kranto watch provider openai --key-stdin`
 from the command line): it goes to Kranto once, is tested, spending nothing, and is kept as
 `OPENAI_API_KEY` in the home's `.env` (0600) only when it works; the page never shows it again
 and no log holds it. The page's choice is `POST /api/prose/voice` with `{"writer_model": {"blog":
@@ -533,7 +533,7 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | `FAIL  api key` in `kranto doctor`, or `Scouting failed: no API key: set $OPENROUTER_API_KEY` (or `$ANTHROPIC_API_KEY`) | Paste the key in Welcome › Watching, or Settings › Watching › Watching model (step 6). |
 | `Watching paused until … (Claude Code usage limit)` in the top bar or in Health | Your Claude plan's usage window closed. Watching resumes by itself at the time shown, when the window reopens; nothing is lost. |
 | `FAIL  claude login` in `kranto doctor` | Run the command it names (`claude auth login`, or `claude update` for an old version). |
-| `Watching paused until … (spend limit set in the Claude Console reached)` in the top bar or in Health | The Claude API refused calls for a spend limit. Watching resumes by itself at that time. To go on sooner, raise the limit in the Claude Console, then click **Resume now** in Settings › System › Health (or run `python -m kranto.cli resume`). |
+| `Watching paused until … (spend limit set in the Claude Console reached)` in the top bar or in Health | The Claude API refused calls for a spend limit. Watching resumes by itself at that time. To go on sooner, raise the limit in the Claude Console, then click **Resume now** in Settings › System › Health (or run `kranto watch resume`). |
 | `FAIL  claude … is not signed in` | `claude auth login`, then `kranto doctor` again. |
 | The header says `Can't check for updates: GitHub answered 403 …` | GitHub allows 60 requests an hour from one address without a login, and the limit was reached. Wait an hour, then **Check for updates** (click the version, or ⌘K). With `gh` installed and logged in (`gh auth login`), Kranto asks through it and this limit does not apply. |
 | The header says `Can't check for updates: GitHub answered 404 …` | The release list cannot be seen without a login (a repository that is not public): `gh auth login` with an account that can see it, then **Check for updates**. |

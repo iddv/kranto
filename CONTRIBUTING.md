@@ -83,7 +83,7 @@ The root:
 | `tests/` | everything CI runs: the server's suite, and the page's in `tests/page/` (its own `pytest.ini`); `tests/README.md` is the map |
 | `docs/` | what a user or contributor reads (`docs/README.md` lists every page); `docs/design/` why it is built this way |
 | `scripts/` | `ci/`, `release/`, `dev/`: who runs what is in `scripts/README.md` |
-| `examples/` | topic packs for `python -m kranto.cli pack` |
+| `examples/` | topic packs for `kranto watch pack` |
 | `install.sh` | the installer every release carries |
 | `public.toml` | what the published project is called and where it lives |
 
