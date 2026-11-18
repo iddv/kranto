@@ -137,7 +137,7 @@ def test_the_sessions_mcp_reads_kranto_through_the_door_and_never_writes(term):
     tid, c = session(term)
     for path, q in (("/api/ideas", {"embedding": "ref"}), ("/api/ideas/143", None),
                     ("/api/home", None), ("/api/post", None), ("/api/topics", None)):
-        status, body = c.afk_get(path, q)
+        status, body = c.server_get(path, q)
         assert status == 200, (path, body)
     assert [(m, p) for m, p, _ in term.verbs.calls] == [
         ("GET", "/api/ideas?embedding=ref"), ("GET", "/api/ideas/143"), ("GET", "/api/home"),
@@ -145,8 +145,8 @@ def test_the_sessions_mcp_reads_kranto_through_the_door_and_never_writes(term):
     n = len(term.verbs.calls)
     for path in ("/api/runs", "/api/runs/abc12345", "/api/settings/assistant", "/api/verbs",
                  "/api/ideas/1/../../settings", "/api/ideas/x", "/brb/api/traces"):
-        assert c.afk_get(path)[0] == 404, path
-    assert c.afk_get("/api/ideas", {"secret": "x", "embedding": "ref"})[0] == 200
+        assert c.server_get(path)[0] == 404, path
+    assert c.server_get("/api/ideas", {"secret": "x", "embedding": "ref"})[0] == 200
     assert term.verbs.calls[-1][1] == "/api/ideas?embedding=ref"     # unknown keys dropped
     run_dir = term.store.dir(tid) / "run"
     tok = (run_dir / "token").read_text()

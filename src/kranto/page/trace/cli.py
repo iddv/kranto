@@ -1,4 +1,4 @@
-"""``brb trace …`` (and ``kranto trace …``, passed through): a trace of Kranto's own runs as
+"""``kranto trace …``: a trace of Kranto's own runs as
 readable text: a console or Open in Claude Code session (``session:<tid>``), a
 kept research run (``research:<stem>``). ``list`` the traces (the build loop's old rows too,
 read from ``trace.db`` without writing it), ``show`` one as a tree (``--errors``: only error spans
@@ -48,7 +48,7 @@ def open_trace(tid: str, home: Path):
         t.refresh()
         return t
     if src in ("build", "maint", "loop"):
-        raise ValueError(f"{src} traces left with the build loop: 'brb trace list' still "
+        raise ValueError(f"{src} traces left with the build loop: 'kranto trace list' still "
                          "shows their row")
     raise ValueError(f"{src} traces are not readable here yet")
 
@@ -155,7 +155,7 @@ def cmd_list(args) -> None:
         try:
             since = time.time() - float(args.since[:-1] if k else args.since) * (k or 86400)
         except ValueError:
-            sys.exit("brb trace list: --since is like 7d, 12h or 30m")
+            sys.exit("kranto trace list: --since is like 7d, 12h or 30m")
     rows: list[tuple[dict, str | None]] = []
     src = args.source or "all"
     if src in ("all", "session"):
@@ -191,13 +191,13 @@ def cmd_show(args) -> None:
     try:
         t = open_trace(args.trace, loop_home(args))
     except ValueError as e:
-        sys.exit(f"brb trace show: {e}")
+        sys.exit(f"kranto trace show: {e}")
     red = Redactor(share=args.share)
     if args.span:
         sp = t.spans.get(args.span) or next(
             (x for x in t.spans.values() if x.id.startswith(args.span)), None)
         if sp is None:
-            sys.exit(f"brb trace show: no span {args.span} in {t.id}")
+            sys.exit(f"kranto trace show: no span {args.span} in {t.id}")
         if args.raw:
             from .payload import raw_lines
             for f, at, text in raw_lines(t, sp):
@@ -279,7 +279,7 @@ def cmd_follow(args) -> None:
     try:
         t = open_trace(args.trace, loop_home(args))
     except ValueError as e:
-        sys.exit(f"brb trace follow: {e}")
+        sys.exit(f"kranto trace follow: {e}")
     red = Redactor(share=args.share)
     print(red.text(head_line(t)), flush=True)
     shown: dict[str, str] = {}                       # span id -> the status it was printed with
@@ -317,13 +317,13 @@ def cmd_export(args) -> None:
     ex = (Config(home).get("trace") or {}).get("export") or {}
     url = args.otlp or ex.get("otlp_url") or ""
     if not url and not args.out:
-        sys.exit("brb trace export: give --otlp <url> (or set trace.export.otlp_url), or --out")
+        sys.exit("kranto trace export: give --otlp <url> (or set trace.export.otlp_url), or --out")
     if url and not url.startswith(("http://", "https://")):
-        sys.exit("brb trace export: --otlp is an http(s) address, like http://127.0.0.1:4318")
+        sys.exit("kranto trace export: --otlp is an http(s) address, like http://127.0.0.1:4318")
     try:
         t = open_trace(args.trace, home)
     except ValueError as e:
-        sys.exit(f"brb trace export: {e}")
+        sys.exit(f"kranto trace export: {e}")
     body = spans(t, content=bool(args.content or ex.get("content")))
     n = len(body["resourceSpans"][0]["scopeSpans"][0]["spans"])
     if args.out:
@@ -333,7 +333,7 @@ def cmd_export(args) -> None:
     try:
         status = send(body, url)
     except OSError as e:
-        sys.exit(f"brb trace export: {url} did not take it: {e}")
+        sys.exit(f"kranto trace export: {url} did not take it: {e}")
     print(f"{n} spans of {t.id} sent to {url} ({status}; trace id {trace_id(t.id)})")
 
 

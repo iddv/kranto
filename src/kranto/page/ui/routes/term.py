@@ -41,8 +41,8 @@ def _list(app, r):
 def _open(app, r):
     from ...term import asgi
     if not asgi.served():
-        raise HttpError(503, "Open in Claude Code needs Kranto itself (kranto up): `brb ui` "
-                             "alone has no terminal.")
+        raise HttpError(503, "Open in Claude Code needs Kranto running as itself: start it "
+                             "with `kranto up`.")
     q = r.data
     return app.term.open(q.get("subject"), cols=_int(q.get("cols") or 100, "cols"),
                          rows=_int(q.get("rows") or 30, "rows"))
@@ -60,8 +60,8 @@ def _console_state(app, r):
 def _console_open(app, r):
     from ...term import asgi
     if not asgi.served():
-        raise HttpError(503, "The console needs Kranto itself (kranto up): `brb ui` alone has no "
-                             "terminal.")
+        raise HttpError(503, "The console needs Kranto running as itself: start it with "
+                             "`kranto up`.")
     q = r.data
     return app.term.open_console(q.get("harness") or None,
                                  cols=_int(q.get("cols") or 100, "cols"),

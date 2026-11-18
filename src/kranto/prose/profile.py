@@ -18,8 +18,9 @@ Where it is stored, and who reads it:
   :func:`load` and :func:`samples`; nothing else in Kranto opens them.
 
 Every reader takes a missing file, an empty file, a value stored as null or of another type, and
-a key it does not know, as the default (the RCA rule of 23 October): the row goes through
-``Stored.load``, which coerces each field and notes a bad one, and each file is read as text.
+a key it does not know, as the default (a real bug: ``.get(k, default)`` does not cover a key
+stored as null): the row goes through ``Stored.load``, which coerces each field and notes a
+bad one, and each file is read as text.
 """
 
 from __future__ import annotations

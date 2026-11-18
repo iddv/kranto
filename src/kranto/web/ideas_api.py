@@ -1,6 +1,6 @@
-"""Idea cards as JSON: what Kranto UI and the console read (PLAN.md 1(d), 2.5).
+"""Idea cards as JSON: what Kranto UI and the console read.
 
-The page never opens the server's database (handover rule 4); it reads cards here.
+The page never opens the server's database; it reads cards here.
 
 | Method and path      | Does                                                        |
 |----------------------|-------------------------------------------------------------|
@@ -12,7 +12,7 @@ The page never opens the server's database (handover rule 4); it reads cards her
 | POST /api/ideas/{id}/later | {days?}: Later (``idea.later``): off the list for ``days``  |
 |                      | (7; 0 brings it back), an ``outcomes`` row, never the loop's  |
 | POST /api/themes/{lineage}/card | one card on that theme now, in the background       |
-|                      | (``cards.card_theme``, the owner's D-1): 202, ``started``   |
+|                      | (``cards.card_theme``): 202, ``started``                    |
 
 Cards made from the owner's dispatches are listed only when asked for: ``origin=dispatch``
 (those alone), ``origin=all`` (with the rest), or a ``kind``. A reader that does not know
@@ -22,11 +22,11 @@ Each card carries its text (title, thesis, pattern, ...), status, score, the own
 latest grade (``list_ideas``'s query), its **rank** (``taste.rank``, ``{position, taste, line,
 parts}``; ``position`` is its place among the shown cards, None on an
 unsupported one; ``line`` the one line a row shows, "" when there is none; each part
-``{weight, why, target, target_id, value, graded_at, title}``), #96's fields (``who``,
+``{weight, why, target, target_id, value, graded_at, title}``), the pitch fields (``who``,
 ``smallest_v1``, ``demand``, ``citations``), the topics of its theme, its ``output_kind`` and
 an ``embedding``.
 
-- **#96's fields** are the card writer's. A card written before them has ``who`` None,
+- **The pitch fields** are the card writer's. A card written before them has ``who`` None,
   ``smallest_v1`` "" and ``demand`` None, and its ``citations`` are built from its
   supported ``evidence`` (live observation, else the card's own snapshot), so every card
   has URL, date and claim per citation.
@@ -34,7 +34,7 @@ an ``embedding``.
   ``moment``, ``mechanism``) are written by a card prompt that states the insight first; they
   are None on every other card.
 - **Topics** come from the card's evidence, written once at its insert (``idea_topics``,
-  migration 35; L2): a topic counts when a cited observation came from one of its
+  migration 35): a topic counts when a cited observation came from one of its
   sources, ``n`` is how many citations did and ``share`` the part of the evidence (a source in
   two topics counts for both); user topics come first. ``topic`` is the user topic with the
   largest share, never a project topic, None when there is none (a dispatch card's archive
@@ -48,7 +48,7 @@ an ``embedding``.
   there is none. **outcomes** is the latest outcome of each kind (``{kind: outcome}``) and
   **built** what the loop made of the card (``outcomes.built``: ``{state, kind, idea, repo,
   url, at}``, None when nothing was built or the owner closed it since), so a page says "built
-  -> Repo Recall" without the loop's snapshot. Builds left Kranto (CUT): these read the rows the
+  -> Repo Recall" without the loop's snapshot. Builds left Kranto: these read the rows the
   loop wrote before; no new loop row comes.
 - **state** is where the card sits on Ideas, from the server's rows alone
   (``card_state``): ``waiting``, ``later`` (with **later_until**, else None), ``posted`` (a draft
@@ -351,7 +351,7 @@ def read_ideas(store: Store, status: str | None = None,
     drafts = drafts_of(store, [i["id"] for i in ideas])
     out: list[dict[str, Any]] = []
     for i in ideas:
-        # one card that cannot be read is listed as such, never the whole list (RCA A3); a
+        # one card that cannot be read is listed as such, never the whole list; a
         # reader that builds from cards (the page's intake) skips it by ``unreadable``
         with rowsafe.row(out, "idea", i.get("id"), title=i.get("title"),
                          status=i.get("status"), origin=i.get("origin"),

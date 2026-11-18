@@ -14,7 +14,7 @@
   the prefilter line, and the five newest.
 - "Fetch now" is one adapter fetch outside a run: it counts what is new and
   records a fetch row; no item is consumed or judged.
-- A mute (UI-v4.md 2.3) is an append-only ``source_mutes`` row, latest wins: muted
+- A mute is an append-only ``source_mutes`` row, latest wins: muted
   for some days (ingest does not fetch the source until then), or "read less" (ingest
   reads it at half its items per run). A row with neither is back to normal.
 - Kept rate: kept over judged in the last 30 days. Yield: observations kept a day over
@@ -397,7 +397,7 @@ def list_sources(store: Store, cfg: Any = None, *,
     paid = spend.by_source(store, "x", now=now) if any(s.kind == "x" for s in srcs) else {}
     out: list[dict[str, Any]] = []
     for s in srcs:
-        # one source that cannot be read is listed as such, never the whole list (RCA A3)
+        # one source that cannot be read is listed as such, never the whole list
         with rowsafe.row(out, "source", s.id, label=s.label, kind=s.kind, review=s.status):
             got = fetches.get(s.id)
             last = got[0] if got else fallback.get(s.id)

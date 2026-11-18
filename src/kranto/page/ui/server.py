@@ -1,4 +1,5 @@
-"""``brb ui``: the page on its own, over ``api.handle``.
+"""The page on its own, over ``api.handle``, without the server: the page's tests serve it
+with ``make_server``.
 
 A stdlib server around ``api.handle`` (the same function the server mounts at ``/brb/``):
 this file only binds, guards and writes the responses. Binds 127.0.0.1 only: a page that
@@ -7,9 +8,9 @@ not a loopback name is refused on every method (400), so a page on another name 
 rebinding points here can neither read nor write; a write needs an ``Origin`` (or ``Referer``)
 equal to the Host, port included (403).
 
-A POST needs a kranto token (OI), as under the server: ``Authorization: Bearer`` (kranto mcp,
+A POST needs a Kranto token, as under the server: ``Authorization: Bearer`` (kranto mcp,
 the command line, an agent) or the page's session cookie, which only a one-time sign-in link
-sets (``/auth/open?code=``; ``brb ui`` prints one at start, ``kranto open`` makes others). The
+sets (``/auth/open?code=``; ``kranto open`` makes one). The
 token says who acts; so does a trace's read (``api.read_needs_identity``: a trace holds file
 contents and prompts). ``api.require_token: false`` in loop.yaml keeps the old way.
 """
@@ -19,13 +20,12 @@ import errno
 import json
 import logging
 import re
-import sys
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from kranto import legacy
+from kranto import legacy, product
 
 from .. import tokens as tokens_mod
 from . import api
@@ -62,7 +62,7 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
     store = store or tokens_mod.Store()
 
     class Handler(BaseHTTPRequestHandler):
-        server_version = "brb-ui"
+        server_version = f"{product.COMMAND}-page"
 
         def log_message(self, fmt, *a):      # quiet
             pass
@@ -179,7 +179,7 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
                     log.warning("refused GET %s: %s", u.path, why)
                     return self.send(401, JSON, json.dumps({
                         "error": f"not signed in: {why}. A trace is read signed in: open the "
-                                 "sign-in link brb ui or kranto open prints"}).encode())
+                                 "sign-in link kranto open prints"}).encode())
                 return self.respond("GET", identity=ident)
             self.respond("GET")
 
@@ -237,8 +237,8 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
             if ident is None and require:
                 log.warning("refused POST %s: %s", path, why)
                 return self.send(401, JSON, json.dumps({
-                    "error": f"not signed in: {why}. In a browser, open the sign-in link brb ui "
-                             "or kranto open prints; scripts and agents send 'Authorization: "
+                    "error": f"not signed in: {why}. In a browser, open the sign-in link "
+                             "kranto open prints; scripts and agents send 'Authorization: "
                              "Bearer' with their own token"}).encode())
             self.respond("POST", body, ident)
 
@@ -246,7 +246,6 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
 
 
 DEFAULT_PORT = 8790          # 8765 is the server's default (`python -m kranto serve`, Kranto)
-PORT_TRIES = 20
 
 
 def require_token(loop_home: Path | None) -> bool:
@@ -280,32 +279,3 @@ def make_server(root: Path, port: int = DEFAULT_PORT, harness: str = "claude-cod
     srv.tokens = store
     return srv
 
-
-def serve(root: Path, port: int = DEFAULT_PORT, harness: str = "claude-code",
-          loop_home: Path | None = None) -> None:
-    try:
-        srv = make_server(root, port, harness, tries=PORT_TRIES, loop_home=loop_home)
-    except OSError as e:
-        if e.errno != errno.EADDRINUSE:
-            raise
-        raise SystemExit(f"brb ui: ports {port}-{port + PORT_TRIES - 1} are all in use; "
-                         "pick one with --port")
-    bound = srv.server_address[1]
-    if bound != port:
-        print(f"brb ui: port {port} is in use; using {bound}", file=sys.stderr)
-    print(f"brb ui: http://{HOST}:{bound}/", file=sys.stderr)
-    if sys.stderr.isatty():                    # a one-time code never goes into a log
-        print(f"Sign this browser in (once, within 10 minutes): http://{HOST}:{bound}/auth/open"
-              f"?code={srv.tokens.mint_code()}", file=sys.stderr)
-    else:
-        print("Run brb ui in a terminal for a one-time sign-in link (writes need a token)",
-              file=sys.stderr)
-    print("Loopback only. From another machine: ssh -L "
-          f"{bound}:localhost:{bound} <this host>, then open the link above with localhost",
-          file=sys.stderr)
-    try:
-        srv.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        srv.server_close()

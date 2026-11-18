@@ -30,3 +30,12 @@ green and amber the page uses are state colours, and stay that.
 In a sentence, **Kranto**. As a wordmark, the name in lowercase, `kranto`, set in the page's own
 sans-serif (the `--sans` stack) at weight 650 with tight tracking. No drawing, no tagline
 locked to it, no pun on the name.
+
+## The screenshot
+
+The README shows one picture of the page: `docs/brand/screenshot.png`, 1400 by 600, light mode.
+It is a real install, never a mock: a fresh home made by `install.sh`, one made-up topic typed
+into Welcome, the places Kranto proposed for it, and the brief its first read wrote. Today's is
+the topic "Home server tooling: small tools that make running a home server easier and safer"
+(setup.md's example), five of the places proposed for it ticked, its first brief on 0.7.0.dev2.
+Take a new one the same way when the page changes, and say in the pull request what the topic was.

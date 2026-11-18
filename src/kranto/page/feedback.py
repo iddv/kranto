@@ -1,4 +1,4 @@
-"""Feedback: an issue on Kranto's release repository, filed as the person who writes it (FB).
+"""Feedback: an issue on Kranto's release repository, filed as the person who writes it.
 
 The page's Feedback sheet writes the issue (the kind, the person's words, and the details it
 showed them, scrubbed in the page); this module answers the two things only the machine

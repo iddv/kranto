@@ -142,8 +142,8 @@ class Verb:
     ask_why: str = ""
     # every call by an assistant waits for the owner's press whatever the kind's setting says
     # (``prose.voice``: how you write; ``settings.models``: what a role costs; Kranto's
-    # prompts); the owner's own choice for the verb still holds (the owner's D1: until the owner
-    # says which settings an assistant may change without a yes, these wait)
+    # prompts); the owner's own choice for the verb still holds (until it is decided which
+    # settings an assistant may change without a yes, these wait)
     asks: bool = False
 
     def needs_id(self) -> bool:
@@ -459,8 +459,8 @@ CORE: tuple[Verb, ...] = (
          fields=(F("memory", "object", 'GB of MemoryMax (MemoryHigh is 1 GB under it), or "auto"',
                    True),),
          page="#/settings/system?sel=eservice-memory", undo="settings.service_memory"),
-    # a model choice changes what Kranto spends (the owner's D1, safe side: on the spend rung,
-    # and an assistant's change waits)
+    # a model choice changes what Kranto spends (the safe side: on the spend rung, and an
+    # assistant's change waits)
     Verb("settings.models", "Save", "Which model each of Kranto's roles uses (a model choice "
          "changes what Kranto spends: an assistant's change waits for the owner's approval).",
          "spend", "POST", "/api/settings/models",

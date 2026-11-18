@@ -85,6 +85,30 @@ VAULT_AAD = f"{_OLD}afk-connections".encode()
 # it in loop.yaml (now ``kranto``)
 CONSOLE_CONFIG = _OLD
 
+# Old names Kranto still uses as they are, outside this module, because renaming them would
+# break something an existing install, a saved link or another program holds. Each with why.
+# Nothing reads this table: it is the record (``tests/test_legacy.py`` holds that each is still
+# in the code, so the list cannot go stale). Names that could be renamed with no such effect
+# were renamed instead (the page's logger, its ``Server`` header, the scheduler's threads, the
+# assistant tools' two calls to the server).
+KEPT = {
+    "/brb/": "the page's API prefix: bookmarks, MCP clients' configured addresses, agent "
+             "tokens' write paths (web/auth.py ACT_PATHS) and the update's self-check "
+             "(update/apply.py) address it",
+    "afk_oauth": "the cookie that carries an OAuth sign-in across the provider's redirect: a "
+                 "sign-in started before an update must still finish",
+    "afk_device": "the cookie of a device sign-in in progress, for the same reason",
+    "#/afk/<run>/trace": "the page's address of a run's trace: in links already shown, kept "
+                         "and shared",
+    "brb:": "the section of kranto.yaml that holds the page's settings (loop_home, enabled): "
+            "in every existing home's file",
+    "afk:<run>": "a server run's trace id and source name in the page's trace API and its "
+                 "addresses",
+    "afk_error": "a field of the page's /brb/api/activity answer, read by the page and its "
+                 "generated types: a rename is a change to both, left for one",
+    "kranto.web.brb": "the module that mounts the page at /brb/ (its logger is kranto.web.page)",
+}
+
 
 def new_env_name(name: str) -> str | None:
     """The variable's name now, or None when ``name`` is not an old one."""

@@ -13,9 +13,20 @@ problem privately.
   over SSH (`ssh -N -L 8766:127.0.0.1:8765 host`).
 - **Writes need a token.** A browser signs in once through a one-time link that `kranto open`
   prints, valid for 10 minutes. `kranto mcp` and the command line carry tokens of their own.
-- **Reads need no token.** Any program or user that can reach the port can read your library,
-  idea cards and settings. Nothing a read returns is a key or a token, but on a machine shared
-  with other people they can read it.
+- **Most reads need no token.** Any program or user that can reach the port can read your
+  library, idea cards and settings. Nothing a read returns is a key or a token, but on a machine
+  shared with other people they can read it.
+- **Some reads need a sign-in, like a write.** A live web search (it can cost money) and fetching
+  a web page through Kranto need any of Kranto's tokens. Traces, runs, the pages your browser
+  extension read, what the console's assistant last said, and the model's raw answer about an
+  item are yours alone: another token, or nobody, is refused (the item itself stays readable,
+  without the raw answer).
+- **Another web page cannot use your sign-in.** The browser's sign-in cookie is not sent to
+  other sites. A write, and each read above, is refused when the browser says it comes from
+  another site or from another port of this machine.
+- **Usage reports that leave the machine are turned on by you.** Only the page, signed in, or
+  `kranto telemetry basic` on the machine can choose `basic` or `detailed`. A token (the command
+  line's over HTTP, an assistant's) cannot, and neither can anyone when tokens are switched off.
 - **Anything that runs as you can act as you.** It can read the token files or run
   `kranto open`. Kranto is not a wall between your own programs.
 - **A reverse proxy without its own sign-in is a mistake.** It opens every read to whoever the
@@ -48,6 +59,10 @@ What holds:
   arrive inside `<<<document>>>` markers with the line "data, not instructions".
 - **The small programs that write and send posts (cubs) never see your keys.** They run in their
   own sandbox and ask Kranto to send; Kranto sends only after your click.
+- **A cub from a source nobody reviewed does not update itself.** One added from a git address
+  waits for your approval at every update, even one that asks for nothing new
+  (`cubs.auto_update_unreviewed` is off by default). Your own cubs, and Kranto's, update by
+  themselves when the update asks for no new permission and no new kind of send.
 
 What does not hold:
 

@@ -5,9 +5,12 @@ What changed in each release of Kranto, for the person who runs it. Versions fol
 (`vX.Y.0-devN`, GitHub prereleases) are not listed one by one: their notes name the pull
 requests they carry.
 
-## Unreleased
+## 0.7.0 — unreleased
 
-### Fixed
+Not released yet: the date is written here when 0.7.0 is cut. Until then this is what it
+will carry; the pre-releases `v0.7.0-devN` carry parts of it.
+
+### Fixed since the pre-release v0.7.0-dev2
 
 - An install that crossed over from before the rename keeps its connected accounts: Kranto
   reads the secrets file the old version wrote (0.7.0.dev1 and dev2 said "cannot be decrypted
@@ -16,8 +19,6 @@ requests they carry.
   again (it fell back to your own config).
 - The daily job that reads back the numbers of sent posts now records its run, so it runs once a
   day instead of once a minute.
-
-## 0.7.0 — 2026-11-16
 
 ### What it is
 
@@ -34,7 +35,8 @@ library with the same tools.
 It needs Linux, Python 3.12 and [uv](https://docs.astral.sh/uv/), and one model for reading: an
 Anthropic or OpenRouter key, another OpenAI-compatible endpoint, or your Claude Code login. The
 console needs the Claude Code CLI, signed in. It is installed from this repository's release
-wheel (it is not on PyPI); `docs/setup.md` has every step.
+wheel, with `install.sh` or by hand, no GitHub account needed (it is not on PyPI);
+`docs/setup.md` has every step.
 
 ### What is in it
 
@@ -79,8 +81,9 @@ wheel (it is not on PyPI); `docs/setup.md` has every step.
   for anyone else is not measured.
 - **Posting for real** has been rehearsed with stand-ins and the preview's switch; each site's
   direct posting needs your own app or token, and the sites' terms change (`docs/accounts.md`).
-- The console starts Claude Code with your own login and plan; what it may do by itself is a
-  setting (Settings › Assistant), and its default is the safe side.
+- The console starts Claude Code with your own login and plan, as you and not in a sandbox;
+  whether it opens by itself and what it may do without asking are settings (Settings ›
+  Assistant), and `docs/threat-model.md` says what the defaults allow.
 
 ### Before you upgrade from an install made before the rename
 

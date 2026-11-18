@@ -54,22 +54,22 @@ def doc(name: str, text) -> str:
 @dataclass
 class Client:
     """``get(path, query) -> (status, json or text)``, ``post(path, body) -> (status, json)``;
-    paths under the page mount (``/api/kranto``). ``afk_get`` and ``afk_post``: the server's
+    paths under the page mount (``/api/kranto``). ``server_get`` and ``server_post``: the server's
     own API (the library search, the verbs), None when Kranto is not hosting. ``who``: the
     client's own name for itself (MCP's ``clientInfo.name``, or the console's harness): words
     for Activity's "by Codex (outside)", never authority."""
     get: Callable
     post: Callable
-    afk_get: Callable | None = None
+    server_get: Callable | None = None
     base: str = DEFAULT_URL
-    afk_post: Callable | None = None
+    server_post: Callable | None = None
     who: str | None = None
     door: str = "mcp"
 
 
 def http_client(url: str | None = None, timeout: float = 30.0,
                 token: str | None = None, door: str = "mcp") -> Client:
-    """The running service on loopback. Every POST carries ``Origin: <base>``, as the page's
+    """The running service on loopback. Every request carries ``Origin: <base>``, as the page's
     do, so it passes the host's guard, and kranto mcp's own token (OI: ``mcp.token`` in
     ``~/.config/kranto/tokens``, read at each call so a rotation counts; ``door`` console: the
     console's, ``console.token``): the service acts as ``mcp`` (or ``console``) because of the
@@ -79,7 +79,8 @@ def http_client(url: str | None = None, timeout: float = 30.0,
     def call(method: str, path: str, query=None, body=None):
         q = ("?" + urllib.parse.urlencode(query)) if query else ""
         data = json.dumps(body).encode() if body is not None else None
-        secret = token or (Store().value(door) if method == "POST" else None)
+        # every request carries the token: a live search and a page fetch are read signed in
+        secret = token or Store().value(door)
         req = urllib.request.Request(base + path + q, data=data, method=method, headers={
             "Content-Type": "application/json", "Origin": base, "Accept": "application/json",
             **({"Authorization": f"Bearer {secret}"} if secret else {})})
@@ -90,7 +91,7 @@ def http_client(url: str | None = None, timeout: float = 30.0,
             status, raw = e.code, e.read()
         except (urllib.error.URLError, ConnectionError, TimeoutError) as e:
             raise ToolError(f"Kranto is not running at {base} (start it: kranto up)") from e
-        if status == 401 and method == "POST":
+        if status == 401:
             raise ToolError(f"Kranto refused kranto mcp's token: it has none, or an old one (run "
                             f"kranto up, or kranto token rotate {door}, then restart the MCP "
                             "client)")
@@ -102,8 +103,8 @@ def http_client(url: str | None = None, timeout: float = 30.0,
 
     return Client(get=lambda p, q=None: call("GET", "/brb" + p, q),
                   post=lambda p, b: call("POST", "/brb" + p, body=b),
-                  afk_get=lambda p, q=None: call("GET", p, q), base=base,
-                  afk_post=lambda p, b: call("POST", p, body=b), door=door)
+                  server_get=lambda p, q=None: call("GET", p, q), base=base,
+                  server_post=lambda p, b: call("POST", p, body=b), door=door)
 
 
 def _ok(res, what: str):
@@ -130,7 +131,7 @@ def _by_title(rows: list[dict], words: str) -> dict | None:
 def _afk_read(c: Client, path: str) -> dict:
     """One of the server's reads as a dict ({} when it cannot be read: the answer says what it has)."""
     try:
-        status, body = c.afk_get(path) if c.afk_get is not None else (0, None)
+        status, body = c.server_get(path) if c.server_get is not None else (0, None)
     except ToolError as e:
         if "is not running" in str(e):           # Kranto itself is down: that is the answer
             raise
@@ -240,9 +241,9 @@ def kranto_needs_you(c: Client) -> dict:
 def _cards(c: Client) -> list[dict]:
     """The server's idea cards in the owner's order (``GET /api/ideas``, H1): what Ideas
     lists, never the build loop's snapshot."""
-    if c.afk_get is None:
+    if c.server_get is None:
         raise ToolError("ideas are the server's cards: Kranto is not hosting this API")
-    body = _ok(c.afk_get("/api/ideas", {"embedding": "ref"}), "the ideas")
+    body = _ok(c.server_get("/api/ideas", {"embedding": "ref"}), "the ideas")
     return [x for x in (body.get("ideas") if isinstance(body, dict) else body) or []
             if isinstance(x, dict) and x.get("id") is not None and not x.get("unreadable")]
 
@@ -297,10 +298,10 @@ def card_number(c: Client, idea: str, cards: list[dict] | None = None) -> int:
 
 
 def kranto_get_idea(c: Client, idea: str) -> dict:
-    if c.afk_get is None:
+    if c.server_get is None:
         raise ToolError("ideas are the server's cards: Kranto is not hosting this API")
     n = card_number(c, idea)
-    status, x = c.afk_get(f"/api/ideas/{n}", {"embedding": "ref"})
+    status, x = c.server_get(f"/api/ideas/{n}", {"embedding": "ref"})
     if status == 404 or not isinstance(x, dict):
         raise ToolError(f"no idea {idea!r} (kranto_list_ideas or kranto_read /api/ideas lists them)")
     x = _ok((status, x), "the idea")
@@ -320,9 +321,9 @@ def kranto_get_idea(c: Client, idea: str) -> dict:
 
 
 def kranto_library_search(c: Client, q: str, limit: int = 10) -> dict:
-    if c.afk_get is None:
+    if c.server_get is None:
         raise ToolError("the library is the server's: Kranto is not hosting this API")
-    body = _ok(c.afk_get("/api/search", {"q": q, "limit": max(1, min(int(limit), 50))}),
+    body = _ok(c.server_get("/api/search", {"q": q, "limit": max(1, min(int(limit), 50))}),
                "the library search")
     results = (body.get("results") if isinstance(body, dict) else body) or []
     return {"q": q, "results": doc("library search results", results[:int(limit)])}
@@ -357,13 +358,13 @@ def kranto_search(c: Client, query: str, recency: str | None = None, kind: str =
                  n: int = 10, _caller: str = "owner") -> dict:
     """Live web search through the server (``GET /api/websearch``): dated, numbered results,
     fenced as data, or the "no live search" sentence."""
-    if c.afk_get is None:
+    if c.server_get is None:
         raise ToolError("live search is the server's: Kranto is not hosting this API")
     q = {"q": str(query or "")[:300], "kind": kind, "n": max(1, min(int(n), 20)),
          "caller": _caller}
     if recency:
         q["recency"] = recency
-    body = _ok(c.afk_get("/api/websearch", q), "the search")
+    body = _ok(c.server_get("/api/websearch", q), "the search")
     if not isinstance(body, dict):
         raise ToolError("the search: the server's answer was not a search result")
     return {"query": body.get("query"), "live": bool(body.get("live")),
@@ -373,9 +374,9 @@ def kranto_search(c: Client, query: str, recency: str | None = None, kind: str =
 
 def kranto_fetch(c: Client, url: str, max_chars: int = 3000) -> dict:
     """A page's text through the server's fetch (public addresses only, 5 MB, 20 s), fenced."""
-    if c.afk_get is None:
+    if c.server_get is None:
         raise ToolError("fetching is the server's: Kranto is not hosting this API")
-    body = _ok(c.afk_get("/api/websearch/fetch", {"url": str(url or "")[:2000],
+    body = _ok(c.server_get("/api/websearch/fetch", {"url": str(url or "")[:2000],
                                                   "max_chars": max(200, min(int(max_chars),
                                                                             20000))}),
                "the fetch")
@@ -399,10 +400,10 @@ def post_failures(c: Client, about: str | None = None) -> list[dict]:
     """The server's Write a post jobs that wrote no draft (``GET /api/post``'s ``failed``), as
     outcomes: the job a press started can fail after the press itself was taken (5: a
     failed post read as "Every recent action happened")."""
-    if c.afk_get is None:
+    if c.server_get is None:
         return []
     try:
-        status, body = c.afk_get("/api/post")
+        status, body = c.server_get("/api/post")
     except ToolError:
         return []
     if status != 200 or not isinstance(body, dict):
@@ -614,10 +615,10 @@ MAX_READ_CHARS = 60_000
 
 def fetch_verbs(c: Client) -> list[dict] | None:
     """The server's verb table, or None when this Kranto has none (or is not hosting)."""
-    if c.afk_get is None:
+    if c.server_get is None:
         return None
     try:
-        status, body = c.afk_get("/api/verbs")
+        status, body = c.server_get("/api/verbs")
     except ToolError:
         return None
     if status != 200 or not isinstance(body, dict) or not isinstance(body.get("verbs"), list):
@@ -631,10 +632,10 @@ CUB_VERBS = "cub."            # a cub's own verbs (kranto_cub_*): the cub develo
 def cubs_developer(c: Client | None) -> bool:
     """The host's ``cubs.developer`` (``/api/status``'s ``cubs_developer``): the cub shop, and
     the cubs' own verbs as tools. Not known (no host, an older one, no answer): off."""
-    if c is None or c.afk_get is None:
+    if c is None or c.server_get is None:
         return False
     try:
-        status, body = c.afk_get("/api/status")
+        status, body = c.server_get("/api/status")
     except Exception:  # noqa: BLE001 - a host that cannot be asked: off
         return False
     return status == 200 and isinstance(body, dict) and body.get("cubs_developer") is True
@@ -751,7 +752,7 @@ def verb_tools(verbs: list[dict]) -> list[dict]:
 
 def run_verb(c: Client, kind: str, args: dict, verb: dict | None = None) -> dict:
     """One verb through the server's door: the ladder answers (done, prepared, or off)."""
-    if c.afk_post is None:
+    if c.server_post is None:
         raise ToolError("Kranto's verbs are the server's: Kranto is not hosting this API")
     args = dict(args or {})
     args.pop("confirm", None)                  # the owner's ladder confirms, never the model
@@ -766,7 +767,7 @@ def run_verb(c: Client, kind: str, args: dict, verb: dict | None = None) -> dict
     body = {"fields": args, "client": c.who}
     if sid is not None:
         body["subject"] = {"kind": skind, "id": sid}
-    status, out = c.afk_post(f"/api/verbs/{kind}", body)
+    status, out = c.server_post(f"/api/verbs/{kind}", body)
     if status >= 400:
         # PAR: the reason in words, never a bare status (a failed verb said "b.publish: 409")
         err = (out.get("error") or out.get("say")) if isinstance(out, dict) else None
@@ -799,14 +800,14 @@ def _write_result(c: Client, answer: dict, _sleep=None, _clock=None) -> dict:
     job: dict = answer["job"] if isinstance(answer.get("job"), dict) else {}
     key = str(job.get("key") or "")
     _, as_, about = (key.split(":", 2) + ["", ""])[:3] if key.startswith("post:") else ("", "", "")
-    if c.afk_get is None or not about:
+    if c.server_get is None or not about:
         return {}
     end = clock() + WRITE_WAIT
     state, error = "running", None
     while clock() < end:
         sleep(WRITE_POLL)
         try:
-            status, got = c.afk_get("/api/post/write", {"about": about, "as": as_})
+            status, got = c.server_get("/api/post/write", {"about": about, "as": as_})
         except ToolError:
             break
         if status != 200 or not isinstance(got, dict):
@@ -837,12 +838,12 @@ def _read_path(path: str) -> str:
 
 def kranto_read(c: Client, path: str, query: dict | None = None) -> dict:
     """One of Kranto's reads, as the page reads it, fenced as data."""
-    if c.afk_get is None:
+    if c.server_get is None:
         raise ToolError("Kranto is not hosting this API")
     p = _read_path(path)
     if query is not None and not isinstance(query, dict):
         raise ToolError("query is an object of the read's parameters")
-    body = _ok(c.afk_get(p, {str(k): str(v) for k, v in (query or {}).items()}), p)
+    body = _ok(c.server_get(p, {str(k): str(v) for k, v in (query or {}).items()}), p)
     text = body if isinstance(body, str) else json.dumps(body, indent=1, default=str)
     cut = len(text) > MAX_READ_CHARS
     return {"path": p, "cut": cut,
@@ -859,9 +860,9 @@ def page_reads() -> list[dict]:
 def kranto_reads(c: Client) -> dict:
     """Every read Kranto has: the server's (from its registry) and the page's."""
     afk: list = []
-    if c.afk_get is not None:
+    if c.server_get is not None:
         try:
-            status, body = c.afk_get("/api/verbs")
+            status, body = c.server_get("/api/verbs")
             if status == 200 and isinstance(body, dict):
                 afk = [r for r in body.get("reads") or [] if isinstance(r, dict)]
         except ToolError:
@@ -1009,10 +1010,10 @@ def unix_client(sock: str, token: str, timeout: float = 30.0) -> Client:
             return status, text
 
     # The server's reads go through the door too (term.door.AFK_READS, GET only); there is no
-    # afk_post: a session's only writes are its proposals and its list
+    # server_post: a session's only writes are its proposals and its list
     return Client(get=lambda p, q=None: call("GET", p, q),
                   post=lambda p, b: call("POST", p, body=b),
-                  afk_get=lambda p, q=None: call("GET", "/afk" + p, q), base="unix:" + sock)
+                  server_get=lambda p, q=None: call("GET", "/afk" + p, q), base="unix:" + sock)
 
 
 def kranto_propose(c: Client, kind: str, why: str, subject: dict | None = None,

@@ -20,7 +20,7 @@ _NAMES = {
     "handle": ("kranto.page.ui.api", "handle"),
     "handle_with_headers": ("kranto.page.ui.api", "handle_with_headers"),
     "stream": ("kranto.page.ui.api", "stream"),               # the live feed (/api/stream)
-    # the post-update self-check's reads of the mount (the server web/selfcheck_api.py, RCA D1)
+    # the post-update self-check's reads of the mount (the server's web/selfcheck_api.py)
     "selfcheck_paths": ("kranto.page.ui.api", "selfcheck_paths"),
     # The page's settings file, loop.yaml (the console's term and ask sections): read and one
     # key written (the server setup.py, wizard.py, web/verbs_api.py)

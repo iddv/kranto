@@ -100,7 +100,7 @@ BUILTINS: tuple[Builtin, ...] = (
             options=(("topic", "int", 1, 10**9, True), ("rows", "int", 1, 10, False))),
     Builtin("sources", "Sources", "Sources watched, failing, last read and next read.",
             ("S", "M")),
-    # what Kranto is doing (the owner's D-5: off by default, the top bar says it
+    # what Kranto is doing (off by default, the top bar says it
     # on every page); drawn by the page from the page's activity read, so it has no slot here
     Builtin("activity", "Activity", "What Kranto is doing: what runs, what waits on you, what "
             "comes next.", ("S", "M", "L")),
@@ -445,7 +445,7 @@ def _builtin_slot(rt: Any, e: dict[str, Any], ctx: dict[str, Any]) -> dict[str, 
     except ValueError as exc:  # the slot's own words (its topic is gone): not a bug
         return {"state": "error", "error": _words(exc)}
     except Exception as exc:  # noqa: BLE001 - a slot's failure is the slot's, in words
-        # kept and logged once by its id (RCA B3): the slot offers Send this error
+        # kept and logged once by its id: the slot offers Send this error
         return {"state": "error", "error": _words(exc),
                 "error_id": _error_id(exc, f"home:{e['id']}")}
 

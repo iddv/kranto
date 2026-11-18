@@ -330,7 +330,7 @@ def big_hints(diff: str) -> list[str]:
                 for ln in add
                 if _DROP.search(ln)
             ][:1]
-        if path.endswith(("src/kranto/launcher.py", "src/kranto/cli.py", "src/kranto/page/cli.py")):
+        if path.endswith(("src/kranto/launcher.py", "src/kranto/cli.py")):
             gone = {m[1] for ln in rem if (m := _SUBPARSER.search(ln))} - {
                 m[1] for ln in add if (m := _SUBPARSER.search(ln))
             }

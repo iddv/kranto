@@ -11,6 +11,18 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
 authors = [{ name = "The Kranto authors" }]
+keywords = ["news", "feeds", "briefs", "writing", "self-hosted", "local-first"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Web Environment",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: News/Diary",
+  "Topic :: Text Processing",
+]
 dependencies = [
   "numpy>=1.26",
   "fastembed>=0.4",
@@ -34,6 +46,13 @@ dependencies = [
   # kranto cub eval runs a cub's own tests (its tests/, against bears_cub.testing.FakeHost)
   "pytest>=8",
 ]
+
+[project.urls]
+Homepage = "https://github.com/iddv/kranto"
+Documentation = "https://github.com/iddv/kranto/blob/main/docs/README.md"
+Changelog = "https://github.com/iddv/kranto/blob/main/CHANGELOG.md"
+Issues = "https://github.com/iddv/kranto/issues"
+Source = "https://github.com/iddv/kranto"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff==0.16.10", "time-machine>=2.14", "cryptography>=42",
@@ -82,7 +101,7 @@ addopts = "-m 'not slow' -p no:randomly"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 extend-exclude = ["src/kranto/page/ui/web"]
 
 [tool.ruff.lint]
@@ -99,7 +118,6 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
                    "E702", "E731", "E741", "F402", "F811", "F841", "SIM102", "SIM105",
                    "SIM108", "SIM201", "SIM222", "SIM401", "UP031"]
 "scripts/dev/build_ui.py" = ["E501"]
-"scripts/dev/gen_ts.py" = ["E501"]
 
 # The type check: scripts/ci/typecheck.py runs mypy with this table and compares each file's
 # error count with scripts/ci/typecheck_baseline.json, so a count can only fall. The overrides
@@ -130,7 +148,7 @@ module = ["kranto.stored", "kranto.stored.*", "kranto.web.types",
           "kranto.map.read", "kranto.map.snapshot",
           # the settings blobs, the events, the home
           "kranto.core.events", "kranto.core.shell", "kranto.core.home", "kranto.setup",
-          "kranto.llm", "kranto.core.money", "kranto.newsletter",
+          "kranto.llm", "kranto.newsletter",
           # the cubs' registry, views, installs and tickets
           "kranto.core.cubs.registry", "kranto.core.cubs.views", "kranto.core.cubs.install",
           "kranto.core.tickets",
