@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 
+from kranto import legacy
 from kranto import news_ideas as story
 from kranto.features.news import api as news_api
 from kranto.ideate import cards
@@ -95,9 +96,11 @@ def test_no_map_yet_says_so(rt):  # noqa: F811
                         "story": f"brief:{bid}:1"}
 
 
-def test_why_lines_that_open_kranto_on_read_plainly():
-    assert news_api.plain_why("Kranto on whether cheap arms can learn.") == \
+def test_why_lines_that_open_with_the_old_verb_read_plainly():
+    verb = legacy.COMMAND.capitalize()
+    assert news_api.plain_why(f"{verb} on whether cheap arms can learn.") == \
         "Whether cheap arms can learn."
-    assert news_api.plain_why("It Kranto on robot costs.") == "Robot costs."
+    assert news_api.plain_why(f"It {legacy.COMMAND} on robot costs.") == "Robot costs."
+    assert news_api.plain_why("Kranto on robot costs.") == "Kranto on robot costs."
     assert news_api.plain_why("Cuts the cost of a robot arm.") == "Cuts the cost of a robot arm."
     assert news_api.plain_why(None) is None

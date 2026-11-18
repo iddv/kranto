@@ -60,7 +60,7 @@
 </script>
 
 {#if !H || !fs}
-  <Page head={{ title: id, crumb: [POST_CRUMB] }}>{#snippet body()}{#if !H}<Empty text="Features come from the server, which is not hosting this page." />{:else}<Loading />{/if}{/snippet}</Page>
+  <Page head={{ title: id, crumb: [POST_CRUMB] }}>{#snippet body()}{#if !H}<Empty text="Features come from the server, which is not answering." />{:else}<Loading />{/if}{/snippet}</Page>
 {:else if !f}
   <Page head={{ title: id, crumb: [POST_CRUMB] }}>{#snippet body()}<Empty text={`There is no feature called ${id} on this Kranto.`} link={{ href: "#/post", w: "Post ›" }} />{/snippet}</Page>
 {:else if !o}

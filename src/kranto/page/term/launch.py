@@ -313,7 +313,7 @@ def offered(cfg: dict, environ=None, sandboxed: bool | None = None) -> tuple[boo
         return True, None
     if v is not None:
         return False, ("Open in Claude Code is off: set term.enabled: true in loop.yaml "
-                       "(Settings › Building lists it) and restart Kranto.")
+                       "and restart Kranto.")
     box = boxed() if sandboxed is None else sandboxed
     tok = token_source(environ) is not None
     if box and tok:

@@ -5,11 +5,11 @@ checking a release runs, `dev/` what a maintainer runs by hand.
 
 | Script | Who runs it | What it does |
 |---|---|---|
-| `ci/merge_when_green.sh` | everyone who merges, for both repos | waits for a PR's checks, refuses red or skipped required ones and a moved head, then squash-merges |
+| `ci/merge_when_green.sh` | everyone who merges | waits for a PR's checks, refuses red or skipped required ones and a moved head, then squash-merges |
 | `ci/merge_base.sh` | `merge_when_green.sh --merge-base`, anyone merging the base into a PR | merges the base in (never a rebase); when only generated files conflict (the usage reports' field page) it makes them again and finishes the merge |
 | `ci/checks.py` | `merge_when_green.sh`, `release/decide.py` | is one commit green: the rule every merge and release follows |
 | `ci/audit_merges.py` | the weekly `audit.yml` | files an issue listing every merge whose merged commit was not green |
-| `ci/no_attribution.py` | CI (`gitleaks`), and by hand in | refuses tool or agent attribution lines in a range of commits |
+| `ci/no_attribution.py` | CI (`gitleaks`), and by hand | refuses tool or agent attribution lines in a range of commits |
 | `release/decide.py` | whoever cuts | which heads a release takes, and whether it must be an rc first |
 | `release/cut_local.sh` | whoever cuts | builds, tags and publishes a release from green heads (`--prerelease rcN`, `--from-tag`) |
 | `release/build.sh`, `release/publish.py`, `release/notes.py` | `cut_local.sh` | the wheel (or, with `--shape compat`, the three wheels of the release that crosses an install made before the rename); the GitHub release; its notes |
@@ -19,7 +19,7 @@ checking a release runs, `dev/` what a maintainer runs by hand.
 | `release/rehearse_way_back.py` | whoever cuts the release that crosses an install made before the rename | that release and its way back on a scratch HOME, in a sandbox, with systemd stood in for: the old version, there and back twice, the one-wheel release, forced failures, an update killed while it installs; fails if a real unit file changed |
 | `release/fresh_install.sh`, `release/smoke.sh`, `release/e2e_update.sh` | `rc_check.sh` (and by hand, step by step) | install as a newcomer does; install and start the wheels; the update's end-to-end steps |
 | `release/smoke_doctor.py` | `smoke.sh setup` | judges `kranto doctor` on a bare machine: it fails only on what such a machine lacks and says the model is missing |
-| `preview/kranto-preview`, `preview/copy_live.py` | the owner, and every track after a merge into `oss` (`refresh`) | the preview: a second Kranto built from a branch on `127.0.0.1:8766`, with a read-only copy of live's data, that cannot send (`docs/preview.md`) |
+| `preview/kranto-preview`, `preview/copy_live.py` | a maintainer, after a merge (`refresh`) | the preview: a second Kranto built from a branch on `127.0.0.1:8766`, with a read-only copy of a running install's data, that cannot send (`docs/preview.md`) |
 | `dev/eval_fixtures.py` | a maintainer, when the eval sets change | writes `tests/fixtures/evals` (synthetic items, no third-party text) |
 | `dev/resolve_check.py` | a maintainer, before a release that touches the source resolver | a real check of the resolver against a fixed list; calls a model and the network, never in CI |
 | `dev/check_cub_schema.py` | a maintainer, after editing the cub schema | checks `cub.yaml` files with `jsonschema` and with Kranto's own validator, and says where they disagree |

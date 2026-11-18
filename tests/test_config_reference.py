@@ -28,8 +28,16 @@ def fields(cls, path=""):
 def test_every_config_key_is_named_in_the_default_config():
     text = config_mod.DEFAULT_CONFIG_YAML
     missing = [p for p, name in fields(config_mod.Config)
-               if not re.search(rf"\b{re.escape(name)}\b", text)]
+               if p.split(".")[0] not in config_mod.FOR_OLD_FILES
+               and not re.search(rf"\b{re.escape(name)}\b", text)]
     assert missing == []
+
+
+def test_a_new_file_has_no_section_of_a_feature_that_left():
+    """They are still read from a file that has them; a new file does not get them."""
+    data = yaml.safe_load(config_mod.DEFAULT_CONFIG_YAML)
+    assert not set(config_mod.FOR_OLD_FILES) & set(data)
+    assert {"deep_dive", "builds"} <= set(config_mod.FOR_OLD_FILES)
 
 
 def test_the_default_config_sets_the_defaults(tmp_path):

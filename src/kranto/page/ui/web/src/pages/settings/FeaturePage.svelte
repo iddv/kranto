@@ -94,7 +94,7 @@
 {/snippet}
 
 {#if !H}
-  <List title="Settings"><Empty text="A feature's settings come from the server, which is not hosting this page." /></List>
+  <List title="Settings"><Empty text="A feature's settings come from the server, which is not answering." /></List>
 {:else if !fs}
   <List title="Settings"><Loading /></List>
 {:else if !f || !g}

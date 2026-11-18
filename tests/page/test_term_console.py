@@ -199,6 +199,26 @@ def test_a_missing_harness_says_so(term):
     assert "not installed" in str(e.value)
 
 
+def test_kranto_only_without_a_token_says_the_consoles_own_way_on(term, tmp_path, monkeypatch):
+    """A stranger's console under Kranto's only configuration and no token answered with Open in
+    Claude Code's words and a hand-written systemd drop-in, while doctor names kranto setup claude
+    (KPUB C5): the console says its own sentence, the same way on as doctor's."""
+    from kranto.page.term import service
+    for var in ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("KRANTO_CLAUDE_DIR", str(tmp_path / "no-login"))   # no token kept either
+    term.console_settings({"config": "kranto"})
+    with pytest.raises(service.TermError) as e:
+        term.open_console()
+    said = str(e.value)
+    assert e.value.code == 503 and said == service.CONSOLE_NO_TOKEN
+    assert said.startswith("The console") and "kranto setup claude" in said
+    assert "Settings › Assistant" in said
+    # Open in Claude Code's own line says the same way on; neither speaks of a drop-in
+    assert term.status()["why"] == service.NO_TOKEN and "kranto setup claude" in service.NO_TOKEN
+    assert not [w for w in (said, service.NO_TOKEN) if "drop-in" in w or "EnvironmentFile" in w]
+
+
 def test_a_change_taken_at_start_offers_the_restart_and_it_resumes(term, home):
     """The owner's Q2: switching whose configuration or the permission mode
     offers to restart the console; the restart (the panel's End, then Open) resumes the same

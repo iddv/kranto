@@ -57,7 +57,7 @@ describe("Review (this week's cards only: D-2)", () => {
     const { target, done } = await draw(ReviewList, W);
     expect(target.querySelector(".wl")?.getAttribute("data-title")).toBe("Review");
     expect(target.querySelector(".lh .muted")?.textContent).toBe("this week's queue");
-    expect(target.querySelector(".box strong")?.textContent).toBe("The review queue needs the server. ");
+    expect(target.querySelector(".box strong")?.textContent).toBe("The review queue needs Kranto's server, which is not answering. ");
     expect(L.api).not.toHaveBeenCalled();
     done();
     old({ host: false });

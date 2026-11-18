@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -73,6 +74,30 @@ def _http_get(url: str, headers: dict, timeout: float = 20) -> tuple[int, dict, 
 
     r = httpx.get(url, headers=headers, timeout=timeout, follow_redirects=True)
     return r.status_code, dict(r.headers), r.content
+
+
+def rate_limited(code: int, headers: dict, authed: bool, *, now: float | None = None) -> str:
+    """The words for GitHub's rate limit (a 403 or 429 whose ``x-ratelimit-remaining`` is 0, or
+    with ``retry-after``): what it is, when it lifts, and the way round it; "" for any other
+    answer. Anonymous requests share 60 an hour per address; a GitHub login has far more."""
+    h = {str(k).lower(): str(v) for k, v in (headers or {}).items()}
+    if code not in (403, 429) or (h.get("x-ratelimit-remaining") != "0"
+                                  and "retry-after" not in h):
+        return ""
+    when = "within the hour"
+    try:
+        if "x-ratelimit-reset" in h:
+            at = int(h["x-ratelimit-reset"])
+        else:
+            at = int(time.time() if now is None else now) + int(h["retry-after"])
+        when = "at " + time.strftime("%H:%M", time.localtime(at))
+    except (KeyError, ValueError, OverflowError):
+        pass
+    if authed:
+        return (f"GitHub's rate limit for this login is used up; it lifts {when}. Nothing is "
+                "wrong with Kranto: check again then")
+    return (f"GitHub's limit on requests without a login (60 an hour for this address) is used "
+            f"up; it lifts {when}. Signing gh in (gh auth login) lifts it to thousands an hour")
 
 
 def gh_error(text: str | None, limit: int = 200) -> str:
@@ -221,6 +246,9 @@ class GitHubReleases:
                        else " (a private repo needs a GitHub login)")
             elif code == 401:
                 why = " (Kranto's GitHub login no longer works: connect GitHub again)"
+            limited = rate_limited(code, h, "Authorization" in headers)
+            if limited:
+                raise SourceError(limited)
             raise SourceError(f"GitHub answered {code} for {self.repo}'s releases{why}")
         return json.loads(body or b"[]"), h.get("etag") or h.get("ETag")
 

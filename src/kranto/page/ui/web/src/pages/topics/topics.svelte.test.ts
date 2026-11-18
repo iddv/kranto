@@ -357,7 +357,7 @@ describe("Topics, the pane", () => {
     ui.facts = null;
     answering({});
     const off = await draw(TopicPane, at("topics", {}, "t1"));
-    expect(off.target.querySelector(".pane-empty")?.textContent).toBe("This comes from the server, which is not hosting this page.");
+    expect(off.target.querySelector(".pane-empty")?.textContent).toBe("This comes from the server, which is not answering.");
     off.done();
   });
 });

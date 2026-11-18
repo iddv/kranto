@@ -1,6 +1,7 @@
 <script lang="ts">
-  // A page that needs the server, on brb ui alone (the old page's needKranto()).
+  // A page that needs the server's data while the server does not answer (its /api/status read
+  // failed: stopped, restarting, or the page was left open after kranto down).
   let { what, verb = "need" }: { what: string; verb?: string } = $props();
 </script>
 
-<div><div class="ph"><h1>{what}</h1></div><section class="box"><div class="box-b"><p><strong>{`${what} ${verb} the server. `}</strong>This page is served by brb ui on its own, without the server. Open the server (afk serve, usually http://127.0.0.1:8765/) with brb.enabled set in kranto.yaml, and every tab is in one place.</p></div></section></div>
+<div><div class="ph"><h1>{what}</h1></div><section class="box"><div class="box-b"><p><strong>{`${what} ${verb} Kranto's server, which is not answering. `}</strong>Start it with kranto up (kranto status says whether it runs), then reload this page.</p></div></section></div>

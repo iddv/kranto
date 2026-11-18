@@ -115,15 +115,12 @@ def test_a_new_home_is_a_workspace_with_the_loop_on(user_home):
     assert {Path(w).name for w in written} >= {"kranto.yaml", "loop.yaml"}
     cfg = config_mod.load(home, dotenv=False)
     assert cfg.brb.enabled and cfg.brb.loop_home == "~/.kranto/loop"
-    assert Path(cfg.brb.root).expanduser() == home / "tasks"
+    assert cfg.brb.root is None                      # the builds' task folder: not for a new home
     assert cfg.notify.base_url == "http://127.0.0.1:8800" and launcher.port_of(cfg) == 8800
     assert cfg.llm.base_url == "https://openrouter.ai/api/v1"  # the llm section kept its own
     seed = yaml.safe_load((home / "loop" / "loop.yaml").read_text())
-    assert seed["tasks_dir"] == "~/.kranto/tasks" and seed["concurrency"] == 1
-    # cards through the API, never the file (handover rule 4)
-    assert seed["kranto"] == {"url": "http://127.0.0.1:8800"}
-    assert seed["intake"]["auto"]["mode"] == "manual"
-    assert seed["feed"]["ui_url"] == "http://127.0.0.1:8800/brb/"
+    # cards through the API, never the file (handover rule 4); no key of the builds
+    assert seed == {"kranto": {"url": "http://127.0.0.1:8800"}}
     assert (home / "data").is_dir()
     # the task folder was the builds'; they left, and nothing reads it: no empty tasks/
     assert not (home / "tasks").exists()
@@ -411,7 +408,11 @@ def test_the_written_configs_name_no_page_that_left(user_home):
     assert "the page and\n# its console" in config and "loop/loop.yaml" in config
     assert yaml.safe_load(block)["brb"] == {"enabled": True, "loop_home": "~/kranto-loop",
                                             "root": "~/tasks"}
-    assert set(yaml.safe_load(seed)) == {"tasks_dir", "concurrency", "intake", "kranto", "feed"}
+    # a new home: no task folder of the builds, in either file, and no section of a feature
+    # that left (they are still read from an older file: config.FOR_OLD_FILES)
+    assert yaml.safe_load(config)["brb"] == {"enabled": True, "loop_home": "~/.kranto/loop"}
+    assert set(yaml.safe_load(seed)) == {"kranto"}
+    assert not set(config_mod.FOR_OLD_FILES) & set(yaml.safe_load(config))
 
 
 def test_status_when_the_server_is_down(user_home, monkeypatch, capsys):
@@ -532,7 +533,7 @@ def test_doctor_says_the_console_is_ready(user_home, monkeypatch):
     said["line"] = (
         "warn",
         "Open in Claude Code is off: set term.enabled: true in loop.yaml "
-        "(Settings › Building lists it) and restart Kranto.",
+        "and restart Kranto.",
     )
     c = by_name(launcher.console_checks(cfg))["open in claude code"]
     assert c.detail == "not ready: off: set term.enabled: true and restart Kranto."
@@ -657,7 +658,7 @@ def legacy(user_home, monkeypatch):
     text = (
         (kb / "kranto.yaml")
         .read_text()
-        .replace("  enabled: false\n\nbuilds:", "  enabled: true\n\nbuilds:")
+        .replace("  enabled: false\n\nconnections:", "  enabled: true\n\nconnections:")
     )
     (kb / "kranto.yaml").write_text(text)
     assert config_mod.load(kb, dotenv=False).brb.enabled
@@ -978,7 +979,7 @@ def test_uninstall_removes_the_service_and_keeps_the_data(user_home, capsys):
     assert not (unit_dir / "kranto.service").exists()
     assert not (unit_dir / "kranto.service.d").exists()
     assert (home / "kranto.yaml").is_file() and (home / "loop" / "loop.yaml").is_file()
-    assert f"the home {home.resolve()}" in out and "uv tool uninstall Kranto" in out
+    assert f"the home {home.resolve()}" in out and "uv tool uninstall kranto" in out
     # without --linger-off lingering is left alone
     host = make_host(user_home)
     assert launcher.main(["uninstall"], host) == 0
@@ -989,8 +990,53 @@ def test_uninstall_without_systemd_says_so_and_keeps_everything(user_home, capsy
     host = make_host(user_home, FakeMachine(systemd=False))
     assert launcher.main(["uninstall"], host) == 0
     out = capsys.readouterr().out
-    assert "no systemd user manager" in out and "uv tool uninstall Kranto" in out
+    assert "no systemd user manager" in out and "uv tool uninstall kranto" in out
     assert not any(c[:2] == ["systemctl", "--user"] and "disable" in c for c in host.machine.calls)
+    assert "is stopped and will not start again" not in out
+    assert "Kranto is not running, and nothing starts it by itself here." in out
+
+
+def test_uninstall_without_systemd_says_a_foreground_kranto_still_runs(
+        user_home, capsys, monkeypatch):
+    """Without systemd, uninstall said "Kranto is stopped and will not start again" while this
+    home's server still answered in the foreground; it says how to stop it now."""
+    home = user_home / ".kranto"
+    launcher.make_home(home, 8765, user_home)
+    launcher.remember_home(home, user_home)
+    monkeypatch.setattr(launcher, "port_in_use", lambda port, host="127.0.0.1": port == 8765)
+    monkeypatch.setattr(launcher, "serves_this_home", lambda host, port, h: True)
+    host = make_host(user_home, FakeMachine(systemd=False))
+    assert launcher.main(["uninstall"], host) == 0
+    out = capsys.readouterr().out
+    assert "still runs in the foreground on 127.0.0.1:8765: stop it with Ctrl-C" in out
+    assert "will not start again" not in out
+
+
+def _status(runs, observations=0):
+    return {"version": "0.7.0", "observations": observations,
+            "runs": [{"run_uuid": r} for r in runs]}
+
+
+def test_serves_this_home_tells_this_homes_server_from_another(user_home):
+    """kranto setup took any server answering on the home's port for its own; the runs the
+    server lists must be this home's (the status answer names no home)."""
+    home = user_home / ".kranto"
+    launcher.make_home(home, 8765, user_home)
+    Store.open(home / "data" / "kranto.db").close()
+    with sqlite3.connect(home / "data" / "kranto.db") as con:
+        con.execute("INSERT INTO runs (run_uuid, kind, status, started_at, finished_at, "
+                    "summary) VALUES ('r1', 'ingest', 'ok', 'x', 'x', '{}')")
+
+    def host_with(answer, code=200):
+        h = make_host(user_home)
+        h.http_get = lambda url, timeout: (code, json.dumps(answer).encode())
+        return h
+
+    assert launcher.serves_this_home(host_with(_status(["r1"])), 8765, home) is True
+    assert launcher.serves_this_home(host_with(_status(["r9"])), 8765, home) is False
+    assert launcher.serves_this_home(host_with(_status([], 5)), 8765, home) is False
+    assert launcher.serves_this_home(host_with({"hello": 1}), 8765, home) is None
+    assert launcher.serves_this_home(host_with({}, 404), 8765, home) is None
 
 
 class ServiceMachine(FakeMachine):

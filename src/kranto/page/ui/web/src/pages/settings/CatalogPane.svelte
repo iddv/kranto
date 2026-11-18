@@ -106,7 +106,7 @@
 
 <Detail back={view.back}>
   {#if !host}
-    {@render gone("Adding a source needs the server, which is not hosting this page.")}
+    {@render gone("Adding a source needs the server, which is not answering.")}
   {:else if !cat}
     <div class="pane-in"><Loading error={c?.error} /></div>
   {:else if k !== "preset" && k !== "review"}

@@ -34,7 +34,7 @@ export interface ConsoleState {
   restart?: boolean;
   /** with your own configuration, the MCP servers it loads besides Kranto's (names only) */
   outside?: string[];
-  /** whether this server serves terminals (Kranto itself does; `brb ui` alone does not) */
+  /** whether this server serves terminals (Kranto itself does; the page's own test server does not) */
   socket?: boolean;
 }
 
@@ -108,7 +108,7 @@ export const consoleUi: { place: Place; known: boolean; harness: string | null; 
   /** Restart the console now (Settings › Assistant, the owner's Q2): the panel ends its session
    * and starts it again, resumed, with the settings saved (``harness``: another assistant) */
   restart: { n: 0, harness: null },
-  /** this server runs consoles (Kranto itself; not `brb ui` alone): only then is the page's place told */
+  /** this server runs consoles (Kranto itself; not the page's own test server): only then is the page's place told */
   served: false,
 });
 

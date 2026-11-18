@@ -128,7 +128,7 @@ def settle_home(home: Path, *, port: int, root: Path, swaps, copied_at: str,
     data = yaml.safe_load(cfg.read_text()) or {}
     data = rewrite(data, swaps)
     n = data.setdefault("notify", {})
-    n["urls"] = []                         # nothing reaches the owner's phone from the preview
+    n["urls"] = []                         # nothing reaches the maintainer's phone from the preview
     n["heartbeat_every_hours"] = 0
     n["base_url"] = f"http://127.0.0.1:{port}"
     data["telemetry"] = {"mode": "off"}

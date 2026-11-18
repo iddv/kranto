@@ -34,7 +34,7 @@
 
 <List title="Spend" crumb="Settings">
   {#if !host}
-    <Group id="sp-topic" title="By topic" kind="spend">{#snippet right()}<span class="muted">watching</span>{/snippet}{#snippet foot()}<p class="more">Spend is the server's, which is not hosting this page.</p>{/snippet}</Group>
+    <Group id="sp-topic" title="By topic" kind="spend">{#snippet right()}<span class="muted">watching</span>{/snippet}{#snippet foot()}<p class="more">Spend is the server's, which is not answering.</p>{/snippet}</Group>
   {:else if !t}
     <Group id="sp-topic" title="By topic" kind="spend">{#snippet foot()}<Loading error={reads.t?.error} />{/snippet}</Group>
   {:else}

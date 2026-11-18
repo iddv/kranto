@@ -6,12 +6,18 @@ import re
 from datetime import UTC, datetime
 from urllib.parse import urlsplit
 
+from .. import legacy
 from ..scrub import scrub
 from ..store import iso, utcnow
 from ..websearch import NO_SEARCH, Results, combine, fenced, hit_for, is_backend_label, outlet
 
-__all__ = ["NO_SEARCH", "Results", "combine", "domain", "fenced", "hit_for", "is_backend_label",
-           "iso", "outlet", "parse_time", "possessive", "scrub", "utcnow", "words"]
+__all__ = ["NO_SEARCH", "OLD_VERB_ON", "Results", "combine", "domain", "fenced", "hit_for",
+           "is_backend_label", "iso", "outlet", "parse_time", "possessive", "scrub", "utcnow",
+           "words"]
+
+# A why line stored before a prompt changed can open with the verb that was also the old
+# product's name ("<verb> on robot costs"); legacy.COMMAND is that word.
+OLD_VERB_ON = re.compile(rf"^\s*(?:it\s+)?{re.escape(legacy.COMMAND)}\s+on\s+", re.IGNORECASE)
 
 # Second-level labels under which the registrable domain is three labels (co.uk, com.au...).
 _SECOND = {"co", "com", "org", "net", "gov", "ac", "edu"}

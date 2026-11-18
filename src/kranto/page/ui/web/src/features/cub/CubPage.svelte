@@ -123,7 +123,7 @@
 </script>
 
 {#if !H}
-  <List title={id} head={{ crumb: [POST_CRUMB] }}><Empty text="Features come from the server, which is not hosting this page." /></List>
+  <List title={id} head={{ crumb: [POST_CRUMB] }}><Empty text="Features come from the server, which is not answering." /></List>
 {:else if !fs}
   <List title={id} head={{ crumb: [POST_CRUMB] }}><Loading /></List>
 {:else if !f}

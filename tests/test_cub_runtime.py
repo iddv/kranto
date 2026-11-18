@@ -533,10 +533,10 @@ def test_status_line_doctor_and_the_drain(rt, cubs, tmp_path):  # noqa: F811
     from kranto.web.app import create_app
 
     from .conftest import web_client
-    assert status.status_line(rt.cfg, rt.store).startswith("none installed; limits: ")
+    assert status.status_line(rt.cfg, rt.store).startswith("none installed; ")
     install(rt, "echo")
     assert status.status_line(rt.cfg, rt.store).startswith(
-        "1 installed, 0 in practice, 0 paused; limits: ")
+        "1 installed, 0 in practice, 0 paused; ")
     rows = {name: (s, d) for s, name, d in status.doctor(rt.cfg, rt.store)}
     assert rows["cub echo"] == ("ok", "1.0.0, pinned")
     (tmp_path / "cubs.STOP").touch()

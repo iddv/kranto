@@ -1,4 +1,4 @@
-"""The ``afk`` command."""
+"""The watcher's command line: ``kranto watch …`` (and ``python -m kranto`` from a checkout)."""
 
 from __future__ import annotations
 

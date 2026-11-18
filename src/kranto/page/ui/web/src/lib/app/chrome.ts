@@ -86,7 +86,7 @@ function classicTree(r: Route): NavFacts {
   }
   if (H) {
     // the Cubs row with what they ask you, then each cub's page (the owner's note)
-    out.push({ head: "Cubs", to: "cubs", n: open || null, tone: "wait" } as NavRow);
+    out.push({ head: "Features", to: "cubs", n: open || null, tone: "wait" } as NavRow);
     for (const c of cubs) item("cub/" + c.id, c.title, { n: c.open || null, tone: "wait" });
     item("cubs/approvals", "Approvals", { n: open || null, tone: "wait" });
   }
@@ -241,7 +241,7 @@ function serviceLine(): Facts["bar"] {
   const used = tokSum([H?.tokens_today]);
   const cells = svc ? [wp ? watchPaused(wp) : null, svc.last ? `ingest ${stamp(svc.last.finished_at).slice(11)} ${svc.last.status}` : "no ingest yet",
     svc.judge_calls_24h ? `judge errors ${svc.judge_errors_24h} of ${svc.judge_calls_24h}` : null]
-    : [H ? "reading the server's health…" : "the server is not hosting this page"];
+    : [H ? "reading the server's health…" : "the server is not answering"];
   const size = svc ? `${plural(svc.sources, "source")} · ${plural(svc.topics, "topic")} · ${svc.observations.toLocaleString("en-GB")} observations` : null;
   // the live feed's places all taken: the page polls and says so (QA B20)
   const all = [...cells, livePaused() ? "live updates paused" : null];

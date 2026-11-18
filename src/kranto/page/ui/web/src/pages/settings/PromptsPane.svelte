@@ -153,7 +153,7 @@
 
 <Detail back={view.back}>
   {#if !host}
-    {#if id}<NeedHost what="Prompts" />{:else}{@render gone("Prompts are the server's, which is not hosting this page.")}{/if}
+    {#if id}<NeedHost what="Prompts" />{:else}{@render gone("Prompts are the server's, which is not answering.")}{/if}
   {:else if !id}
     {#if !d}{@render loading(c?.error ? "Could not read the prompts: " + c.error : "Loading…")}
     {:else}

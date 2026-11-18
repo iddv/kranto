@@ -229,8 +229,12 @@ def test_notes_list_the_merges_then_pins_install_and_verify():
     assert text.index("(#120)") < text.index("(#121)")
     assert "- Releases: versions from tags" in text
     assert "One wheel, `kranto 0.2.0`" in text
-    assert '"kranto[connections,notify,mcp] @ ./kranto-0.2.0-py3-none-any.whl"' in text
-    assert "sha256sum -c SHA256SUMS" in text
+    install = text.split("## Install", 1)[1].split("## Verify", 1)[0]
+    # a public repository: no GitHub login, and the tag pins exactly this release
+    assert ("curl -fsSL https://github.com/iddv/kranto/releases/download/v0.2.0/install.sh"
+            " | sh -s -- --version v0.2.0") in install
+    assert '"kranto[connections,notify,mcp] @ file://$PWD/kranto-0.2.0-py3-none-any.whl"' in install
+    assert "sha256sum -c --ignore-missing SHA256SUMS" in install and "gh release" not in install
 
 
 def test_the_pins_tell_a_cub_author_the_sdk_and_its_tag():

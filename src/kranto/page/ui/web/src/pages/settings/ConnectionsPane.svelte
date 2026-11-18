@@ -216,7 +216,7 @@
       {/if}
     </div>
   {:else if !host}
-    {@render gone("Connections need the server, which is not hosting this page.")}
+    {@render gone("Connections need the server, which is not answering.")}
   {:else if !d}
     <div class="pane-in"><Loading error={c?.error} /></div>
   {:else if id}

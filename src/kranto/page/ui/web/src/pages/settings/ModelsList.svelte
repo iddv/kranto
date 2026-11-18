@@ -23,7 +23,7 @@
 </script>
 
 <List title="Models" crumb="Settings">
-  {#snippet tools()}<span class="tbn"><span class="mono">{a?.data ? "watching via " + watchingVia(a.data) : host ? "" : "the server is not hosting this page: its models are not shown"}</span></span>{/snippet}
+  {#snippet tools()}<span class="tbn"><span class="mono">{a?.data ? "watching via " + watchingVia(a.data) : host ? "" : "the server is not answering: its models are not shown"}</span></span>{/snippet}
   {#if !host}{:else if !xs}
     <Group id="m-watch" title="Models" kind="sets">{#snippet foot()}<Loading error={a?.error} />{/snippet}</Group>
   {:else if xs.length}

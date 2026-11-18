@@ -45,11 +45,11 @@
   function line(key: string): string | null {
     const { s, p, H } = reads;
     switch (key) {
-      case "watching": return s?.data ? keyWords(s.data.key, Date.now(), s.data.logins?.claude ?? null).line : host ? null : "watching is the server's: not hosted here";
+      case "watching": return s?.data ? keyWords(s.data.key, Date.now(), s.data.logins?.claude ?? null).line : host ? null : "the server is not answering";
       case "sources": return H?.topics ? `${H.topics.length} active topics; their sources, Add source, and the accounts some are read with` : null;
       case "prompts": return "every prompt Kranto sends a model that you can steer";
-      case "spend": return H?.spend_this_month_usd != null ? `watching ${usd(H.spend_this_month_usd)} this month, ${capUsd(H.budget_usd)}` : host ? null : "spend is the server's: not hosted here";
-      case "privacy": return p?.data ? `usage reports: ${MODE[p.data.mode] || p.data.mode}` : host ? null : "usage reports are the server's: not hosted here";
+      case "spend": return H?.spend_this_month_usd != null ? `watching ${usd(H.spend_this_month_usd)} this month, ${capUsd(H.budget_usd)}` : host ? null : "the server is not answering";
+      case "privacy": return p?.data ? `usage reports: ${MODE[p.data.mode] || p.data.mode}` : host ? null : "the server is not answering";
       case "system": return H?.version ? `Kranto ${H.version} on ${location.host}` : `on ${location.host}`;
       case "appearance": return "light or dark, and the theme, in this browser";
       case "posting": return "the accounts a draft is sent with, and what Kranto writes";
@@ -62,7 +62,7 @@
   function switched(): { to: string; title: string; why: string }[] {
     void view.tick;
     const out: { to: string; title: string; why: string }[] = [];
-    if (!shopOff()) out.push({ to: "cubs/available", title: "The cub shop", why: "cubs.developer" });
+    if (!shopOff()) out.push({ to: "cubs/available", title: "Adding features", why: "cubs.developer" });
     return out;
   }
 </script>

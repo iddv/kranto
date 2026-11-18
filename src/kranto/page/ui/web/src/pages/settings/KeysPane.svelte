@@ -33,7 +33,7 @@
   {#if id && !known}
     {@render gone("Nothing to show here.")}
   {:else if !host}
-    {#if id}<NeedHost what="Keys" />{:else}{@render gone("Keys need the server, which is not hosting this page.")}{/if}
+    {#if id}<NeedHost what="Keys" />{:else}{@render gone("Keys need the server, which is not answering.")}{/if}
   {:else if !s}
     <div class="pane-in"><Loading error={c?.error} /></div>
   {:else if id === "key"}

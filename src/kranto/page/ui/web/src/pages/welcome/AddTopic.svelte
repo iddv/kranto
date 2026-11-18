@@ -170,7 +170,7 @@
 {/snippet}
 <!-- while the scout runs, what it is doing and how long it takes; "found nothing" only once it
      has ended (fix 3, mock `scout`) -->
-{#snippet finding()}<section class="box" id="scout-state" role="status" aria-live="polite"><div class="box-h"><h2>Finding places to read</h2><span class="grow"></span><span class="muted small">about 2 minutes</span></div><div class="box-b"><p>Searching the web, Hacker News, GitHub and arXiv, then test-reading each place it finds.</p><p class="muted small" id="scout-elapsed">{scouting}</p></div></section>{/snippet}
+{#snippet finding()}<section class="box" id="scout-state" role="status" aria-live="polite"><div class="box-h"><h2>Finding places to read</h2><span class="grow"></span><span class="muted small">a few minutes</span></div><div class="box-b"><p>Searching the web, Hacker News, GitHub and arXiv, then test-reading each place it finds.</p><p class="muted small" id="scout-elapsed">{scouting}</p></div></section>{/snippet}
 {#snippet props()}{#if T.id}<Proposals title={`Proposed for “${T.name.trim()}”`} tid={T.id} rows={T.rows} ticked={T.ticked} busy={!!scouting} plain={welcome} />{/if}{/snippet}
 
 {#if welcome}
