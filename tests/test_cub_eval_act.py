@@ -1,7 +1,7 @@
 """``kranto cub eval`` says when pytest is missing; Kranto package ships pytest for it; ``kranto
 cub act`` reads a file on the owner's side and posts the action through the page's route with
 the command line's door. (These ran on the examplecom cub until it moved to
-octo-owner/bearcubs with its own tests.)
+a repository of its own with its own tests.)
 
 No connection exists and nothing leaves the machine (the model is a fake transport)."""
 

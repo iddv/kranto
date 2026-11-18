@@ -14,7 +14,7 @@ from bears_cub import CapReached, NotConnected, RateLimited, grants, kinds
 from bears_cub.errors import HostError
 from bears_cub.testing import FakeHost
 
-TEMPLATE = Path(__file__).parent / "fixtures" / "cubs" / "template"   # the starter, as in bearcubs
+TEMPLATE = Path(__file__).parent / "fixtures" / "cubs" / "template"   # a starter cub
 ECHO = Path(__file__).parent / "fixtures" / "cubs" / "echo"
 
 

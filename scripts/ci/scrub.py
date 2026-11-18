@@ -69,6 +69,9 @@ ALLOW: dict[str, dict[str, str]] = {
     },
     "plan-ref": {},
     "owner-site": {},
+    "foreign-account": {
+        "tests/test_public_tree.py": "tests for this scanner",
+    },
     "attribution": {
         "scripts/ci/no_attribution.py": "the check's own patterns",
         "scripts/release/notes.py": "release notes drop these lines: the patterns that find them",
@@ -221,6 +224,10 @@ _PLAN_PATTERNS = [
 # project id): refused anywhere, built from pieces so this file does not hold them whole
 _OWNER_SITE = ["ueyw" + "95bi"]
 
+# a GitHub account that is not the project's, and the collection of features it was said to
+# hold (it never existed): code, docs and tests once sent people there; refused anywhere
+_FOREIGN = [r"\bocto" + r"-owner\b", "bear" + "cub"]
+
 _ATTRIBUTION = ["Co-" + "Authored-By:", "Gener" + "ated with", "noreply" + "@" + "anthropic"]
 _ATTRIBUTION_RX = r"\b(?:" + "|".join(re.escape(a) for a in _ATTRIBUTION) + ")"
 
@@ -253,6 +260,7 @@ RULES: list[Rule] = [
     ),
     Rule("plan-ref", re.compile("|".join(_PLAN_PATTERNS))),
     Rule("owner-site", re.compile("|".join(re.escape(n) for n in _OWNER_SITE), re.I)),
+    Rule("foreign-account", re.compile("|".join(_FOREIGN), re.I)),
     Rule(
         "attribution",
         re.compile(_ATTRIBUTION_RX, re.I),

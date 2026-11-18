@@ -10,12 +10,14 @@ each such action waits for your approval on the page, and in practice (the defau
 The protocol in full is [cub-protocol.md](cub-protocol.md); the manifest's schema is
 `src/bears_cub/cub.schema.json`.
 
-## Start from the template
+## Start from one of Kranto's own
 
-`template/` in [octo-owner/bearcubs](https://github.com/octo-owner/bearcubs) is a working cub: one weekly
-job, one action, two reads, its tests against `FakeHost` and its own CI. Copy it, rename
-`my_cub` everywhere (the id is the prefix of its jobs, actions, events, settings and model
-purposes), and change what it does.
+Kranto ships three working cubs (`blog`, `newsletter`, `toot`) in the folder
+`kranto paths examples` prints; the newsletter is the smallest whole one: a weekly job, an
+action, reads, and its tests against `FakeHost`. Copy its folder, give it your own id
+everywhere (the id is the prefix of its jobs, actions, events, settings and model purposes),
+and change what it does. The project keeps no collection of other people's cubs: you add one
+from a folder or a git address you give (below).
 
 ```
 cub.yaml          what it is and everything it may ask for
@@ -27,7 +29,7 @@ tests/test_cub.py its tests, against bears_cub.testing.FakeHost
 
 Test it without Kranto, against the SDK at the tag of Kranto you run (`kranto --version`; the
 newest is on the releases page): `pip install "bears-cub-sdk @
-git+https://github.com/iddv/kranto.git@v0.5.27#subdirectory=sdk" pytest`, then `pytest`.
+git+https://github.com/iddv/kranto.git@v0.7.0#subdirectory=sdk" pytest`, then `pytest`.
 Check that Kranto will accept it: `python -m bears_cub.check path/to/cub`.
 
 ## `cub.yaml`
@@ -199,8 +201,7 @@ says so inside its own frame. Reads made for widgets are page reads: they do not
 `calls_per_day`.
 
 kranto reads `ui.widgets` from 0.5.13. An older Kranto refuses the key as unknown, as it refuses
-any key it does not know, so a cub that declares widgets says so: `kranto: ">=0.5.13"` (the
-template does).
+any key it does not know, so a cub that declares widgets says so: `kranto: ">=0.5.13"`.
 
 `host.widget(id, size)` draws a widget as Kranto does and raises `WidgetAnswerError` naming
 anything Kranto would refuse or change; `kranto cub eval` reads every widget at every size with
@@ -311,8 +312,6 @@ kranto cub add "https://github.com/you/cubs#subdirectory=cubs/my-cub" --ref main
 
 A repository that holds several cubs names the one to install with `#subdirectory=` (a
 relative path inside it, as pip writes it); `kranto cub update` fetches the same folder again.
-More cubs, such as **examplecom** (drafts posts for a Sanity-backed blog), live in
-[octo-owner/bearcubs](https://github.com/octo-owner/bearcubs), each with its own guide.
 
 Kranto copies the tree (never a `.git`, a `.venv` or caches), refuses a link out of the folder,
 a native library or program and a script marked executable, validates `cub.yaml` against what
@@ -332,7 +331,7 @@ is turned on on the page only: in the ask's own dialog, or on the cub's page.
 | `kranto cub list` | the installed cubs: version, trust, state, mode, last run, what waits for you, spend |
 | `kranto cub inspect ID` | its source and pin, grants in words, limits, findings, last runs, and an update staged for it with what it may now do (`--manifest`, `--grants`, `--kv`) |
 | `kranto cub update ID` | fetch its source again: the files' diff and the permission delta; `--apply JOB` applies it (an update that adds a permission, or of a cub that sends, is applied on the page). One update waits per cub: looking again answers the one staged, and newer files replace it. A staged update shows on the cub's page ("Update to 1.2.0" in its head) and under Cubs › Staged |
-| `kranto cub source ID SOURCE` | where its updates are read from now: a folder, or a git URL (`URL#subdirectory=cubs/ID`; `--ref`). Only the recorded source changes; the installed copy, its pin and its grants stay. A cub Kranto ships, added from that cub's folder inside an installed Kranto (or the tool an install made before the rename ran), reads this Kranto's own copy once an update moved the folder: nothing is said and it updates as before. When any other folder is gone, `inspect`, its page and Needs you (once) say so and name this command: Kranto's own example cubs left the package for octo-owner/bearcubs (`kranto cub source examplecom https://github.com/octo-owner/bearcubs#subdirectory=cubs/examplecom`) |
+| `kranto cub source ID SOURCE` | where its updates are read from now: a folder, or a git URL (`URL#subdirectory=cubs/ID`; `--ref`). Only the recorded source changes; the installed copy, its pin and its grants stay. A cub Kranto ships, added from that cub's folder inside an installed Kranto (or the tool an install made before the rename ran), reads this Kranto's own copy once an update moved the folder: nothing is said and it updates as before. When any other folder is gone, `inspect`, its page and Needs you (once) say so and name this command; for a cub Kranto ships, the command it names points at Kranto's own copy (`kranto cub source newsletter "$(kranto paths examples)/newsletter"`) |
 | `kranto cub enable ID` / `disable ID` | the owner's switch (`cubs.<id>.enabled`); what it asks you stays open |
 | `kranto cub dry ID KIND` | a kind back to practice (Send for real is the page's) |
 | `kranto cub stop ID` / `resume ID` | stop: its process killed, the cub paused, what it asks you closed |
