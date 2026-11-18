@@ -1,4 +1,4 @@
-"""``brb trace export --otlp`` against a receiver on 127.0.0.1 in this process:
+"""``kranto trace export --otlp`` against a receiver on 127.0.0.1 in this process:
 OTLP/HTTP JSON to ``/v1/traces``, the GenAI conventions' names, one UUIDv5 trace id (the same
 on a re-export), parents that exist, and content only when asked, redacted. No model; the
 secret is made up here at run time and never printed."""
@@ -15,8 +15,9 @@ from pathlib import Path
 
 import pytest
 
-from kranto.page.cli import main
 from kranto.page.trace.export_otlp import NS, trace_id
+
+from .trace_common import main
 
 FIX = Path(__file__).parent / "fixtures" / "trace"
 STEM = "1790000000-verify"

@@ -14,7 +14,7 @@ cache of summaries and positions, never of payloads.
 - ``session``, ``file``, ``afk``: the kinds;
 - ``redact``: every string a trace returns passes through it; the files never change;
 - ``payload``: a span's input, output, chat or diff, read by byte range, redacted, paged;
-- ``cli``: ``brb trace list / show / follow`` (and ``kranto trace …``).
+- ``cli``: ``kranto trace list / show / follow``.
 
 The build loop's traces (builds, maintenance fixes, the loop's steps) left with it: their rows in
 the index still list as rows, with their stored words, and do not open.

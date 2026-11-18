@@ -1,4 +1,4 @@
-"""``brb trace list / show / follow`` on Kranto's own runs: a session's tree as
+"""``kranto trace list / show / follow`` on Kranto's own runs: a session's tree as
 text, one span with its payload, ``--raw`` with its path, ``--json``, a running session followed
 until it ends, and the build loop's old rows listed from ``trace.db`` without writing it. No
 network, no model."""
@@ -11,9 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from kranto.page.cli import main
-
 from .test_trace_session import TID, _old_index, make_session
+from .trace_common import main
 
 FIX = Path(__file__).parent / "fixtures" / "trace"
 STEM = "1790000000-verify"

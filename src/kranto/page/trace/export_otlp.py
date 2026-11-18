@@ -1,5 +1,5 @@
 """A trace as OpenTelemetry spans (decision D-10): OTLP/HTTP JSON, sent by a
-command (``brb trace export <trace> --otlp <url>``), never in the background, to the URL the
+command (``kranto trace export <trace> --otlp <url>``), never in the background, to the URL the
 owner gives (``trace.export.otlp_url`` by default, empty: nothing is sent) and nowhere else.
 
 The GenAI semantic conventions name the spans and their attributes: a run and a stage are
