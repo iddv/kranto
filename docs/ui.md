@@ -95,10 +95,7 @@ Details), one page a story `#/news/i/:brief/:n` (`StoryPage.svelte`: the item an
 Settings › Posting › How you write is `pages/settings/VoicePage.svelte` (`#/settings/posting/voice`,
 `GET /api/prose`, `POST /api/prose/voice`; its OpenAI key, `POST /api/prose/writer-key`); the top bar's Needs you count is
 `pages/front/needstotal.ts`, and what a button in an open sheet did is said in it by `shell/PressLine.svelte`; their lines are `NewsSources.svelte` (title, where from and when, the
-observation a quiet link). The figures are `features/news/diagrams/` (`Timeline` across the page
-and down it on the phone, `Bars`, `Series`, `RelMap`, `Thumb` beside an item on News › Today): plain SVG in the tokens,
-drawn from the article's data, `diagram` choosing the lead one (`evidence`, the cited lines' own
-dates, when nothing else has three points). A brief from `briefs.get`/`latest` carries
+observation a quiet link). A brief from `briefs.get`/`latest` carries
 `articles` (each item's newest), so Today and the brief's page link the article and the item page
 offers Deep dive now (`news.article_now`, a confirm). The page's policy allows `img-src https:`
 for the source's picture only. Earlier's old `?sel=f<id>` lands on the brief's page. News › Topics'
