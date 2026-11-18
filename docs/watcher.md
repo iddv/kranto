@@ -47,23 +47,21 @@ messages to delivery targets you configure (none by default).
 
 ## The watcher alone
 
-Kranto runs all of this for you. The watcher's own commands are not on your PATH: they run
-as `python -m kranto.cli` with Kranto's own Python. In a checkout that is
-`uv run python -m kranto.cli`; for an installed Kranto it is
-`~/.local/share/uv/tools/kranto/bin/python -m kranto.cli`. Below, `python -m kranto.cli` means
-either. The commands work on the folder given with `-w`, else `$KRANTO_HOME`, else the current
-folder: for an installed Kranto, set `KRANTO_HOME=~/.kranto`.
+Kranto runs all of this for you. The watcher's own commands are under `kranto watch`
+(`kranto watch --help` lists them; in a checkout, `uv run kranto watch`). They work on your
+Kranto home (the one `kranto status` names); `-w DIR` points them at another folder, such as a
+watcher-only workspace made with `kranto watch init DIR`.
 
 To run only the watcher you need Linux, Python 3.12 or newer, [uv](https://docs.astral.sh/uv/)
 and a key: the default is [OpenRouter](https://openrouter.ai), which reports the cost of every
-call; an Anthropic API key works too (`python -m kranto.cli provider use anthropic --key-stdin`,
+call; an Anthropic API key works too (`kranto watch provider use anthropic --key-stdin`,
 which tests the key and switches the watcher to the Claude API). From a checkout:
 
 ```
 uv sync
-uv run python -m kranto.cli init ~/kranto
+uv run kranto watch init ~/kranto
 echo 'OPENROUTER_API_KEY=sk-or-...' > ~/kranto/.env
-uv run python -m kranto.cli -w ~/kranto doctor
+uv run kranto watch -w ~/kranto doctor
 ```
 
 `doctor` checks the key, that the configured models exist, pricing, and
@@ -80,7 +78,7 @@ Then tell Kranto what to watch. Either describe a topic and let a scout
 propose sources:
 
 ```
-python -m kranto.cli -w ~/kranto topics add "Local-first software" \
+kranto watch -w ~/kranto topics add "Local-first software" \
   "Software that keeps working offline and keeps data on the user's devices: CRDTs, sync engines, and the products built on them."
 ```
 
@@ -96,7 +94,7 @@ Or start from a pack of hand-picked sources, with no model call (the packs are i
 repository's `examples/packs/`):
 
 ```
-python -m kranto.cli -w ~/kranto pack examples/packs/local-first.yaml
+kranto watch -w ~/kranto pack examples/packs/local-first.yaml
 ```
 
 `examples/packs/broad.yaml` adds general feeds linked to no topic (the broad
@@ -106,7 +104,7 @@ costs more judge calls; the file says how many at most.
 Then start it:
 
 ```
-python -m kranto.cli -w ~/kranto serve
+kranto watch -w ~/kranto serve
 ```
 
 and open http://127.0.0.1:8765. The UI is Kranto's (the page, at `/`; the
@@ -197,7 +195,7 @@ who can reach the port can read the library. See [SECURITY.md](../SECURITY.md).
 
 ## Commands
 
-Each runs as `python -m kranto.cli …` (above).
+Each runs as `kranto watch …` (above).
 
 ```
 init DIR                 create a workspace

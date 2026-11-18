@@ -58,19 +58,19 @@ class Fake:
         self.developer = developer
 
     def client(self, door="mcp"):
-        def afk_get(path, q=None):
+        def server_get(path, q=None):
             if path == "/api/verbs":
                 return 200, {"verbs": self.table, "reads": self.reads}
             if path == "/api/status":
                 return 200, {"builds": False, "cubs_developer": self.developer}
             return 200, {"path": path, "q": q}
 
-        def afk_post(path, body):
+        def server_post(path, body):
             self.posts.append((path, body))
             return 200, {"ok": True, "say": "done", "page": "#/watch/topic/7/sources",
                          "mark": "topic:7", "run": "r1", "answer": {"id": 7, "_run": "r1"}}
         return T.Client(get=lambda p, q=None: (404, {}), post=lambda p, b: (404, {}),
-                        afk_get=afk_get, afk_post=afk_post, door=door)
+                        server_get=server_get, server_post=server_post, door=door)
 
 
 def test_rule_4_the_tool_list_is_the_registry():
@@ -170,7 +170,7 @@ def test_reads():
 
 def test_without_the_registry_the_tools_are_the_reads():
     c = Fake().client()
-    c.afk_get = lambda p, q=None: (404, {"error": "not found"})
+    c.server_get = lambda p, q=None: (404, {"error": "not found"})
     names = {t["name"] for t in T.tools(c)}
     assert names == set(T.READS) and "kranto_topic_add" not in names
     assert T.kranto_verbs(c)["verbs"] == []

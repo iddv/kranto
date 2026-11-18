@@ -732,7 +732,8 @@ def _chose(run: Run, name: str, result: dict, *, wrote_key: bool) -> int:
                                          if result["base_url"] else "") + ")")
     if launcher.port_in_use(run.port):
         run.io.say("  Kranto is running: it watches with this from its next start "
-                   "('kranto restart'); Settings › Watching switches a running Kranto at once")
+                   "('kranto down', then 'kranto up'); Settings › Watching switches a running "
+                   "Kranto at once")
     return EXIT_OK
 
 
@@ -797,7 +798,7 @@ def search(run: Run) -> int:
         run.wrote(f"{config_mod.config_path(run.home)} (search.provider {picked})")
     if launcher.port_in_use(run.port):
         run.io.say("  Kranto is running: it searches with this from its next start "
-                   "('kranto restart'); Settings switches a running Kranto at once")
+                   "('kranto down', then 'kranto up'); Settings switches a running Kranto at once")
     return EXIT_OK
 
 

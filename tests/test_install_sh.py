@@ -1,16 +1,13 @@
-"""``install.sh`` (the owner's D1 of 2026-10-17), run for real in a scratch HOME
-with fake ``uv``, ``gh`` and ``kranto`` and a fake GitHub on loopback: no network, no model,
-nothing of this machine's HOME touched."""
+"""``install.sh``, run for real in a scratch HOME with fake ``uv``, ``gh`` and ``kranto`` and a
+stand-in for GitHub's release download addresses on loopback: no network, no model, nothing of
+this machine's HOME touched."""
 
 from __future__ import annotations
 
 import hashlib
 import http.server
-import json
 import os
-import secrets
 import shutil
-import stat
 import subprocess
 import sys
 import threading
@@ -89,7 +86,7 @@ def box(tmp_path):
     log = tmp_path / "log"
     env = {"HOME": str(home), "PATH": f"{fake}:{tools}", "LOG": str(log),
            "FAKE_KRANTO": str(tmp_path / "kranto"), "TMPDIR": str(tmp_path),
-           "KRANTO_GITHUB_API": "http://127.0.0.1:9", "KRANTO_GITHUB_WEB": "http://127.0.0.1:9"}
+           "KRANTO_DOWNLOAD_BASE": "http://127.0.0.1:9"}
     return {"tmp": tmp_path, "home": home, "fake": fake, "log": log, "env": env}
 
 
@@ -142,23 +139,6 @@ def test_a_hash_that_does_not_match_installs_nothing(box):
     assert "uv tool install" not in log and "kranto" not in log.replace("kranto-install", "")
 
 
-def test_private_with_a_gh_login_downloads_with_gh_and_setup_reuses_it(box):
-    rel = release_dir(box["tmp"])
-    r, log = run(box, extra={"GH_LOGGED_IN": "1", "RELEASE": str(rel)})
-    assert r.returncode == 0, r.stderr
-    assert "gh release download v9.9.9 -R iddv/kranto" in log
-    assert log.splitlines()[-1] == "kranto setup --github gh"
-
-
-def test_no_login_and_no_client_id_says_how_to_get_gh(box):
-    os.remove(box["fake"] / "gh")
-    r, log = run(box, extra={"KRANTO_GITHUB_CLIENT_ID": ""})     # "" turns the device flow off
-    assert r.returncode == 1
-    assert "gh auth login" in r.stdout and "https://cli.github.com" in r.stdout
-    assert "sudo apt install gh" in r.stdout
-    assert "invitations" in r.stdout and "uv tool install" not in log
-
-
 def test_a_release_without_setup_starts_kranto_up(box):
     rel = release_dir(box["tmp"])
     r, log = run(box, "--from", str(rel), extra={"NO_SETUP": "1"})
@@ -184,126 +164,143 @@ def test_macos_says_watcher_only_and_installs(box):
     rel = release_dir(box["tmp"])
     r, log = run(box, "--from", str(rel))
     assert r.returncode == 0, r.stderr
-    assert "macOS: kranto installs the watcher only" in r.stdout
-    assert "bwrap, systemd and the build checks are skipped" in r.stdout
+    assert "macOS: Kranto installs the watcher only" in r.stdout
+    assert "bubblewrap sandbox" in r.stdout and "Builds" not in r.stdout
     assert log.splitlines()[-1] == "kranto setup"
 
 
-class FakeGitHub(http.server.BaseHTTPRequestHandler):
-    """The device flow (pending once, then granted) and one private release's assets."""
-    token = ""
+class StandIn(http.server.BaseHTTPRequestHandler):
+    """GitHub's release download addresses as a public repository has them:
+    ``/<repo>/releases/latest/download/<file>`` (the newest stable release) and
+    ``/<repo>/releases/download/<tag>/<file>``, each answered with a redirect to the file, as
+    github.com does. ``answer`` set to a status makes every address answer it instead."""
     release: Path
-    polls = 0
-    seen_auth: list[str] = []
+    tag = "v9.9.9"
+    answer = 0
+    seen: list[tuple[str, str]] = []
 
     def log_message(self, *a):
         pass
 
-    def _json(self, obj, code=200):
-        body = json.dumps(obj).encode()
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(body)
-
-    def do_POST(self):
-        self.rfile.read(int(self.headers.get("Content-Length") or 0))
-        if self.path == "/login/device/code":
-            return self._json({"device_code": "dc", "user_code": "ABCD-1234", "interval": 0,
-                               "expires_in": 60,
-                               "verification_uri": "https://github.com/login/device"})
-        cls = type(self)
-        cls.polls += 1
-        if cls.polls == 1:
-            return self._json({"error": "authorization_pending"})
-        return self._json({"access_token": cls.token, "scope": "repo,workflow,read:org",
-                           "token_type": "bearer"})
-
     def do_GET(self):
         cls = type(self)
-        auth = self.headers.get("Authorization") or ""
-        cls.seen_auth.append(auth)
-        if auth != f"Bearer {cls.token}":
-            return self._json({"message": "Not Found"}, 404)
-        base = f"http://127.0.0.1:{self.server.server_address[1]}"
-        files = sorted(cls.release.iterdir())
-        if self.path.startswith("/repos/iddv/kranto/releases/"):
-            return self._json({"tag_name": "v9.9.9", "assets": [
-                {"name": f.name, "url": f"{base}/assets/{f.name}"} for f in files]})
-        if self.path.startswith("/assets/"):
-            body = (cls.release / self.path.rsplit("/", 1)[1]).read_bytes()
+        cls.seen.append((self.path, self.headers.get("Authorization") or ""))
+        if cls.answer:
+            self.send_response(cls.answer)
+            self.end_headers()
+            return
+        for prefix in ("/iddv/kranto/releases/latest/download/",
+                       f"/iddv/kranto/releases/download/{cls.tag}/"):
+            if self.path.startswith(prefix) and (cls.release / self.path[len(prefix):]).is_file():
+                self.send_response(302)
+                self.send_header("Location", "/files/" + self.path[len(prefix):])
+                self.end_headers()
+                return
+        if self.path.startswith("/files/"):
+            body = (cls.release / self.path[len("/files/"):]).read_bytes()
             self.send_response(200)
+            self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
-            return None
-        return self._json({}, 404)
+            return
+        self.send_response(404)
+        self.end_headers()
 
 
-def test_the_device_flow_signs_in_once_and_hands_the_login_to_setup(box):
-    token = "gho_" + secrets.token_hex(18)          # built at run time: no literal
-    FakeGitHub.token, FakeGitHub.release, FakeGitHub.polls = token, release_dir(box["tmp"]), 0
-    FakeGitHub.seen_auth = []
-    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), FakeGitHub)
+@pytest.fixture
+def standin(box):
+    StandIn.release, StandIn.answer, StandIn.seen = release_dir(box["tmp"]), 0, []
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), StandIn)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
-    url = f"http://127.0.0.1:{srv.server_address[1]}"
-    os.remove(box["fake"] / "gh")
-    try:
-        r, log = run(box, extra={"KRANTO_GITHUB_CLIENT_ID": "Iv1.test", "KRANTO_GITHUB_API": url,
-                                 "KRANTO_GITHUB_WEB": url})
-    finally:
-        srv.shutdown()
+    box["env"]["KRANTO_DOWNLOAD_BASE"] = f"http://127.0.0.1:{srv.server_address[1]}"
+    yield StandIn
+    srv.shutdown()
+
+
+def test_public_the_latest_release_installs_with_no_login(box, standin):
+    os.remove(box["fake"] / "gh")                     # no gh at all: a stranger's machine
+    r, log = run(box, "--", "--yes")
     assert r.returncode == 0, r.stderr
-    assert "ABCD-1234" in r.stdout and FakeGitHub.polls == 2
-    kept = box["home"] / ".config" / "kranto" / "github" / "install-login.env"
-    assert log.splitlines()[-1] == f"kranto setup --github-token-file {kept}"
-    assert stat.S_IMODE(kept.stat().st_mode) == 0o600
-    assert stat.S_IMODE(kept.parent.parent.stat().st_mode) == 0o700
-    assert kept.read_text() == f"GH_TOKEN={token}\n"
-    # the token is in its file and the download's Authorization header, nowhere else
-    assert token not in r.stdout + r.stderr + log
-    assert token not in Path(f"{box['log']}.kranto-env").read_text()
-    assert not list(box["tmp"].glob("kranto-install.*"))     # the temporary folder is gone
+    assert "Downloading the latest release of iddv/kranto" in r.stdout
+    assert "kranto-9.9.9-py3-none-any.whl: OK" in r.stdout
+    paths = [p for p, _ in standin.seen]
+    assert paths[0] == "/iddv/kranto/releases/latest/download/SHA256SUMS"
+    assert "/iddv/kranto/releases/latest/download/kranto-9.9.9-py3-none-any.whl" in paths
+    assert all(auth == "" for _, auth in standin.seen)        # no login was ever sent
+    assert log.splitlines()[-1] == "kranto setup --yes"
+    assert not (box["home"] / ".config").exists()             # nothing kept: no login, no token
+    assert not list(box["tmp"].glob("kranto-install.*"))      # the temporary folder is gone
 
 
-def test_wider_scopes_than_asked_are_refused_and_nothing_is_kept(box):
-    token = "gho_" + secrets.token_hex(18)
-    FakeGitHub.token, FakeGitHub.release, FakeGitHub.polls = token, release_dir(box["tmp"]), 1
+def test_public_a_tag_installs_that_release(box, standin):
+    r, log = run(box, "--version", "v9.9.9", "--no-setup")
+    assert r.returncode == 0, r.stderr
+    assert standin.seen[0][0] == "/iddv/kranto/releases/download/v9.9.9/SHA256SUMS"
+    assert "gh " not in log and "kranto setup" not in log
+    assert "Installed. Run 'kranto setup' when you are ready." in r.stdout
 
-    class Wider(FakeGitHub):
-        def do_POST(self):
-            self.rfile.read(int(self.headers.get("Content-Length") or 0))
-            if self.path == "/login/device/code":
-                return self._json(
-                    {"device_code": "dc", "user_code": "WXYZ-0000", "interval": 0,
-                     "expires_in": 60, "verification_uri": "https://github.com/login/device"})
-            return self._json({"access_token": token, "scope": "repo,workflow,read:org,"
-                                                               "delete_repo"})
-    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Wider)
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
-    url = f"http://127.0.0.1:{srv.server_address[1]}"
+
+def test_no_stable_release_yet_names_the_way_on_and_asks_for_no_login(box, standin):
+    standin.answer = 404
     os.remove(box["fake"] / "gh")
-    try:
-        r, log = run(box, extra={"KRANTO_GITHUB_CLIENT_ID": "Iv1.test", "KRANTO_GITHUB_API": url,
-                                 "KRANTO_GITHUB_WEB": url})
-    finally:
-        srv.shutdown()
-    assert r.returncode != 0 and "wider scopes" in r.stderr
-    assert not (box["home"] / ".config" / "kranto" / "github").exists()
-    assert "uv tool install" not in log and token not in r.stdout + r.stderr
+    r, log = run(box)
+    assert r.returncode == 1 and "uv tool install" not in log
+    assert "has no stable release yet" in r.stderr and "--version" in r.stderr
+    said = (r.stdout + r.stderr).lower()
+    for word in ("invitation", "token", "device", "sign in", "private"):
+        assert word not in said, word
 
 
-def test_the_client_id_is_kranto_oauth_app():
-    """D3: the owner registered the "kranto" OAuth App on 2026-10-17. Its client id is public;
-    the page's tests pin the same value in github_user.CLIENT_ID, so the two cannot drift."""
-    line = next(ln for ln in SCRIPT.read_text().splitlines() if ln.startswith("CLIENT_ID="))
-    assert line == 'CLIENT_ID="Ov23lismfFcZrfTLDoxm"'
+def test_a_release_only_a_signed_in_gh_can_see_downloads_with_gh(box, standin):
+    """Before the repository is public, the owner's pre-release by tag: not found without a
+    login, so the logged-in gh downloads it; setup is handed nothing of gh's."""
+    standin.answer = 404
+    side = box["tmp"] / "gh-side"
+    side.mkdir()
+    rel = release_dir(side)
+    r, log = run(box, "--version", "v0.7.0-dev9", extra={"GH_LOGGED_IN": "1", "RELEASE": str(rel)})
+    assert r.returncode == 0, r.stderr
+    assert "gh release download v0.7.0-dev9 -R iddv/kranto" in log
+    assert "trying again with your gh login" in r.stdout
+    assert log.splitlines()[-1] == "kranto setup"
 
 
-def test_without_gh_the_device_flow_is_offered_with_kranto_app(box):
-    os.remove(box["fake"] / "gh")
-    r, log = run(box)                   # the fake GitHub at 127.0.0.1:9 refuses the request
-    assert r.returncode != 0
-    assert "Signing in to GitHub" in r.stdout and "uv tool install" not in log
+def test_gh_not_logged_in_is_not_asked_for(box, standin):
+    standin.answer = 404
+    r, log = run(box, "--version", "v1.2.3")
+    assert r.returncode == 1
+    assert "has no release v1.2.3" in r.stderr and "gh release download" not in log
+
+
+def test_a_rate_limit_or_an_outage_says_so_and_asks_for_no_login(box, standin):
+    standin.answer = 429
+    r, log = run(box, extra={"GH_LOGGED_IN": "1"})
+    assert r.returncode == 1 and "uv tool install" not in log
+    assert "HTTP 429" in r.stderr and "try again in a few minutes" in r.stderr
+    assert "gh release" not in log                     # an outage is not "needs a login"
+
+
+def test_a_tampered_download_installs_nothing(box, standin):
+    (standin.release / "kranto-9.9.9-py3-none-any.whl").write_bytes(b"tampered")
+    r, log = run(box)
+    assert r.returncode != 0 and "does not match SHA256SUMS" in r.stderr
+    assert "uv tool install" not in log
+
+
+def test_the_script_asks_for_no_login_and_names_no_app():
+    """A public repository: no device flow, no OAuth App, no scopes, no invitation, and the
+    words of the private time are gone."""
+    text = SCRIPT.read_text()
+    for gone in ("CLIENT_ID", "login/device", "read:org", "invitation", "github-token-file",
+                 "OAuth", "publishes builds", "private before launch", "the owner"):
+        assert gone not in text, gone
+
+
+def test_the_script_runs_only_once_it_is_whole():
+    """Under curl ... | sh a cut-off download must run nothing: every step is in main, called on
+    the last line."""
+    lines = [ln for ln in SCRIPT.read_text().splitlines() if ln.strip()]
+    assert lines[-1] == 'main "$@"'
 
 
 def test_every_release_carries_install_sh(tmp_path, monkeypatch):

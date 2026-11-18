@@ -48,7 +48,7 @@ def test_one_nominee_files_one_ticket_whose_text_is_the_drafts(host):
 
 
 def test_a_pick_the_loop_already_built_is_skipped(host):
-    nominee(host, built={"state": "public", "repo": "octo-owner/logs", "url": "https://x/logs"})
+    nominee(host, built={"state": "public", "repo": "jo-example/logs", "url": "https://x/logs"})
     out = host.run_job("draft_pick", strict=True)
     assert out["status"] == "skipped" and not host.tickets and not host.model.calls
 

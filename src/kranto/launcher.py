@@ -17,11 +17,11 @@ Commands:
 
 - ``up``: make the home if there is none, install and start ``kranto.service`` (a systemd
   user unit) where systemd is usable, else serve in the foreground; open the browser;
-- ``serve``: ``python -m kranto serve`` with the scheduler on (what the unit runs);
+- ``serve``: ``kranto serve`` with the scheduler on (what the unit runs);
 ``--no-scheduler``
   stays for cron users;
 - ``down``, ``status``, ``logs``: the unit, a one-screen status, its journal;
-- ``doctor``: ``python -m kranto doctor`` plus the prerequisites nobody can install for you (the
+- ``doctor``: ``kranto doctor`` plus the prerequisites nobody can install for you (the
   Claude Code CLI and its login, ``gh`` and its login, ``bwrap``), the unit's PATH, whether
   the console is ready, pending migrations;
 - ``adopt``: switch an existing installation (``~/kranto-kb``, ``~/kranto-loop``,
@@ -1745,6 +1745,40 @@ def cmd_cub(args, host: Host) -> int:
     return cubs_cli.main(home, list(args.rest or []))
 
 
+WATCH = "watch"
+
+
+def cmd_watch(args, host: Host) -> int:
+    """``kranto watch …``: the watcher's own commands (``kranto.cli``: topics, sources, run,
+    search, ideas, provider, news, …) on this home. The same parser ``python -m kranto`` runs;
+    this home is its workspace unless ``-w`` names another."""
+    from . import cli
+
+    rest = list(args.rest or [])
+    if not any(w in ("-w", "--workspace") or w.startswith("--workspace=") for w in rest):
+        rest = ["-w", str(kranto_home(args.home, host)), *rest]
+    return cli.main(rest)
+
+
+def _split_watch(argv: Sequence[str]) -> tuple[list[str], list[str]] | None:
+    """``kranto [--home H] watch REST``: (the words up to ``watch``, REST); None for any other
+    command. REST goes to the watcher's parser whole (``--help`` included), never to ours."""
+    words = list(argv)
+    i = 0
+    while i < len(words):
+        w = words[i]
+        if w == "--home":
+            i += 2
+            continue
+        if w.startswith("--home="):
+            i += 1
+            continue
+        if w.startswith("-"):
+            return None  # --help, --version: ours
+        return (words[: i + 1], words[i + 1:]) if w == WATCH else None
+    return None
+
+
 def cmd_trace(args, host: Host) -> int:
     """``kranto trace list|show``: the page's ``brb trace`` for this home: a build's agent trace
     (sessions, turns, tool calls, cost, the failure point) read from its files, redacted."""
@@ -2812,6 +2846,15 @@ def build_parser(developer: bool = False) -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_cub)
 
     s = sub.add_parser(
+        WATCH,
+        help="the watcher's own commands on this home: topics, sources, run, search, "
+        "websearch, ideas, provider, news, … (kranto watch --help lists them)",
+        add_help=False,
+    )
+    s.add_argument("rest", nargs=argparse.REMAINDER, help="COMMAND [ARGS] (kranto watch --help)")
+    s.set_defaults(func=cmd_watch)
+
+    s = sub.add_parser(
         "trace",
         help="agent traces: an assistant session's turns and tool calls, its cost and "
         "where it failed",
@@ -2950,7 +2993,13 @@ def alias_notice(argv0: str | None = None, *, tty: bool | None = None,
 def main(argv: Sequence[str] | None = None, host: Host | None = None) -> int:
     if argv is None:
         alias_notice(user_home=host.home if host is not None else None)
-    args = build_parser(developer=_help_developer(argv, host)).parse_args(argv)
+    words = list(sys.argv[1:] if argv is None else argv)
+    watch = _split_watch(words)
+    if watch is not None:
+        args = build_parser().parse_args(watch[0])
+        args.rest = watch[1]
+    else:
+        args = build_parser(developer=_help_developer(argv, host)).parse_args(argv)
     if host is None:  # Kranto's own gh (--fetch-gh), for this run and its children
         from .ghfetch import bin_dir
 

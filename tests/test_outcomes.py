@@ -57,8 +57,8 @@ def test_the_loops_old_steps_still_say_what_was_built(web, rt, cards):  # noqa: 
     new, old = cards["new"], cards["old"]
     for body in (loop_step("intake", "taken in"), loop_step("pitch", "accepted"),
                  loop_step("build", "building", round=1), loop_step("gate", "ready", round=1),
-                 loop_step("publish", "published", repo="octo-owner/repo-recall",
-                           url="https://github.com/octo-owner/repo-recall", version="0.1.0")):
+                 loop_step("publish", "published", repo="jo-example/repo-recall",
+                           url="https://github.com/jo-example/repo-recall", version="0.1.0")):
         old_row(rt.store, new, body)
     for body in (loop_step("build", "building", round=1), loop_step("verdict", "closed")):
         old_row(rt.store, old, body)
@@ -68,8 +68,8 @@ def test_the_loops_old_steps_still_say_what_was_built(web, rt, cards):  # noqa: 
     assert card["outcomes"]["build"]["detail"] == {"idea": "i235df527", "round": 1}
     built = card["built"]
     assert (built["state"], built["kind"], built["idea"], built["repo"], built["url"]) == (
-        "published", "publish", "i235df527", "octo-owner/repo-recall",
-        "https://github.com/octo-owner/repo-recall")
+        "published", "publish", "i235df527", "jo-example/repo-recall",
+        "https://github.com/jo-example/repo-recall")
     assert listed[old]["built"] is None and listed[old]["outcomes"]["verdict"]["value"] == "closed"
     ids = outcomes.by_kind(rt.store, [new, old, 99999])
     assert set(ids) == {new, old} and outcomes.built(ids.get(99999)) is None
@@ -97,11 +97,11 @@ def test_built_reads_any_stored_shape(rt, cards):  # noqa: F811
 
 def test_a_cub_reads_a_cards_old_outcome_and_what_was_built(rt, cards):  # noqa: F811
     from kranto.core import api
-    old_row(rt.store, cards["new"], loop_step("publish", "public", repo="octo-owner/x",
-                                              url="https://github.com/octo-owner/x"))
+    old_row(rt.store, cards["new"], loop_step("publish", "public", repo="jo-example/x",
+                                              url="https://github.com/jo-example/x"))
     ctx = type("Ctx", (), {"store": rt.store})()
     got = api.ideas_get(ctx, {"id": cards["new"]})
-    assert got["built"] == {"state": "public", "repo": "octo-owner/x", "url": "https://github.com/octo-owner/x"}
+    assert got["built"] == {"state": "public", "repo": "jo-example/x", "url": "https://github.com/jo-example/x"}
     assert got["outcome"]["kind"] == "publish" and got["outcome"]["at"]
     other = api.ideas_get(ctx, {"id": cards["old"]})
     assert other["built"] is None and other["outcome"] is None

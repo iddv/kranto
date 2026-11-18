@@ -62,17 +62,27 @@ def _folder_gone(row) -> str | None:
         return None
 
 
-# Kranto's own example cubs left the wheel for this repository
-CUBS_REPO = "https://github.com/octo-owner/bearcubs"
+def _shipped(cid: str) -> bool:
+    """Whether this Kranto ships a cub of that id (the folder ``kranto paths examples`` names)."""
+    from ...cubs import examples_dir
+
+    try:
+        return (examples_dir() / cid / "cub.yaml").is_file()
+    except OSError:
+        return False
 
 
 def gone_words(cid: str, path: str) -> dict:
     """What a cub whose source folder is gone says (live's examplecom pointed at a
-    folder that no longer exists, its daily look said ok, and it would never update)."""
-    ours = "/kranto/cubs/examples/" in path.replace("\\", "/")
-    fix = (f"kranto cub source {cid} {CUBS_REPO}#subdirectory=cubs/{cid}" if ours
-           else f"kranto cub source {cid} <its folder or git URL>")
-    where = "Reinstall from octo-owner/bearcubs" if ours else "Say where it lives now"
+    folder that no longer exists, its daily look said ok, and it would never update).
+    A cub this Kranto ships is pointed at Kranto's own copy; any other comes from a folder or a
+    git address the person gives (the project keeps no collection of features to point at)."""
+    if _shipped(cid):
+        fix = f'kranto cub source {cid} "$(kranto paths examples)/{cid}"'
+        where = "Point it at this Kranto's own copy"
+    else:
+        fix = f"kranto cub source {cid} <its folder or git URL>"
+        where = "Say where it lives now"
     return {"path": path, "fix": fix,
             "words": f"Its source folder is gone ({path}); it gets no updates. {where}: {fix}"}
 

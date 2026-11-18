@@ -12,14 +12,12 @@ from __future__ import annotations
 
 import fnmatch
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 from .base import SETTINGS, Iso, Stored
 
 if TYPE_CHECKING:
     from ..store import Store
-
-T = TypeVar("T", bound=Stored)
 
 
 @dataclass(frozen=True)
@@ -131,7 +129,7 @@ def contract_for_key(key: str) -> type[Stored] | None:
     return next((t for pat, t in SETTINGS.items() if fnmatch.fnmatchcase(key, pat)), None)
 
 
-def get_blob(store: Store, key: str, cls: type[T]) -> T | None:
+def get_blob[T: Stored](store: Store, key: str, cls: type[T]) -> T | None:
     """The key's object, or None when the key is not set (or holds no readable object)."""
     return cls.parse(store.get_setting(key))
 

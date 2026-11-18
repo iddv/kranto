@@ -262,9 +262,9 @@ def test_mounts_api_version_2(rt, fake_api):
 def test_the_start_log_names_where_the_page_is_served(rt, fake_api, caplog):
     """A newcomer's first log said "the page mounted at /brb/", an address that now only
     redirects to the page at /."""
-    with caplog.at_level("INFO", logger="kranto.web.brb"), client(rt) as web:
+    with caplog.at_level("INFO", logger="kranto.web.page"), client(rt) as web:
         assert web.get("/").status_code == 200
-    said = [r.getMessage() for r in caplog.records if r.name == "kranto.web.brb"]
+    said = [r.getMessage() for r in caplog.records if r.name == "kranto.web.page"]
     assert any("the page is served at /" in m for m in said), said
     assert not any("/brb/" in m for m in said)
 
