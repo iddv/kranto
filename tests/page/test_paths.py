@@ -105,9 +105,8 @@ def test_the_layouts_name_what_the_homes_hold(tmp_path):
     (tmp_path / "kranto.yaml").write_text("")
     assert lay.config == tmp_path / "kranto.yaml"
     assert lay.db == tmp_path / "data" / "kranto.db" and lay.mcp_servers.name == "mcp-servers"
-    cfg = store.Config(tmp_path)
     loop = paths.LoopLayout(tmp_path)
-    assert (cfg.inbox, cfg.pause_file, cfg.stop_file) == (loop.inbox, loop.pause, loop.stop)
+    assert store.Config(tmp_path).layout.settings == loop.settings
     assert [p.name for p in (loop.settings, loop.db, loop.lock, loop.pid)] == \
         ["loop.yaml", "loop.db", "daemon.lock", "daemon.pid"]
 

@@ -114,13 +114,11 @@ class App:
     def term_setting(self, body: dict) -> dict:
         """``POST api/term/settings`` ``{key, value}`` (or ``{key, clear: true}``: back to the
         default): a key under ``term.``, checked by ``settings.write.check`` and written to
-        loop.yaml. A key in ``settings.write.SENSITIVE`` also needs ``confirm: true``."""
+        loop.yaml."""
         from ..settings import write as settings
         key = str(body.get("key") or "")
         if not TERM_KEY.fullmatch(key) or key not in settings.RULES:
             raise HttpError(400, "only the console's settings (term.…) are written here")
-        if key in settings.SENSITIVE and body.get("confirm") is not True:
-            raise HttpError(409, f"{key} needs confirm: true. {settings.SENSITIVE[key]}")
         try:
             value = settings.UNSET if body.get("clear") is True \
                 else settings.check(key, body.get("value"))

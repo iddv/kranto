@@ -15,5 +15,5 @@ def test_kranto_own_repositories_are_named_once():
             if p.name != "upstream.py"
             for n, line in enumerate(p.read_text().splitlines(), 1) if literal.search(line)]
     assert hits == []
-    assert DEFAULTS["chat"]["factory_repos"] == REPOS
+    assert DEFAULTS["feedback"]["repo"] == REPOS["watcher"]
 
