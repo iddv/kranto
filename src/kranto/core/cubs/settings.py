@@ -42,33 +42,34 @@ from ..manifest import ID, Setting
 from ..settings import SettingError, check
 
 GLOBAL: dict[str, Setting] = {
-    "cubs.enabled": Setting("bool", True, words="cubs run (off: none runs or starts)"),
-    "cubs.max_running": Setting("int", 3, lo=1, hi=8, words="cub processes at once"),
+    "cubs.enabled": Setting("bool", True, words="features run (off: none runs or starts)"),
+    "cubs.max_running": Setting("int", 3, lo=1, hi=8, words="feature processes at once"),
     "cubs.idle_s": Setting("int", 60, lo=0, hi=600,
-                           words="seconds a cub's process stays up after its last request"),
+                           words="seconds a feature's process stays up after its last request"),
     "cubs.auto_update": Setting("bool", True,
-                                words="apply a cub's update by itself when it adds no "
+                                words="apply a feature's update by itself when it adds no "
                                       "permission and no send and runs on this Kranto"),
     "cubs.auto_update_unreviewed": Setting(
-        "bool", False, words="apply by itself also the update of a cub from a source nobody "
+        "bool", False, words="apply by itself also the update of a feature from a source nobody "
                              "reviewed (a git address); off, its updates wait for your approval"),
-    "cubs.check_updates": Setting("bool", True, words="look for cubs' updates daily"),
+    "cubs.check_updates": Setting("bool", True, words="look for features' updates daily"),
     "cubs.default_monthly_usd": Setting("usd", 5.0,
-                                        words="a stranger's cub: model and search a month"),
+                                        words="a stranger's feature: model and search a month"),
     "cubs.default_calls_per_day": Setting("int", 200, lo=10, hi=10000,
-                                          words="a stranger's cub: calls to your accounts "
+                                          words="a stranger's feature: calls to your accounts "
                                                 "and the web a day"),
     "cubs.min_sdk": Setting("str", None, words="the oldest cub SDK this Kranto runs"),
     "cubs.allow_rlimits": Setting("bool", False,
-                                  words="run cubs that are not yours on a machine that cannot "
+                                  words="run features that are not yours on a machine that cannot "
                                         "cap their processes (no systemd user manager)"),
     #.2: the cub shop is a developer's, off unless set
     "cubs.developer": Setting("bool", False,
-                              words="the cub shop: Available, Made by Kranto, adding a cub from "
-                                    "outside and its checks (off: your installed cubs only)"),
+                              words="the feature shop: Available, Made by Kranto, adding a "
+                                    "feature from outside and its checks (off: your installed "
+                                    "features only)"),
 }
 PER_CUB: dict[str, Setting] = {
-    "enabled": Setting("bool", True, words="this cub runs"),
+    "enabled": Setting("bool", True, words="this feature runs"),
     "live": Setting("list", [], words="what it may do for real (each confirmed on the page)"),
     "monthly_usd": Setting("usd", None, words="its model and search a month"),
     "calls_per_day": Setting("int", None, lo=10, hi=10000,

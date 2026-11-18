@@ -837,8 +837,7 @@ def usage(run: Run) -> int:
         run.io.say("    3  nothing: count nothing")
         run.io.say(f"  What Kranto sends: {telemetry.DOCS_LINK}")
         run.io.say("  (also kranto telemetry docs, and Settings › Privacy & access)")
-        got = run.io.ask("Send usage reports? 1/2/3, Enter sends nothing until you decide", "")
-        picked = USAGE_CHOICES.get(got.strip(), got.strip() or None)
+        picked = _ask_usage(run)
     if picked in (None, "") and not eff.answered:
         run.keep("usage reports: not answered, so nothing is sent (counted on this machine "
                  "only; 'kranto telemetry' or Settings › Privacy & access to choose)")
@@ -857,6 +856,24 @@ def usage(run: Run) -> int:
     run.wrote(f"{config_mod.config_path(run.home)} (telemetry.mode {picked}: "
               f"{telemetry.MEANING[picked]})")
     return EXIT_OK
+
+
+def _ask_usage(run: Run) -> str | None:
+    """The answer to "Send usage reports?": 1, 2 or 3 (or a mode's own name), None for Enter.
+    Anything else is asked again, never the end of setup; after three tries it stays unanswered
+    (nothing is sent)."""
+    from . import telemetry
+    for _ in range(3):
+        got = run.io.ask("Send usage reports? 1/2/3, Enter sends nothing until you decide", "")
+        got = got.strip().lower()
+        if not got:
+            return None
+        if got in USAGE_CHOICES:
+            return USAGE_CHOICES[got]
+        if got in telemetry.MODES:
+            return got
+        run.io.say(f"  '{got}' is not one of them: type 1, 2 or 3, or Enter to decide later")
+    return None
 
 
 def _wrap(text: str, width: int = 88) -> list[str]:
@@ -1062,7 +1079,7 @@ def ready(run: Run) -> int:
 
 
 X_COST = (
-    "X is paid: X bills your own developer account $0.005 for each post kranto reads "
+    "X is paid: X bills your own developer account $0.005 for each post Kranto reads "
     "($0.001 for your bookmarks and likes). A typical install (10 topics, one list of "
     "about 200 accounts) is estimated at about $46 a month at the defaults; Kranto counts "
     "every read on Settings › Spend, and your Developer Console is the bill."

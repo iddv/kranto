@@ -1202,10 +1202,10 @@ def status_lines(home: Path, host: Host) -> tuple[list[str], bool]:
         from .core.cubs import status as cubs_status
 
         cubs = cubs_status.status_line(cfg)
-        lines.append(f"cubs       {cubs}")
+        lines.append(f"features   {cubs}")
         good = good and "STOPPED" not in cubs
     except Exception as exc:  # noqa: BLE001 - a status line, never a crash
-        lines.append(f"cubs       unknown: {exc}")
+        lines.append(f"features   unknown: {exc}")
     return lines, good
 
 

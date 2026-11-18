@@ -241,7 +241,7 @@ look:
 
 notify:
   # Apprise URLs (https://github.com/caronc/apprise/wiki), e.g. "mailto://...",
-  # "ntfy://...", "tgram://...". Needs: pip install 'kranto[notify]'.
+  # "ntfy://...", "tgram://...". Needs the notify extra (install.sh installs it).
   # Empty means nothing leaves this machine; messages stay on the Health page
   # and in the Atom feed at /feed.xml. URLs usually carry tokens: prefer
   # listing them (space or comma separated) in the environment variable named
@@ -267,8 +267,8 @@ connections:
   # Sources read with your own account (Settings › Sources › Accounts): Mastodon,
   # Bluesky, GitHub, YouTube, Product Hunt and Stack Exchange. Only read-only
   # scopes are asked for. Tokens are kept encrypted in data/secrets/ (mode 0600),
-  # never in this file, the library or an export. Needs: pip install
-  # 'kranto[connections]'. On by default; 'enabled: false' turns connected
+  # never in this file, the library or an export. Needs the connections extra
+  # (install.sh installs it). On by default; 'enabled: false' turns connected
   # accounts off (their sources then report Needs login).
   # github_client_id: the client id of a GitHub OAuth app you registered with
   # device flow enabled (no secret). Turns on "Sign in with GitHub"; without it,
@@ -870,7 +870,7 @@ def quiet_window(text: str) -> tuple[int, int]:
 class ConnectionsConfig:
     """Connected accounts (section 3): sources read with your own login.
     Tokens are kept encrypted in data/secrets/, never here. Needs the cryptography
-    package (pip install 'kranto[connections]'). ``github_client_id``: an OAuth
+    package (the ``connections`` extra). ``github_client_id``: an OAuth
     app's client id (no secret), which turns on GitHub's device flow."""
 
     enabled: bool = True

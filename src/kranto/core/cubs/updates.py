@@ -199,7 +199,7 @@ def run(rt) -> dict:
         return summary
     if getattr(rt, "cubs", None) is None or not (v["cubs.check_updates"]
                                                  or v["cubs.auto_update"]):
-        summary = {"why": "looking for the cubs' updates is off"}
+        summary = {"why": "looking for the features' updates is off"}
         record_run(rt.store, KIND, "skipped", started, summary, run_uuid=uuid)
         return summary
     outcomes = check(rt, apply=bool(v["cubs.auto_update"]))

@@ -51,7 +51,7 @@ SUMMARY = ("Kranto can send one small report a day about how it is used: the ver
            "error's type, where in Kranto's code it happened and its message with every word "
            "that could be yours removed. Never your topics, cards, posts, prompts, paths or "
            "keys. Reports carry no "
-           "identifier. You can read every report before and after it is sent (Kranto "
+           "identifier. You can read every report before and after it is sent (kranto "
            "telemetry show), and stop at any time (kranto telemetry off, Settings › Privacy & "
            "access, or DO_NOT_TRACK=1). If you choose to send, reports go to a relay the "
            "maintainer runs on AWS in the EU; every field is listed in "

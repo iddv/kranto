@@ -95,6 +95,39 @@ def test_interactive_enter_sends_nothing_and_a_number_answers(user_home, capsys,
     assert not any("Send usage reports?" in p for p in asked[n:])    # asked once
 
 
+def test_a_mistyped_answer_is_asked_again_and_setup_goes_on(user_home, capsys,  # noqa: F811
+                                                            monkeypatch):
+    """A stranger typed "y" (or a port) at the question: setup asked again and went on, where it
+    used to stop with words that were not the 1/2/3 it offered."""
+    host = make_host(user_home)
+    host.stdin_tty = True
+    monkeypatch.setattr(sys.stdout, "isatty", lambda: True)
+    replies = iter(["y", "10211", "Basic"])
+    monkeypatch.setattr(builtins, "input", lambda prompt: next(replies) if
+                        "Send usage reports?" in prompt else "")
+    monkeypatch.setattr(wizard.getpass, "getpass", lambda prompt: "")
+    code, out = setup(host, "--no-start", capsys=capsys)
+    home = user_home / ".kranto"
+    assert code == 0
+    assert "'y' is not one of them: type 1, 2 or 3" in out.out
+    assert mode_in(home)["mode"] == "basic"
+    assert "Sources › Topics" in out.out                      # the sections after it still ran
+    replies2 = iter(["x", "x", "x"])
+    monkeypatch.setattr(builtins, "input", lambda prompt: next(replies2) if
+                        "Send usage reports?" in prompt else "")
+    telemetry.set_mode(home, "local")
+    cfg = yaml.safe_load((home / "kranto.yaml").read_text())
+    cfg["telemetry"].pop("answered_at", None)
+    (home / "kranto.yaml").write_text(yaml.safe_dump(cfg))
+    code, out = setup(host, "usage", capsys=capsys)
+    assert code == 0 and "not answered, so nothing is sent" in out.err + out.out
+
+
+def test_the_question_names_the_real_command():
+    assert "(kranto telemetry show)" in telemetry.SUMMARY
+    assert "Kranto telemetry" not in telemetry.SUMMARY
+
+
 def test_do_not_track_is_kept_and_said(user_home, capsys, monkeypatch):  # noqa: F811
     monkeypatch.setenv("DO_NOT_TRACK", "1")
     code, out = setup(make_host(user_home), "--yes", "--no-start", capsys=capsys)
