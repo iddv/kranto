@@ -34,7 +34,7 @@ RETIRED = {
         "policy", "harness", "owner", "max_usd", "models", "stage_caps", "retries",
         "max_resumes", "auto_repair", "flow", "fix_rounds", "kill_grace_s", "undo_s",
         "command", "revise_command")),
-    # the page's own reads of the server's database file
+    # reads of the server's database file, by the page running on its own
     "kranto.db", "kranto.include_unsupported",
 }
 
