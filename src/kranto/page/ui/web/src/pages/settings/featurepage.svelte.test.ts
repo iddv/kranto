@@ -227,7 +227,7 @@ describe("an installed cub's Settings page", () => {
   it("says a feature's source is gone, with the command that points it elsewhere", async () => {
     stub();
     hosted();
-    // the server's words for a feature Kranto ships (core/cubs/updates.py's gone_words)
+    // Kranto's own words for a feature it ships (core/cubs/updates.py's gone_words)
     const fix = 'kranto cub source toot "$(kranto paths examples)/toot"';
     const gone = { path: "/x/old-install/cubs/examples/toot", fix,
       words: `Its source folder is gone (/x/old-install/cubs/examples/toot); it gets no updates. Point it at this Kranto's own copy: ${fix}` };
