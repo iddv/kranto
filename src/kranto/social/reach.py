@@ -216,7 +216,16 @@ def read_threads(send: Any, media_id: str) -> dict[str, int | None] | str | None
 def run(rt: Any, now: datetime | None = None) -> dict[str, Any]:
     """The daily ``post.reach`` job: read every due post's numbers, one row each; then
     LinkedIn's token reminder (``remind``). Nothing on the preview. Kranto never retries a read
-    by itself: a post a site did not answer for is read at the next run."""
+    by itself: a post a site did not answer for is read at the next run. Each run is recorded
+    (a ``runs`` row): the scheduler reads them to know the job is not due again for a day."""
+    from ..core.context import record_run
+    started = utcnow()
+    out = _run(rt, now)
+    record_run(rt.store, KIND, "ok", started, out)
+    return out
+
+
+def _run(rt: Any, now: datetime | None = None) -> dict[str, Any]:
     from .. import preview
     from ..core.cubs.brokers.base import BrokerContext, connection_of
     from ..sources.base import SourceError

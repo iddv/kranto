@@ -75,8 +75,11 @@ def settings(cfg: dict | None) -> dict:
                         if k in HARNESSES and isinstance(v, str) and v}
     if raw.get("permission") in PERMISSIONS:
         out["permission"] = raw["permission"]
-    if raw.get("config") in CONFIGS:
-        out["config"] = raw["config"]
+    config = raw.get("config")
+    if config == legacy.CONSOLE_CONFIG:      # saved before the rename: Kranto's own config
+        config = "kranto"
+    if config in CONFIGS:
+        out["config"] = config
     d = raw.get("daily_usd")
     if isinstance(d, int | float) and not isinstance(d, bool) and d > 0:
         out["daily_usd"] = float(d)
