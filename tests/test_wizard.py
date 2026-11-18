@@ -515,7 +515,7 @@ def test_macos_installs_the_watcher_only(user_home, capsys, monkeypatch):  # noq
     assert code == 0, out.err
     assert wizard.MACOS_NOTE in out.err
     names = {c["name"] for c in got["checks"]}
-    assert "macos" in names and "builds" in names
+    assert "macos" in names and "sandbox" in names
     assert not names & {"bwrap", "claude", "systemd", "linux"}
     assert not [c for c in got["checks"] if c["status"] == FAIL]
     assert got["service"] == "foreground"
@@ -689,8 +689,24 @@ def _x_running(monkeypatch):
         return {"ok": True, "message": "Saved. Now click Connect."}
     monkeypatch.setattr(wizard, "_api", api)
     monkeypatch.setattr(launcher, "port_in_use", lambda port, host="127.0.0.1": True)
+    monkeypatch.setattr(launcher, "serves_this_home", lambda host, port, home: True)
     monkeypatch.setattr(launcher, "_wait_up", lambda host, port, s: True)
     return calls
+
+
+def test_a_foreground_setup_will_not_take_another_server_on_its_port(user_home, capsys,  # noqa: F811
+                                                                     monkeypatch):
+    """kranto setup said "already answers: using it ... Kranto is running" for any server on
+    the home's port; one that is not this home's Kranto is refused, with the way on."""
+    monkeypatch.setattr(launcher, "port_in_use", lambda port, host="127.0.0.1": True)
+    monkeypatch.setattr(launcher, "serves_this_home", lambda host, port, home: False)
+    host = make_host(user_home, FakeMachine(systemd=False))
+    code, out = setup(host, "--yes", "--service", "foreground", "--port", "9051",
+                      "--no-browser", capsys=capsys)
+    assert code != 0
+    assert "127.0.0.1:9051 already answers, but not as Kranto serving" in out.err + out.out
+    assert "choose another port with --port" in out.err + out.out
+    assert "using it" not in out.err + out.out
 
 
 def test_sources_with_yes_and_no_client_id_connects_nothing(user_home, capsys):  # noqa: F811

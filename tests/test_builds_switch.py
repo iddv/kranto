@@ -52,10 +52,10 @@ def test_absent_means_off_and_the_value_is_checked(tmp_path):
             config_mod.load(tmp_path, dotenv=False)
 
 
-def test_the_default_config_says_builds_are_off():
-    assert "builds:\n" in config_mod.DEFAULT_CONFIG_YAML
-    block = config_mod.DEFAULT_CONFIG_YAML.split("builds:\n", 1)[1].split("\n\n", 1)[0]
-    assert "enabled: false" in block
+def test_the_default_config_leaves_builds_out_and_off(tmp_path):
+    assert "\nbuilds:\n" not in config_mod.DEFAULT_CONFIG_YAML
+    config_mod.init_workspace(tmp_path)
+    assert not config_mod.builds_on(config_mod.load(tmp_path, dotenv=False))
 
 
 @pytest.fixture

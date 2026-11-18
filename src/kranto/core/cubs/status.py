@@ -3,7 +3,7 @@
 The doctor: bubblewrap works (else no cub runs; red when the owner allowed running them
 without it); the systemd user scope works (else "rlimits only": memory as an address-space
 limit, no pids cap); no ``cubs.STOP``; every installed cub's tree hashes to its pin.
-``kranto status``: one line, ``cubs: 2 installed, 2 dry, 0 paused; limits: scope``.
+``kranto status``: one line, ``cubs: 2 installed, 1 in practice, 0 paused; a systemd scope caps…``.
 """
 
 from __future__ import annotations
@@ -56,7 +56,9 @@ def status_line(cfg, store=None) -> str:
             dry += 1
     head = (f"{len(installed)} installed, {dry} in practice, {len(paused)} paused" if rows
             else "none installed")
-    line = f"{head}; limits: {sandbox.limits_mode()}"
+    caps = ("a systemd scope caps their memory, processes and CPU"
+            if sandbox.limits_mode() == "scope" else "process limits cap them (no systemd scope)")
+    line = f"{head}; {caps}"
     if not cub_settings.enabled(cfg):
         line += "; cubs are off (cubs.enabled: false)"
     if tickets.stop_file().exists():

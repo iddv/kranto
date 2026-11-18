@@ -22,6 +22,7 @@ import threading
 from datetime import timedelta
 from typing import Any
 
+from kranto import legacy
 from kranto.core import rows as rowsafe
 from kranto.core.text import is_backend_label, iso, outlet
 
@@ -41,22 +42,24 @@ def _int(params: dict[str, Any], key: str, default: Any=None) -> Any:
         raise ValueError(f"{key} is a whole number") from None
 
 
-KRANTO_ON = re.compile(r"^\s*(?:it\s+)?kranto\s+on\s+", re.IGNORECASE)
+# Briefs written before the prompt's change open a why line with the verb that was also the old
+# product's name ("<verb> on robot costs"); legacy.COMMAND is that word.
+OLD_VERB_ON = re.compile(rf"^\s*(?:it\s+)?{re.escape(legacy.COMMAND)}\s+on\s+", re.IGNORECASE)
 
 
 def plain_why(why: Any) -> Any:
-    """A why line as the page says it: one written before the prompt's
-    change that opens "Kranto on …" (which reads as the product's name) loses those words."""
-    if not isinstance(why, str) or not KRANTO_ON.match(why):
+    """A why line as the page says it: one stored before the prompt's change that opens with
+    the old verb and "on" (which reads as a product's name) loses those words."""
+    if not isinstance(why, str) or not OLD_VERB_ON.match(why):
         return why
-    rest = KRANTO_ON.sub("", why, count=1).strip()
+    rest = OLD_VERB_ON.sub("", why, count=1).strip()
     return rest[:1].upper() + rest[1:] if rest else why
 
 
 def _outlets(items: list[Any]) -> list[Any]:
     """A web source stored with the search backend's name as its outlet (briefs written before
      D6: "Exa, free mode (rate-limited, no account)") reads as its own site; a why line
-    that opens "Kranto on" says what it Kranto on (``plain_why``)."""
+    that opens with the old verb says plainly what it is about (``plain_why``)."""
     for it in items:
         if isinstance(it, dict) and "why" in it:
             it["why"] = plain_why(it["why"])

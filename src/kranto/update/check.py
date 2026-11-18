@@ -463,11 +463,12 @@ def _ago(ts: str | None) -> str:
 
 
 def moving(home: Path, inst: dict) -> str:
-    """``, moving to stable at the next promotion`` for an install that runs a nightly build
+    """``, moves to stable at the first stable release newer than it`` for an install that
+    runs a nightly build
     and chose stable (nothing is ever downgraded: it stays on its build until a stable newer
-    than it is promoted), else ``""``."""
+    than it is published), else ``""``."""
     if inst.get("channel") == "nightly" and settings(home).channel == "stable":
-        return ", moving to stable at the next promotion"
+        return ", moves to stable at the first stable release newer than it"
     return ""
 
 
