@@ -96,6 +96,9 @@ LEAKS = [
     ("plan-ref", {"docs/a.md": "From R" + "CA 20" + "24-01-02.\n"}),
     ("plan-ref", {"docs/a.md": "UI" + " fi" + "x 3b landed.\n"}),
     ("owner-site", {"src/kranto/connections/x.py": "placeholder = '" + "ueyw" + "95bi'\n"}),
+    ("foreign-account", {"docs/cubs.md": "More cubs live in " + "octo" + "-owner/x.\n"}),
+    ("foreign-account", {"src/kranto/x.py": "URL = 'https://example.invalid/" + "bear"
+                         + "cubs'\n"}),
     ("attribution", {"docs/a.md": "Co-" + "Authored-By: a bot\n"}),
     ("attribution", {"docs/a.md": "Gener" + "ated with a tool.\n"}),
     ("big-file", {"data/blob.bin": b"\x00" * 1_000_001}),
@@ -125,6 +128,7 @@ ALLOWED = [
     ("host", {"docs/a.md": "Use localhost or example.net.\n"}),
     ("private-repo", {"docs/a.md": "See kranto-notes.\n"}),
     ("plan-ref", {"docs/a.md": "See docs/design/TENETS.md and the release plan.\n"}),
+    ("foreign-account", {"docs/a.md": "The cub SDK is bears_cub; an octopus owner.\n"}),
     ("attribution", {"docs/a.md": "Written by hand. Generated files live in build/.\n"}),
     ("big-file", {"data/blob.bin": b"\x00" * 1000}),
     ("workflow", _workflow(

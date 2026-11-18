@@ -32,7 +32,7 @@ kept that memory): see [the decision log](design/DECISIONS.md) and `src/kranto/e
 The caps cover the server and everything it starts, the console included.
 
 Where Kranto runs without the service (`kranto up --foreground`, a machine whose systemd user
-manager is not running for the service) and for the watcher's own `python -m kranto.cli run`, the command puts itself in a
+manager is not running for the service) and for the watcher's own `kranto watch run`, the command puts itself in a
 `systemd-run --user --scope` with the same caps when the machine has a user systemd. It says
 so on its first line. `KRANTO_NO_SCOPE=1` runs it without. Without systemd (macOS, a
 container), there is no cap; the warning below still works.

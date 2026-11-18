@@ -94,7 +94,7 @@ class FakeMastodon:
         if not self.authorized(request):
             return httpx.Response(401, json={"error": "The access token is invalid"})
         if path == "/api/v1/accounts/verify_credentials":
-            return httpx.Response(200, json={"acct": "octo-owner", "id": "1"})
+            return httpx.Response(200, json={"acct": "jo-example", "id": "1"})
         if path in ("/api/v1/timelines/home", "/api/v1/timelines/list/42"):
             return httpx.Response(200, json=[
                 {"id": "1", "url": f"https://{INSTANCE}/@a/1", "content": "<p>A CRDT engine "
@@ -434,10 +434,10 @@ def test_mastodon_flow_registers_once_asks_read_only_and_labels_the_account(
     assert fake.registered[0]["scopes"] == SCOPES
     conn = connect(conns, fake, redirect)
     assert len(fake.registered) == 1, "one app per instance and callback"
-    assert conn["account"] == f"@octo-owner@{INSTANCE}" and conn["state"] == "connected"
+    assert conn["account"] == f"@jo-example@{INSTANCE}" and conn["state"] == "connected"
     assert json.loads(conn["scopes"]) == SCOPES.split()
     [account] = conns.accounts()
-    assert account["account"] == f"@octo-owner@{INSTANCE}" and len(account["scopes"]) == 3
+    assert account["account"] == f"@jo-example@{INSTANCE}" and len(account["scopes"]) == 3
     assert conns.test(conn["id"])["ok"]
 
 
@@ -545,7 +545,7 @@ def test_web_flow_end_to_end_then_ingest_then_revoked_token_needs_login(rig, cap
                        follow_redirects=False)
         assert done.status_code == 303 and "Connected" in done.headers["location"]
         [account] = web.get("/api/connections").json()["accounts"]
-        assert account["account"] == f"@octo-owner@{INSTANCE}"
+        assert account["account"] == f"@jo-example@{INSTANCE}"
 
         # A source from the catalog's login preset, previewed then added.
         body = {"preset": "mastodon.home", "fields": {"instance": INSTANCE}}
@@ -660,7 +660,7 @@ def test_doctor_is_ok_with_a_vault_written_before_the_rename(rig, machine_id):
     assert "readable here" in checks["secrets"].detail
     assert "before the rename" in checks["secrets"].detail
     assert checks["connections"].status == doctor.OK
-    assert "octo-owner" in checks["connections"].detail
+    assert "jo-example" in checks["connections"].detail
     [account] = rt.connections.accounts()
     assert account["state"] == "connected"
     assert rt.connections.test(account["id"])["ok"] is True

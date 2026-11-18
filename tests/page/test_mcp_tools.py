@@ -57,10 +57,10 @@ POST = {"drafts": [{"id": 3, "word": "Newsletter", "title": "Weekly", "fact": "I
 def afk_client(routes: dict) -> T.Client:
     seen = []
 
-    def afk_get(p, q=None):
+    def server_get(p, q=None):
         seen.append(p)
         return (200, routes[p]) if p in routes else (404, {"error": "no"})
-    c = T.Client(get=lambda p, q=None: (404, {}), post=lambda p, b: (404, {}), afk_get=afk_get)
+    c = T.Client(get=lambda p, q=None: (404, {}), post=lambda p, b: (404, {}), server_get=server_get)
     c.seen = seen
     return c
 
@@ -131,11 +131,11 @@ def test_write_a_post_says_started_and_then_what_happened():
                           ({"state": "running"}, "Write a post: started, not finished yet.", None)):
         asked = []
 
-        def afk_get(p, q=None, job=job):
+        def server_get(p, q=None, job=job):
             asked.append((p, q))
             return 200, job
         c = T.Client(get=lambda p, q=None: (404, {}), post=lambda p, b: (404, {}),
-                     afk_get=afk_get, afk_post=lambda p, b: (200, started))
+                     server_get=server_get, server_post=lambda p, b: (200, started))
         clock = iter(range(0, 100, 5))
         got = T._write_result(c, started["answer"], _sleep=lambda s: None,
                               _clock=lambda: next(clock))

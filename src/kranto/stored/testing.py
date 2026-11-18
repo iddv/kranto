@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import types
 from datetime import UTC, datetime
-from typing import Annotated, Any, Literal, TypeVar, Union, get_args, get_origin
+from typing import Annotated, Any, Literal, Union, get_args, get_origin
 
 from hypothesis import strategies as st
 
@@ -70,10 +70,7 @@ def _for(tp: object) -> st.SearchStrategy[Any]:
     raise TypeError(f"no strategy for {tp!r}")
 
 
-T = TypeVar("T", bound=Stored)
-
-
-def strategy(cls: type[T]) -> st.SearchStrategy[T]:
+def strategy[T: Stored](cls: type[T]) -> st.SearchStrategy[T]:
     """Instances of a contract type, every field drawn from its type and ``extra`` from keys no
     field names."""
     fields = cls._fields()

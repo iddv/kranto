@@ -25,7 +25,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from kranto import legacy
+from kranto import legacy, product
 
 from .. import tokens as tokens_mod
 from . import api
@@ -62,7 +62,7 @@ def make_handler(app: App, store: tokens_mod.Store | None = None, require: bool 
     store = store or tokens_mod.Store()
 
     class Handler(BaseHTTPRequestHandler):
-        server_version = "brb-ui"
+        server_version = f"{product.COMMAND}-page"
 
         def log_message(self, fmt, *a):      # quiet
             pass

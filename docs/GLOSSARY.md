@@ -12,8 +12,8 @@ The words Kranto uses, in the app, its commands and this repository.
   `kranto` command and `kranto update`.
 - **the page**: the web UI in your browser (drawn at `/`; its own files and calls under
   `/brb/`), with the console and `kranto mcp` (`src/kranto/page/`).
-- **`kranto`**: the command. The watcher's own commands also run from a checkout as
-  `python -m kranto.cli` ([watcher.md](watcher.md)).
+- **`kranto`**: the command. The watcher's own commands are under
+  `kranto watch` ([watcher.md](watcher.md)).
 - **Home**: where an install keeps its data. A Kranto home (default `~/.kranto`) holds
   `kranto.yaml`, `.env`, `data/` (the library) and `loop/` (the page's `loop.yaml`).
   `~/.config/kranto/home` records which home `kranto` uses.

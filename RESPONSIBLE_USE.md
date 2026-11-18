@@ -176,11 +176,11 @@ updated 2026-04-27), the Developer Policy and the Display Requirements.
   X's: deletions within 24 hours of a request. Once a week Kranto asks X about
   up to 100 kept posts (the ones idea cards cite first) and removes each one X
   no longer has, through the recorded purge, with no rollup made from it.
-  **Remove this post** (`POST /api/observations/<id>/remove`, or `python -m kranto.cli
+  **Remove this post** (`POST /api/observations/<id>/remove`, or `kranto watch
   sources forget <post URL>`) removes one at once: that is how a deletion request you
   receive is honoured. Its `items_seen` row stays, so it is never read again.
 - **Nothing is displayed to anyone else or redistributed.** Kranto shows one
-  person their own notes; a bundle (`python -m kranto.cli export bundle`) leaves an X post's text
+  person their own notes; a bundle (`kranto watch export bundle`) leaves an X post's text
   out and keeps the URL and Kranto's summary.
 - **X through Grok** (off until `XAI_API_KEY` is set): for a person with an xAI key and
   no X developer app, xAI's `x_search` tool searches X once a day and lists the posts it
@@ -240,9 +240,9 @@ Observations are a working set, not a permanent archive.
 - Each observation is kept for its retention age: 90 days by default
   (`retention.default_days` in `kranto.yaml`), overridable per source kind
   (`retention.by_kind`, for example `{reddit: 30}`) and per source
-  (`python -m kranto.cli sources retention ID DAYS`; `default` removes the override). `0` keeps
+  (`kranto watch sources retention ID DAYS`; `default` removes the override). `0` keeps
   observations forever; setting it is your choice and your responsibility.
-- Past that age, compaction (`python -m kranto.cli compact`, and a daily job of the service,
+- Past that age, compaction (`kranto watch compact`, and a daily job of the service,
   set by `retention.every_hours`) clusters each week's expired observations
   into rollups: a name, a short summary, keywords, source mix and up to five
   links. It then removes the observations and the model calls that hold their
@@ -275,6 +275,6 @@ when").
 - **Your jurisdiction.** Data protection and copyright law differ by country.
   Kranto does not decide what is lawful for you.
 - **Not republishing third-party text.** Observations, excerpts, exports
-  (`python -m kranto.cli export`) and bundles hold text derived from other people's writing.
+  (`kranto watch export`) and bundles hold text derived from other people's writing.
   Keep them for your own use; do not publish a library, an export or a bundle
   without checking the terms of every source in it.

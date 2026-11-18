@@ -82,7 +82,7 @@ class World:
     def set_git(self, commits, version):
         self._fresh("kranto", version)
         self._write("kranto", "kranto", version, {
-            "url": "https://github.com/octo-owner/x",
+            "url": "https://github.com/jo-example/x",
             "vcs_info": {"vcs": "git", "commit_id": commits["kranto"]}})
 
     def set_wheels(self, folder, version, shape="final"):

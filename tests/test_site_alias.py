@@ -1,8 +1,8 @@
 """The owner's site cub as a registry alias of Kranto's blog writer (the ``cubs`` row; CUT,
 handed over by G4).
 
-A copy whose registry holds an ``examplecom`` install row (from bearcubs' ``cubs/examplecom`` or
-the old
+A copy whose registry holds an ``examplecom`` install row (from a git repository's
+``cubs/examplecom`` or the old
 example's folder) lists one cub, ``blog``, at Kranto's version; ``/api/cubs/blog`` reaches it; the
 blog writer reads the examplecom settings it has none of its own for; once Kranto's own blog writer
 is
@@ -63,9 +63,9 @@ def test_an_examplecom_row_lists_one_blog_cub_at_kranto_version(rt, monkeypatch)
         assert web.get("/api/cubs/blog").json()["alias_of"] == "examplecom"
 
 
-def test_bearcubs_examplecom_is_the_site_cub_and_another_source_is_not(rt):  # noqa: F811
+def test_a_git_examplecom_is_the_site_cub_and_another_source_is_not(rt):  # noqa: F811
     assert registry.is_site_row({"cub": "examplecom", "source": json.dumps(
-        {"kind": "git", "url": "https://github.com/octo-owner/bearcubs", "ref": "main",
+        {"kind": "git", "url": "https://example.invalid/cubs.git", "ref": "main",
          "subdirectory": "cubs/examplecom"})})
     assert registry.is_site_row({"cub": "examplecom", "source": "{}"})
     assert registry.is_site_row({"cub": "examplecom", "source": None})          # any stored shape
