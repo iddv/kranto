@@ -58,6 +58,8 @@ will carry; the pre-releases `v0.7.0-devN` carry parts of it.
   places for a new topic says "a few minutes" and ticks first the places that publish.
 - Removed what nothing used: the build loop's settings, the `brb` command line, the evals and
   setup-key routes, the browser extension's pairing path.
+- NOTICE names the copyright holder, and the package's and the SDK's metadata name the same
+  author.
 
 ### What it is
 
