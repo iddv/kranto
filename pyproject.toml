@@ -70,9 +70,9 @@ mcp = ["mcp>=1.8"]
 browser = ["playwright==1.65.1"]
 
 [project.scripts]
+# The one command. An install made before the rename keeps its old command as a link to this
+# one, made by `kranto up` when the unit it kept starts that name (launcher.keep_old_command).
 kranto = "kranto.launcher:main"
-# the command's name before the rename, the same function, kept until 1.0
-bears = "kranto.launcher:main"
 
 [tool.hatch.version]
 source = "vcs"

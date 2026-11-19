@@ -1239,7 +1239,8 @@ def where(run: Run) -> list[str]:
         f"{launcher.tilde(launcher.pointer_path(h).parent, h)} (tokens)",
         *([launcher.tilde(unit, h)] if unit.is_file() else []),
         f"~/.local/share/uv/tools/{product.DIST} and ~/.local/bin/{product.COMMAND} (the "
-        f"program; ~/.local/bin/{legacy.COMMAND} is the same command under its old name)",
+        "program" + (f"; ~/.local/bin/{legacy.COMMAND} is the same command under its old name"
+                     if (h / ".local" / "bin" / legacy.COMMAND).exists() else "") + ")",
     ]
 
 
