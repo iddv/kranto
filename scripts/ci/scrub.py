@@ -442,6 +442,9 @@ def scan_message(text: str, label: str) -> list[Finding]:
 BOT_NAME = "dependabot[bot]"
 BOT_EMAIL = "49699333+dependabot[bot]@" + NOREPLY_DOMAIN
 BOT_SIGNOFF = "Signed-off-by: dependabot[bot] <support@" + "github.com>"
+# GitHub's squash of a Dependabot pull request names the bot again as a co-author: the bot's own
+# identity on the bot's own commit, not a tool's attribution. Any other co-author line is refused.
+BOT_COAUTHOR = "co-" + "authored-by: " + BOT_NAME + " <" + BOT_EMAIL + ">"
 _SIGNOFF_RE = re.compile(r"^Signed-off-by: (.+?) <([^<>]+)>\s*$", re.M)
 
 
@@ -526,8 +529,10 @@ def scan_commits(range_spec: str, repo: str | Path = ".", dco: bool = False) -> 
                 )
         scanned = body
         if is_bots_own((a_name, author), (c_name, committer)):
-            # the bot's own sign-off names GitHub's support address: not a person's
-            scanned = "\n".join(ln for ln in body.splitlines() if ln != BOT_SIGNOFF)
+            # the bot's own sign-off names GitHub's support address: not a person's; and the
+            # squash's co-author line names the bot itself
+            scanned = "\n".join(ln for ln in body.splitlines()
+                                if ln != BOT_SIGNOFF and ln.strip().lower() != BOT_COAUTHOR.lower())
         findings.extend(scan_message(scanned, label))
         if dco:
             why = dco_problem((a_name, author), (c_name, committer), body)
