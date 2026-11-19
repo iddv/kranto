@@ -7,7 +7,7 @@ are loaded by path, so a script needs no install of Kranto and no ``sys.path`` c
     names.py repo            the repository releases are published to (public.toml's repo)
     names.py dist            the release's one distribution (product.DIST)
     names.py command         the product's command
-    names.py alias           the command's old name, kept as an alias (legacy.COMMAND)
+    names.py alias           the command's old name (legacy.COMMAND): only an old install has it
     names.py compat          the old shape's three distributions, meta first (one a line)
     names.py old-env VAR     the old names of the variable VAR (KRANTO_UNIT: each name an
                              install made before the rename reads instead), one a line
