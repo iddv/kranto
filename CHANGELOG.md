@@ -5,61 +5,9 @@ What changed in each release of Kranto, for the person who runs it. Versions fol
 (`vX.Y.0-devN`, GitHub prereleases) are not listed one by one: their notes name the pull
 requests they carry.
 
-## 0.7.0 — unreleased
+## 0.7.0 — 2026-11-19
 
-Not released yet: the date is written here when 0.7.0 is cut. Until then this is what it
-will carry; the pre-releases `v0.7.0-devN` carry parts of it.
-
-### Fixed since the pre-release v0.7.0-dev2
-
-- An install that crossed over from before the rename keeps its connected accounts: Kranto
-  reads the secrets file the old version wrote (0.7.0.dev1 and dev2 said "cannot be decrypted
-  here") and rewrites it in its own form at the next change; `kranto doctor` says so.
-- The console's "Kranto's own Claude config" choice, saved before the rename, is read as that
-  again (it fell back to your own config).
-- The daily job that reads back the numbers of sent posts now records its run, so it runs once a
-  day instead of once a minute.
-- A ? tip's **More in the docs** opens the help page; it opened an address that does not exist.
-
-### Changed since the pre-release v0.7.0-dev2
-
-- **A new install has one command, `kranto`.** The command's name from before the rename is no
-  longer in the package; an install made before the rename keeps it: `kranto up`, which every
-  update runs, links it to `kranto` because the service that install kept starts that name.
-- **An unfinished setup shows on the home**, on a phone too: "Kranto is not set up yet", what is
-  still missing (a model, a topic, a place to read) and **Set up**, which opens Welcome there.
-- **Keys are shown as your computer names them:** Ctrl+K and Ctrl+J on Linux and Windows, ⌘K
-  and ⌘J on a Mac, on the page, in the help and in `kranto doctor`.
-- Plainer words: `kranto doctor`'s page line, `kranto down` without systemd, `kranto watch
-  import`'s help; `kranto uninstall` names GitHub's pages only when GitHub was connected, and
-  looking for Claude Code no longer runs npm (which left `~/.npm/_logs` behind).
-
-- **Installing needs no GitHub account:** `install.sh` and the guide's by-hand steps download
-  the release's wheel and `SHA256SUMS` from its public addresses and check every hash.
-- **The watcher's commands are under `kranto watch`** (`kranto watch topics`, `kranto watch
-  websearch "…"`, `kranto watch provider show`, …). Every command Kranto or its docs print now
-  runs on an installed Kranto; `python -m kranto.cli` still works from a checkout.
-- **A live web search and a page fetch need a sign-in** (`/api/websearch` and
-  `/api/websearch/fetch`), as every change does; other reads still need none. A script that
-  called them without a token now gets 401; `kranto mcp` and the page send theirs. Switching
-  usage reports to basic or detailed, the console's last words and a raw model answer are the
-  signed-in page's only.
-- **A new home's console asks first and does not open by itself** (`ask: {open: false,
-  permission: ask}` in its `loop.yaml`); a home made before keeps what it had. `kranto doctor`
-  says how the console behaves.
-- **A feature from an unreviewed source waits for your approval at every update**
-  (`cubs.auto_update_unreviewed`, off); one from your own folder still updates by itself.
-- **The embedding model is kept in `~/.cache/kranto/fastembed`**, not in `/tmp` (gone at a
-  reboot on many machines); a copy an older Kranto left in `/tmp` is copied over once.
-- When GitHub's rate limit stops the update check, it says so, when it lifts, and that a GitHub
-  login avoids it. Without systemd, `kranto uninstall` says when a foreground Kranto still runs,
-  and `kranto setup` no longer takes another program on its port for Kranto.
-- The page says "feature" where it said "cub", and drops the rename's other leftovers; finding
-  places for a new topic says "a few minutes" and ticks first the places that publish.
-- Removed what nothing used: the build loop's settings, the `brb` command line, the evals and
-  setup-key routes, the browser extension's pairing path.
-- NOTICE names the copyright holder, and the package's and the SDK's metadata name the same
-  author.
+The first release of Kranto.
 
 ### What it is
 
@@ -132,3 +80,55 @@ Read `docs/setup.md` › "Updating" first: its settings must name this repositor
 (`update.repo: iddv/kranto`), or it never sees a Kranto release. The crossing is two releases: a nightly build in the
 old shape (three wheels, for the old update helper), then the one-wheel release. `kranto update
 --rollback` goes back at each step.
+
+### If you ran a pre-release: fixed since v0.7.0-dev2
+
+- An install that crossed over from before the rename keeps its connected accounts: Kranto
+  reads the secrets file the old version wrote (0.7.0.dev1 and dev2 said "cannot be decrypted
+  here") and rewrites it in its own form at the next change; `kranto doctor` says so.
+- The console's "Kranto's own Claude config" choice, saved before the rename, is read as that
+  again (it fell back to your own config).
+- The daily job that reads back the numbers of sent posts now records its run, so it runs once a
+  day instead of once a minute.
+- A ? tip's **More in the docs** opens the help page; it opened an address that does not exist.
+- The short posts' daily job and the newsletter's weekly job no longer run every minute
+  after a run that found nothing to do: that run now counts for its day.
+
+### If you ran a pre-release: changed since v0.7.0-dev2
+
+- **A new install has one command, `kranto`.** The command's name from before the rename is no
+  longer in the package; an install made before the rename keeps it: `kranto up`, which every
+  update runs, links it to `kranto` because the service that install kept starts that name.
+- **An unfinished setup shows on the home**, on a phone too: "Kranto is not set up yet", what is
+  still missing (a model, a topic, a place to read) and **Set up**, which opens Welcome there.
+- **Keys are shown as your computer names them:** Ctrl+K and Ctrl+J on Linux and Windows, ⌘K
+  and ⌘J on a Mac, on the page, in the help and in `kranto doctor`.
+- Plainer words: `kranto doctor`'s page line, `kranto down` without systemd, `kranto watch
+  import`'s help; `kranto uninstall` names GitHub's pages only when GitHub was connected, and
+  looking for Claude Code no longer runs npm (which left `~/.npm/_logs` behind).
+- **Installing needs no GitHub account:** `install.sh` and the guide's by-hand steps download
+  the release's wheel and `SHA256SUMS` from its public addresses and check every hash.
+- **The watcher's commands are under `kranto watch`** (`kranto watch topics`, `kranto watch
+  websearch "…"`, `kranto watch provider show`, …). Every command Kranto or its docs print now
+  runs on an installed Kranto; `python -m kranto.cli` still works from a checkout.
+- **A live web search and a page fetch need a sign-in** (`/api/websearch` and
+  `/api/websearch/fetch`), as every change does; other reads still need none. A script that
+  called them without a token now gets 401; `kranto mcp` and the page send theirs. Switching
+  usage reports to basic or detailed, the console's last words and a raw model answer are the
+  signed-in page's only.
+- **A new home's console asks first and does not open by itself** (`ask: {open: false,
+  permission: ask}` in its `loop.yaml`); a home made before keeps what it had. `kranto doctor`
+  says how the console behaves.
+- **A feature from an unreviewed source waits for your approval at every update**
+  (`cubs.auto_update_unreviewed`, off); one from your own folder still updates by itself.
+- **The embedding model is kept in `~/.cache/kranto/fastembed`**, not in `/tmp` (gone at a
+  reboot on many machines); a copy an older Kranto left in `/tmp` is copied over once.
+- When GitHub's rate limit stops the update check, it says so, when it lifts, and that a GitHub
+  login avoids it. Without systemd, `kranto uninstall` says when a foreground Kranto still runs,
+  and `kranto setup` no longer takes another program on its port for Kranto.
+- The page says "feature" where it said "cub", and drops the rename's other leftovers; finding
+  places for a new topic says "a few minutes" and ticks first the places that publish.
+- Removed what nothing used: the build loop's settings, the `brb` command line, the evals and
+  setup-key routes, the browser extension's pairing path.
+- NOTICE names the copyright holder, and the package's and the SDK's metadata name the same
+  author.

@@ -2,7 +2,8 @@
 
 A job with ``at: "08:00"`` (and ``days: [mon]``) is due once at or after that local time on
 each listed day (every day when ``days`` is empty): its slot is the newest such time not after
-now, and it is due while no run since that slot ended ``ok``, ``degraded`` or ``skipped``. A
+now, and it is due while no run since that slot ended ``ok``, ``degraded`` or ``skipped`` (a
+scheduled run with nothing to do is no row: the store's note of it counts, until a restart). A
 failed run leaves it due, under the scheduler's back-off (read from the stored runs, so a
 restart keeps it); a slot missed while Kranto was down is
 run once when Kranto is back (a Monday issue on Tuesday, not a lost week). A job without ``at``
@@ -70,12 +71,16 @@ def next_slot(at: str, days, after: datetime, tz: str | None = None) -> datetime
 
 
 def _last_done(store: Store, kind: str) -> datetime | None:
+    """When a run of ``kind`` last ended done: its newest such row, or the scheduled run that
+    had nothing to do, which the store keeps in memory instead of a row (``Store.skipped_at``).
+    Reading the rows alone left a job that found nothing to do due at every tick: the short
+    posts' daily job ran once a minute."""
     marks = ",".join("?" * len(DONE))
     r = store.query_one(f"SELECT MAX(finished_at) AS t FROM runs WHERE kind = ? AND status IN "
                         f"({marks})", (kind, *DONE))
-    if not r or not r["t"]:
-        return None
-    return datetime.fromisoformat(r["t"].replace("Z", "+00:00"))
+    row = datetime.fromisoformat(r["t"].replace("Z", "+00:00")) if r and r["t"] else None
+    noted = store.skipped_at(kind) if hasattr(store, "skipped_at") else None
+    return max((t for t in (row, noted) if t is not None), default=None)
 
 
 def _retry_at(store: Store, kind: str, slot: datetime) -> datetime | None:
