@@ -1,10 +1,19 @@
 version: 2
 updates:
-  - package-ecosystem: pip
+  # Python: pyproject.toml and uv.lock move together (CI installs with `uv sync --locked`; the
+  # pip ecosystem would leave uv.lock behind). A range that already allows the new release is
+  # left as it is and only the lock moves; an exact pin is raised. Minor and patch updates come
+  # as one pull request a week; a major version comes on its own, to be read first.
+  - package-ecosystem: uv
     directory: /
     schedule:
       interval: weekly
+    versioning-strategy: increase-if-necessary
     open-pull-requests-limit: 5
+    groups:
+      python:
+        patterns: ["*"]
+        update-types: [minor, patch]
   # The page's sources (package.json and package-lock.json). CI installs with --ignore-scripts.
   - package-ecosystem: npm
     directory: /src/kranto/page/ui/web
@@ -16,7 +25,11 @@ updates:
       dev-tools:
         dependency-type: development
         update-types: [minor, patch]
+  # The workflow's actions (pinned by commit): one pull request a month for all of them.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
