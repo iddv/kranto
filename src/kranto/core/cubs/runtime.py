@@ -92,8 +92,10 @@ class CubRunner:
 
 
 class CubJob:
-    """A cub job as the scheduler sees it: off while the cub (or cubs) is off or paused, or
-    its ``when`` setting is false; due by its interval, or by its ``at``/``days`` slot."""
+    """A cub job as the scheduler sees it: off while the cub (or cubs) is off or paused, its
+    ``when`` setting is false, or this machine cannot cap it (``weak_limits``: every start would
+    be refused until a setting changes, so it is not tried once a minute); due by its interval,
+    or by its ``at``/``days`` slot."""
 
     def __init__(self, runtime: CubRuntime, cid: str, job: dict) -> None:
         self.runtime, self.cid, self.job = runtime, cid, job
@@ -103,7 +105,8 @@ class CubJob:
     @property
     def every_hours(self) -> float:
         cub = self.runtime.installed.get(self.cid)
-        if cub is None or cub.state != "installed" or self.runtime.off(cub):
+        if cub is None or cub.state != "installed" or self.runtime.off(cub) \
+                or self.runtime.weak_limits(cub):
             return 0
         when = self.job.get("when")
         if when:

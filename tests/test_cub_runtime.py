@@ -358,7 +358,10 @@ def test_where_only_rlimits_apply_a_strangers_cub_waits_for_the_owners_word(rt, 
     with pytest.raises(CubUnavailable, match="cubs.allow_rlimits: true"):
         cubs.preflight("echo", "action")
     assert rt.store.query_one("SELECT 1 FROM runs WHERE kind = 'echo.tick'") is None
+    # the scheduler does not try it once a minute meanwhile: its jobs are off until the word
+    assert {j.kind: j.every_hours for j in cubs.jobs()}["echo.tick"] == 0
     rt.cfg = replace(rt.cfg, cubs=cs.parse({"allow_rlimits": True}))
+    assert {j.kind: j.every_hours for j in cubs.jobs()}["echo.tick"] > 0
     if sandbox.sandboxed():
         assert cubs.run_job("echo", "echo.tick", "tick")["status"] == "ok"
     else:
