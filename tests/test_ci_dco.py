@@ -91,6 +91,34 @@ def test_dependabots_commit_github_committed_for_it_passes(tmp_path):
     assert found(r) == ["no Signed-off-by line (git commit -s)"]
 
 
+CO = "Co-" + "authored-by: "
+
+
+def test_the_squash_of_a_dependabot_pull_request_passes(tmp_path):
+    """GitHub's squash on main: the bot is the author, GitHub the committer, and GitHub appends
+    the bot again as a co-author after its sign-off. The bot naming itself is no attribution."""
+    r = repo(tmp_path)
+    commit(r, BOT, scrub.GITHUB_COMMITTER,
+           "Bump jsdom from 30.1.2 to 31.0.1 (#67)\n\nupdated-dependencies:\n"
+           f"- dependency-name: jsdom\n...\n\n{scrub.BOT_SIGNOFF}\n{CO}{BOT[0]} <{BOT[1]}>")
+    assert found(r) == []
+
+
+def test_only_the_bot_naming_itself_on_its_own_commit_is_spared(tmp_path):
+    """Any other co-author line is still refused: another name on the bot's commit, or the
+    bot's line on a person's commit."""
+    r = repo(tmp_path)
+    commit(r, BOT, scrub.GITHUB_COMMITTER,
+           f"Bump a dependency (#9)\n\n{scrub.BOT_SIGNOFF}\n{CO}{OTHER[0]} <{OTHER[1]}>")
+    assert any(g.startswith("[attribution]") for g in found(r))
+    commit(r, PERSON, scrub.GITHUB_COMMITTER,
+           f"Bump by hand (#9)\n\n{signoff(PERSON)}\n{CO}{BOT[0]} <{BOT[1]}>")
+    assert any(g.startswith("[attribution]") for g in found(r))
+    commit(r, BOT, PERSON,
+           f"Bump a dependency\n\n{signoff(PERSON)}\n{CO}{BOT[0]} <{BOT[1]}>")
+    assert any(g.startswith("[attribution]") for g in found(r))
+
+
 def test_github_committing_does_not_make_anyone_else_the_bot(tmp_path):
     """Only the bot's authorship counts: a person's commit GitHub committed, or the bot's commit
     under a GitHub look-alike, still needs a person's sign-off."""
