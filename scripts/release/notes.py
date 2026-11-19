@@ -11,7 +11,8 @@ crossing's three).
 - ``promotion``: the held line, "**Stable X.Y.0**, from nightly build vX.Y.0-devN", then
   **## Big changes** (the merged pull requests labelled ``big`` since the previous stable) and,
   with ``--stable-defaults FILE`` (``kranto settings stable-defaults --json`` of the build),
-  **## Off on stable** (each setting whose stable default keeps the old behaviour);
+  **## Off on stable** (each setting whose stable default keeps the old behaviour); each only
+  when it has a line;
 - ``fix``: the held line, "**Fix for stable X.Y**", and the pull requests merged into
   ``release/X.Y`` since the previous stable.
 
@@ -138,15 +139,19 @@ def opening(kind: str, tag: str, from_tag: str = "") -> list[str]:
 
 
 def big_section(big: list[dict], off: list[dict]) -> list[str]:
-    """A promotion's ## Big changes, and ## Off on stable when a setting's stable default keeps
-    the old behaviour."""
-    out = ["## Big changes", ""]
-    out += pr_lines(big) or ["- None: no pull request since the previous stable is labelled big."]
+    """A promotion's ## Big changes when a pull request is labelled big, and ## Off on stable
+    when a setting's stable default keeps the old behaviour. An empty section is left out: a
+    "None" line would read oddly, and the updater shows a release's first ``- `` lines as its
+    changes."""
+    out: list[str] = []
+    if big:
+        out += ["## Big changes", "", *pr_lines(big), ""]
     if off:
-        out += ["", "## Off on stable", ""]
+        out += ["## Off on stable", ""]
         out += [f"- `{s['key']}`: stable keeps `{s.get('default_stable')}` (nightly: "
                 f"`{s.get('default')}`)" for s in off]
-    return [*out, ""]
+        out.append("")
+    return out
 
 
 def sdk_version() -> str | None:
