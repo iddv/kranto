@@ -69,6 +69,38 @@ tool_py() {
   [ -x "$exe" ] || exe="$UV_TOOL_BIN_DIR/$ALIAS"
   echo "$(dirname "$(readlink -f "$exe")")/python"
 }
+# an empty home holds only the values setup wrote, and 'kranto up' writes the release's own
+# settings only where no settings file exists, so a one-wheel release refused to start on it
+# ("llm.models is required"): put the installed release's own new-home settings under them
+complete_settings() {
+  "$(tool_py)" - "$KRANTO_HOME" "$PORT" "${HOME_FILES[@]}" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+from kranto import launcher
+
+home, port, names = Path(sys.argv[1]), int(sys.argv[2]), sys.argv[3:]
+cfg = next((home / n for n in names if (home / n).exists()), None)
+ours = (yaml.safe_load(cfg.read_text()) if cfg else None) or {}
+if cfg is None or "models" in (ours.get("llm") or {}):
+    sys.exit(0)                                      # a copied home has its own settings
+
+
+def under(base: dict, top: dict) -> dict:
+    for k, v in top.items():
+        if isinstance(v, dict) and isinstance(base.get(k), dict):
+            under(base[k], v)
+        else:
+            base[k] = v
+    return base
+
+
+base = yaml.safe_load(launcher.home_config_text(home, port, Path.home())) or {}
+cfg.write_text("# e2e scratch home\n" + yaml.safe_dump(under(base, ours), sort_keys=False))
+print("the release's own settings under e2e's:", cfg)
+PY
+}
 say() { printf '\n== %s\n' "$*"; }
 api() { curl -sf "http://127.0.0.1:$PORT$1"; }
 listen() { ss -ltnH "( sport = :$1 )" || true; }
@@ -123,6 +155,8 @@ data["brb"] = {"enabled": True, "loop_home": str(loop), "root": tasks}
 data["update"] = {"channel": channel, "check_every_hours": 24, "download": True, "auto": "off"}
 # the copy never reports as the home it came from (telemetry/, its install id, is not copied)
 data["telemetry"] = {"mode": "off"}
+# copy_live.py marks its copy as the preview, which is never updated; this copy must be
+data.pop("preview", None)
 cfg.write_text("# e2e scratch home\n" + yaml.safe_dump(data, sort_keys=False))
 (loop / "loop.yaml").write_text(yaml.safe_dump({
     "tasks_dir": tasks, "concurrency": 1, "intake": {"auto": {"mode": "manual"}},
@@ -149,6 +183,7 @@ install)
       whl="$(ls "$rel/$DIST_NAME"-*.whl)"
       uv tool install --force --python 3.12 \
         "$DIST_NAME[connections,notify] @ file://$whl" 2>&1 | tail -n 5
+      complete_settings
     else                                                              # the old shape
       # a release made before the rename reads its settings file by an old name only; every
       # later one reads the old names too
@@ -166,6 +201,7 @@ install)
     at="${MAIN_REF:+@$MAIN_REF}"
     uv tool install --force --python 3.12 \
       "$DIST_NAME[connections,notify] @ $SPEC$at" 2>&1 | tail -n 5
+    complete_settings
   fi
   kr --version
   # the library marked set up (the welcome is not what is being checked), with the package the
