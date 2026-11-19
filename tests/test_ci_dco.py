@@ -1,7 +1,8 @@
 """The sign-off check (``scripts/ci/scrub.py --commits RANGE --dco``, ci.yml's gitleaks job):
 every commit carries a ``Signed-off-by`` with its author's address. Dependabot's own sign-off
-(``dependabot[bot] <support@...>``) counts on a commit Dependabot both wrote and committed, and
-on no other: a person's commit carrying it still needs the person's own, and a Dependabot commit
+(``dependabot[bot] <support@...>``) counts on a commit Dependabot both wrote and committed (the
+bot itself or GitHub for it, as Dependabot's commits and their squash on main are), and on no
+other: a person's commit carrying it still needs the person's own, and a Dependabot commit
 a person committed (a rebase or an edit of its branch) needs the committer's sign-off, who then
 certifies it. Real git commits in tmp_path; no network."""
 from __future__ import annotations
@@ -76,6 +77,32 @@ def test_dependabots_own_commit_may_carry_its_own_sign_off(tmp_path):
     r = repo(tmp_path)
     commit(r, BOT, BOT, f"Bump a dependency from 1 to 2\n\n{scrub.BOT_SIGNOFF}")
     assert found(r) == []                 # its support address is not reported as an email
+
+
+def test_dependabots_commit_github_committed_for_it_passes(tmp_path):
+    """Dependabot's commits on its branches are committed by GitHub for it, and so is its pull
+    request squash-merged on main: the bot's own sign-off holds there too."""
+    r = repo(tmp_path)
+    commit(r, BOT, scrub.GITHUB_COMMITTER, "Bump playwright from 1.65.1 to 1.65.2\n\n"
+                                           "updated-dependencies:\n- dependency-name: playwright\n"
+                                           f"\n{scrub.BOT_SIGNOFF}")
+    assert found(r) == []                 # neither the sign-off nor its address is reported
+    commit(r, BOT, scrub.GITHUB_COMMITTER, "Bump a dependency from 1 to 2 (#9)")
+    assert found(r) == ["no Signed-off-by line (git commit -s)"]
+
+
+def test_github_committing_does_not_make_anyone_else_the_bot(tmp_path):
+    """Only the bot's authorship counts: a person's commit GitHub committed, or the bot's commit
+    under a GitHub look-alike, still needs a person's sign-off."""
+    r = repo(tmp_path)
+    commit(r, PERSON, scrub.GITHUB_COMMITTER, f"Bump by hand (#9)\n\n{scrub.BOT_SIGNOFF}")
+    got = found(r)
+    assert "the Dependabot sign-off counts only on a commit Dependabot wrote and committed" in got
+    assert any("[email]" in g for g in got)
+    look_alike = ("GitHub", "noreply@" + "example.com")
+    commit(r, BOT, look_alike, f"Bump a dependency from 1 to 2\n\n{scrub.BOT_SIGNOFF}")
+    assert "the Dependabot sign-off counts only on a commit Dependabot wrote and committed" \
+        in found(r)
 
 
 def test_a_persons_commit_with_the_bots_sign_off_is_refused(tmp_path):

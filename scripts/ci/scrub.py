@@ -460,16 +460,24 @@ def is_github_committer(name: str, email: str) -> bool:
     return name == GITHUB_COMMITTER[0] and email.lower() == GITHUB_COMMITTER[1]
 
 
+def is_bots_own(author: tuple[str, str], committer: tuple[str, str]) -> bool:
+    """A commit Dependabot wrote, committed by the bot itself or by GitHub for it (Dependabot's
+    commits are made through GitHub, which commits them as ``GITHUB_COMMITTER``; so are its
+    pull requests squash-merged on main). A person committing a bot commit is not this."""
+    return is_bot(*author) and (is_bot(*committer) or is_github_committer(*committer))
+
+
 def dco_problem(author: tuple[str, str], committer: tuple[str, str], body: str) -> str | None:
     """Why a commit's sign-off does not hold, or None. ``author`` and ``committer``: (name,
     email).
 
-    - A commit Dependabot wrote and committed may carry the bot's own sign-off (``BOT_SIGNOFF``).
+    - A commit Dependabot wrote and committed (itself, or GitHub for it: ``is_bots_own``) may
+      carry the bot's own sign-off (``BOT_SIGNOFF``).
     - Any other commit needs a sign-off with its author's address; one the bot wrote but a
       person committed (a rebase or an edit of its branch) may instead carry the committer's,
       who then certifies it. The bot's sign-off counts on no commit but the bot's own."""
     offs = [(m[1].strip(), m[2].strip().lower()) for m in _SIGNOFF_RE.finditer(body)]
-    bot_commit = is_bot(*author) and is_bot(*committer)
+    bot_commit = is_bots_own(author, committer)
     if bot_commit and BOT_SIGNOFF in body.splitlines():
         return None
     human = [o for o in offs if o != (BOT_NAME, "support@" + "github.com")]
@@ -517,7 +525,7 @@ def scan_commits(range_spec: str, repo: str | Path = ".", dco: bool = False) -> 
                     )
                 )
         scanned = body
-        if is_bot(a_name, author) and is_bot(c_name, committer):
+        if is_bots_own((a_name, author), (c_name, committer)):
             # the bot's own sign-off names GitHub's support address: not a person's
             scanned = "\n".join(ln for ln in body.splitlines() if ln != BOT_SIGNOFF)
         findings.extend(scan_message(scanned, label))
