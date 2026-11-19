@@ -14,16 +14,22 @@ updates:
       python:
         patterns: ["*"]
         update-types: [minor, patch]
+    ignore:
+      # [build-system]'s floors say what the build needs, not the newest release; no lock
+      # covers them, so each release would come as its own pull request outside the group.
+      - dependency-name: hatchling
+      - dependency-name: hatch-vcs
   # The page's sources (package.json and package-lock.json). CI installs with --ignore-scripts.
+  # Minor and patch updates (the tool chain and the terminal library alike) come as one pull
+  # request a week; a major version comes on its own, to be read first.
   - package-ecosystem: npm
     directory: /src/kranto/page/ui/web
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
-      # the dev tool chain (Vite, Svelte, vitest, types) moves together or not at all
-      dev-tools:
-        dependency-type: development
+      page:
+        patterns: ["*"]
         update-types: [minor, patch]
   # The workflow's actions (pinned by commit): one pull request a month for all of them.
   - package-ecosystem: github-actions
