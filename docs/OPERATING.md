@@ -635,7 +635,8 @@ promotion is a line in `~/.local/state/kranto-release/gate.jsonl`.
 (public.toml's `repo`) and published there. `cut_local.sh --shape final` (the default) builds
 one wheel, `kranto-V-py3-none-any.whl`, with `SHA256SUMS` and a `manifest.json` of
 `"shape": 2`; `install.sh` and the update helper install it as the uv tool `kranto`, which puts
-`kranto` and the old command on PATH. `--shape compat` builds the one nightly that crosses an
+`kranto` on PATH (on an install made before the rename, `kranto up` links the old command, which
+its kept unit starts, to `kranto`: `launcher.keep_old_command`). `--shape compat` builds the one nightly that crosses an
 install made before the rename over: the three wheels its old update helper installs, under the
 old names (`scripts/release/compat_wheels.py`: the real code without commands, an empty
 distribution, and a meta-package carrying both commands), with `"shape": 1` and the pins that

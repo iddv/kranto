@@ -253,13 +253,16 @@ jobs:
           HOME="$S/home" UV_TOOL_DIR="$S/home/tools" UV_TOOL_BIN_DIR="$S/home/bin" \
             uv tool install --python 3.12 \
             "$dist[connections,notify,mcp] @ file://$(ls "$RUNNER_TEMP/dist/$dist"-*.whl)"
-      - name: both commands answer the version
+      # A new install has one command. The old name is only a link that `kranto up` makes on an
+      # install made before the rename (launcher.keep_old_command); the wheel never puts it here.
+      - name: the command answers the version, and it is the only one
         run: |
-          for c in "$(python3 scripts/release/names.py command)" "$(python3 scripts/release/names.py alias)"; do
-            got="$("$S/home/bin/$c" --version)"
-            echo "$c --version: $got"
-            [ "$(echo "$got" | awk '{print $2}')" = "$VERSION" ]
-          done
+          c="$(python3 scripts/release/names.py command)"
+          got="$("$S/home/bin/$c" --version)"
+          echo "$c --version: $got"
+          [ "$(echo "$got" | awk '{print $2}')" = "$VERSION" ]
+          ls -A "$S/home/bin"
+          [ "$(ls -A "$S/home/bin")" = "$c" ]
       - name: serve on loopback, then doctor --routes
         run: |
           kr="$S/home/bin/$(python3 scripts/release/names.py command)"

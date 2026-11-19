@@ -52,7 +52,6 @@ ALLOW: dict[str, dict[str, str]] = {
         "scripts/ci/scrub.py": "this scanner",
         "uv.lock": "lock file written by the package manager",
         "**/package-lock.json": "lock file written by the package manager",
-        "pyproject.toml": "the command's old name, kept as an alias until 1.0",
         "**/cub.yaml": "the cub manifest's host-range key keeps its name (cub.yaml schema 1)",
         "tests/fixtures/cub_manifests/**": "cub manifests, with that same key",
     },

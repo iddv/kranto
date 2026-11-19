@@ -109,8 +109,7 @@ browser, the [release page](https://github.com/iddv/kranto/releases/latest) has 
 files.
 
 **You should see:** one `OK` line from `sha256sum`, a list of packages, then the
-executables uv installed: `kranto`, and the command's name from before the rename (kept for
-installs made then; it runs the same program), and then `kranto 0.x.y`. It takes under a minute.
+executable uv installed, `kranto`, and then `kranto 0.x.y`. It takes under a minute.
 If your shell then says `kranto: command not found`, run `uv tool update-shell` and open a new
 terminal. The downloaded files can be deleted afterwards.
 
@@ -476,7 +475,9 @@ Its settings must name this repository first (`update.repo: iddv/kranto` in its 
 or it never sees a Kranto release; in the same edit set `update.auto: off`, or its own nightly
 check would try the one-wheel release, which its update helper cannot install, by itself in its
 quiet window (it can go back on once step 2 is done). Both commands, and both the old and the new names of the
-environment variables, keep working after the crossing.
+environment variables, keep working after the crossing: the package carries only `kranto`, and
+`kranto up` (which every update runs) makes the old command a link to it beside it, because the
+service the install kept starts that name. A new install never has the old command.
 
 Connected accounts cross too: from 0.7.0.dev3 Kranto reads the secrets file the old version
 wrote, and rewrites it in its own form at the next change (0.7.0.dev1 and dev2 cannot read it and

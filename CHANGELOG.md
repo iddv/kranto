@@ -23,6 +23,9 @@ will carry; the pre-releases `v0.7.0-devN` carry parts of it.
 
 ### Changed since the pre-release v0.7.0-dev2
 
+- **A new install has one command, `kranto`.** The command's name from before the rename is no
+  longer in the package; an install made before the rename keeps it: `kranto up`, which every
+  update runs, links it to `kranto` because the service that install kept starts that name.
 - **An unfinished setup shows on the home**, on a phone too: "Kranto is not set up yet", what is
   still missing (a model, a topic, a place to read) and **Set up**, which opens Welcome there.
 - **Keys are shown as your computer names them:** Ctrl+K and Ctrl+J on Linux and Windows, ⌘K

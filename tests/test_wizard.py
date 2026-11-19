@@ -42,6 +42,20 @@ def test_where_things_are_names_the_unit_only_when_one_was_written(user_home, tm
     assert any(w.endswith("kranto.service") for w in wizard.where(run))
 
 
+def test_where_things_are_names_the_old_command_only_where_it_is(user_home):  # noqa: F811
+    """A new install has one command; an install made before the rename keeps its old one."""
+    from kranto import legacy
+
+    run = types.SimpleNamespace(host=make_host(user_home), home=user_home / ".kranto")
+    assert not any(legacy.COMMAND in w for w in wizard.where(run))
+    bin_dir = user_home / ".local" / "bin"
+    bin_dir.mkdir(parents=True)
+    (bin_dir / legacy.COMMAND).symlink_to("kranto")
+    (bin_dir / "kranto").write_text("#!/bin/sh\n")
+    assert any(f"~/.local/bin/{legacy.COMMAND} is the same command" in w
+               for w in wizard.where(run))
+
+
 def test_yes_on_a_fresh_home_writes_the_home_then_nothing_more(user_home, capsys):  # noqa: F811
     host = make_host(user_home)
     code, out = setup(host, "--yes", "--no-start", "--port", "9023", "--json", capsys=capsys)

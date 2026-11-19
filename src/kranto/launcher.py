@@ -693,6 +693,44 @@ def install_unit(host: Host, text: str) -> tuple[Path, bool]:
     return path, old != text
 
 
+def keep_old_command(unit: Path, exe: Path, user_home: Path) -> Path | None:
+    """On an install made before the rename, the unit it kept starts the old command
+    (``legacy.COMMAND``, beside ``kranto`` in the tool's command folder). The package carries
+    only ``kranto``, so an update that installs it leaves that name unfilled; before the unit
+    starts, the old name is made a link to ``kranto`` (the same program, which answers to
+    either name). A new install's unit starts ``kranto``: nothing is made. The link, when
+    made."""
+    command = unit_command(unit, user_home)
+    if command is None or not legacy.is_old_unit(unit.read_text(errors="replace")):
+        return None
+    old = Path(command).expanduser()
+    if old.name != legacy.COMMAND or old.exists() or not Path(exe).exists():
+        return None
+    try:
+        if old.parent.resolve() != Path(exe).parent.resolve():
+            return None
+        if old.is_symlink():          # a link left dangling by an uninstall
+            old.unlink()
+        old.symlink_to(Path(exe).name)
+    except OSError:
+        return None
+    return old
+
+
+def remove_old_command(exe: Path) -> Path | None:
+    """The old command's link that ``keep_old_command`` made beside ``exe``, removed with the
+    program (uninstalling the tool removes only what the package carries). The path, when
+    removed."""
+    old = Path(exe).parent / legacy.COMMAND
+    try:
+        if old.is_symlink() and os.readlink(old) == Path(exe).name:
+            old.unlink()
+            return old
+    except OSError:
+        pass
+    return None
+
+
 def cmd_up(args, host: Host) -> int:
     home = kranto_home(args.home, host)
     why_not = "--foreground" if args.foreground else host.systemd()
@@ -738,6 +776,11 @@ def cmd_up(args, host: Host) -> int:
             print(f"  adopted {unit_path.name}: it ran {other}")
         else:
             unit, changed = install_unit(host, text)
+            linked = keep_old_command(unit, exe, host.home)
+            if linked:
+                at = f"{tilde(linked.parent, host.home)}/{linked.name}"
+                print(f"  linked {at} to {product.COMMAND}: {unit.name} starts it under "
+                      "that name")
         name = unit.name
         active = host.sh("systemctl", "--user", "is-active", name).stdout.strip() == "active"
         if not active and port_in_use(port):
@@ -1007,9 +1050,15 @@ def cmd_uninstall(args, host: Host) -> int:
     uninstall = f"uv tool uninstall {product.DIST}"
     if getattr(args, "program", False):
         uv = host.which("uv")
+        exe = kranto_exe(host)          # before the program, and its command, are gone
         r = host.sh(uv, "tool", "uninstall", product.DIST, timeout=120) if uv else None
         print(f"  removed the program ({uninstall})" if r is not None and r.returncode == 0
               else f"  note: '{uninstall}' did not run; run it yourself")
+        if r is not None and r.returncode == 0:
+            gone = remove_old_command(exe)
+            if gone:
+                at = f"{tilde(gone.parent, host.home)}/{gone.name}"
+                print(f"  removed {at} (the same program's old name)")
     if getattr(args, "data", False):
         for p in remove_data(home, host):
             print(f"  removed {p}")

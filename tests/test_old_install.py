@@ -384,3 +384,92 @@ def test_the_hooks_never_name_the_old_product():
     for f in HOOKS.iterdir():
         if f.suffix in (".py", ".json"):
             assert legacy.MCP_SERVER not in f.read_text(), f
+
+
+# -- the old command: a link on an old install only ----------------------------------------------
+
+
+def _installed(user_home: Path) -> Path:
+    """``kranto`` in the tool's command folder, as ``uv tool install`` leaves it."""
+    exe = user_home / ".local" / "bin" / product.COMMAND
+    exe.parent.mkdir(parents=True, exist_ok=True)
+    exe.write_text("#!/bin/sh\n")
+    exe.chmod(0o755)
+    return exe
+
+
+def test_up_on_an_old_install_links_the_old_command_before_the_unit_starts(user_home, capsys):
+    """The package carries only ``kranto``; an update leaves the old unit's command unfilled.
+    The update's helper runs ``kranto up``, which links it before it starts the unit."""
+    old_install(user_home)
+    exe = _installed(user_home)
+    host = make_host(user_home)
+
+    seen = {}
+
+    def run(cmd, timeout=30, _run=host.machine.run):
+        if cmd[:3] == ["systemctl", "--user", "enable"]:
+            seen["at_start"] = (exe.parent / legacy.COMMAND).exists()
+        return _run(cmd, timeout)
+    host.run = run
+    assert launcher.main(["up", "--no-browser"], host) == 0
+    link = exe.parent / legacy.COMMAND
+    assert link.is_symlink() and link.readlink() == Path(product.COMMAND)
+    assert link.resolve() == exe.resolve() and seen["at_start"] is True
+    assert f"linked ~/.local/bin/{legacy.COMMAND} to {product.COMMAND}" in capsys.readouterr().out
+    assert launcher.main(["up", "--no-browser"], host) == 0          # again: left as it is
+    assert link.readlink() == Path(product.COMMAND)
+
+
+def test_an_old_command_the_tool_carries_is_left_alone(user_home):
+    """An older version's package put the old command there itself: nothing is changed."""
+    old = old_install(user_home)
+    exe = _installed(user_home)
+    real = exe.parent / legacy.COMMAND
+    real.write_text("#!/bin/sh\n# from the package\n")
+    assert launcher.keep_old_command(old["unit"], exe, user_home) is None
+    assert not real.is_symlink() and "from the package" in real.read_text()
+
+
+def test_a_dangling_old_link_is_made_again(user_home):
+    old = old_install(user_home)
+    exe = _installed(user_home)
+    link = exe.parent / legacy.COMMAND
+    link.symlink_to("gone")
+    assert launcher.keep_old_command(old["unit"], exe, user_home) == link
+    assert link.readlink() == Path(product.COMMAND)
+
+
+def test_a_new_install_gets_no_old_command(user_home):
+    exe = _installed(user_home)
+    host = make_host(user_home)
+    assert launcher.main(["up", "--no-browser"], host) == 0
+    assert not (exe.parent / legacy.COMMAND).exists()
+    assert not (exe.parent / legacy.COMMAND).is_symlink()
+    unit = user_home / ".config" / "systemd" / "user" / product.UNIT
+    assert launcher.keep_old_command(unit, exe, user_home) is None
+
+
+def test_an_old_unit_that_starts_another_folder_s_command_gets_no_link(user_home):
+    old = old_install(user_home)
+    exe = _installed(user_home)
+    (old["dropins"] / "40-d.conf").write_text(
+        f"[Service]\nExecStart=\nExecStart=/opt/x/{legacy.COMMAND} serve\n")
+    assert launcher.keep_old_command(old["unit"], exe, user_home) is None
+    assert not (exe.parent / legacy.COMMAND).exists()
+    assert not Path("/opt/x", legacy.COMMAND).exists()
+
+
+def test_uninstalling_the_program_removes_the_link_it_made_and_nothing_else(user_home, capsys):
+    old_install(user_home)
+    exe = _installed(user_home)
+    host = make_host(user_home)
+    assert launcher.main(["up", "--no-browser"], host) == 0
+    link = exe.parent / legacy.COMMAND
+    assert link.is_symlink()
+    assert launcher.main(["uninstall", "--program"], host) == 0
+    assert not link.is_symlink() and not link.exists()
+    assert f"removed ~/.local/bin/{legacy.COMMAND}" in capsys.readouterr().out
+    # a file the link did not make is never removed
+    link.write_text("#!/bin/sh\n")
+    assert launcher.remove_old_command(exe) is None and link.exists()
