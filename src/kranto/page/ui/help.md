@@ -631,10 +631,10 @@ the row says each step, and if one fails the release stays held and the row says
 To check now, click the version ("Kranto 0.5.10 · Check for updates": in the status bar, on
 Settings' Overview, and Check for updates under Settings › System › Updates), or ⌘K "Check for
 updates". The answer is said where you clicked: you're on the latest, a new version is ready
-(Restart to update, also ⌘K "Update Kranto"), or why the check failed and what to do. While the
-repository is private, a check needs a GitHub login that can see it: run `gh auth login` on
-the machine Kranto runs on. When the check has failed for more than two days, the top bar says
-"Can't check for updates" (point at it for the reason). An update ready says "Update" there,
+(Restart to update, also ⌘K "Update Kranto"), or why the check failed and what to do. A check
+needs no GitHub login; without one GitHub answers 60 an hour from one address, and with `gh auth
+login` on the machine Kranto runs on, it asks through it. When the check has failed for more
+than two days, the top bar says "Can't check for updates" (point at it for the reason). An update ready says "Update" there,
 without its versions: Settings › Updates says them. The top bar holds nothing else daily: what
 runs is on Activity, the tokens used today on Settings › Spend, and Feedback is under ⚙.
 

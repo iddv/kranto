@@ -52,13 +52,14 @@ def test_the_one_line_install_is_first_in_both():
 
 def test_no_doc_needs_a_github_login_to_install():
     """A public repository: the README and the guide install with curl, never gh, and speak of
-    no invitation. The one exception is the guide's line for a pre-release before the flip."""
+    no invitation and of no time before the repository was public."""
     readme = (ROOT / "README.md").read_text()
-    assert "gh release" not in readme and "invitation" not in readme
     guide = GUIDE.read_text()
-    assert "invitation" not in guide and "gh auth status" not in guide
-    gh_lines = [ln for ln in guide.splitlines() if "gh release" in ln]
-    assert len(gh_lines) == 1 and "--version" in gh_lines[0], gh_lines
+    for name, text in (("README.md", readme), ("docs/setup.md", guide)):
+        flat = " ".join(text.split())
+        for words in ("gh release", "invitation", "gh auth status",
+                      "before the repository is public", "No stable release is out yet"):
+            assert words not in flat, (name, words)
 
 
 def test_no_doc_installs_kranto_from_git():

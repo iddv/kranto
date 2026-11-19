@@ -5,6 +5,17 @@ What changed in each release of Kranto, for the person who runs it. Versions fol
 (`vX.Y.0-devN`, GitHub prereleases) are not listed one by one: their notes name the pull
 requests they carry.
 
+## Unreleased
+
+### Fixed
+
+- A stable release's notes no longer open with an empty "Big changes — None" section (the
+  update check showed that line as the release's first change); a section with nothing in it is
+  left out.
+- The install guide no longer carries a line for installing before the repository was public,
+  and the guide, the glossary and the help page no longer say an update check needs a GitHub
+  login: the repository is public.
+
 ## 0.7.0 — 2026-11-19
 
 The first release of Kranto.
