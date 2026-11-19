@@ -13,7 +13,7 @@ description = "Write and test a cub for kranto: the cub/1 protocol's cub side an
 readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
-authors = [{ name = "The Kranto authors" }]
+authors = [{ name = "Ian de Villiers" }]
 dependencies = [
   # cub.yaml is read with it, by the runner inside Kranto's sandbox and by FakeHost
   "pyyaml>=6.0",

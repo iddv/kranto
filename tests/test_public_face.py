@@ -28,6 +28,17 @@ def test_notice_holder_is_public_toml_s_or_the_one_placeholder():
         assert lines[1] == PLACEHOLDER
 
 
+def test_the_packages_name_the_holder_as_their_author():
+    """Once the holder is written, the published package and the SDK name the same person as
+    their author: a stranger reading the wheel's metadata sees what NOTICE says."""
+    holder = PUBLIC["holder"].strip()
+    if not holder:
+        return
+    for path in (ROOT / "pyproject.toml", ROOT / "sdk" / "pyproject.toml"):
+        authors = tomllib.loads(path.read_text())["project"]["authors"]
+        assert authors == [{"name": holder}], path.name
+
+
 def test_the_package_says_where_the_project_lives():
     meta = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]
     home = f"https://github.com/{PUBLIC['repo']}"
