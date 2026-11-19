@@ -36,10 +36,6 @@ install` exactly as step 2 below does, then runs `kranto setup`. Nothing it does
 `sh install.sh --version vX.Y.Z` installs that release instead of the latest; `--no-setup`
 installs only; `--help` lists the rest.
 
-A pre-release by its tag, before the repository is public (needs a logged-in `gh` that can see
-it): `gh release download vX.Y.0-devN -R iddv/kranto -p install.sh && sh install.sh --version
-vX.Y.0-devN`.
-
 **`kranto setup`** asks only what it cannot find, and every question has a default in
 `[brackets]` that Enter keeps:
 
@@ -526,7 +522,7 @@ loginctl disable-linger    # only if nothing else of yours needs it
 
 | You see | Do |
 |---|---|
-| `has no stable release yet`, or `curl: (22) … 404` while downloading (step 2) | No stable release is out yet: install one by its tag from the [releases](https://github.com/iddv/kranto/releases) (`sh install.sh --version <tag>`, or `base=…/releases/download/<tag>` in step 2). |
+| `curl: (22) … 404` while downloading (step 2), or `has no release …` | The address or the tag is mistyped: compare it with the [releases](https://github.com/iddv/kranto/releases) (`sh install.sh --version <tag>`, or `base=…/releases/download/<tag>` in step 2). `has no stable release yet` means `KRANTO_REPO` names another repository (a fork) that has no stable release: name one of its tags with `--version`. |
 | `sha256sum` says `FAILED` | The download is incomplete or altered: delete the downloaded files and run step 2 again. |
 | The page says `this kranto was installed without its web page` | It was installed from git, which carries no built page: install from a release (step 2). |
 | `kranto: command not found` after installing | `uv tool update-shell`, then open a new terminal. |
@@ -540,7 +536,7 @@ loginctl disable-linger    # only if nothing else of yours needs it
 | `Watching paused until … (spend limit set in the Claude Console reached)` in the top bar or in Health | The Claude API refused calls for a spend limit. Watching resumes by itself at that time. To go on sooner, raise the limit in the Claude Console, then click **Resume now** in Settings › System › Health (or run `kranto watch resume`). |
 | `FAIL  claude … is not signed in` | `claude auth login`, then `kranto doctor` again. |
 | The header says `Can't check for updates: GitHub's limit on requests without a login (60 an hour for this address) is used up; it lifts at …` | Nothing is wrong with Kranto: **Check for updates** (click the version, or Ctrl+K; ⌘K on a Mac) after the time it names. With `gh` installed and logged in (`gh auth login`), Kranto asks through it and the limit is thousands an hour. |
-| The header says `Can't check for updates: GitHub answered 404 …` | The release list cannot be seen without a login (a repository that is not public): `gh auth login` with an account that can see it, then **Check for updates**. |
+| The header says `Can't check for updates: GitHub answered 404 …` | Kranto's own releases are public, so `update.repo` in `kranto.yaml` names another repository: a mistyped name (put back `iddv/kranto`), or a private fork, which needs `gh auth login` with an account that can see it. Then **Check for updates**. |
 | The sign-in link says it expired or was used | Each link works once, within 10 minutes: `kranto open --no-browser` for a new one. |
 | A script's write answers `cross-origin request refused` | Your Kranto is older than 0.3.30: `kranto update`, or send `Origin: http://127.0.0.1:8765` (your port) with the `Authorization` header (step 9). |
 | `kranto mcp: install the MCP extra` | Install `kranto[mcp]`: the command is in the message, and in step 2. |

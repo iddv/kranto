@@ -434,8 +434,18 @@ def test_the_notes_open_with_the_line():
         "`classic`" in promo and "from nightly build v0.6.0-dev12" in promo
     fix = notes.render("0.6.1", "v0.6.1", "r", [], "2026-10-23", kind="fix")
     assert "**Fix for stable 0.6**" in fix and "release/0.6" in fix
-    assert "no pull request since the previous stable is labelled big" in notes.render(
-        "0.6.0", "v0.6.0", "r", [], "x", kind="promotion")
+    # an empty section is left out: no "None" line, which the updater would show as a change
+    bare = notes.render("0.6.0", "v0.6.0", "r", [], "x", kind="promotion",
+                        from_tag="v0.6.0-dev12")
+    assert "## Big changes" not in bare and "## Off on stable" not in bare
+    assert "None" not in bare and "labelled big" not in bare
+    assert note_lines(bare)[0] == "- No changes."
+    off_only = notes.render("0.6.0", "v0.6.0", "r", [], "x", kind="promotion",
+                            off=[{"key": "shell.layout", "default": "new",
+                                  "default_stable": "classic"}])
+    assert "## Big changes" not in off_only
+    assert off_only.index(notes.HELD_LINE) < off_only.index("## Off on stable") < \
+        off_only.index("## Merged")
 
 
 def test_the_previous_release_is_told_by_its_tag(monkeypatch):

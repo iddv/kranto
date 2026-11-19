@@ -141,9 +141,9 @@ fix for each failure.
 Most of Kranto's code is written by AI coding agents working from written briefs, and it is
 reviewed, tested and run every day by its one maintainer. Every change passes the test suite and
 a walk through the pages in a real browser before it ships. The checks run on GitHub Actions
-([.github/workflows/ci.yml](.github/workflows/ci.yml)); a pull request from a fork runs them on
-GitHub's hosted runners, once the maintainer has approved the run. If you would rather not run software
-made this way, Kranto is not for you, and that is fine.
+([.github/workflows/ci.yml](.github/workflows/ci.yml)) on GitHub's hosted runners; a pull
+request from a fork runs them once the maintainer has approved the run. If you would rather not
+run software made this way, Kranto is not for you, and that is fine.
 
 ## Documentation
 
