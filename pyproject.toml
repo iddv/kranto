@@ -10,7 +10,7 @@ description = "Kranto watches the sources you care about, keeps what it notices,
 readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
-authors = [{ name = "The Kranto authors" }]
+authors = [{ name = "Ian de Villiers" }]
 keywords = ["news", "feeds", "briefs", "writing", "self-hosted", "local-first"]
 classifiers = [
   "Development Status :: 3 - Alpha",
