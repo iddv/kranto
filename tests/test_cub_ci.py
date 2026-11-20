@@ -54,6 +54,7 @@ def test_the_plan_runs_again_on_a_uv_managed_python_under_the_home():
     run = leg["run"]
     assert "uv python install 3.12" in run and "KRANTO_CUBS_SANDBOX_REQUIRED=1" in run
     assert 'sys.base_prefix.startswith("/home/")' in run
+    assert "-k" not in run or "test_s1_" in run         # S1 always among the rows it runs
     assert "|| true" not in run
 
 

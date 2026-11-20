@@ -131,10 +131,11 @@ def _starts_at_neutral(exe: str, root: str) -> bool:
         return True                  # no sandbox here: nothing is shown anywhere
     inside = f"{PYTHON_AT}/{os.path.relpath(os.path.realpath(exe), root)}"
     files = [x for f in SYSTEM_FILES if os.path.exists(f) for x in ("--ro-bind", f, f)]
-    view = [x for copy, at in python_view(root) for x in ("--ro-bind", copy, at)]
+    # without the rewritten files: whether it starts does not depend on them, and an
+    # interpreter that stays at its own path never needs them made
     return _probe([bwrap, "--unshare-all", "--die-with-parent", "--clearenv", "--ro-bind",
                    "/usr", "/usr", *_system_links(), *files, "--ro-bind", root, PYTHON_AT,
-                   *view, "--dev", "/dev", "--", inside, "-I", "-S", "-B", "-c",
+                   "--dev", "/dev", "--", inside, "-I", "-S", "-B", "-c",
                    "import encodings, sys; sys.exit(sys.prefix != " + repr(PYTHON_AT) + ")"])
 
 

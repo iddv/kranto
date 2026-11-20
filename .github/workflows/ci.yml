@@ -259,7 +259,8 @@ jobs:
           tests/test_cub_security.py tests/test_cub_runtime.py tests/test_cub_install.py
           tests/test_brokers.py tests/test_examples_install.py
       # A machine without a system Python 3.12 installs Kranto on one uv downloads into the home
-      # folder: the plan again on such a Python (no cub may see the home, or a path naming it)
+      # folder: the plan's rows that depend on the interpreter again on such a Python (S1: no cub
+      # may see the home, or a path naming it; S2-S5: what else it may reach)
       - name: the security plan on a uv-managed Python, under the home folder
         env:
           UV_PYTHON_PREFERENCE: only-managed
@@ -268,7 +269,8 @@ jobs:
           uv python install 3.12
           uv sync --locked --extra dev --extra connections --extra mcp
           .venv-uv/bin/python -c 'import sys; assert sys.base_prefix.startswith("/home/"), sys.base_prefix; print(sys.base_prefix)'
-          KRANTO_CUBS_SANDBOX_REQUIRED=1 .venv-uv/bin/pytest -q -rs tests/test_cub_security.py
+          KRANTO_CUBS_SANDBOX_REQUIRED=1 .venv-uv/bin/pytest -q -rs tests/test_cub_security.py \
+            -k "test_s1_ or test_s2_ or test_s3_ or test_s4_ or test_s5_"
       - name: the console's box
         run: >
           KRANTO_BWRAP_REQUIRED=1 KRANTO_TEST_REAL_CLAUDE="$(command -v claude || true)"
