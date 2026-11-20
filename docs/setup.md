@@ -407,7 +407,10 @@ missing, and `c` says so in the page. It needs:
    key.
 2. `bwrap` (bubblewrap) working. `term: {enabled: false}` in `~/.kranto/loop/loop.yaml` turns it
    off; `true` turns it on without `bwrap`, with a one-line warning that the session runs
-   without Kranto's sandbox. Each `c` reads it, so no restart is needed.
+   without Kranto's sandbox. Each `c` reads it, so no restart is needed. Where AppArmor refuses
+   the user namespace the sandbox gives each command (Ubuntu 24.04 and later can, with
+   `kernel.apparmor_restrict_unprivileged_userns` 1), it stays off by itself: `c` and
+   `kranto doctor` say so in one line, with the command that allows it.
 
 **You should see:** `kranto doctor` says `ok    term           Open in Claude Code: sandboxed, its
 Claude login token by pipe` (or `its Claude API key by pipe`).

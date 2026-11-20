@@ -304,7 +304,18 @@ def boxed() -> bool:
         return False
 
 
-def offered(cfg: dict, environ=None, sandboxed: bool | None = None) -> tuple[bool, str | None]:
+def refusal() -> str | None:
+    """Where bubblewrap works but refuses the namespace each command gets in it (Ubuntu's
+    AppArmor), the one line saying so and what to do (``box.isolation.box_refusal``)."""
+    from ..box.isolation import box_refusal
+    try:
+        return box_refusal()
+    except Exception:                                # noqa: BLE001
+        return None
+
+
+def offered(cfg: dict, environ=None, sandboxed: bool | None = None,
+            refused: str | None = None) -> tuple[bool, str | None]:
     """Whether Open in Claude Code is on, from ``term.enabled``: true or false as written;
     null (the default) on where bubblewrap works and Kranto has a Claude token. Off, the
     one line that says how to turn it on."""
@@ -314,10 +325,16 @@ def offered(cfg: dict, environ=None, sandboxed: bool | None = None) -> tuple[boo
     if v is not None:
         return False, ("Open in Claude Code is off: set term.enabled: true in loop.yaml "
                        "and restart Kranto.")
-    box = boxed() if sandboxed is None else sandboxed
+    if sandboxed is None:
+        box = boxed()
+        refused = None if box else refusal()
+    else:
+        box = sandboxed
     tok = token_source(environ) is not None
     if box and tok:
         return True, None
+    if not box and refused:
+        return False, "Open in Claude Code is off: " + refused
     missing = " and ".join(w for w, ok in (("bubblewrap", box), ("a Claude token", tok))
                            if not ok)
     return False, (f"Open in Claude Code turns on by itself where Kranto has bubblewrap and a "
@@ -340,7 +357,8 @@ def doctor_lines(loop_home=None, environ=None, dotenv=()) -> tuple[str, str]:
         started = set(environ)
         environ = {**{k: "set" for k in dotenv}, **environ}
     box = boxed()
-    on, why = offered(cfg, environ, box)
+    refused = None if box else refusal()
+    on, why = offered(cfg, environ, box, refused)
     if not on:
         if cfg.get("enabled") is False:
             return "ok", "Open in Claude Code is off (term.enabled)"
@@ -349,7 +367,8 @@ def doctor_lines(loop_home=None, environ=None, dotenv=()) -> tuple[str, str]:
         return "fail", "Open in Claude Code is on, and the claude CLI is not on Kranto's PATH"
     warn = []
     if not box:
-        warn.append("no bubblewrap: sessions run without the sandbox")
+        warn.append(f"sessions run without the sandbox: {refused}" if refused else
+                    "no bubblewrap: sessions run without the sandbox")
     try:
         scope = int(Path("/proc/sys/kernel/yama/ptrace_scope").read_text().strip())
     except (OSError, ValueError):

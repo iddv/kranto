@@ -6,8 +6,10 @@ failures; the scheduler runs a cub's job at its slot; a cub's settings come from
 
 from __future__ import annotations
 
+import functools
 import json
 import os
+import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -343,6 +345,117 @@ def test_a_cub_may_not_make_user_namespaces_where_bwrap_can_say_so(monkeypatch, 
     assert on[1:5] == ["--unshare-all", "--unshare-user", "--disable-userns",
                        "--die-with-parent"]
     assert "--disable-userns" not in cmd([])            # an older bwrap: the rest unchanged
+
+
+def fake_python(tmp_path):
+    """A uv-managed Python's shape under a home: uv writes the root into sysconfig's data."""
+    root = tmp_path / "home" / "someone" / ".local" / "share" / "uv" / "python" / "cpython-3.12"
+    lib = root / "lib" / "python3.12"
+    (lib / "__pycache__").mkdir(parents=True)
+    (root / "bin").mkdir()
+    exe = root / "bin" / "python3.12"
+    exe.write_bytes(b"\x7fELF\0no path here")
+    (lib / "os.py").write_text("# the stdlib\n")
+    (lib / "_sysconfigdata_x.py").write_text(f"build_time_vars = {{'prefix': '{root}'}}\n")
+    (lib / "__pycache__" / "_sysconfigdata_x.cpython-312.pyc").write_bytes(
+        b"\x00\x01" + str(root).encode() + b"\x00")
+    (lib / "_native.so").write_bytes(b"\x7fELF\0" + str(root).encode() + b"\0tail")
+    return root, exe
+
+
+def neutral(monkeypatch, starts: bool):
+    from kranto.core.cubs import sandbox
+    monkeypatch.setattr(sandbox, "_starts_at_neutral", lambda exe, root: starts)
+    sandbox.python_mount.cache_clear()
+    monkeypatch.setattr(sandbox, "python_mount", functools.cache(sandbox.python_mount.__wrapped__))
+
+
+def test_a_python_from_the_home_is_shown_at_a_neutral_path(monkeypatch, tmp_path):
+    from kranto.core.cubs import sandbox
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    neutral(monkeypatch, True)
+    root, exe = fake_python(tmp_path)
+    assert sandbox.python_root(str(exe)) == str(root)
+    assert sandbox.python_inside(str(exe)) == f"{sandbox.PYTHON_AT}/bin/python3.12"
+    assert sandbox.python_root("/usr/bin/python3") is None
+    assert sandbox.python_inside("/usr/bin/python3") == "/usr/bin/python3"
+    view = dict((inside, Path(copy)) for copy, inside in sandbox.python_view(str(root)))
+    at = sandbox.PYTHON_AT + "/lib/python3.12/"
+    assert set(view) == {at + "_sysconfigdata_x.py", at + "_native.so",
+                         at + "__pycache__/_sysconfigdata_x.cpython-312.pyc"}
+    assert view[at + "_sysconfigdata_x.py"].read_text() == \
+        f"build_time_vars = {{'prefix': '{sandbox.PYTHON_AT}'}}\n"
+    assert view[at + "__pycache__/_sysconfigdata_x.cpython-312.pyc"].read_bytes() == b""
+    native = view[at + "_native.so"].read_bytes()
+    assert str(root).encode() not in native
+    assert len(native) == (root / "lib" / "python3.12" / "_native.so").stat().st_size
+    assert all(str(tmp_path / "cache") in str(p) for p in view.values())
+
+
+def test_the_sandbox_binds_no_host_path_where_a_cub_can_name_it(monkeypatch, tmp_path):
+    """The interpreter at PYTHON_AT with its rewritten files over it, the venv's packages
+    only (its pyvenv.cfg and scripts name host paths), and no /proc (its mountinfo names the
+    host path of every bind)."""
+    from kranto.core.cubs import sandbox
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    neutral(monkeypatch, True)
+    root, exe = fake_python(tmp_path)
+    monkeypatch.setattr(sandbox, "bwrap_path", lambda: "/usr/bin/bwrap")
+    monkeypatch.setattr(sandbox, "userns_flags", lambda: [])
+    monkeypatch.setattr(sandbox, "base_python", lambda: str(exe))
+    venv = tmp_path / "venv"
+    site = venv / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / \
+        "site-packages"
+    site.mkdir(parents=True)
+    (venv / "pyvenv.cfg").write_text(f"home = {root}/bin\n")
+    (site / "pkg" / "__pycache__").mkdir(parents=True)
+    sdk = {n: tmp_path / "sdk" / n for n in ("bears_cub", "yaml")}
+    for d in sdk.values():
+        (d / "__pycache__").mkdir(parents=True)
+    monkeypatch.setattr(sandbox, "sdk_dirs", lambda: {n: str(d) for n, d in sdk.items()})
+    cmd = sandbox.argv(src=tmp_path / "src", entry="main", venv=venv, unit="u",
+                       limits=sandbox.Limits(), mode="rlimits")
+    binds = {cmd[i + 2]: cmd[i + 1] for i, a in enumerate(cmd) if a == "--ro-bind"}
+    assert binds[sandbox.PYTHON_AT] == str(root)
+    assert binds[sandbox.venv_site(venv)] == str(site)
+    assert not any(d.startswith(str(tmp_path)) for d in binds)       # nothing at its own path
+    assert "/cub/venv" not in binds and "--proc" not in cmd
+    assert f"{sandbox.PYTHON_AT}/bin/python3.12" in cmd
+    assert sandbox.PYTHON_AT + "/lib/python3.12/_sysconfigdata_x.py" in binds
+    # bytecode records the host path of its source: an empty folder over each __pycache__
+    empty = str(tmp_path / "cache" / "kranto" / "sandbox" / "empty")
+    for inside in (f"{sandbox.SDK_AT}/bears_cub/__pycache__", f"{sandbox.SDK_AT}/yaml/__pycache__",
+                   f"{sandbox.venv_site(venv)}/pkg/__pycache__"):
+        assert binds[inside] == empty
+
+
+def test_a_python_that_cannot_move_stays_at_its_path_and_the_doctor_says_so(monkeypatch,
+                                                                              tmp_path):
+    """One built for its own path only (setup-python's: a library path written into the
+    binary) does not start from /opt/kranto/python: it stays at its own path, as before;
+    where that path is in the home folder the doctor warns."""
+    from types import SimpleNamespace
+
+    from kranto.core.cubs import sandbox, status
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    monkeypatch.setenv("KRANTO_CUBS_STOP", str(tmp_path / "cubs.STOP"))
+    neutral(monkeypatch, False)
+    root, exe = fake_python(tmp_path)
+    assert sandbox.python_mount(str(exe)) == (str(root), str(root))
+    assert sandbox.python_inside(str(exe)) == str(exe)
+    assert sandbox.python_binds(str(exe)) == ["--ro-bind", str(root), str(root)]
+    monkeypatch.setattr(sandbox, "base_python", lambda: str(exe))
+    monkeypatch.setattr(sandbox, "sandboxed", lambda: True)
+    monkeypatch.setattr(sandbox, "limits_mode", lambda: "scope")
+    cfg = SimpleNamespace(db_path=tmp_path / "none.db")
+
+    def warned():
+        return [r for r in status.doctor(cfg) if "names your home folder" in r[2]]
+    monkeypatch.setattr(sandbox.Path, "home", lambda: tmp_path / "home" / "someone")
+    assert sandbox.python_shows_home(str(exe))
+    assert warned()[0][0] == "warn" and str(root) in warned()[0][2]
+    monkeypatch.setattr(sandbox.Path, "home", lambda: tmp_path / "elsewhere")
+    assert not sandbox.python_shows_home(str(exe)) and warned() == []
 
 
 def test_where_only_rlimits_apply_a_strangers_cub_waits_for_the_owners_word(rt, cubs):  # noqa: F811

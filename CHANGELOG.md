@@ -9,6 +9,12 @@ requests they carry.
 
 ### Fixed
 
+- A post writer's sandbox no longer shows any path from your home folder, your user name among
+  them. Where uv installed Kranto's Python (a machine without a system Python 3.12), that
+  Python now appears inside the sandbox at a fixed path.
+- Open in Claude Code no longer turns on where AppArmor refuses the namespace its sandbox gives
+  each command (Ubuntu 24.04 and later can); `c` and `kranto doctor` say what is refused and
+  what to run.
 - A stable release's notes no longer open with an empty "Big changes — None" section (the
   update check showed that line as the release's first change); a section with nothing in it is
   left out.

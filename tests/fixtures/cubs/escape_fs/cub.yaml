@@ -10,4 +10,5 @@ jobs:
 settings:
   keys:
     escape_fs.paths: {type: list, default: []}
+    escape_fs.needles: {type: list, default: []}
 storage: none
