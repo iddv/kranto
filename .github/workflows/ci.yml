@@ -230,7 +230,8 @@ jobs:
       # which refuse the user namespace the console's shell nests inside the sandbox for each
       # command. First, on the image as it comes, the console's box must say so (the page and
       # the doctor in one line, never a sandbox it cannot have); then the restriction is lifted
-      # on this throwaway machine: the sysctl alone, the same check, then the profiles unloaded.
+      # on this throwaway machine: the sysctl alone (not enough on 26.04), the same check, then
+      # the profiles unloaded, after which the box must work (what its line tells a person).
       - name: bubblewrap, and the console's box under the image's own AppArmor (GitHub's runner only)
         if: runner.environment == 'github-hosted'
         run: |
@@ -246,6 +247,7 @@ jobs:
             if [ -f "$p" ]; then echo "unloading $p"; sudo apparmor_parser -R "$p" || true; fi
           done
           sudo aa-status 2>/dev/null | grep -iE 'bwrap|unshare|userns' || echo "no such profile loaded"
+          KRANTO_EXPECT_NESTED=1 .venv/bin/pytest -q -rs -s tests/page/test_term_apparmor.py -k this_machine
       # the session's own /proc, and the user namespace kranto-shell nests in it
       - name: can bubblewrap mount a fresh /proc here?
         run: >

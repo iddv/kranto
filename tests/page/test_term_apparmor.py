@@ -18,11 +18,15 @@ TOKEN = {"CLAUDE_CODE_OAUTH_TOKEN": "set"}
 
 
 @pytest.fixture
-def refused(monkeypatch):
+def refused(monkeypatch, tmp_path):
+    profile = tmp_path / "bwrap-userns-restrict"
+    profile.write_text("profile bwrap {}\n")
     monkeypatch.setattr(isolation, "isolation", lambda: "bwrap")
     monkeypatch.setattr(isolation, "nested_userns", lambda: False)
     monkeypatch.setattr(isolation, "apparmor_restricts", lambda: True)
+    monkeypatch.setattr(isolation, "BWRAP_PROFILE", profile)
     monkeypatch.setattr(launch, "boxed", box.available)
+    return profile
 
 
 def test_the_box_is_not_offered_where_apparmor_refuses_its_namespace(refused):
@@ -30,8 +34,10 @@ def test_the_box_is_not_offered_where_apparmor_refuses_its_namespace(refused):
     on, why = launch.offered({"enabled": None}, TOKEN)
     assert not on
     assert why.startswith("Open in Claude Code is off: AppArmor refuses the user namespace")
-    assert "kernel.apparmor_restrict_unprivileged_userns" in why and "restart Kranto" in why
-    assert "\n" not in why
+    # Ubuntu 26.04: the sysctl alone is not enough, the profile on bubblewrap's children too
+    assert f"sudo apparmor_parser -R {refused}; sudo sysctl -w " \
+           "kernel.apparmor_restrict_unprivileged_userns=0" in why
+    assert "restart Kranto" in why and "\n" not in why
     with pytest.raises(box.SandboxUnavailable, match="AppArmor refuses"):
         box.command(isolation.Path("/tmp"))
 
@@ -51,10 +57,21 @@ def test_the_doctor_says_why_when_it_is_turned_on_anyway(refused, tmp_path, monk
     assert status == "warn" and text.startswith("Open in Claude Code is off: AppArmor refuses")
 
 
-def test_without_apparmor_the_line_names_no_setting_it_cannot_see(monkeypatch):
+def test_the_line_names_only_what_this_machine_has(refused, monkeypatch, tmp_path):
+    monkeypatch.setattr(isolation, "BWRAP_PROFILE", tmp_path / "none")
+    why = isolation.box_refusal()
+    assert "apparmor_parser" not in why and "restrict_unprivileged_userns=0" in why
+    monkeypatch.setattr(isolation, "BWRAP_PROFILE", refused)
+    monkeypatch.setattr(isolation, "apparmor_restricts", lambda: False)
+    why = isolation.box_refusal()
+    assert "apparmor_parser -R" in why and "sysctl" not in why
+
+
+def test_without_apparmor_the_line_names_no_setting_it_cannot_see(monkeypatch, tmp_path):
     monkeypatch.setattr(isolation, "isolation", lambda: "bwrap")
     monkeypatch.setattr(isolation, "nested_userns", lambda: False)
     monkeypatch.setattr(isolation, "apparmor_restricts", lambda: False)
+    monkeypatch.setattr(isolation, "BWRAP_PROFILE", tmp_path / "none")
     why = isolation.box_refusal()
     assert "apparmor" not in why.lower() and "run Kranto on the host" in why
     monkeypatch.setattr(isolation, "nested_userns", lambda: True)

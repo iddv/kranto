@@ -152,16 +152,23 @@ def apparmor_restricts() -> bool:
         return False
 
 
+BWRAP_PROFILE = Path("/etc/apparmor.d/bwrap-userns-restrict")
+
+
 def box_refusal() -> str | None:
     """Where bubblewrap works and the nested namespace is refused, the one line that says so
-    and what to do; else None."""
+    and what to do; else None. Ubuntu 26.04 refuses it in two places: the sysctl, and the
+    profile that confines bubblewrap's children (the sysctl alone does not lift that one)."""
     if isolation() != "bwrap" or nested_userns():
         return None
-    if apparmor_restricts():
+    restricts, profile = apparmor_restricts(), BWRAP_PROFILE.exists()
+    if restricts or profile:
+        steps = ([f"sudo apparmor_parser -R {BWRAP_PROFILE}"] if profile else []) + (
+            ["sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0"] if restricts
+            else [])
         return ("AppArmor refuses the user namespace Open in Claude Code's sandbox gives each "
-                "command (kernel.apparmor_restrict_unprivileged_userns is 1). To allow it: "
-                "sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 (lasts until a "
-                "restart; add the line to /etc/sysctl.d/ to keep it), then restart Kranto.")
+                "command. To allow it on this machine: " + "; ".join(steps) + " (until the "
+                "machine restarts), then restart Kranto; or leave Open in Claude Code off.")
     return ("this machine refuses the user namespace Open in Claude Code's sandbox gives each "
             "command inside bubblewrap (a container, or a kernel setting): run Kranto on the "
             "host, or allow unprivileged user namespaces, then restart Kranto.")

@@ -6,8 +6,9 @@ read-only, the SDK (and the YAML reader the SDK needs) read-only, a private ``/t
 size, no home, no network, no secret, no ``/proc`` and an environment of five variables. No
 path it can read names the user's home: an interpreter from outside the system's directories
 (a uv-managed Python) appears at ``/opt/kranto/python``, with the files that name its own path
-shown rewritten. Values from the manifest never reach
-the command line but the entry file's name, which the schema's pattern has checked.
+shown rewritten (one that cannot move stays at its own path: ``python_mount``). Values from
+the manifest never reach the command line but the entry file's name, which the schema's pattern
+has checked.
 
 Without bubblewrap a cub does not run; ``KRANTO_ALLOW_UNSANDBOXED=1`` runs it on the host for a
 developer's own machine (the doctor says so in red). Without a systemd user manager (a
@@ -76,17 +77,65 @@ def _system(path: str) -> bool:
 def python_root(exe: str) -> str | None:
     """The base interpreter's install root when it lives outside the system's directories (a
     uv-managed Python under the user's home), else None (``/usr/bin/python3.12`` comes with
-    ``/usr``). Inside the sandbox that root appears at ``PYTHON_AT``, never at its own path."""
+    ``/usr``)."""
     root = os.path.dirname(os.path.dirname(os.path.realpath(exe)))
     return None if _system(root) else root
 
 
-def python_inside(exe: str) -> str:
-    """The base interpreter's path inside the sandbox."""
+def in_home(path: str) -> bool:
+    return path == str(Path.home()) or path.startswith((str(Path.home()) + "/", "/home/"))
+
+
+@functools.cache
+def python_mount(exe: str) -> tuple[str, str] | None:
+    """``(host root, path inside)`` for an interpreter from outside the system's directories,
+    else None. It appears at ``PYTHON_AT`` when it starts from there (uv's Pythons are built to
+    move); one built for its own path only (a library path written into the binary, as
+    setup-python's) stays at that path, and ``python_shows_home`` says when that path names the
+    user's home (``kranto doctor`` warns)."""
     root = python_root(exe)
     if root is None:
+        return None
+    return (root, PYTHON_AT) if _starts_at_neutral(exe, root) else (root, root)
+
+
+def python_shows_home(exe: str) -> bool:
+    m = python_mount(exe)
+    return m is not None and m[1] != PYTHON_AT and in_home(m[0])
+
+
+def python_inside(exe: str) -> str:
+    """The base interpreter's path inside the sandbox."""
+    m = python_mount(exe)
+    if m is None:
         return exe
-    return f"{PYTHON_AT}/{os.path.relpath(os.path.realpath(exe), root)}"
+    return f"{m[1]}/{os.path.relpath(os.path.realpath(exe), m[0])}"
+
+
+def python_binds(exe: str) -> list[str]:
+    """bwrap arguments that show the base interpreter (nothing for a system one)."""
+    m = python_mount(exe)
+    if m is None:
+        return []
+    root, at = m
+    out = ["--ro-bind", root, at]
+    if at == PYTHON_AT:
+        for copy, inside in python_view(root):
+            out += ["--ro-bind", copy, inside]
+    return out
+
+
+def _starts_at_neutral(exe: str, root: str) -> bool:
+    bwrap = bwrap_path()
+    if bwrap is None:
+        return True                  # no sandbox here: nothing is shown anywhere
+    inside = f"{PYTHON_AT}/{os.path.relpath(os.path.realpath(exe), root)}"
+    files = [x for f in SYSTEM_FILES if os.path.exists(f) for x in ("--ro-bind", f, f)]
+    view = [x for copy, at in python_view(root) for x in ("--ro-bind", copy, at)]
+    return _probe([bwrap, "--unshare-all", "--die-with-parent", "--clearenv", "--ro-bind",
+                   "/usr", "/usr", *_system_links(), *files, "--ro-bind", root, PYTHON_AT,
+                   *view, "--dev", "/dev", "--", inside, "-I", "-S", "-B", "-c",
+                   "import encodings, sys; sys.exit(sys.prefix != " + repr(PYTHON_AT) + ")"])
 
 
 def _cache() -> Path:
@@ -298,11 +347,7 @@ def argv(*, src: Path, entry: str, venv: Path | None, unit: str, limits: Limits,
     for f in SYSTEM_FILES:
         if os.path.exists(f):
             cmd += ["--ro-bind", f, f]
-    root = python_root(py)
-    if root is not None:
-        cmd += ["--ro-bind", root, PYTHON_AT]
-        for copy, inside in python_view(root):
-            cmd += ["--ro-bind", copy, inside]
+    cmd += python_binds(py)
     # no /proc: its mountinfo names the host path of every bind (the cub's folder, the SDK,
     # the interpreter), and with them the user's home
     cmd += ["--dev", "/dev",

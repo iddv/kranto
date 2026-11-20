@@ -6,6 +6,7 @@ failures; the scheduler runs a cub's job at its slot; a cub's settings come from
 
 from __future__ import annotations
 
+import functools
 import json
 import os
 import sys
@@ -362,9 +363,17 @@ def fake_python(tmp_path):
     return root, exe
 
 
+def neutral(monkeypatch, starts: bool):
+    from kranto.core.cubs import sandbox
+    monkeypatch.setattr(sandbox, "_starts_at_neutral", lambda exe, root: starts)
+    sandbox.python_mount.cache_clear()
+    monkeypatch.setattr(sandbox, "python_mount", functools.cache(sandbox.python_mount.__wrapped__))
+
+
 def test_a_python_from_the_home_is_shown_at_a_neutral_path(monkeypatch, tmp_path):
     from kranto.core.cubs import sandbox
     monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    neutral(monkeypatch, True)
     root, exe = fake_python(tmp_path)
     assert sandbox.python_root(str(exe)) == str(root)
     assert sandbox.python_inside(str(exe)) == f"{sandbox.PYTHON_AT}/bin/python3.12"
@@ -389,6 +398,7 @@ def test_the_sandbox_binds_no_host_path_where_a_cub_can_name_it(monkeypatch, tmp
     host path of every bind)."""
     from kranto.core.cubs import sandbox
     monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    neutral(monkeypatch, True)
     root, exe = fake_python(tmp_path)
     monkeypatch.setattr(sandbox, "bwrap_path", lambda: "/usr/bin/bwrap")
     monkeypatch.setattr(sandbox, "userns_flags", lambda: [])
@@ -417,6 +427,35 @@ def test_the_sandbox_binds_no_host_path_where_a_cub_can_name_it(monkeypatch, tmp
     for inside in (f"{sandbox.SDK_AT}/bears_cub/__pycache__", f"{sandbox.SDK_AT}/yaml/__pycache__",
                    f"{sandbox.venv_site(venv)}/pkg/__pycache__"):
         assert binds[inside] == empty
+
+
+def test_a_python_that_cannot_move_stays_at_its_path_and_the_doctor_says_so(monkeypatch,
+                                                                              tmp_path):
+    """One built for its own path only (setup-python's: a library path written into the
+    binary) does not start from /opt/kranto/python: it stays at its own path, as before;
+    where that path is in the home folder the doctor warns."""
+    from types import SimpleNamespace
+
+    from kranto.core.cubs import sandbox, status
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    monkeypatch.setenv("KRANTO_CUBS_STOP", str(tmp_path / "cubs.STOP"))
+    neutral(monkeypatch, False)
+    root, exe = fake_python(tmp_path)
+    assert sandbox.python_mount(str(exe)) == (str(root), str(root))
+    assert sandbox.python_inside(str(exe)) == str(exe)
+    assert sandbox.python_binds(str(exe)) == ["--ro-bind", str(root), str(root)]
+    monkeypatch.setattr(sandbox, "base_python", lambda: str(exe))
+    monkeypatch.setattr(sandbox, "sandboxed", lambda: True)
+    monkeypatch.setattr(sandbox, "limits_mode", lambda: "scope")
+    cfg = SimpleNamespace(db_path=tmp_path / "none.db")
+
+    def warned():
+        return [r for r in status.doctor(cfg) if "names your home folder" in r[2]]
+    monkeypatch.setattr(sandbox.Path, "home", lambda: tmp_path / "home" / "someone")
+    assert sandbox.python_shows_home(str(exe))
+    assert warned()[0][0] == "warn" and str(root) in warned()[0][2]
+    monkeypatch.setattr(sandbox.Path, "home", lambda: tmp_path / "elsewhere")
+    assert not sandbox.python_shows_home(str(exe)) and warned() == []
 
 
 def test_where_only_rlimits_apply_a_strangers_cub_waits_for_the_owners_word(rt, cubs):  # noqa: F811

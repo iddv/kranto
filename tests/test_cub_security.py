@@ -75,7 +75,8 @@ def host_paths(tmp_path) -> list[str]:
     Python lives under the home), the Kranto home."""
     out = {str(Path.home()), "/home/" + getpass.getuser(), str(tmp_path)}
     root = sandbox.python_root(sandbox.base_python())
-    if root:
+    if root and (sandbox.in_home(root) or sandbox.python_mount(sandbox.base_python())[1]
+                 == sandbox.PYTHON_AT):
         out.add(root)
     return sorted(out)
 
@@ -98,7 +99,8 @@ def test_s1_escape_fs_sees_only_its_own_view(rt, home, tmp_path):  # noqa: F811
     # Python (under the home) the interpreter is shown at /opt/kranto/python
     assert s["leaks"] == [], s["leaks"]
     assert not any(n in json.dumps(s["python"]) for n in needles), s["python"]
-    if sandbox.python_root(sandbox.base_python()):
+    mount = sandbox.python_mount(sandbox.base_python())
+    if mount and mount[1] == sandbox.PYTHON_AT:
         assert s["python"]["prefix"] == sandbox.PYTHON_AT, s["python"]
         assert s["python"]["executable"].startswith(sandbox.PYTHON_AT + "/"), s["python"]
     if sandbox.userns_flags():
