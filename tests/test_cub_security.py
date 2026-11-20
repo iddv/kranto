@@ -10,12 +10,10 @@ answers to broken lines can be seen; its fixture's docstring says how.
 
 from __future__ import annotations
 
-import getpass
 import json
 import threading
 import time
 from dataclasses import replace
-from pathlib import Path
 
 import httpx
 import pytest
@@ -71,9 +69,13 @@ def summary(rt, kind: str) -> dict:  # noqa: F811
 
 
 def host_paths(tmp_path) -> list[str]:
-    """What a cub must never read: the user's home, the interpreter's own root (a uv-managed
-    Python lives under the home), the Kranto home."""
-    out = {str(Path.home()), "/home/" + getpass.getuser(), str(tmp_path)}
+    """What a cub must never read: the Kranto home, the host paths of Kranto's packages and the
+    SDK, and the interpreter's own root where it is in the home folder or shown elsewhere (a
+    uv-managed Python lives under the home)."""
+    # paths this machine's sandbox binds from (a word like the bare home folder would also match
+    # an interpreter's own build notes, made on another machine under the same user name;
+    # /home itself is held by the open and root checks)
+    out = {str(tmp_path), sandbox.site_packages(), *sandbox.sdk_dirs().values()}
     root = sandbox.python_root(sandbox.base_python())
     if root and (sandbox.in_home(root) or sandbox.python_mount(sandbox.base_python())[1]
                  == sandbox.PYTHON_AT):
