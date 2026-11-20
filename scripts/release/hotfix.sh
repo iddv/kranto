@@ -232,8 +232,14 @@ if [ "$MERGED_SHA" = "-" ]; then
 else
   PICK="stable/$PR-${MERGED_SHA:0:7}"
   git -C "$SRC" checkout --quiet -B "$PICK" "origin/$BRANCH"
-  if ! git -C "$SRC" -c user.name="kranto release" -c user.email="release@kranto.invalid" \
-      cherry-pick -x "$MERGED_SHA" > "$WORK/cherry-pick.log" 2>&1; then
+  # the maintainer's public identity (as the tag's), signed off: CI's sign-off check refuses an
+  # unsigned commit on the stable line's pull request as on any other
+  PICK_NAME="${RELEASE_TAGGER_NAME:-$(git -C "$SRC" config user.name || true)}"
+  PICK_EMAIL="${RELEASE_TAGGER_EMAIL:-$(git -C "$SRC" config user.email || true)}"
+  [ -n "$PICK_NAME" ] && [ -n "$PICK_EMAIL" ] \
+    || fail "no identity for the cherry-pick: set RELEASE_TAGGER_NAME and RELEASE_TAGGER_EMAIL (your GitHub no-reply address)"
+  if ! git -C "$SRC" -c user.name="$PICK_NAME" -c user.email="$PICK_EMAIL" \
+      cherry-pick -x -s "$MERGED_SHA" > "$WORK/cherry-pick.log" 2>&1; then
     files="$(git -C "$SRC" diff --name-only --diff-filter=U | tr '\n' ' ')"
     git -C "$SRC" cherry-pick --abort 2>/dev/null || true
     fail "the cherry-pick of ${MERGED_SHA:0:10} onto $BRANCH conflicts in: ${files:-see $WORK/cherry-pick.log}. Resolve it on a branch from $BRANCH, open its pull request against $BRANCH, and run hotfix.sh $NAME <that PR> --stable --no-update"
