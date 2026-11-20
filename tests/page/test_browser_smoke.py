@@ -581,7 +581,8 @@ def test_while_term_is_off_c_says_how_to_turn_it_on(browser, page_base, monkeypa
     panel stays shut and nothing is asked to start."""
     from kranto.page.term import launch
     why = "Open in Claude Code is off: set term.enabled: true in loop.yaml and restart Kranto."
-    monkeypatch.setattr(launch, "offered", lambda cfg, environ=None, sandboxed=None: (False, why))
+    monkeypatch.setattr(launch, "offered", lambda cfg, environ=None, sandboxed=None, refused=None:
+                        (False, why))
     page, errors, sent, _ = _story(browser, PageAfk(topics=["Clinics"], cards=CARDS))
     page.goto(f"{page_base}/#/ideas/7")
     page.wait_for_selector("#dscroll #idea-write")

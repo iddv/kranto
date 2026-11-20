@@ -168,7 +168,7 @@ def test_it_is_on_by_itself_where_bubblewrap_and_a_token_are_there(tmp_path, mon
 
 def test_the_page_hears_why_it_is_off(tmp_path, monkeypatch):
     term = make_term(tmp_path, monkeypatch)
-    monkeypatch.setattr(launch, "offered", lambda cfg, environ=None, sandboxed=None:
+    monkeypatch.setattr(launch, "offered", lambda cfg, environ=None, sandboxed=None, refused=None:
                         (False, "Open in Claude Code is off: set term.enabled: true"))
     st = term.status()
     assert st["enabled"] is False and st["available"] is False

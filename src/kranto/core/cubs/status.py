@@ -78,6 +78,13 @@ def doctor(cfg, store=None) -> list[tuple[str, str, str]]:
     else:
         out.append(("warn", "post writers", "bubblewrap does not work here: no post writer runs "
                                             "until it does (install bubblewrap)"))
+    mount = sandbox.python_mount(sandbox.base_python()) if sandbox.sandboxed() else None
+    if mount and sandbox.python_shows_home(sandbox.base_python()):
+        root = mount[0]
+        out.append(("warn", "post writers", f"they can see the path of Kranto's Python ({root}), "
+                                            "which names your home folder: it cannot run from "
+                                            "another path. A Python from uv can: uv python "
+                                            "install 3.12, then install Kranto again"))
     mode = sandbox.limits_mode()
     out.append(("ok", "writer limits", "memory, processes and CPU are capped (a systemd user "
                                        "scope)")

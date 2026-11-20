@@ -107,7 +107,7 @@ class Term:
         shows)."""
         cfg = self.cfg()
         box = self.sandboxed()
-        on, why = launch.offered(cfg, self.environ, box)
+        on, why = launch.offered(cfg, self.environ, box, None if box else launch.refusal())
         cred, held = launch.login(cfg, self.environ)
         if on and not claude_cli.find():
             why = "Open in Claude Code needs the claude CLI on Kranto's PATH."
