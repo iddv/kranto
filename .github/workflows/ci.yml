@@ -1,5 +1,6 @@
 name: ci
-# Every pull request and every push to main. Each job but sandbox runs on the runner the repository
+# Every pull request and every push to main or to a stable line's release/X.Y (a stable fix is
+# cut only from a release/X.Y commit whose own checks are green). Each job but sandbox runs on the runner the repository
 # variable RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, for a run
 # started by hand with "hosted", and for every pull request from a fork, on GitHub's own runner: a
 # stranger's code never reaches a runner of the project's own. sandbox always runs on GitHub's own
@@ -9,7 +10,7 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, "release/**"]
   workflow_dispatch:
     inputs:
       hosted:
@@ -21,14 +22,20 @@ on:
 permissions:
   contents: read
 
-# A newer push to the same pull request cancels its older run; each push to main keeps its own.
+# A newer push to the same pull request cancels its older run; each push to a branch keeps its own.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# uv's cache is setup-uv's (on GitHub's runner it is saved after the job, keyed on uv.lock); a
+# cache path with '..' in it makes that save fail the job. The tests run on Python 3.12, the
+# version install.sh and the README install with, installed system-wide by setup-python (outside
+# any home folder, as on the release machine); uv would otherwise take the image's own python3,
+# whatever version it ships, or download one into the home folder.
 env:
-  UV_CACHE_DIR: ${{ github.workspace }}/../.uv-cache
   PYTHONDONTWRITEBYTECODE: "1"
+  UV_PYTHON: "3.12"
+  UV_PYTHON_PREFERENCE: only-system
 
 jobs:
   # The server's tests (tests/, without tests/page), serial.
@@ -39,6 +46,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra connections --extra notify
       - name: pytest (the cub sandbox tests are the sandbox job's)
@@ -52,6 +62,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # The console's box tests run here too wherever bubblewrap works (and in sandbox, where it
+      # is required). Their shell nests a user namespace inside the sandbox for each command,
+      # which newer Ubuntu images refuse by default; this lifts that refusal as sandbox does.
+      - name: nested user namespaces (GitHub's runner only)
+        if: runner.environment == 'github-hosted'
+        run: |
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+          for p in /etc/apparmor.d/*bwrap* /etc/apparmor.d/*unshare*; do
+            if [ -f "$p" ]; then echo "unloading $p"; sudo apparmor_parser -R "$p" || true; fi
+          done
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra mcp
       # a test skipped because an import failed fails the run here (tests/page/conftest.py)
@@ -65,6 +90,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra mcp
       - run: KRANTO_NO_IMPORT_SKIPS=1 uv run --no-sync pytest -q -rs tests/page -m slow -n 4 --dist loadfile
@@ -77,6 +105,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv sync --locked --extra dev --extra mcp --group browser
       - run: python3 scripts/dev/build_ui.py
@@ -109,6 +140,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - name: uv.lock matches pyproject.toml
         run: uv lock --check
@@ -183,44 +217,67 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # this job keeps no cache: its dependencies are fetched fresh every run
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
+      - run: uv sync --locked --extra dev --extra connections --extra mcp
       # GitHub's Ubuntu image has no bubblewrap, and its AppArmor forbids unprivileged user
       # namespaces by default; a runner of your own brings its own (and has no sudo). Newer
       # Ubuntu images also confine bubblewrap's children and unshare with profiles of their own,
       # which refuse the user namespace the console's shell nests inside the sandbox for each
-      # command; they are unloaded on this throwaway machine.
-      - name: bubblewrap (GitHub's runner only)
+      # command. First, on the image as it comes, the console's box must say so (the page and
+      # the doctor in one line, never a sandbox it cannot have); then the restriction is lifted
+      # on this throwaway machine: the sysctl alone (not enough on 26.04), the same check, then
+      # the profiles unloaded, after which the box must work (what its line tells a person).
+      - name: bubblewrap, and the console's box under the image's own AppArmor (GitHub's runner only)
         if: runner.environment == 'github-hosted'
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends bubblewrap
+          ls /etc/apparmor.d | grep -iE 'bwrap|unshare|userns' || echo "no such profile file"
+          .venv/bin/pytest -q -rs -s tests/page/test_term_apparmor.py
           if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
             sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+            .venv/bin/pytest -q -rs -s tests/page/test_term_apparmor.py -k this_machine
           fi
           for p in /etc/apparmor.d/*bwrap* /etc/apparmor.d/*unshare*; do
             if [ -f "$p" ]; then echo "unloading $p"; sudo apparmor_parser -R "$p" || true; fi
           done
           sudo aa-status 2>/dev/null | grep -iE 'bwrap|unshare|userns' || echo "no such profile loaded"
+          KRANTO_EXPECT_NESTED=1 .venv/bin/pytest -q -rs -s tests/page/test_term_apparmor.py -k this_machine
       # the session's own /proc, and the user namespace kranto-shell nests in it
       - name: can bubblewrap mount a fresh /proc here?
         run: >
           bwrap --unshare-all --die-with-parent --new-session --ro-bind / / --proc /proc
           unshare --user --map-current-user --pid --fork --mount --mount-proc true
-      # on GitHub's runner setup-uv would save its cache after the job, and it refuses
-      # UV_CACHE_DIR's relative path; this job keeps no cache
-      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-        with:
-          enable-cache: false
-      - run: uv sync --locked --extra dev --extra connections --extra mcp
       - name: the cub runtime's security plan and failure modes
         run: >
           KRANTO_CUBS_SANDBOX_REQUIRED=1 .venv/bin/pytest -q -rs
           tests/test_cub_security.py tests/test_cub_runtime.py tests/test_cub_install.py
           tests/test_brokers.py tests/test_examples_install.py
+      # A machine without a system Python 3.12 installs Kranto on one uv downloads into the home
+      # folder: the plan's rows that depend on the interpreter again on such a Python (S1: no cub
+      # may see the home, or a path naming it; S2-S5: what else it may reach)
+      - name: the security plan on a uv-managed Python, under the home folder
+        env:
+          UV_PYTHON_PREFERENCE: only-managed
+          UV_PROJECT_ENVIRONMENT: .venv-uv
+        run: |
+          uv python install 3.12
+          uv sync --locked --extra dev --extra connections --extra mcp
+          .venv-uv/bin/python -c 'import sys; assert sys.base_prefix.startswith("/home/"), sys.base_prefix; print(sys.base_prefix)'
+          KRANTO_CUBS_SANDBOX_REQUIRED=1 .venv-uv/bin/pytest -q -rs tests/test_cub_security.py \
+            -k "test_s1_ or test_s2_ or test_s3_ or test_s4_ or test_s5_"
       - name: the console's box
         run: >
           KRANTO_BWRAP_REQUIRED=1 KRANTO_TEST_REAL_CLAUDE="$(command -v claude || true)"
           .venv/bin/pytest -q -rs tests/page/test_term_sandbox.py tests/page/test_term_door.py
           tests/page/test_term_sources.py tests/page/test_print_call.py
+          tests/page/test_term_apparmor.py
 
   # The release as a stranger installs it: the final wheel built by the release script (with a
   # pretend version), installed with uv into a scratch HOME, both commands answering it, the
@@ -237,6 +294,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       # build.sh tags the commit it builds; on a runner of your own the checkout keeps that tag
       # from an earlier run, at another commit, and build.sh refuses it. It is only this job's.

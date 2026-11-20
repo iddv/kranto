@@ -39,7 +39,7 @@ One name for each thing, in the pages, Welcome, `kranto setup` and the commands'
   a program's own sign-in on this machine (Claude Code's, the GitHub CLI's), Ready or Missing.
 - **Account**: one you read sources with or post through (Mastodon, Bluesky, X, GitHub…);
   Connect and Disconnect… are its verbs. Kranto also uses a connected GitHub account, or your
-  gh login, to check for updates while the repository is private.
+  gh login, to check for updates (GitHub allows 60 checks an hour without one).
 - **Door** and **agent**: who may act; the file each uses is a token.
 - **Cap**: a spend ceiling, always "X a month" or "a day"; "no cap" when there
   is none. Never "budget" or "limit" (a provider's own spend limit keeps its name).

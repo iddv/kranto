@@ -631,10 +631,10 @@ the row says each step, and if one fails the release stays held and the row says
 To check now, click the version ("Kranto 0.5.10 · Check for updates": in the status bar, on
 Settings' Overview, and Check for updates under Settings › System › Updates), or ⌘K "Check for
 updates". The answer is said where you clicked: you're on the latest, a new version is ready
-(Restart to update, also ⌘K "Update Kranto"), or why the check failed and what to do. While the
-repository is private, a check needs a GitHub login that can see it: run `gh auth login` on
-the machine Kranto runs on. When the check has failed for more than two days, the top bar says
-"Can't check for updates" (point at it for the reason). An update ready says "Update" there,
+(Restart to update, also ⌘K "Update Kranto"), or why the check failed and what to do. A check
+needs no GitHub login; without one GitHub answers 60 an hour from one address, and with `gh auth
+login` on the machine Kranto runs on, it asks through it. When the check has failed for more
+than two days, the top bar says "Can't check for updates" (point at it for the reason). An update ready says "Update" there,
 without its versions: Settings › Updates says them. The top bar holds nothing else daily: what
 runs is on Activity, the tokens used today on Settings › Spend, and Feedback is under ⚙.
 
@@ -771,7 +771,9 @@ and `kranto term open <id>` (the page's limits).
 It turns on by itself where Kranto has bubblewrap and a Claude token (`claude setup-token`)
 in its environment; `kranto doctor` says whether both are there, and the setup guide has the
 steps. `term.enabled` in `loop.yaml` set false turns it off, and `true` turns it on without
-bubblewrap (with a warning). While it is off, `c` says how to turn it on.
+bubblewrap (with a warning). While it is off, `c` says how to turn it on. On a machine whose
+AppArmor refuses the namespace the sandbox gives each command (Ubuntu 24.04 and later can), it
+stays off by itself, and `c` and `kranto doctor` say what is refused and what to run.
 
 Which token it logs in with: your Claude login token first, so a session runs on your Claude
 plan. Without one, it would bill your Claude API key. The watcher's key, saved under Settings ›

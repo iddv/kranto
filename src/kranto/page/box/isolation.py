@@ -114,7 +114,8 @@ def _probe(cmd: list[str]) -> bool:
 @functools.cache
 def isolation() -> str:
     """The strongest solver isolation this machine supports: ``bwrap`` (private
-    filesystem view, private /tmp, no network), ``netns`` (no network only) or ``none``."""
+    filesystem view, private /tmp, no network), ``netns`` (no network only) or ``none``.
+    The console's box needs more (``nested_userns``): ``box/sandbox.available`` asks both."""
     exe = shutil.which("bwrap")
     if exe:
         with tempfile.TemporaryDirectory(prefix="kranto.page-probe-") as tmp:
@@ -125,6 +126,52 @@ def isolation() -> str:
     if exe and _probe([exe, "-rn", "true"]):
         return "netns"
     return "none"
+
+
+NESTED = ("--user", "--map-current-user", "--pid", "--fork", "--mount", "--mount-proc")
+
+
+@functools.cache
+def nested_userns() -> bool:
+    """Whether a command inside bubblewrap may make the user, pid and mount namespace the
+    console's shell prefix (``kranto-shell``) gives each command. Ubuntu's AppArmor (24.04 and
+    later, ``kernel.apparmor_restrict_unprivileged_userns`` 1) may refuse it while bubblewrap
+    itself works: ``isolation()`` says only what bubblewrap does."""
+    exe, unshare = shutil.which("bwrap"), shutil.which("unshare")
+    if not (exe and unshare):
+        return False
+    with tempfile.TemporaryDirectory(prefix="kranto.page-probe-") as tmp:
+        return _probe(bwrap_cmd(exe, Path(tmp), interp=unshare) + [*NESTED, "--", "true"])
+
+
+def apparmor_restricts() -> bool:
+    try:
+        return Path("/proc/sys/kernel/apparmor_restrict_unprivileged_userns").read_text() \
+            .strip() == "1"
+    except OSError:
+        return False
+
+
+BWRAP_PROFILE = Path("/etc/apparmor.d/bwrap-userns-restrict")
+
+
+def box_refusal() -> str | None:
+    """Where bubblewrap works and the nested namespace is refused, the one line that says so
+    and what to do; else None. Ubuntu 26.04 refuses it in two places: the sysctl, and the
+    profile that confines bubblewrap's children (the sysctl alone does not lift that one)."""
+    if isolation() != "bwrap" or nested_userns():
+        return None
+    restricts, profile = apparmor_restricts(), BWRAP_PROFILE.exists()
+    if restricts or profile:
+        steps = ([f"sudo apparmor_parser -R {BWRAP_PROFILE}"] if profile else []) + (
+            ["sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0"] if restricts
+            else [])
+        return ("AppArmor refuses the user namespace Open in Claude Code's sandbox gives each "
+                "command. To allow it on this machine: " + "; ".join(steps) + " (until the "
+                "machine restarts), then restart Kranto; or leave Open in Claude Code off.")
+    return ("this machine refuses the user namespace Open in Claude Code's sandbox gives each "
+            "command inside bubblewrap (a container, or a kernel setting): run Kranto on the "
+            "host, or allow unprivileged user namespaces, then restart Kranto.")
 
 
 ALLOW_UNSANDBOXED = "KRANTO_ALLOW_UNSANDBOXED"

@@ -5,6 +5,26 @@ What changed in each release of Kranto, for the person who runs it. Versions fol
 (`vX.Y.0-devN`, GitHub prereleases) are not listed one by one: their notes name the pull
 requests they carry.
 
+## 0.7.1 — 2026-11-20
+
+Fixes for 0.7.0. Nothing to do by hand: the sandbox change takes effect the first time a post
+writer starts after the update.
+
+### Fixed
+
+- A post writer's sandbox no longer shows any path from your home folder, your user name among
+  them. Where uv installed Kranto's Python (a machine without a system Python 3.12), that
+  Python now appears inside the sandbox at a fixed path.
+- Open in Claude Code no longer turns on where AppArmor refuses the namespace its sandbox gives
+  each command (Ubuntu 24.04 and later can); `c` and `kranto doctor` say what is refused and
+  what to run.
+- A stable release's notes no longer open with an empty "Big changes — None" section (the
+  update check showed that line as the release's first change); a section with nothing in it is
+  left out.
+- The install guide no longer carries a line for installing before the repository was public,
+  and the guide, the glossary and the help page no longer say an update check needs a GitHub
+  login: the repository is public.
+
 ## 0.7.0 — 2026-11-19
 
 The first release of Kranto.

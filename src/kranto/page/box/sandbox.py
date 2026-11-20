@@ -31,8 +31,9 @@ cached files into the venvs it makes, so a worker that could write the scoring c
 change what the scoring tests run with. Set ``$KRANTO_WORKER_UV_CACHE`` to share a cache
 on purpose.
 
-Without bubblewrap (``isolation() != "bwrap"``) the profile refuses to run: it never
-falls back to an unsandboxed shell."""
+Without bubblewrap (``isolation() != "bwrap"``), or where the machine refuses the namespace
+each command gets inside it (``isolation.nested_userns``: Ubuntu's AppArmor), the profile
+refuses to run: it never falls back to an unsandboxed shell."""
 from __future__ import annotations
 
 import os
@@ -64,8 +65,9 @@ class SandboxUnavailable(RuntimeError):
 
 
 def available() -> bool:
-    from .isolation import isolation
-    return isolation() == "bwrap"
+    """bubblewrap works and lets each command have its own namespace (``kranto-shell``)."""
+    from .isolation import isolation, nested_userns
+    return isolation() == "bwrap" and nested_userns()
 
 
 def net_mode() -> str:
@@ -282,9 +284,10 @@ def command(workspace: Path, proxy_dir: Path | None = None, config_dir: Path | N
     without a working bubblewrap."""
     from .isolation import base_python, bwrap_cmd
     if not available():
-        raise SandboxUnavailable(
+        from .isolation import box_refusal
+        raise SandboxUnavailable(box_refusal() or (
             "the 'full' worker profile runs claude inside bubblewrap, and bwrap is missing "
-            "or does not work here; refusing to run it unsandboxed (use tools: restricted)")
+            "or does not work here; refusing to run it unsandboxed (use tools: restricted)"))
     workspace = Path(workspace).resolve()
     h = home()
     hide = list(HIDE) + ([str(h)] if not str(h).startswith("/home/") else [])
