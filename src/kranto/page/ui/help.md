@@ -771,7 +771,9 @@ and `kranto term open <id>` (the page's limits).
 It turns on by itself where Kranto has bubblewrap and a Claude token (`claude setup-token`)
 in its environment; `kranto doctor` says whether both are there, and the setup guide has the
 steps. `term.enabled` in `loop.yaml` set false turns it off, and `true` turns it on without
-bubblewrap (with a warning). While it is off, `c` says how to turn it on.
+bubblewrap (with a warning). While it is off, `c` says how to turn it on. On a machine whose
+AppArmor refuses the namespace the sandbox gives each command (Ubuntu 24.04 and later can), it
+stays off by itself, and `c` and `kranto doctor` say what is refused and what to run.
 
 Which token it logs in with: your Claude login token first, so a session runs on your Claude
 plan. Without one, it would bill your Claude API key. The watcher's key, saved under Settings ›

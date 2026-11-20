@@ -10,10 +10,12 @@ answers to broken lines can be seen; its fixture's docstring says how.
 
 from __future__ import annotations
 
+import getpass
 import json
 import threading
 import time
 from dataclasses import replace
+from pathlib import Path
 
 import httpx
 import pytest
@@ -68,19 +70,37 @@ def summary(rt, kind: str) -> dict:  # noqa: F811
     return json.loads(row["summary"])
 
 
+def host_paths(tmp_path) -> list[str]:
+    """What a cub must never read: the user's home, the interpreter's own root (a uv-managed
+    Python lives under the home), the Kranto home."""
+    out = {str(Path.home()), "/home/" + getpass.getuser(), str(tmp_path)}
+    root = sandbox.python_root(sandbox.base_python())
+    if root:
+        out.add(root)
+    return sorted(out)
+
+
 def test_s1_escape_fs_sees_only_its_own_view(rt, home, tmp_path):  # noqa: F811
     db = rt.store.path or (tmp_path / "data" / "kranto.db")
     secret = tmp_path / "data" / "secrets"
+    needles = host_paths(tmp_path)
     section(rt, tmp_path, f"escape_fs:\n  paths: [{tmp_path}, {db}, {secret}, "
-                          f"{tmp_path / 'kranto.yaml'}]\n")
+                          f"{tmp_path / 'kranto.yaml'}]\n  needles: {json.dumps(needles)}\n")
     install(rt, "escape_fs")
     home.run_job("escape_fs", "escape_fs.probe", "probe")
     s = summary(rt, "escape_fs.probe")
     for path, got in s["opens"].items():
         assert got.startswith(("FileNotFoundError", "PermissionError")), (path, got)
-    assert set(s["root"]) <= {"bin", "dev", "etc", "lib", "lib64", "sbin", "proc", "tmp",
+    assert set(s["root"]) <= {"bin", "dev", "etc", "lib", "lib64", "sbin", "tmp",
                               "usr", "cub", "opt"}, s["root"]
     assert "home" not in s["root"] and "run" not in s["root"] and "var" not in s["root"]
+    # no path, link target or file it can read names the host's home: with a uv-managed
+    # Python (under the home) the interpreter is shown at /opt/kranto/python
+    assert s["leaks"] == [], s["leaks"]
+    assert not any(n in json.dumps(s["python"]) for n in needles), s["python"]
+    if sandbox.python_root(sandbox.base_python()):
+        assert s["python"]["prefix"] == sandbox.PYTHON_AT, s["python"]
+        assert s["python"]["executable"].startswith(sandbox.PYTHON_AT + "/"), s["python"]
     if sandbox.userns_flags():
         assert s["userns"].startswith("refused"), s["userns"]
     assert set(s["env"]) <= {"PATH", "HOME", "LANG", "TZ", "PWD"}
