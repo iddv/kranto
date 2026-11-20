@@ -5,7 +5,10 @@ What changed in each release of Kranto, for the person who runs it. Versions fol
 (`vX.Y.0-devN`, GitHub prereleases) are not listed one by one: their notes name the pull
 requests they carry.
 
-## Unreleased
+## 0.7.1 — 2026-11-20
+
+Fixes for 0.7.0. Nothing to do by hand: the sandbox change takes effect the first time a post
+writer starts after the update.
 
 ### Fixed
 
