@@ -1,5 +1,6 @@
 name: ci
-# Every pull request and every push to main. Each job but sandbox runs on the runner the repository
+# Every pull request and every push to main or to a stable line's release/X.Y (a stable fix is
+# cut only from a release/X.Y commit whose own checks are green). Each job but sandbox runs on the runner the repository
 # variable RUNNER names (a JSON value: a label, or a list of labels); with no RUNNER set, for a run
 # started by hand with "hosted", and for every pull request from a fork, on GitHub's own runner: a
 # stranger's code never reaches a runner of the project's own. sandbox always runs on GitHub's own
@@ -9,7 +10,7 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, "release/**"]
   workflow_dispatch:
     inputs:
       hosted:
@@ -21,7 +22,7 @@ on:
 permissions:
   contents: read
 
-# A newer push to the same pull request cancels its older run; each push to main keeps its own.
+# A newer push to the same pull request cancels its older run; each push to a branch keeps its own.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
