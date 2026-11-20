@@ -55,7 +55,15 @@ the page.
 - A stable: add `## X.Y.0` to `CHANGELOG.md` in a pull request (and `docs/releases/X.Y.0.md` for
   the notes' opening, if you want one), then `cut_local.sh --from-tag vX.Y.0-devN`, the
   `rc_check.sh` line, `gate.py promote`.
-- A fix for stable: `scripts/release/hotfix.sh --stable` (CONTRIBUTING).
+- A fix for stable: `scripts/release/hotfix.sh --stable` (CONTRIBUTING). By hand, the same
+  steps: a branch from `release/X.Y`, each fix's merge commit from main taken with
+  `git cherry-pick -x -s` (a fix that does not apply alone needs the one before it first), and
+  `## X.Y.Z — <date>` in `CHANGELOG.md` over the fixes' lines; a pull request against
+  `release/X.Y`, merged on green with `merge_when_green.sh` like any other; its merge commit's
+  own push run must be green. Then `cut_local.sh --line stable --must-include
+  kranto@<that merge commit>` (published held), the `rc_check.sh vX.Y.Z vX.Y.(Z-1)` line it
+  prints, and `gate.py promote --now --tag vX.Y.Z --reason …`, which makes it Latest. On main,
+  the same lines go under `## X.Y.Z` too, so the next minor's notes do not list them again.
 
 ## When something fails
 
