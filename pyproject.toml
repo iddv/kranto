@@ -55,8 +55,8 @@ Issues = "https://github.com/iddv/kranto/issues"
 Source = "https://github.com/iddv/kranto"
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff==0.17.5", "time-machine>=2.14", "cryptography>=42",
-       "jsonschema>=4.20", "hypothesis>=6.100", "mypy>=1.13", "pytest-randomly>=5.0.0",
+dev = ["pytest>=8.0", "ruff==0.17.6", "time-machine>=2.14", "cryptography>=42",
+       "jsonschema>=4.20", "hypothesis>=6.170.16", "mypy>=1.13", "pytest-randomly>=5.0.0",
        "pytest-split>=0.11.0", "pytest-xdist>=3.8.0"]
 # Delivery of strikes, heartbeats and alarms to Apprise targets (BSD-2).
 notify = ["apprise>=1.6"]
